@@ -1,5 +1,7 @@
 #include "pch.h"
 
+#include "logging.h"
+
 /**
  * @brief Main startup thread.
  * @note Instance of `LPTHREAD_START_ROUTINE`.
@@ -8,8 +10,10 @@
  */
 static DWORD startup_thread(void* /*unused*/) {
     try {
-        SetThreadDescription(GetCurrentThread(), L"UnrealSDK Startup");
-    } catch (std::exception& ex) {}
+        unrealsdk::logging::init();
+    } catch (std::exception& ex) {
+        LOG(ERROR, "Exception occured while initalizing the sdk: %s", ex.what());
+    }
 
     return 1;
 }

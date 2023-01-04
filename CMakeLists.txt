@@ -15,8 +15,10 @@ file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/*.c" "src/*.cpp" "src/*.h" "src
 
 add_library(unrealsdk SHARED
     ${sources}
+    "libs/loguru/loguru.cpp"
+    "libs/loguru/loguru.hpp"
 )
-target_include_directories(unrealsdk PUBLIC "src")
+target_include_directories(unrealsdk PUBLIC "src" "libs/loguru")
 
 target_compile_definitions(unrealsdk PUBLIC ${SDK_UE_VERSION})
 # CMake by default defines NDEBUG in release, we also want the opposite

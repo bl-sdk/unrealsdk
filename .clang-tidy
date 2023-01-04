@@ -1,19 +1,21 @@
 ---
+WarningsAsErrors:    ""
+HeaderFilterRegex:   "src/*.h"
 Checks: >
     -*,
     bugprone-*
     clang-analyzer-*,
     cppcoreguidelines-*,
     -cppcoreguidelines-avoid-non-const-global-variables,
+    -cppcoreguidelines-pro-type-vararg,
     misc-*,
     modernize-*,
     -modernize-redundant-void-arg,
     -modernize-use-trailing-return-type,
     performance-*,
     portability-*,
-    readability-*
+    readability-*,
+    -cppcoreguidelines-avoid-c-arrays,
 CheckOptions:
     cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor: true
-WarningsAsErrors:    ""
-HeaderFilterRegex:   "src/*.h"
 ---

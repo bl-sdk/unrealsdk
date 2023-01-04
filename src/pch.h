@@ -6,8 +6,11 @@
 #include <windows.h>
 
 #ifdef __cplusplus
+#include <charconv>
 #include <cstdint>
 #include <stdexcept>
+
+#include <loguru.hpp>
 
 using std::int16_t;
 using std::int32_t;

@@ -3,3 +3,9 @@ If:
     PathMatch: src/pch.h
 CompileFlags:
     Add: [-xc++]
+---
+# Suppress errors from outside the project
+If:
+    PathExclude: src/.*
+Diagnostics:
+    Suppress: '*'
