@@ -1,0 +1,19 @@
+---
+Checks: >
+    -*,
+    bugprone-*
+    clang-analyzer-*,
+    cppcoreguidelines-*,
+    -cppcoreguidelines-avoid-non-const-global-variables,
+    misc-*,
+    modernize-*,
+    -modernize-redundant-void-arg,
+    -modernize-use-trailing-return-type,
+    performance-*,
+    portability-*,
+    readability-*
+CheckOptions:
+    cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor: true
+WarningsAsErrors:    ""
+HeaderFilterRegex:   "src/*.h"
+---

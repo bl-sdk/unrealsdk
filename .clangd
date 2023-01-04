@@ -1,0 +1,5 @@
+# Treat the pch as c++
+If:
+    PathMatch: src/pch.h
+CompileFlags:
+    Add: [-xc++]
