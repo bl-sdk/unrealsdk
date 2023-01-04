@@ -9,6 +9,7 @@
 #include <charconv>
 #include <cstdint>
 #include <stdexcept>
+#include <string>
 
 #include <loguru.hpp>
 

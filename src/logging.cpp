@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include "env.h"
 #include "logging.h"
 
 namespace unrealsdk::logging {
@@ -21,6 +22,8 @@ static Verbosity console_verbosity = DEFAULT_CONSOLE_VERBOSITY;
 static const char* log_level_to_name(loguru::Verbosity level);
 static loguru::Verbosity name_to_log_level(const char* name);
 
+static Verbosity log_level_from_env_var(env::env_var_key key, Verbosity default_value);
+
 static void log_to_console(void* user_data, const loguru::Message& message);
 
 void init(void) {
@@ -29,7 +32,10 @@ void init(void) {
     loguru::set_verbosity_to_name_callback(log_level_to_name);
     loguru::set_name_to_verbosity_callback(name_to_log_level);
 
-    loguru::add_file(LOG_FILE_NAME, loguru::Truncate, DEFAULT_FILE_VERBOSITY);
+    console_verbosity = log_level_from_env_var(env::CONSOLE_VERBOSITY, DEFAULT_CONSOLE_VERBOSITY);
+    auto file_verbosity = log_level_from_env_var(env::FILE_VERBOSITY, DEFAULT_FILE_VERBOSITY);
+
+    loguru::add_file(LOG_FILE_NAME, loguru::Truncate, file_verbosity);
 
     // Take max Verbosity and filter it in our callback instead
     loguru::add_callback(CONSOLE_LOG_CALLBACK_NAME, log_to_console, nullptr, loguru::Verbosity_MAX);
@@ -45,13 +51,18 @@ void init(void) {
     loguru::init(fake_argc, static_cast<char**>(fake_argv), options);
     // NOLINTEND(modernize-avoid-c-arrays)
 
-    if (AllocConsole() != 0) {
-        external_console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-        if (external_console_handle == nullptr) {
-            LOG(ERROR, "Failed to get handle to external console!");
+#ifndef DEBUG
+    if (env::defined(env::EXTERNAL_CONSOLE))
+#endif
+    {
+        if (AllocConsole() != 0) {
+            external_console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+            if (external_console_handle == nullptr) {
+                LOG(ERROR, "Failed to get handle to external console!");
+            }
+        } else {
+            LOG(ERROR, "Failed to initalize external console!");
         }
-    } else {
-        LOG(ERROR, "Failed to initalize external console!");
     }
 }
 
@@ -115,6 +126,24 @@ static loguru::Verbosity name_to_log_level(const char* name) {
         return loguru::Verbosity_INVALID;
     }
     // NOLINTEND(readability-else-after-return)
+}
+
+/**
+ * @brief Parses a log level from an enviroment variable.
+ * @note Accepts both integers (which are in range) and level names
+ *
+ * @param key The enviroment variable.
+ * @param default_value The default value to use if parsing was unsuccessful.
+ * @return The parsed verbosity.
+ */
+static Verbosity log_level_from_env_var(env::env_var_key key, Verbosity default_value) {
+    auto level_int = env::get_numeric<int>(key, Verbosity::INVALID);
+    if (Verbosity::MIN <= level_int && level_int <= Verbosity::MAX) {
+        return static_cast<Verbosity>(level_int);
+    }
+    auto level_from_str = loguru::get_verbosity_from_name(env::get(env::CONSOLE_VERBOSITY).c_str());
+    return level_from_str == Verbosity::INVALID ? default_value
+                                                : static_cast<Verbosity>(level_from_str);
 }
 
 /**

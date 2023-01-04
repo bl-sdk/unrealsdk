@@ -2,6 +2,8 @@
 
 #include "logging.h"
 
+using namespace unrealsdk;
+
 /**
  * @brief Main startup thread.
  * @note Instance of `LPTHREAD_START_ROUTINE`.
@@ -10,7 +12,7 @@
  */
 static DWORD startup_thread(void* /*unused*/) {
     try {
-        unrealsdk::logging::init();
+        logging::init();
     } catch (std::exception& ex) {
         LOG(ERROR, "Exception occured while initalizing the sdk: %s", ex.what());
     }
