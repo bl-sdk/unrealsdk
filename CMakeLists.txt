@@ -20,7 +20,7 @@ add_library(unrealsdk SHARED
 )
 target_include_directories(unrealsdk PUBLIC "src" "libs/loguru")
 
-target_compile_definitions(unrealsdk PUBLIC ${SDK_UE_VERSION})
+target_compile_definitions(unrealsdk PUBLIC "${SDK_UE_VERSION}" "ARCH_$<UPPER_CASE:${SDK_ARCH}>")
 # CMake by default defines NDEBUG in release, we also want the opposite
 target_compile_definitions(unrealsdk PUBLIC "$<$<CONFIG:DEBUG>:DEBUG>")
 target_compile_definitions(unrealsdk PUBLIC "UNICODE" "_UNICODE")

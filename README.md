@@ -11,6 +11,7 @@ Enviroment Variable           | Usage
 `UNREALSDK_EXTERNAL_CONSOLE`  | If defined, creates an external console window mirroring what is written to the game's console. Always enabled in debug builds.
 `UNREALSDK_CONSOLE_LOG_LEVEL` | Changes the default console logging level. May use either the level names or their numerical values.
 `UNREALSDK_FILE_LOG_LEVEL`    | Changes the default file logging level. May use either the level names or their numerical values.
+`UNREALSDK_GAME_OVERRIDE`     | Override the executable name used for game detection.
 
 # Developing
 To get started developing:

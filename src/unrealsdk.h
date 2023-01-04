@@ -3,6 +3,8 @@
 
 #include "pch.h"
 
+#include "games/game_hook.h"
+
 namespace unrealsdk {
 
 struct PathsList {
@@ -11,6 +13,7 @@ struct PathsList {
 };
 
 extern const PathsList& paths;
+extern const std::unique_ptr<games::GameHook>& game;
 
 /**
  * @brief Initalizes the SDK.
