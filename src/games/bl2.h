@@ -1,5 +1,5 @@
-#ifndef BL2_H
-#define BL2_H
+#ifndef GAMES_BL2_H
+#define GAMES_BL2_H
 
 #include "pch.h"
 
@@ -21,4 +21,4 @@ struct GameTraits<BL2Hook> {
 
 }  // namespace unrealsdk::games
 
-#endif /* BL2_H */
+#endif /* GAMES_BL2_H */

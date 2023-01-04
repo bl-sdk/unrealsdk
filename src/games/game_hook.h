@@ -1,5 +1,5 @@
-#ifndef GAME_HOOK_H
-#define GAME_HOOK_H
+#ifndef GAMES_GAME_HOOK_H
+#define GAMES_GAME_HOOK_H
 
 #include "pch.h"
 
@@ -48,4 +48,4 @@ void hook(void);
 
 }  // namespace unrealsdk::games
 
-#endif /* GAME_HOOK_H */
+#endif /* GAMES_GAME_HOOK_H */
