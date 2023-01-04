@@ -18,12 +18,12 @@ bool defined(env_var_key env_var);
 
 /**
  * @brief Gets the value of an enviroment variable.
- * @note Returns an empty string if not defined.
  *
  * @param envvar The enviroment variable.
+ * @param default_value The default value to return if not defined.
  * @return The enviroment variable's value.
  */
-std::string get(env_var_key env_var);
+std::string get(env_var_key env_var, const std::string& default_value = "");
 
 /**
  * @brief Gets the value of an enviroment variable as a number.
@@ -34,7 +34,7 @@ std::string get(env_var_key env_var);
  * @return The parsed number.
  */
 template <typename T>
-T get_numeric(env_var_key env_var, T default_value) {
+T get_numeric(env_var_key env_var, T default_value = 0) {
     auto str = get(env_var);
 
     T value;

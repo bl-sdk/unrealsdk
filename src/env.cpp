@@ -12,10 +12,10 @@ bool defined(env_var_key env_var) {
     return std::getenv(env_var) != nullptr;
 }
 
-std::string get(env_var_key env_var) {
+std::string get(env_var_key env_var, const std::string& default_value) {
     const char* buf = std::getenv(env_var);
     if (buf == nullptr) {
-        return "";
+        return default_value;
     }
 
     return std::string{buf};
