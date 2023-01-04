@@ -1,8 +1,8 @@
 #include "pch.h"
 
-#include "logging.h"
+#include "unrealsdk.h"
 
-using namespace unrealsdk;
+static HMODULE this_module;
 
 /**
  * @brief Main startup thread.
@@ -10,9 +10,11 @@ using namespace unrealsdk;
  *
  * @return unused.
  */
-static DWORD startup_thread(void* /*unused*/) {
+static DWORD WINAPI startup_thread(LPVOID /*unused*/)  {
     try {
-        logging::init();
+        // Make sure we initalize logging before anything else
+        unrealsdk::logging::init();
+        unrealsdk::init(this_module);
     } catch (std::exception& ex) {
         LOG(ERROR, "Exception occured while initalizing the sdk: %s", ex.what());
     }
@@ -23,14 +25,16 @@ static DWORD startup_thread(void* /*unused*/) {
 /**
  * @brief Main entry point.
  *
- * @param hModule Handle to module for this dll.
+ * @param h_module Handle to module for this dll.
  * @param ul_reason_for_call Reason this is being called.
  * @return True if loaded successfully, false otherwise.
  */
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID /*unused*/) {
+// NOLINTNEXTLINE(readability-identifier-naming)  - for `DllMain`
+BOOL APIENTRY DllMain(HMODULE h_module, DWORD ul_reason_for_call, LPVOID /*unused*/) {
     switch (ul_reason_for_call) {
         case DLL_PROCESS_ATTACH:
-            DisableThreadLibraryCalls(hModule);
+            this_module = h_module;
+            DisableThreadLibraryCalls(h_module);
             CreateThread(nullptr, 0, &startup_thread, nullptr, 0, nullptr);
             break;
         case DLL_THREAD_ATTACH:

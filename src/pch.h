@@ -6,12 +6,17 @@
 #include <windows.h>
 
 #ifdef __cplusplus
+#include <array>
 #include <charconv>
 #include <cstdint>
+#include <filesystem>
+#include <memory>
 #include <stdexcept>
 #include <string>
 
-#include <loguru.hpp>
+// This is the only sdk header we'll include in the PCH, since automatically having the log macro
+// exposed is very convenient, and it doesn't depend on any other sdk headers
+#include "logging.h"
 
 using std::int16_t;
 using std::int32_t;
