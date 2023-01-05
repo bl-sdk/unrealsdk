@@ -8,8 +8,10 @@ Checks: >
     cppcoreguidelines-*,
     -cppcoreguidelines-avoid-non-const-global-variables,
     -cppcoreguidelines-pro-type-reinterpret-cast,
+    -cppcoreguidelines-pro-type-union-access,
     -cppcoreguidelines-pro-type-vararg,
     misc-*,
+    -misc-non-private-member-variables-in-classes,
     modernize-*,
     -modernize-redundant-void-arg,
     -modernize-use-trailing-return-type,
@@ -19,6 +21,22 @@ Checks: >
     readability-*,
     -readability-qualified-auto,
     -cppcoreguidelines-avoid-c-arrays,
+    -cppcoreguidelines-non-private-member-variables-in-classes,
 CheckOptions:
     cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor: true
+    misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
+
+    readability-identifier-naming.ConstantCase:         UPPER_CASE
+    readability-identifier-naming.MacroDefinitionCase:  UPPER_CASE
+
+    readability-identifier-naming.ClassCase:            CamelCase
+    readability-identifier-naming.StructCase:           CamelCase
+    readability-identifier-naming.EnumCase:             CamelCase
+
+    readability-identifier-naming.FunctionCase:         lower_case
+    readability-identifier-naming.NamespaceCase:        lower_case
+    readability-identifier-naming.ParameterCase:        lower_case
+    readability-identifier-naming.VariableCase:         lower_case
+    readability-identifier-naming.MemberCase:           lower_case
+    readability-identifier-naming.ConstantMemberCase:   lower_case
 ---
