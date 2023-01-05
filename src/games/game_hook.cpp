@@ -4,6 +4,8 @@
 #include "games/bl2.h"
 #include "games/bl3.h"
 #include "games/game_hook.h"
+#include "games/tps_aodk.h"
+#include "games/wl.h"
 #include "unrealsdk.h"
 
 namespace unrealsdk {
@@ -17,6 +19,13 @@ const std::unique_ptr<games::GameHook>& game = game_instance;
 
 namespace unrealsdk::games {
 
+/**
+ * @brief Tuple of all hook types to consider.
+ * @note The first matching hook will be used, order matters.
+ */
+// TODO: generic hooks
+using all_known_games = std::tuple<BL2Hook, TPSAoDKHook, BL3Hook, WLHook>;
+
 #ifdef ARCH_X64
 static constexpr auto WANT_64BIT = true;
 #else
@@ -27,13 +36,6 @@ static constexpr auto WANT_UE4 = true;
 #else
 constexpr auto WANT_UE4 = false;
 #endif
-
-/**
- * @brief Tuple of all hook types to consider.
- * @note The first matching hook will be used, order matters.
- */
-// TODO: generic hooks
-using all_known_games = std::tuple<BL2Hook, BL3Hook>;
 
 /**
  * @brief Recursive helper function to find the right game hook, which discards games with the wrong
@@ -51,6 +53,7 @@ constexpr void iter_hooks(const std::string& executable) {
         if constexpr (GameTraits<game>::IS_64BIT == WANT_64BIT
                       && GameTraits<game>::IS_UE4 == WANT_UE4) {
             if (GameTraits<game>::matches_executable(executable)) {
+                LOG(INFO, "Using %s hook", GameTraits<game>::NAME);
                 unrealsdk::game_instance = std::make_unique<game>();
                 return;
             }

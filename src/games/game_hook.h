@@ -6,6 +6,12 @@
 #include "unreal/wrappers/gnames.h"
 #include "unreal/wrappers/gobjects.h"
 
+namespace unrealsdk::unreal {
+
+class FName;
+
+}
+
 namespace unrealsdk::games {
 
 /**
@@ -18,6 +24,15 @@ struct GameHook {
     unreal::GObjects gobjects;
     /// Wrapper around gnames
     unreal::GNames gnames;
+
+    /**
+     * @brief Call FName::Init, set to add new names and split numbers.
+     *
+     * @param name Pointer to the name to initalize.
+     * @param str The string to initalize the name to.
+     * @param number The number to initalize the name to.
+     */
+    virtual void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) = 0;
 };
 
 /**
