@@ -6,6 +6,7 @@
 #include "games/game_hook.h"
 #include "games/tps_aodk.h"
 #include "games/wl.h"
+#include "sigscan.h"
 #include "unrealsdk.h"
 
 namespace unrealsdk {
@@ -55,6 +56,7 @@ constexpr void iter_hooks(const std::string& executable) {
             if (GameTraits<game>::matches_executable(executable)) {
                 LOG(INFO, "Using %s hook", GameTraits<game>::NAME);
                 unrealsdk::game_instance = std::make_unique<game>();
+                unrealsdk::game_instance->hook();
                 return;
             }
         }
@@ -65,6 +67,20 @@ constexpr void iter_hooks(const std::string& executable) {
 void hook(void) {
     auto executable = env::get(env::GAME_OVERRIDE, unrealsdk::paths.exe_path.filename().string());
     iter_hooks(executable);
+}
+
+GameHook::GameHook() {
+    auto [start_val, size_val] = sigscan::get_exe_range();
+    // NOLINTBEGIN(cppcoreguidelines-prefer-member-initializer)
+    this->start = start_val;
+    this->size = size_val;
+    // NOLINTEND(cppcoreguidelines-prefer-member-initializer)
+}
+
+void GameHook::hook() {
+    this->find_gobjects();
+    this->find_gnames();
+    this->find_fname_init();
 }
 
 }  // namespace unrealsdk::games

@@ -9,37 +9,44 @@ using namespace unrealsdk::sigscan;
 
 namespace unrealsdk::games {
 
-Pattern BL2Hook::get_gnames_sig(void) {
-    return {"\x00\x00\x00\x00\x83\x3C\x81\x00\x74\x5C", "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF",
-            0};
+void BL2Hook::find_gobjects(void) {
+    static const Pattern GOBJECTS_SIG{"\x00\x00\x00\x00\x8B\x04\xB1\x8B\x40\x08",
+                                      "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+    auto gobjects_instr = scan(this->start, this->size, GOBJECTS_SIG);
+    auto gobjects_ptr = read_offset<unreal::GObjects::internal_type>(gobjects_instr);
+    LOG(MISC, "GObjects: 0x%p", gobjects_ptr);
+
+    this->gobjects = unreal::GObjects(gobjects_ptr);
 }
 
-BL2Hook::BL2Hook(void) {
-    auto [start, size] = get_exe_range();
+void BL2Hook::find_gnames(void) {
+    static const Pattern GNAMES_SIG{"\x00\x00\x00\x00\x83\x3C\x81\x00\x74\x5C",
+                                    "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
 
-    {
-        auto gobjects_instr = scan(start, size, this->gobjects_sig);
-        auto gobjects_ptr = read_offset<unreal::GObjects::internal_type>(gobjects_instr);
-        LOG(MISC, "GObjects: 0x%p", gobjects_ptr);
-        this->gobjects = unreal::GObjects(gobjects_ptr);
-    }
+    auto gnames_instr = scan(this->start, this->size, GNAMES_SIG);
+    auto gnames_ptr = read_offset<unreal::GNames::internal_type>(gnames_instr);
+    LOG(MISC, "GNames: 0x%p", gnames_ptr);
 
-    {
-        auto gnames_instr = scan(start, size, this->get_gnames_sig());
-        auto gnames_ptr = read_offset<unreal::GNames::internal_type>(gnames_instr);
-        LOG(MISC, "GNames: 0x%p", gnames_ptr);
-        this->gnames = unreal::GNames(gnames_ptr);
-    }
+    this->gnames = unreal::GNames(gnames_ptr);
+}
 
-    {
-        this->fname_init_ptr = scan<void*>(start, size, this->fname_init_sig);
-        LOG(MISC, "FNameInit: 0x%p", this->fname_init_ptr);
-    }
+void BL2Hook::find_fname_init(void) {
+    static const Pattern FNAME_INIT_SIG{
+        "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x50\x81\xEC\x9C\x0C",
+        "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+    this->fname_init_ptr = scan<void*>(this->start, this->size, FNAME_INIT_SIG);
+    LOG(MISC, "FNameInit: 0x%p", this->fname_init_ptr);
 }
 
 void BL2Hook::fname_init(unreal::FName* name, const std::wstring& str, int32_t number) {
-    reinterpret_cast<fname_init_func>(this->fname_init_ptr)(name, str.c_str(), number, 1,
-                                                            1);  //, 0);
+    // NOLINTNEXTLINE(modernize-use-using)  - need a typedef for the __thiscall
+    typedef void*(__thiscall * fname_init_func)(unreal::FName * name, const wchar_t* str,
+                                                int32_t number, int32_t find_type,
+                                                int32_t split_name);
+
+    reinterpret_cast<fname_init_func>(this->fname_init_ptr)(name, str.c_str(), number, 1, 1);
 }
 
 }  // namespace unrealsdk::games

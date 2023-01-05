@@ -4,37 +4,19 @@
 #include "pch.h"
 
 #include "games/game_hook.h"
-#include "sigscan.h"
-
-using unrealsdk::sigscan::Pattern;
 
 namespace unrealsdk::games {
 
 class BL2Hook : public GameHook {
    protected:
-    const Pattern gobjects_sig{"\x00\x00\x00\x00\x8B\x04\xB1\x8B\x40\x08",
-                               "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF", 0};
-    /**
-     * @brief Get the signature for GNames.
-     *
-     * @return The signature pattern.
-     */
-    virtual Pattern get_gnames_sig(void);
+    void find_gobjects(void) override;
+    void find_gnames(void) override;
+    void find_fname_init(void) override;
 
-    const Pattern fname_init_sig{
-        "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x50\x81\xEC\x9C\x0C",
-        "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF", 0};
-    // NOLINTNEXTLINE(modernize-use-using)  - need a typedef for the __thiscall
-    typedef void*(__thiscall* fname_init_func)(unreal::FName* name,
-                                               const wchar_t* str,
-                                               int32_t number,
-                                               int32_t find_type,
-                                               int32_t split_name /*,
-                                               int32_t unknown*/);
+    /// Pointer to FName::Init function
     void* fname_init_ptr;
 
    public:
-    BL2Hook(void);
     void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) override;
 };
 

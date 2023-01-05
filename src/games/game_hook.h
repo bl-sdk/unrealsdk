@@ -18,12 +18,41 @@ namespace unrealsdk::games {
  * @brief Base class for hooking a game.
  */
 struct GameHook {
+   protected:
+    /// Start address of the executable, to be used in sigscans
+    uintptr_t start;
+    /// Size of the executable, to be used in sigscans
+    size_t size;
+
+    /**
+     * @brief Finds GObjects, and populates the wrapper member.
+     */
+    virtual void find_gobjects(void) = 0;
+
+    /**
+     * @brief Finds GNames, and populates the wrapper member.
+     */
+    virtual void find_gnames(void) = 0;
+
+    /**
+     * @brief Finds `FName::Init`, and sets up such that `fname_init` may be called.
+     */
+    virtual void find_fname_init(void) = 0;
+
+   public:
+    GameHook(void);
     virtual ~GameHook() = default;
 
     /// Wrapper around gobjects
     unreal::GObjects gobjects;
     /// Wrapper around gnames
     unreal::GNames gnames;
+
+    /**
+     * @brief Hooks the current game.
+     * @note May apply game-specific hooks or hex edits as needed.
+     */
+    virtual void hook(void);
 
     /**
      * @brief Call FName::Init, set to add new names and split numbers.

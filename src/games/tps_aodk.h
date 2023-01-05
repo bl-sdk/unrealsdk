@@ -10,14 +10,8 @@ namespace unrealsdk::games {
 
 class TPSAoDKHook : public BL2Hook {
    protected:
-    Pattern get_gnames_sig(void) override;
+    void find_gnames(void) override;
 
-    // NOLINTNEXTLINE(modernize-use-using)  - need a typedef for the __thiscall
-    typedef void*(__thiscall* fname_init_func)(unreal::FName* name,
-                                               const wchar_t* str,
-                                               int32_t number,
-                                               int32_t find_type,
-                                               int32_t split_name);
    public:
     void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) override;
 };
