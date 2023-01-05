@@ -62,6 +62,7 @@ struct GameHook {
      * @param number The number to initalize the name to.
      */
     virtual void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) = 0;
+    virtual void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) = 0;
 };
 
 /**

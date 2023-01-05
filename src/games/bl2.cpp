@@ -41,12 +41,15 @@ void BL2Hook::find_fname_init(void) {
 }
 
 void BL2Hook::fname_init(unreal::FName* name, const std::wstring& str, int32_t number) {
+    this->fname_init(name, str.c_str(), number);
+}
+void BL2Hook::fname_init(unreal::FName* name, const wchar_t* str, int32_t number) {
     // NOLINTNEXTLINE(modernize-use-using)  - need a typedef for the __thiscall
     typedef void*(__thiscall * fname_init_func)(unreal::FName * name, const wchar_t* str,
                                                 int32_t number, int32_t find_type,
                                                 int32_t split_name);
 
-    reinterpret_cast<fname_init_func>(this->fname_init_ptr)(name, str.c_str(), number, 1, 1);
+    reinterpret_cast<fname_init_func>(this->fname_init_ptr)(name, str, number, 1, 1);
 }
 
 }  // namespace unrealsdk::games

@@ -49,7 +49,10 @@ void BL3Hook::find_fname_init(void) {
 }
 
 void BL3Hook::fname_init(unreal::FName* name, const std::wstring& str, int32_t number) {
-    *name = this->fname_init_ptr(str.c_str(), number, 1);
+    this->fname_init(name, str.c_str(), number);
+}
+void BL3Hook::fname_init(unreal::FName* name, const wchar_t* str, int32_t number) {
+    *name = this->fname_init_ptr(str, number, 1);
 }
 
 }  // namespace unrealsdk::games

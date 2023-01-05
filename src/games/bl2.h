@@ -18,6 +18,7 @@ class BL2Hook : public GameHook {
 
    public:
     void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) override;
+    void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) override;
 };
 
 template <>

@@ -26,6 +26,13 @@ struct FNameEntry {
         wchar_t WideName[NAME_SIZE];
     };
     // NOLINTEND(readability-identifier-naming)
+
+    /**
+     * @brief Checks if this entry holds a wide string.
+     *
+     * @return True if this entry is wide, false if it's ANSI.
+     */
+    [[nodiscard]] bool is_wide(void) const;
 };
 
 #ifdef UE4
