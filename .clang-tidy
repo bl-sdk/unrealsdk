@@ -7,14 +7,17 @@ Checks: >
     clang-analyzer-*,
     cppcoreguidelines-*,
     -cppcoreguidelines-avoid-non-const-global-variables,
+    -cppcoreguidelines-pro-type-reinterpret-cast,
     -cppcoreguidelines-pro-type-vararg,
     misc-*,
     modernize-*,
     -modernize-redundant-void-arg,
     -modernize-use-trailing-return-type,
     performance-*,
+    -performance-no-int-to-ptr,
     portability-*,
     readability-*,
+    -readability-qualified-auto,
     -cppcoreguidelines-avoid-c-arrays,
 CheckOptions:
     cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor: true

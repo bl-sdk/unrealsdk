@@ -13,21 +13,24 @@ struct Pattern {
    public:
     const uint8_t* bytes;
     const uint8_t* mask;
+    const size_t offset;
     const size_t size;
 
     /**
-     * @brief Construct a pattern from two strings.
+     * @brief Construct a pattern from strings.
      *
      * @tparam n The length of the strings (should be picked up automatically).
      * @param bytes The bytes to match.
      * @param mask The mask over the bytes to match.
+     * @param offset The constant offset to add to the found address.
      * @return A sigscan pattern.
      */
     // NOLINTBEGIN(modernize-avoid-c-arrays)
     template <size_t n>
-    Pattern(const char (&bytes)[n], const char (&mask)[n])
+    Pattern(const char (&bytes)[n], const char (&mask)[n], size_t offset = 0)
         : bytes(reinterpret_cast<const uint8_t*>(bytes)),
           mask(reinterpret_cast<const uint8_t*>(mask)),
+          offset(offset),
           size(n - 1) {}
 
     static_assert(sizeof(uint8_t) == sizeof(char), "uint8_t is different size to char");

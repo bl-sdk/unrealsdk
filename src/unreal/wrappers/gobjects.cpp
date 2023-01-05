@@ -1,7 +1,7 @@
 #include "pch.h"
 
 #include "unreal/classes/uobject.h"
-#include "unreal/gobjects.h"
+#include "unreal/wrappers/gobjects.h"
 
 #ifdef UE4
 #include "unreal/structs/gobjects.h"
@@ -16,7 +16,7 @@ namespace unrealsdk::unreal {
 GObjects::Iterator::Iterator(const GObjects& gobjects, size_t idx) : gobjects(gobjects), idx(idx) {}
 
 GObjects::Iterator::reference GObjects::Iterator::operator*() const {
-    return this->gobjects.at(idx);
+    return this->gobjects.obj_at(idx);
 }
 
 GObjects::Iterator& GObjects::Iterator::operator++() {
@@ -54,7 +54,7 @@ GObjects::GObjects(internal_type internal) : internal(internal) {}
     return this->internal->ObjObjects.Count;
 }
 
-[[nodiscard]] UObject* GObjects::at(size_t idx) const {
+[[nodiscard]] UObject* GObjects::obj_at(size_t idx) const {
     if (idx > this->internal->ObjObjects.Count) {
         throw std::out_of_range("GObjects index out of range");
     }
@@ -67,7 +67,7 @@ GObjects::GObjects(internal_type internal) : internal(internal) {}
     return this->internal->size();
 }
 
-[[nodiscard]] UObject* GObjects::at(size_t idx) const {
+[[nodiscard]] UObject* GObjects::obj_at(size_t idx) const {
     return this->internal->at(idx);
 }
 

@@ -12,7 +12,9 @@ namespace unrealsdk::games {
 
 class BL2Hook : public GameHook {
     const Pattern gobjects_sig{"\x00\x00\x00\x00\x8B\x04\xB1\x8B\x40\x08",
-                               "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
+                               "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF", 0};
+    const Pattern gnames_sig{"\x00\x00\x00\x00\x83\x3C\x81\x00\x74\x5C",
+                             "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF", 0};
 
    public:
     BL2Hook(void);

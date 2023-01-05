@@ -1,5 +1,5 @@
-#ifndef UNREAL_GOBJECTS_H
-#define UNREAL_GOBJECTS_H
+#ifndef UNREAL_WRAPPERS_GOBJECTS_H
+#define UNREAL_WRAPPERS_GOBJECTS_H
 
 #include "pch.h"
 
@@ -13,9 +13,6 @@
 
 namespace unrealsdk::unreal {
 
-/**
- * @brief GObjects wrapper class
- */
 class GObjects {
    public:
 #ifdef UE4
@@ -66,12 +63,12 @@ class GObjects {
     [[nodiscard]] size_t size(void) const;
 
     /**
-     * @brief Get an element in the array, with bounds checking.
+     * @brief Get an object from the array, with bounds checking.
      *
      * @param idx The index to get.
      * @return The item at that index.
      */
-    [[nodiscard]] UObject* at(size_t idx) const;
+    [[nodiscard]] UObject* obj_at(size_t idx) const;
 
     /**
      * @brief Gets an iterator to the start of GObjects.
@@ -90,4 +87,4 @@ class GObjects {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_GOBJECTS_H */
+#endif /* UNREAL_WRAPPERS_GOBJECTS_H */

@@ -20,7 +20,7 @@ uintptr_t scan(uintptr_t start, size_t size, const Pattern& pattern) {
             }
         }
         if (found) {
-            return reinterpret_cast<uintptr_t>(&start_ptr[i]);
+            return reinterpret_cast<uintptr_t>(&start_ptr[i + pattern.offset]);
         }
     }
 

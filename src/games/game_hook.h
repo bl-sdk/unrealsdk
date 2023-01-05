@@ -3,7 +3,8 @@
 
 #include "pch.h"
 
-#include "unreal/gobjects.h"
+#include "unreal/wrappers/gnames.h"
+#include "unreal/wrappers/gobjects.h"
 
 namespace unrealsdk::games {
 
@@ -13,8 +14,10 @@ namespace unrealsdk::games {
 struct GameHook {
     virtual ~GameHook() = default;
 
-    // Wrapper around gobjects
+    /// Wrapper around gobjects
     unreal::GObjects gobjects;
+    /// Wrapper around gnames
+    unreal::GNames gnames;
 };
 
 /**
