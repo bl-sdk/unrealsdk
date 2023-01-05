@@ -3,20 +3,18 @@
 
 #include "pch.h"
 
+#include "unreal/gobjects.h"
+
 namespace unrealsdk::games {
 
 /**
  * @brief Base class for hooking a game.
  */
-class GameHook {
-   protected:
-    /**
-     * @brief Constructs a new Game Hook, and applies any default hexedits or hooks.
-     */
-    GameHook() = default;
-
-   public:
+struct GameHook {
     virtual ~GameHook() = default;
+
+    // Wrapper around gobjects
+    unreal::GObjects gobjects;
 };
 
 /**
@@ -24,7 +22,7 @@ class GameHook {
  *
  * @tparam T The Hook class that's being described.
  */
-template<typename T, typename = std::enable_if_t<std::is_base_of_v<GameHook, T>, void>>
+template <typename T, typename = std::enable_if_t<std::is_base_of_v<GameHook, T>, void>>
 struct GameTraits {
     /// True if this hook is for a 64-bit game
     static constexpr bool IS_64BIT{};

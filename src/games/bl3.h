@@ -4,10 +4,20 @@
 #include "pch.h"
 
 #include "games/game_hook.h"
+#include "sigscan.h"
+
+using unrealsdk::sigscan::Pattern;
 
 namespace unrealsdk::games {
 
-class BL3Hook : public GameHook {};
+class BL3Hook : public GameHook {
+    const Pattern gobjects_sig{
+        "\x48\x8D\x0D\x00\x00\x00\x00\xC6\x05\x00\x00\x00\x00\x01\xE8\x00\x00\x00\x00\xC6\x05",
+        "\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF"};
+
+   public:
+    BL3Hook();
+};
 
 template <>
 struct GameTraits<BL3Hook> {

@@ -45,6 +45,7 @@ GObjects::Iterator GObjects::end(void) const {
 
 #pragma endregion
 
+GObjects::GObjects(void) : internal(nullptr) {}
 GObjects::GObjects(internal_type internal) : internal(internal) {}
 
 #if defined(UE4)

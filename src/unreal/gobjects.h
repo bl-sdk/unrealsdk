@@ -17,13 +17,13 @@ namespace unrealsdk::unreal {
  * @brief GObjects wrapper class
  */
 class GObjects {
-   private:
+   public:
 #ifdef UE4
     using internal_type = FUObjectArray*;
 #else
     using internal_type = TArray<UObject*>*;
 #endif
-
+   private:
     internal_type internal;
 
    public:
@@ -55,6 +55,7 @@ class GObjects {
      *
      * @param internal A pointer to the internal GObjects structure.
      */
+    GObjects(void);
     GObjects(internal_type internal);
 
     /**
