@@ -10,7 +10,9 @@
 #include <charconv>
 #include <cstdint>
 #include <filesystem>
+#include <iostream>
 #include <memory>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <tuple>

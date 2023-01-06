@@ -1,5 +1,6 @@
+#include "pch.h"
+
 #include "unreal/structs/fname.h"
-#include "unreal/structs/gnames.h"
 #include "unrealsdk.h"
 #include "utils.h"
 
@@ -20,40 +21,53 @@ bool FName::operator!=(const FName& other) const {
     return !operator==(other);
 }
 
-FName::operator std::string() const {
-    auto entry = unrealsdk::game->gnames.at(this->index);
+std::ostream& operator<<(std::ostream& stream, const FName& name) {
+    auto entry = unrealsdk::game->gnames.at(name.index);
 
-    std::string str;
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
     if (entry->is_wide()) {
-        str = utils::narrow(entry->WideName);
+        stream << utils::narrow(entry->WideName);
     } else {
-        str = entry->AnsiName;
+        stream << std::string{entry->AnsiName};
     }
     // NOLINTEND(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
 
-    if (this->number != 0) {
-        str += "_" + std::to_string(this->number - 1);
+    if (name.number != 0) {
+        stream << '_' << std::to_string(name.number - 1);
     }
-    return str;
+    return stream;
 }
 
-FName::operator std::wstring() const {
-    auto entry = unrealsdk::game->gnames.at(this->index);
+std::wostream& operator<<(std::wostream& stream, const FName& name) {
+    auto entry = unrealsdk::game->gnames.at(name.index);
 
-    std::wstring str;
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
     if (entry->is_wide()) {
-        str = entry->WideName;
+        stream << std::wstring{entry->WideName};
     } else {
-        str = utils::widen(entry->AnsiName);
+        stream << utils::widen(entry->AnsiName);
     }
     // NOLINTEND(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
 
-    if (this->number != 0) {
-        str += L"_" + std::to_wstring(this->number - 1);
+    if (name.number != 0) {
+        stream << '_' << std::to_wstring(name.number - 1);
     }
-    return str;
+    return stream;
+}
+
+FName::operator std::string() const {
+    std::ostringstream stream;
+    stream << *this;
+    return stream.str();
+}
+FName::operator std::wstring() const {
+    std::wostringstream stream;
+    stream << *this;
+    return stream.str();
+}
+
+FName operator"" _fn(const wchar_t* str, size_t /*len*/) {
+    return {str};
 }
 
 }  // namespace unrealsdk::unreal

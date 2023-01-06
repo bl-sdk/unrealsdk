@@ -1,6 +1,8 @@
 #ifndef UNREAL_CLASSES_UOBJECT_H
 #define UNREAL_CLASSES_UOBJECT_H
 
+#include "pch.h"
+
 #include "unreal/structs/fname.h"
 
 namespace unrealsdk::unreal {
@@ -43,6 +45,15 @@ class UObject {
 #endif
 
     // NOLINTEND(readability-identifier-naming)
+
+    /**
+     * @brief Get the object's full path name.
+     *
+     * @tparam T the string type to get the name as.
+     * @return The full path name.
+     */
+    template <typename T>
+    [[nodiscard]] std::basic_string<T> get_path_name(void) const;
 };
 
 }  // namespace unrealsdk::unreal

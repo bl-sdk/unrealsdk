@@ -12,6 +12,7 @@ Checks: >
     -cppcoreguidelines-pro-type-vararg,
     misc-*,
     -misc-non-private-member-variables-in-classes,
+    -misc-no-recursion,
     modernize-*,
     -modernize-redundant-void-arg,
     -modernize-use-trailing-return-type,

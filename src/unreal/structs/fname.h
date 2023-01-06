@@ -25,7 +25,18 @@ struct FName {
     bool operator!=(const FName& other) const;
 
     /**
-     * @brief Convert the FName to a string.
+     * @brief Push the FName onto a stream in it's string representation.
+     * @note Automatically converts utf8 to utf16 (or vice versa), as needed.
+     *
+     * @param stream The stream to push it onto.
+     * @param name The FName to push.
+     * @return The stream after pushing the FName.
+     */
+    friend std::ostream& operator<<(std::ostream& stream, const FName& name);
+    friend std::wostream& operator<<(std::wostream& stream, const FName& name);
+
+    /**
+     * @brief Convert the FName to it's string representation.
      * @note Automatically converts utf8 to utf16 (or vice versa), as needed.
      *
      * @return The converted string.
@@ -33,6 +44,14 @@ struct FName {
     operator std::string() const;
     operator std::wstring() const;
 };
+
+/**
+ * @brief Construct an FName literal from a wide string.
+ *
+ * @param str The string to create a name of.
+ * @param len The length of the string.
+ */
+FName operator"" _fn(const wchar_t* str, size_t len);
 
 }  // namespace unrealsdk::unreal
 

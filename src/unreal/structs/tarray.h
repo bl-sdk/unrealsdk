@@ -5,12 +5,11 @@ namespace unrealsdk::unreal {
 
 template <class T>
 struct TArray {
-   private:
+   public:
     T* data;
     int32_t count;
     int32_t max;
 
-   public:
     /**
      * @brief Get the size of the array.
      *
