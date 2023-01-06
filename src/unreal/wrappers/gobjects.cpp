@@ -36,9 +36,7 @@ bool GObjects::Iterator::operator!=(const GObjects::Iterator& rhs) const {
     return !(*this == rhs);
 };
 
-GObjects::Iterator GObjects::begin(void) const {
-    return {*this, 0};
-}
+
 GObjects::Iterator GObjects::end(void) const {
     return {*this, this->size()};
 }
@@ -50,8 +48,12 @@ GObjects::GObjects(internal_type internal) : internal(internal) {}
 
 #if defined(UE4)
 
+GObjects::Iterator GObjects::begin(void) const {
+    return {*this, static_cast<size_t>(std::max(this->internal->ObjFirstGCIndex, 0))};
+}
+
 [[nodiscard]] size_t GObjects::size(void) const {
-    return this->internal->ObjObjects.Count;
+    return this->internal->ObjLastNonGCIndex - std::max(this->internal->ObjFirstGCIndex, 0);
 }
 
 [[nodiscard]] UObject* GObjects::obj_at(size_t idx) const {
@@ -62,6 +64,10 @@ GObjects::GObjects(internal_type internal) : internal(internal) {}
 }
 
 #elif defined(UE3)
+
+GObjects::Iterator GObjects::begin(void) const {
+    return {*this, 0};
+}
 
 [[nodiscard]] size_t GObjects::size(void) const {
     return this->internal->size();
