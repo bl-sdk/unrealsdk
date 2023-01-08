@@ -3,6 +3,10 @@
 
 namespace unrealsdk::unreal {
 
+#if defined(_MSC_VER) && defined(ARCH_X86)
+#pragma pack(push, 0x4)
+#endif
+
 template <class T>
 struct TArray {
    public:
@@ -39,6 +43,10 @@ struct TArray {
         return this->operator[](idx);
     }
 };
+
+#if defined(_MSC_VER) && defined(ARCH_X86)
+#pragma pack(pop)
+#endif
 
 }  // namespace unrealsdk::unreal
 

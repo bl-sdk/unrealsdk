@@ -5,7 +5,17 @@
 
 namespace unrealsdk::unreal {
 
-class UClass : public UStruct {};
+#if defined(_MSC_VER) && defined(ARCH_X86)
+#pragma pack(push, 0x4)
+#endif
+#endif
+
+class UClass : public UStruct {
+};
+
+#if defined(_MSC_VER) && defined(ARCH_X86)
+#pragma pack(pop)
+#endif
 
 }  // namespace unrealsdk::unreal
 

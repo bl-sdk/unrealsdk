@@ -3,6 +3,10 @@
 
 namespace unrealsdk::unreal {
 
+#if defined(_MSC_VER) && defined(ARCH_X86)
+#pragma pack(push, 0x4)
+#endif
+
 struct FName {
    private:
     int32_t index;
@@ -52,6 +56,10 @@ struct FName {
  * @param len The length of the string.
  */
 FName operator"" _fn(const wchar_t* str, size_t len);
+
+#if defined(_MSC_VER) && defined(ARCH_X86)
+#pragma pack(pop)
+#endif
 
 }  // namespace unrealsdk::unreal
 
