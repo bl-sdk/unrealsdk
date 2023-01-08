@@ -22,7 +22,7 @@ void TPSAoDKHook::fname_init(unreal::FName* name, const std::wstring& str, int32
     this->fname_init(name, str.c_str(), number);
 }
 void TPSAoDKHook::fname_init(unreal::FName* name, const wchar_t* str, int32_t number) {
-    // NOLINTNEXTLINE(modernize-use-using)  - need a typedef for the __thiscall
+    // NOLINTNEXTLINE(modernize-use-using)
     typedef void*(__thiscall * fname_init_func)(unreal::FName * name, const wchar_t* str,
                                                 int32_t number, int32_t find_type,
                                                 int32_t split_name, int32_t /*unknown*/);

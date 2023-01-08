@@ -12,23 +12,27 @@ namespace unrealsdk::games {
 
 #pragma region AntiDebug
 
-// NOLINTBEGIN(modernize-use-using)  - need a typedef for the WINAPI
-typedef NTSTATUS(WINAPI* type_NtSetInformationThread)(HANDLE,
-                                                      THREAD_INFORMATION_CLASS,
-                                                      PVOID,
-                                                      ULONG);
-typedef NTSTATUS(
-    WINAPI* type_NtQueryInformationProcess)(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG);
-// NOLINTEND(modernize-use-using)
-
 // NOLINTBEGIN(readability-identifier-naming)
+// NOLINTNEXTLINE(modernize-use-using)  - need a typedef for calling conventions in msvc
+typedef NTSTATUS(WINAPI* NtSetInformationThread_func)(
+    HANDLE ThreadHandle,
+    THREAD_INFORMATION_CLASS ThreadInformationClass,
+    PVOID ThreadInformation,
+    ULONG ThreadInformationLength);
+// NOLINTNEXTLINE(modernize-use-using)
+typedef NTSTATUS(WINAPI* NtQueryInformationProcess_func)(HANDLE ProcessHandle,
+                                                         PROCESSINFOCLASS ProcessInformationClass,
+                                                         PVOID ProcessInformation,
+                                                         ULONG ProcessInformationLength,
+                                                         PULONG ReturnLength);
+
 static constexpr auto ThreadHideFromDebugger = static_cast<THREAD_INFORMATION_CLASS>(17);
 static constexpr auto ProcessDebugObjectHandle = static_cast<PROCESSINFOCLASS>(30);
 // NOLINTEND(readability-identifier-naming)
 
 // NOLINTBEGIN(readability-identifier-naming)
-type_NtSetInformationThread original_NtSetInformationThread;
-NTSTATUS NTAPI hook_NtSetInformationThread(HANDLE ThreadHandle,
+static NtSetInformationThread_func NtSetInformationThread_ptr;
+static NTSTATUS NTAPI NtSetInformationThread_hook(HANDLE ThreadHandle,
                                            THREAD_INFORMATION_CLASS ThreadInformationClass,
                                            PVOID ThreadInformation,
                                            ULONG ThreadInformationLength) {
@@ -37,13 +41,15 @@ NTSTATUS NTAPI hook_NtSetInformationThread(HANDLE ThreadHandle,
         return STATUS_SUCCESS;
     }
 
-    return original_NtSetInformationThread(ThreadHandle, ThreadInformationClass, ThreadInformation,
+    return NtSetInformationThread_ptr(ThreadHandle, ThreadInformationClass, ThreadInformation,
                                            ThreadInformationLength);
 }
+static_assert(std::is_same_v<decltype(&NtSetInformationThread_hook), NtSetInformationThread_func>,
+              "NtSetInformationThread signature is incorrect");
 
 // NOLINTBEGIN(readability-identifier-naming)
-type_NtQueryInformationProcess original_NtQueryInformationProcess;
-NTSTATUS WINAPI hook_NtQueryInformationProcess(HANDLE ProcessHandle,
+static NtQueryInformationProcess_func NtQueryInformationProcess_ptr;
+static NTSTATUS WINAPI NtQueryInformationProcess_hook(HANDLE ProcessHandle,
                                                PROCESSINFOCLASS ProcessInformationClass,
                                                PVOID ProcessInformation,
                                                ULONG ProcessInformationLength,
@@ -53,18 +59,20 @@ NTSTATUS WINAPI hook_NtQueryInformationProcess(HANDLE ProcessHandle,
         return STATUS_PORT_NOT_SET;
     }
 
-    return original_NtQueryInformationProcess(ProcessHandle, ProcessInformationClass,
-                                              ProcessInformation, ProcessInformationLength,
-                                              ReturnLength);
+    return NtQueryInformationProcess_ptr(ProcessHandle, ProcessInformationClass, ProcessInformation,
+                                         ProcessInformationLength, ReturnLength);
 }
+static_assert(
+    std::is_same_v<decltype(&NtQueryInformationProcess_hook), NtQueryInformationProcess_func>,
+    "NtQueryInformationProcess signature is incorrect");
 
 void BL2Hook::hook_antidebug(void) {
     MH_STATUS status = MH_OK;
 
     LPVOID target = nullptr;
-    status = MH_CreateHookApiEx(
-        L"ntdll", "NtSetInformationThread", reinterpret_cast<LPVOID>(hook_NtSetInformationThread),
-        reinterpret_cast<LPVOID*>(&original_NtSetInformationThread), &target);
+    status = MH_CreateHookApiEx(L"ntdll", "NtSetInformationThread",
+                                reinterpret_cast<LPVOID>(NtSetInformationThread_hook),
+                                reinterpret_cast<LPVOID*>(&NtSetInformationThread_ptr), &target);
     if (status != MH_OK) {
         LOG(ERROR, "Failed to create NtSetInformationThread hook: %x", status);
     } else {
@@ -74,10 +82,9 @@ void BL2Hook::hook_antidebug(void) {
         }
     }
 
-    status =
-        MH_CreateHookApiEx(L"ntdll", "NtQueryInformationProcess",
-                           reinterpret_cast<LPVOID>(hook_NtQueryInformationProcess),
-                           reinterpret_cast<LPVOID*>(&original_NtQueryInformationProcess), &target);
+    status = MH_CreateHookApiEx(L"ntdll", "NtQueryInformationProcess",
+                                reinterpret_cast<LPVOID>(NtQueryInformationProcess_hook),
+                                reinterpret_cast<LPVOID*>(&NtQueryInformationProcess_ptr), &target);
     if (status != MH_OK) {
         LOG(ERROR, "Failed to create NtQueryInformationProcess hook: %x", status);
     } else {
