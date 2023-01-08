@@ -14,6 +14,7 @@
 #include <charconv>
 #include <cstdint>
 #include <filesystem>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -21,6 +22,7 @@
 #include <string>
 #include <tuple>
 #include <type_traits>
+#include <unordered_map>
 
 // This is the only sdk header we'll include in the PCH, since automatically having the log macro
 // exposed is very convenient, and it doesn't depend on any other sdk headers

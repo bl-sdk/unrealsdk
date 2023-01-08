@@ -4,6 +4,7 @@
 #include "pch.h"
 
 #include "games/game_hook.h"
+#include "hook_manager.h"
 
 namespace unrealsdk {
 
@@ -14,6 +15,8 @@ struct PathsList {
 
 extern const PathsList& paths;
 extern const std::unique_ptr<games::GameHook>& game;
+extern hook_manager::map hooks;
+extern bool log_all_calls;
 
 /**
  * @brief Initalizes the SDK.
