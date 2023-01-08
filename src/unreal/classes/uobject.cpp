@@ -1,5 +1,4 @@
 #include "pch.h"
-#include <sstream>
 
 #include "unreal/classes/uclass.h"
 #include "unreal/classes/uobject.h"

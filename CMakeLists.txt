@@ -11,6 +11,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 set(COMPILE_WARNING_AS_ERROR True)
 
+# Clang doesn't check the architecture define from the preset, so set it properly
+if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND (SDK_ARCH STREQUAL "x86"))
+    set(CMAKE_SIZEOF_VOID_P 4)
+    add_compile_options("-m32")
+    add_link_options("-m32")
+endif()
+
 add_subdirectory(libs/minhook)
 
 # Source Files

@@ -1,5 +1,4 @@
 #include "pch.h"
-#include <stdexcept>
 
 #include "sigscan.h"
 

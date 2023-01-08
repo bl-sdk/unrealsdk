@@ -2,7 +2,6 @@
 #define SIGSCAN_H
 
 #include "pch.h"
-#include <vadefs.h>
 
 namespace unrealsdk::sigscan {
 
