@@ -8,7 +8,7 @@
 
 namespace unrealsdk::unreal {
 
-class FName;
+struct FName;
 
 }
 
@@ -28,6 +28,12 @@ struct GameHook {
      * @brief Applies any anti-debug hooks, as required.
      */
     virtual void hook_antidebug(void) {}
+
+    /**
+     * @brief Hooks `ProcessEvent`, points it at the hook manager, and sets up such that
+     *        `process_event` may be called.
+     */
+    virtual void hook_process_event(void) = 0;
 
     /**
      * @brief Finds GObjects, and populates the wrapper member.

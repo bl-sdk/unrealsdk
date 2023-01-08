@@ -3,12 +3,35 @@
 #include "games/bl3.h"
 #include "games/game_hook.h"
 #include "sigscan.h"
+#include "unreal/classes/ufunction.h"
 #include "unreal/structs/fname.h"
 #include "unreal/wrappers/gobjects.h"
 
 using namespace unrealsdk::sigscan;
 
 namespace unrealsdk::games {
+
+#pragma region ProcessEvent
+
+using process_event_func = void(unreal::UObject* obj, unreal::UFunction* func, void* params);
+
+static process_event_func* process_event_ptr;
+void process_event_hook(unreal::UObject* obj, unreal::UFunction* func, void* params) {
+    process_event_ptr(obj, func, params);
+}
+static_assert(std::is_same_v<decltype(process_event_hook), process_event_func>,
+              "process_event signature is incorrect");
+
+void BL3Hook::hook_process_event(void) {
+    const Pattern PROCESS_EVENT_SIG{
+        "\x40\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x81\xEC\xF0\x00\x00\x00",
+        "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+    scan_and_detour(this->start, this->size, PROCESS_EVENT_SIG, process_event_hook,
+                    &process_event_ptr, "ProcessEvent");
+}
+
+#pragma endregion
 
 void BL3Hook::find_gobjects(void) {
     static const Pattern GOBJECTS_SIG{

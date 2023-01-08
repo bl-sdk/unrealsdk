@@ -40,7 +40,7 @@ struct Pattern {
 /**
  * @brief Performs a sigscan.
  *
- * @tparam T the type to cast the result to.
+ * @tparam T The type to cast the result to.
  * @param start The address to start the search at.
  * @param size The length of the region to search.
  * @param pattern The pattern to search for.
@@ -53,9 +53,38 @@ T scan(uintptr_t start, size_t size, const Pattern& pattern) {
 }
 
 /**
+ * @brief Helper which sigscans for a function and detours it.
+ *
+ * @tparam T The signature of the detour'd function (should be picked up automatically).
+ * @param start The address to start the search at.
+ * @param size The length of the region to search.
+ * @param pattern The pattern to search for.
+ * @param detour The detour function.
+ * @param original Pointer to store the original function.
+ * @param name Name of the detour, to be used in log messages.
+ * @return True if the detour was successfully created.
+ */
+bool scan_and_detour(uintptr_t start,
+                     size_t size,
+                     const sigscan::Pattern& pattern,
+                     void* detour,
+                     void** original,
+                     const std::string& name);
+template <typename T>
+bool scan_and_detour(uintptr_t start,
+                     size_t size,
+                     const sigscan::Pattern& pattern,
+                     T detour,
+                     T* original,
+                     const std::string& name) {
+    return scan_and_detour(start, size, pattern, reinterpret_cast<void*>(detour),
+                           reinterpret_cast<void**>(original), name);
+}
+
+/**
  * @brief Reads an assembly offset, and gets the address it points to.
  *
- * @tparam T the type to cast the result to.
+ * @tparam T The type to cast the result to.
  * @param address The address of the offset.
  * @return The address it points to.
  */

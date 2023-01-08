@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <stdexcept>
 
 #include "sigscan.h"
 
@@ -27,6 +28,36 @@ uintptr_t scan(uintptr_t start, size_t size, const Pattern& pattern) {
     // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
     return 0;
+}
+
+bool scan_and_detour(uintptr_t start,
+                     size_t size,
+                     const sigscan::Pattern& pattern,
+                     void* detour,
+                     void** original,
+                     const std::string& name) {
+    auto addr = scan<LPVOID>(start, size, pattern);
+    LOG(MISC, "%s: 0x%p", name.c_str(), addr);
+
+    if (addr == nullptr) {
+        LOG(ERROR, "Sigscan failed for %s", name.c_str());
+        return false;
+    }
+
+    MH_STATUS status = MH_OK;
+    status = MH_CreateHook(addr, detour, original);
+    if (status != MH_OK) {
+        LOG(ERROR, "Failed to create hook for %s", name.c_str());
+        return false;
+    }
+
+    status = MH_EnableHook(addr);
+    if (status != MH_OK) {
+        LOG(ERROR, "Failed to enable hook for %s", name.c_str());
+        return false;
+    }
+
+    return true;
 }
 
 uintptr_t read_offset(uintptr_t address) {

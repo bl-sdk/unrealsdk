@@ -1,11 +1,12 @@
 #ifndef UNREAL_CLASSES_UFUNCTION_H
 #define UNREAL_CLASSES_UFUNCTION_H
 
-#include "unreal/classes/uobject.h"
+#include "unreal/classes/ustruct.h"
 
 namespace unrealsdk::unreal {
 
-class UFunction : public UObject {};
+class UFunction : public UStruct {
+};
 
 }  // namespace unrealsdk::unreal
 

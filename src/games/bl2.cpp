@@ -2,11 +2,16 @@
 
 #include "games/bl2.h"
 #include "games/game_hook.h"
-#include "MinHook.h"
+#include "hook_manager.h"
 #include "sigscan.h"
+#include "unreal/classes/ufunction.h"
+#include "unreal/classes/uobject.h"
 #include "unreal/wrappers/gobjects.h"
+#include "unreal/wrappers/wrappedargs.h"
+
 
 using namespace unrealsdk::sigscan;
+using namespace unrealsdk::unreal;
 
 namespace unrealsdk::games {
 
@@ -33,16 +38,16 @@ static constexpr auto ProcessDebugObjectHandle = static_cast<PROCESSINFOCLASS>(3
 // NOLINTBEGIN(readability-identifier-naming)
 static NtSetInformationThread_func NtSetInformationThread_ptr;
 static NTSTATUS NTAPI NtSetInformationThread_hook(HANDLE ThreadHandle,
-                                           THREAD_INFORMATION_CLASS ThreadInformationClass,
-                                           PVOID ThreadInformation,
-                                           ULONG ThreadInformationLength) {
+                                                  THREAD_INFORMATION_CLASS ThreadInformationClass,
+                                                  PVOID ThreadInformation,
+                                                  ULONG ThreadInformationLength) {
     // NOLINTEND(readability-identifier-naming)
     if (ThreadInformationClass == ThreadHideFromDebugger) {
         return STATUS_SUCCESS;
     }
 
     return NtSetInformationThread_ptr(ThreadHandle, ThreadInformationClass, ThreadInformation,
-                                           ThreadInformationLength);
+                                      ThreadInformationLength);
 }
 static_assert(std::is_same_v<decltype(&NtSetInformationThread_hook), NtSetInformationThread_func>,
               "NtSetInformationThread signature is incorrect");
@@ -50,10 +55,10 @@ static_assert(std::is_same_v<decltype(&NtSetInformationThread_hook), NtSetInform
 // NOLINTBEGIN(readability-identifier-naming)
 static NtQueryInformationProcess_func NtQueryInformationProcess_ptr;
 static NTSTATUS WINAPI NtQueryInformationProcess_hook(HANDLE ProcessHandle,
-                                               PROCESSINFOCLASS ProcessInformationClass,
-                                               PVOID ProcessInformation,
-                                               ULONG ProcessInformationLength,
-                                               PULONG ReturnLength) {
+                                                      PROCESSINFOCLASS ProcessInformationClass,
+                                                      PVOID ProcessInformation,
+                                                      ULONG ProcessInformationLength,
+                                                      PULONG ReturnLength) {
     // NOLINTEND(readability-identifier-naming)
     if (ProcessInformationClass == ProcessDebugObjectHandle) {
         return STATUS_PORT_NOT_SET;
@@ -93,6 +98,43 @@ void BL2Hook::hook_antidebug(void) {
             LOG(ERROR, "Failed to enable NtQueryInformationProcess hook: %x", status);
         }
     }
+}
+
+#pragma endregion
+
+#pragma region ProcessEvent
+
+// This function is actually thiscall, but MSVC won't let us declare static thiscall functions
+// As a workaround, declare it fastcall, and add a dummy edx arg.
+// NOLINTNEXTLINE(modernize-use-using)
+typedef void(__fastcall* process_event_func)(unreal::UObject* obj,
+                                             void* /*edx*/,
+                                             unreal::UFunction* func,
+                                             void* params,
+                                             void* result);
+
+process_event_func process_event_ptr;
+static void __fastcall process_event_hook(unreal::UObject* obj,
+                                          void* edx,
+                                          unreal::UFunction* func,
+                                          void* params,
+                                          void* result) {
+    process_event_ptr(obj, edx, func, params, result);
+}
+static_assert(std::is_same_v<decltype(&process_event_hook), process_event_func>,
+              "process_event signature is incorrect");
+
+void BL2Hook::hook_process_event(void) {
+    const Pattern PROCESS_EVENT_SIG{
+        "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x83\xEC\x50\xA1"
+        "\x00\x00\x00\x00\x33\xC5\x89\x45\xF0\x53\x56\x57\x50\x8D\x45\xF4\x64\xA3\x00\x00\x00"
+        "\x00\x8B\xF1\x89\x75\xEC",
+        "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF"
+        "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00"
+        "\x00\xFF\xFF\xFF\xFF\xFF"};
+
+    scan_and_detour(this->start, this->size, PROCESS_EVENT_SIG, process_event_hook,
+                    &process_event_ptr, "ProcessEvent");
 }
 
 #pragma endregion
