@@ -2,21 +2,29 @@
 
 #include "games/bl3.h"
 #include "games/game_hook.h"
+#include "hook_manager.h"
 #include "sigscan.h"
 #include "unreal/classes/ufunction.h"
 #include "unreal/structs/fname.h"
 #include "unreal/wrappers/gobjects.h"
+#include "unreal/wrappers/wrappedargs.h"
 
 using namespace unrealsdk::sigscan;
+using namespace unrealsdk::unreal;
 
 namespace unrealsdk::games {
 
 #pragma region ProcessEvent
 
-using process_event_func = void(unreal::UObject* obj, unreal::UFunction* func, void* params);
+using process_event_func = void(UObject* obj, UFunction* func, void* params);
 
 static process_event_func* process_event_ptr;
-void process_event_hook(unreal::UObject* obj, unreal::UFunction* func, void* params) {
+void process_event_hook(UObject* obj, UFunction* func, void* params) {
+    WrappedArgs args{func, params};
+    if (hook_manager::process_hooks(func, obj, args, "ProcessEvent")) {
+        return;
+    }
+
     process_event_ptr(obj, func, params);
 }
 static_assert(std::is_same_v<decltype(process_event_hook), process_event_func>,
@@ -39,10 +47,10 @@ void BL3Hook::find_gobjects(void) {
         "\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF", 3};
 
     auto gobjects_instr = scan(start, size, GOBJECTS_SIG);
-    auto gobjects_ptr = read_offset<unreal::GObjects::internal_type>(gobjects_instr);
+    auto gobjects_ptr = read_offset<GObjects::internal_type>(gobjects_instr);
     LOG(MISC, "GObjects: 0x%p", gobjects_ptr);
 
-    this->gobjects = unreal::GObjects(gobjects_ptr);
+    this->gobjects = GObjects(gobjects_ptr);
 }
 
 void BL3Hook::find_gnames(void) {
@@ -56,10 +64,10 @@ void BL3Hook::find_gnames(void) {
         0xB};
 
     auto gnames_instr = scan(start, size, GNAMES_SIG);
-    auto gnames_ptr = *read_offset<unreal::GNames::internal_type*>(gnames_instr);
+    auto gnames_ptr = *read_offset<GNames::internal_type*>(gnames_instr);
     LOG(MISC, "GNames: 0x%p", gnames_ptr);
 
-    this->gnames = unreal::GNames(gnames_ptr);
+    this->gnames = GNames(gnames_ptr);
 }
 
 void BL3Hook::find_fname_init(void) {
@@ -71,10 +79,10 @@ void BL3Hook::find_fname_init(void) {
     LOG(MISC, "FNameInit: 0x%p", this->fname_init_ptr);
 }
 
-void BL3Hook::fname_init(unreal::FName* name, const std::wstring& str, int32_t number) {
+void BL3Hook::fname_init(FName* name, const std::wstring& str, int32_t number) {
     this->fname_init(name, str.c_str(), number);
 }
-void BL3Hook::fname_init(unreal::FName* name, const wchar_t* str, int32_t number) {
+void BL3Hook::fname_init(FName* name, const wchar_t* str, int32_t number) {
     *name = this->fname_init_ptr(str, number, 1);
 }
 
