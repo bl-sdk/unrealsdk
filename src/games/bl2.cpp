@@ -2,12 +2,93 @@
 
 #include "games/bl2.h"
 #include "games/game_hook.h"
+#include "MinHook.h"
 #include "sigscan.h"
 #include "unreal/wrappers/gobjects.h"
 
 using namespace unrealsdk::sigscan;
 
 namespace unrealsdk::games {
+
+#pragma region AntiDebug
+
+// NOLINTBEGIN(modernize-use-using)  - need a typedef for the WINAPI
+typedef NTSTATUS(WINAPI* type_NtSetInformationThread)(HANDLE,
+                                                      THREAD_INFORMATION_CLASS,
+                                                      PVOID,
+                                                      ULONG);
+typedef NTSTATUS(
+    WINAPI* type_NtQueryInformationProcess)(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG);
+// NOLINTEND(modernize-use-using)
+
+// NOLINTBEGIN(readability-identifier-naming)
+static constexpr auto ThreadHideFromDebugger = static_cast<THREAD_INFORMATION_CLASS>(17);
+static constexpr auto ProcessDebugObjectHandle = static_cast<PROCESSINFOCLASS>(30);
+// NOLINTEND(readability-identifier-naming)
+
+// NOLINTBEGIN(readability-identifier-naming)
+type_NtSetInformationThread original_NtSetInformationThread;
+NTSTATUS NTAPI hook_NtSetInformationThread(HANDLE ThreadHandle,
+                                           THREAD_INFORMATION_CLASS ThreadInformationClass,
+                                           PVOID ThreadInformation,
+                                           ULONG ThreadInformationLength) {
+    // NOLINTEND(readability-identifier-naming)
+    if (ThreadInformationClass == ThreadHideFromDebugger) {
+        return STATUS_SUCCESS;
+    }
+
+    return original_NtSetInformationThread(ThreadHandle, ThreadInformationClass, ThreadInformation,
+                                           ThreadInformationLength);
+}
+
+// NOLINTBEGIN(readability-identifier-naming)
+type_NtQueryInformationProcess original_NtQueryInformationProcess;
+NTSTATUS WINAPI hook_NtQueryInformationProcess(HANDLE ProcessHandle,
+                                               PROCESSINFOCLASS ProcessInformationClass,
+                                               PVOID ProcessInformation,
+                                               ULONG ProcessInformationLength,
+                                               PULONG ReturnLength) {
+    // NOLINTEND(readability-identifier-naming)
+    if (ProcessInformationClass == ProcessDebugObjectHandle) {
+        return STATUS_PORT_NOT_SET;
+    }
+
+    return original_NtQueryInformationProcess(ProcessHandle, ProcessInformationClass,
+                                              ProcessInformation, ProcessInformationLength,
+                                              ReturnLength);
+}
+
+void BL2Hook::hook_antidebug(void) {
+    MH_STATUS status = MH_OK;
+
+    LPVOID target = nullptr;
+    status = MH_CreateHookApiEx(
+        L"ntdll", "NtSetInformationThread", reinterpret_cast<LPVOID>(hook_NtSetInformationThread),
+        reinterpret_cast<LPVOID*>(&original_NtSetInformationThread), &target);
+    if (status != MH_OK) {
+        LOG(ERROR, "Failed to create NtSetInformationThread hook: %x", status);
+    } else {
+        status = MH_EnableHook(target);
+        if (status != MH_OK) {
+            LOG(ERROR, "Failed to enable NtSetInformationThread hook: %x", status);
+        }
+    }
+
+    status =
+        MH_CreateHookApiEx(L"ntdll", "NtQueryInformationProcess",
+                           reinterpret_cast<LPVOID>(hook_NtQueryInformationProcess),
+                           reinterpret_cast<LPVOID*>(&original_NtQueryInformationProcess), &target);
+    if (status != MH_OK) {
+        LOG(ERROR, "Failed to create NtQueryInformationProcess hook: %x", status);
+    } else {
+        status = MH_EnableHook(target);
+        if (status != MH_OK) {
+            LOG(ERROR, "Failed to enable NtQueryInformationProcess hook: %x", status);
+        }
+    }
+}
+
+#pragma endregion
 
 void BL2Hook::find_gobjects(void) {
     static const Pattern GOBJECTS_SIG{"\x00\x00\x00\x00\x8B\x04\xB1\x8B\x40\x08",

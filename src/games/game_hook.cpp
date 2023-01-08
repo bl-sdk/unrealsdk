@@ -78,6 +78,7 @@ GameHook::GameHook() {
 }
 
 void GameHook::hook() {
+    this->hook_antidebug();
     this->find_gobjects();
     this->find_gnames();
     this->find_fname_init();

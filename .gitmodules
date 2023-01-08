@@ -1,3 +1,6 @@
 [submodule "libs/loguru"]
 	path = libs/loguru
 	url = https://github.com/emilk/loguru.git
+[submodule "libs/minhook"]
+	path = libs/minhook
+	url = https://github.com/TsudaKageyu/minhook.git

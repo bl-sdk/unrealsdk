@@ -35,6 +35,10 @@ static void update_paths(HMODULE this_module) {
 void init(HMODULE this_module) {
     LOG(INFO, "Initalizing");
 
+    if (MH_Initialize() != MH_OK) {
+        throw std::runtime_error("Minhook initialization failed!");
+    }
+
     update_paths(this_module);
 
     games::hook();

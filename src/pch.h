@@ -3,7 +3,11 @@
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
+#include <ntstatus.h>
 #include <windows.h>
+#include <winternl.h>
+
+#include "MinHook.h"
 
 #ifdef __cplusplus
 #include <array>

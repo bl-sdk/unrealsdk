@@ -25,6 +25,11 @@ struct GameHook {
     size_t size;
 
     /**
+     * @brief Applies any anti-debug hooks, as required.
+     */
+    virtual void hook_antidebug(void) {}
+
+    /**
      * @brief Finds GObjects, and populates the wrapper member.
      */
     virtual void find_gobjects(void) = 0;
