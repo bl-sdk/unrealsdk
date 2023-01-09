@@ -34,18 +34,29 @@ class UObject {
     FName Name;
     UObject* Outer;
 #else
+   private:
     void* HashNext;
+
+   public:
     uint64_t ObjectFlags;
+
+   private:
     void* HashOuterNext;
     void* StateFrame;
     class UObject* Linker;
     void* LinkerIndex;
     int ObjectInternalInteger;
+
+   public:
     int InternalIndex;
-    class UObject* Outer;
-    struct FName Name;
-    class UClass* Class;
-    class UObject* ObjectArchetype;
+    UObject* Outer;
+    FName Name;
+    UClass* Class;
+
+   private:
+    UObject* ObjectArchetype;
+
+   public:
 #endif
 
     // NOLINTEND(readability-identifier-naming)

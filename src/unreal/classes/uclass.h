@@ -8,9 +8,30 @@ namespace unrealsdk::unreal {
 #if defined(_MSC_VER) && defined(ARCH_X86)
 #pragma pack(push, 0x4)
 #endif
-#endif
 
 class UClass : public UStruct {
+   public:
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,
+    //             modernize-avoid-c-arrays,
+    //             readability-identifier-naming)
+
+#ifdef UE4
+   private:
+    uint8_t UnknownData00[0x70];
+
+   public:
+    UObject* ClassDefaultObject;
+#else
+   private:
+    uint8_t UnknownData00[0xCC];
+
+   public:
+    UObject* ClassDefaultObject;
+#endif
+
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers,
+    //           modernize-avoid-c-arrays,
+    //           readability-identifier-naming)
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)
