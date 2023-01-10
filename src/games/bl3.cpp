@@ -6,6 +6,7 @@
 #include "sigscan.h"
 #include "unreal/classes/ufunction.h"
 #include "unreal/structs/fname.h"
+#include "unreal/structs/fframe.h"
 #include "unreal/wrappers/gobjects.h"
 #include "unreal/wrappers/wrappedargs.h"
 
@@ -21,7 +22,7 @@ using process_event_func = void(UObject* obj, UFunction* func, void* params);
 static process_event_func* process_event_ptr;
 void process_event_hook(UObject* obj, UFunction* func, void* params) {
     WrappedArgs args{func, params};
-    if (hook_manager::process_hooks(func, obj, args, "ProcessEvent")) {
+    if (hook_manager::process_event(obj, func, args)) {
         return;
     }
 
@@ -37,6 +38,34 @@ void BL3Hook::hook_process_event(void) {
 
     scan_and_detour(this->start, this->size, PROCESS_EVENT_SIG, process_event_hook,
                     &process_event_ptr, "ProcessEvent");
+}
+
+#pragma endregion
+
+#pragma region CallFunction
+
+using call_function_func = void(UObject* obj, FFrame* stack, void* result, UFunction* func);
+
+static call_function_func* call_function_ptr;
+void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* func) {
+    if (hook_manager::call_function(obj, stack, result, func)) {
+        return;
+    }
+
+    call_function_ptr(obj, stack, result, func);
+}
+static_assert(std::is_same_v<decltype(call_function_hook), call_function_func>,
+              "call_function signature is incorrect");
+
+void BL3Hook::hook_call_function(void) {
+    const Pattern CALL_FUNCTION_SIG{
+        "\x40\x55\x53\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x81\xec\x28\x01\x00\x00\x48\x8d"
+        "\x6c\x24\x30",
+        "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+        "\xFF\xFF\xFF"};
+
+    scan_and_detour(this->start, this->size, CALL_FUNCTION_SIG, call_function_hook,
+                    &call_function_ptr, "CallFunction");
 }
 
 #pragma endregion

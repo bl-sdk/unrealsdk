@@ -30,10 +30,14 @@ struct GameHook {
     virtual void hook_antidebug(void) {}
 
     /**
-     * @brief Hooks `ProcessEvent`, points it at the hook manager, and sets up such that
-     *        `process_event` may be called.
+     * @brief Hooks `UObject::ProcessEvent` and points it at the hook manager.
      */
     virtual void hook_process_event(void) = 0;
+
+    /**
+     * @brief Hooks `UObject::CallFunction` and points it at the hook manager.
+     */
+    virtual void hook_call_function(void) = 0;
 
     /**
      * @brief Finds GObjects, and populates the wrapper member.

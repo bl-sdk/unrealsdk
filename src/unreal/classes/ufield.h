@@ -10,6 +10,7 @@ namespace unrealsdk::unreal {
 #endif
 
 class UField : public UObject {
+   public:
     // NOLINTNEXTLINE(readability-identifier-naming)
     UField* Next;
 };

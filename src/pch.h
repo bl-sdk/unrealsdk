@@ -23,6 +23,7 @@
 #include <tuple>
 #include <type_traits>
 #include <unordered_map>
+#include <unordered_set>
 
 // This is the only sdk header we'll include in the PCH, since automatically having the log macro
 // exposed is very convenient, and it doesn't depend on any other sdk headers

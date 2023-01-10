@@ -11,6 +11,7 @@ class BL2Hook : public GameHook {
    protected:
     void hook_antidebug(void) override;
     void hook_process_event(void) override;
+    void hook_call_function(void) override;
     void find_gobjects(void) override;
     void find_gnames(void) override;
     void find_fname_init(void) override;

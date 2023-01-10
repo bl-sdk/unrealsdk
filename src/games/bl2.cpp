@@ -6,6 +6,7 @@
 #include "sigscan.h"
 #include "unreal/classes/ufunction.h"
 #include "unreal/classes/uobject.h"
+#include "unreal/structs/fframe.h"
 #include "unreal/wrappers/gobjects.h"
 #include "unreal/wrappers/wrappedargs.h"
 
@@ -119,7 +120,7 @@ static void __fastcall process_event_hook(UObject* obj,
                                           void* params,
                                           void* result) {
     WrappedArgs args{func, params};
-    if (hook_manager::process_hooks(func, obj, args, "ProcessEvent")) {
+    if (hook_manager::process_event(obj, func, args)) {
         return;
     }
 
@@ -143,16 +144,44 @@ void BL2Hook::hook_process_event(void) {
 
 #pragma endregion
 
-/*
-using type_CallFunction = __thiscall void(UObject* obj, FFrame* frame, void* res, UFunction* func);
-const Pattern CALL_FUNCTION_SIG{
-    "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x81\xEC\x00\x00"
-    "\x00\x00\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\xF0\x53\x56\x57\x50\x8D\x45\xF4\x64\xA3"
-    "\x00\x00\x00\x00\x8B\x7D\x10\x8B\x45\x0C",
-    "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\x00\x00\x00"
-    "\x00\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00"
-    "\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
-*/
+#pragma region CallFunction
+
+// NOLINTNEXTLINE(modernize-use-using)
+typedef void(__fastcall* call_function_func)(UObject* obj,
+                                             void* /*edx*/,
+                                             FFrame* stack,
+                                             void* params,
+                                             UFunction* func);
+
+call_function_func call_function_ptr;
+static void __fastcall call_function_hook(UObject* obj,
+                                          void* edx,
+                                          FFrame* stack,
+                                          void* result,
+                                          UFunction* func) {
+    if (hook_manager::call_function(obj, stack, result, func)) {
+        return;
+    }
+
+    call_function_ptr(obj, edx, stack, result, func);
+}
+static_assert(std::is_same_v<decltype(&call_function_hook), call_function_func>,
+              "call_function signature is incorrect");
+
+void BL2Hook::hook_call_function(void) {
+    const Pattern CALL_FUNCTION_SIG{
+        "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x81\xEC\x00\x00"
+        "\x00\x00\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\xF0\x53\x56\x57\x50\x8D\x45\xF4\x64\xA3"
+        "\x00\x00\x00\x00\x8B\x7D\x10\x8B\x45\x0C",
+        "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\x00\x00\x00"
+        "\x00\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00"
+        "\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+    scan_and_detour(this->start, this->size, CALL_FUNCTION_SIG, call_function_hook,
+                    &call_function_ptr, "CallFunction");
+}
+
+#pragma endregion
 
 void BL2Hook::find_gobjects(void) {
     static const Pattern GOBJECTS_SIG{"\x00\x00\x00\x00\x8B\x04\xB1\x8B\x40\x08",
