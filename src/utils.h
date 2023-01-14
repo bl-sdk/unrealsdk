@@ -19,6 +19,6 @@ std::string narrow(const std::wstring& wstr);
  */
 std::wstring widen(const std::string& str);
 
-}
+}  // namespace unrealsdk::utils
 
 #endif /* UTILS_H */
