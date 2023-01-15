@@ -84,6 +84,7 @@ void GameHook::hook() {
     this->find_gobjects();
     this->find_gnames();
     this->find_fname_init();
+    this->find_fframe_step();
 }
 
 }  // namespace unrealsdk::games

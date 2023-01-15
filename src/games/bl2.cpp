@@ -225,4 +225,15 @@ void BL2Hook::fname_init(FName* name, const wchar_t* str, int32_t number) const 
     reinterpret_cast<fname_init_func>(this->fname_init_ptr)(name, str, number, 1, 1);
 }
 
+void BL2Hook::find_fframe_step(void) {
+    static const Pattern FFRAME_STEP_SIG{"\x55\x8B\xEC\x8B\x41\x18\x0F\xB6\x10",
+                                         "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+    this->fframe_step_ptr = scan<fframe_step_func>(this->start, this->size, FFRAME_STEP_SIG);
+    LOG(MISC, "FFrame::Step: 0x%p", this->fframe_step_ptr);
+}
+void BL2Hook::fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const {
+    this->fframe_step_ptr(frame, obj, param);
+}
+
 }  // namespace unrealsdk::games

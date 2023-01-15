@@ -3,6 +3,7 @@
 
 #include "pch.h"
 
+#include "unreal/structs/fframe.h"
 #include "unreal/wrappers/gnames.h"
 #include "unreal/wrappers/gobjects.h"
 
@@ -54,6 +55,11 @@ struct GameHook {
      */
     virtual void find_fname_init(void) = 0;
 
+    /**
+     * @brief Finds `FFrame::Step`, and sets up such that `fframe_step` may be called.
+     */
+    virtual void find_fframe_step(void) = 0;
+
    public:
     GameHook(void);
     virtual ~GameHook() = default;
@@ -78,6 +84,15 @@ struct GameHook {
      */
     virtual void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) const = 0;
     virtual void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const = 0;
+
+    /**
+     * @brief Calls FFrame::Step.
+     *
+     * @param frame The frame to step.
+     * @param obj The object the frame is coming from.
+     * @param param The parameter.
+     */
+    virtual void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const = 0;
 };
 
 /**
