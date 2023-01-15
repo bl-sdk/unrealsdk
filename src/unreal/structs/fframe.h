@@ -39,8 +39,15 @@ struct FFrame : public FOutputDevice {
     uint8_t* Code;
     void* Locals;
 
+#ifdef UE4
+private:
+    UProperty* LastProperty;
+    void* LastPropertyAddress;
+public:
+#endif
+
     FFrame* PreviousFrame;
-    FOutParmRec* Outparams;
+    FOutParmRec* OutParams;
 };
 
 // NOLINTEND(readability-identifier-naming)
