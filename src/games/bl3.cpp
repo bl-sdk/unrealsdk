@@ -5,8 +5,8 @@
 #include "hook_manager.h"
 #include "sigscan.h"
 #include "unreal/classes/ufunction.h"
-#include "unreal/structs/fname.h"
 #include "unreal/structs/fframe.h"
+#include "unreal/structs/fname.h"
 #include "unreal/wrappers/gobjects.h"
 #include "unreal/wrappers/wrappedargs.h"
 
@@ -105,13 +105,13 @@ void BL3Hook::find_fname_init(void) {
         "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00"};
 
     this->fname_init_ptr = scan<fname_init_func*>(start, size, FNAME_INIT_PATTERN);
-    LOG(MISC, "FNameInit: 0x%p", this->fname_init_ptr);
+    LOG(MISC, "FName::Init: 0x%p", this->fname_init_ptr);
 }
 
-void BL3Hook::fname_init(FName* name, const std::wstring& str, int32_t number) {
+void BL3Hook::fname_init(FName* name, const std::wstring& str, int32_t number) const {
     this->fname_init(name, str.c_str(), number);
 }
-void BL3Hook::fname_init(FName* name, const wchar_t* str, int32_t number) {
+void BL3Hook::fname_init(FName* name, const wchar_t* str, int32_t number) const {
     *name = this->fname_init_ptr(str, number, 1);
 }
 

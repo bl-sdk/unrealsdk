@@ -16,12 +16,13 @@ class BL2Hook : public GameHook {
     void find_gnames(void) override;
     void find_fname_init(void) override;
 
-    /// Pointer to FName::Init function
+    /// Pointer to FName::Init
+    // Deliberately storing in a void pointer because the type changes in bl2/tps
     void* fname_init_ptr;
 
    public:
-    void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) override;
-    void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) override;
+    void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) const override;
+    void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const override;
 };
 
 template <>

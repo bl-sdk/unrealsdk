@@ -113,7 +113,7 @@ typedef void(__fastcall* process_event_func)(UObject* obj,
                                              void* params,
                                              void* result);
 
-process_event_func process_event_ptr;
+static process_event_func process_event_ptr;
 static void __fastcall process_event_hook(UObject* obj,
                                           void* edx,
                                           UFunction* func,
@@ -153,7 +153,7 @@ typedef void(__fastcall* call_function_func)(UObject* obj,
                                              void* params,
                                              UFunction* func);
 
-call_function_func call_function_ptr;
+static call_function_func call_function_ptr;
 static void __fastcall call_function_hook(UObject* obj,
                                           void* edx,
                                           FFrame* stack,
@@ -211,13 +211,13 @@ void BL2Hook::find_fname_init(void) {
         "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
 
     this->fname_init_ptr = scan<void*>(this->start, this->size, FNAME_INIT_SIG);
-    LOG(MISC, "FNameInit: 0x%p", this->fname_init_ptr);
+    LOG(MISC, "FName::Init: 0x%p", this->fname_init_ptr);
 }
 
-void BL2Hook::fname_init(FName* name, const std::wstring& str, int32_t number) {
+void BL2Hook::fname_init(FName* name, const std::wstring& str, int32_t number) const {
     this->fname_init(name, str.c_str(), number);
 }
-void BL2Hook::fname_init(FName* name, const wchar_t* str, int32_t number) {
+void BL2Hook::fname_init(FName* name, const wchar_t* str, int32_t number) const {
     // NOLINTNEXTLINE(modernize-use-using)  - need a typedef for the __thiscall
     typedef void*(__thiscall * fname_init_func)(FName * name, const wchar_t* str, int32_t number,
                                                 int32_t find_type, int32_t split_name);

@@ -70,14 +70,14 @@ struct GameHook {
     virtual void hook(void);
 
     /**
-     * @brief Call FName::Init, set to add new names and split numbers.
+     * @brief Calls FName::Init, set to add new names and split numbers.
      *
      * @param name Pointer to the name to initalize.
      * @param str The string to initalize the name to.
      * @param number The number to initalize the name to.
      */
-    virtual void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) = 0;
-    virtual void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) = 0;
+    virtual void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) const = 0;
+    virtual void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const = 0;
 };
 
 /**

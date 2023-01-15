@@ -18,10 +18,10 @@ void TPSAoDKHook::find_gnames(void) {
     this->gnames = unreal::GNames(gnames_ptr);
 }
 
-void TPSAoDKHook::fname_init(unreal::FName* name, const std::wstring& str, int32_t number) {
+void TPSAoDKHook::fname_init(unreal::FName* name, const std::wstring& str, int32_t number) const {
     this->fname_init(name, str.c_str(), number);
 }
-void TPSAoDKHook::fname_init(unreal::FName* name, const wchar_t* str, int32_t number) {
+void TPSAoDKHook::fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const {
     // NOLINTNEXTLINE(modernize-use-using)
     typedef void*(__thiscall * fname_init_func)(unreal::FName * name, const wchar_t* str,
                                                 int32_t number, int32_t find_type,

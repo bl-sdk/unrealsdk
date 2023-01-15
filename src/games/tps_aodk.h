@@ -13,8 +13,8 @@ class TPSAoDKHook : public BL2Hook {
     void find_gnames(void) override;
 
    public:
-    void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) override;
-    void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) override;
+    void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) const override;
+    void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const override;
 };
 
 template <>
