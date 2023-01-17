@@ -3,6 +3,8 @@
 
 #include "pch.h"
 
+#if defined(UE3) && defined(ARCH_X86)
+
 #include "games/game_hook.h"
 
 namespace unrealsdk::games {
@@ -37,8 +39,6 @@ class BL2Hook : public GameHook {
 template <>
 struct GameTraits<BL2Hook> {
     static constexpr auto NAME = "Borderlands 2";
-    static constexpr bool IS_64BIT = false;
-    static constexpr bool IS_UE4 = false;
 
     static bool matches_executable(const std::string& executable) {
         return executable == "Borderlands2.exe";
@@ -46,5 +46,7 @@ struct GameTraits<BL2Hook> {
 };
 
 }  // namespace unrealsdk::games
+
+#endif
 
 #endif /* GAMES_BL2_H */

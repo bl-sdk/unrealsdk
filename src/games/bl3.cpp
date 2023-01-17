@@ -1,5 +1,7 @@
 #include "pch.h"
 
+#if defined(UE4) && defined(ARCH_X64)
+
 #include "games/bl3.h"
 #include "games/game_hook.h"
 #include "hook_manager.h"
@@ -127,3 +129,5 @@ void BL3Hook::fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* par
 }
 
 }  // namespace unrealsdk::games
+
+#endif

@@ -1,5 +1,7 @@
 #include "pch.h"
 
+#if defined(UE3) && defined(ARCH_X86)
+
 #include "games/tps_aodk.h"
 #include "sigscan.h"
 
@@ -31,3 +33,5 @@ void TPSAoDKHook::fname_init(unreal::FName* name, const wchar_t* str, int32_t nu
 }
 
 }  // namespace unrealsdk::games
+
+#endif

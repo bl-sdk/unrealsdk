@@ -20,27 +20,24 @@ const std::unique_ptr<games::GameHook>& game = game_instance;
 
 namespace unrealsdk::games {
 
-/**
- * @brief Tuple of all hook types to consider.
- * @note The first matching hook will be used, order matters.
- */
-// TODO: generic hooks
-using all_known_games = std::tuple<BL2Hook, TPSAoDKHook, BL3Hook, WLHook>;
-
+// Tuple of all hook types to consider.
+// The first matching hook will be used, order matters.
 #ifdef ARCH_X64
-static constexpr auto WANT_64BIT = true;
-#else
-constexpr auto WANT_64BIT = false;
-#endif
 #ifdef UE4
-static constexpr auto WANT_UE4 = true;
+    using all_known_games = std::tuple<BL3Hook, WLHook>;
 #else
-constexpr auto WANT_UE4 = false;
+    #error No known games for UE3 x64
+#endif
+#else
+#ifdef UE4
+    #error No known games for UE4 x86
+#else
+    using all_known_games = std::tuple<BL2Hook, TPSAoDKHook>;
+#endif
 #endif
 
 /**
- * @brief Recursive helper function to find the right game hook, which discards games with the wrong
- *        architecture/ue version at compile time.
+ * @brief Recursive helper function to find the right game hook.
  *
  * @tparam i Index of the game class being tested this iteration. Picked up automatically.
  * @param executable The executable name to match against.
@@ -51,14 +48,11 @@ constexpr void iter_hooks(const std::string& executable) {
         throw std::runtime_error("Failed to find compatible game hook!");
     } else {
         using game = std::tuple_element_t<i, all_known_games>;
-        if constexpr (GameTraits<game>::IS_64BIT == WANT_64BIT
-                      && GameTraits<game>::IS_UE4 == WANT_UE4) {
-            if (GameTraits<game>::matches_executable(executable)) {
-                LOG(INFO, "Using %s hook", GameTraits<game>::NAME);
-                unrealsdk::game_instance = std::make_unique<game>();
-                unrealsdk::game_instance->hook();
-                return;
-            }
+        if (GameTraits<game>::matches_executable(executable)) {
+            LOG(INFO, "Using %s hook", GameTraits<game>::NAME);
+            unrealsdk::game_instance = std::make_unique<game>();
+            unrealsdk::game_instance->hook();
+            return;
         }
         iter_hooks<i + 1>(executable);
     }

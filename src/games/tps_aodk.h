@@ -3,6 +3,8 @@
 
 #include "pch.h"
 
+#if defined(UE3) && defined(ARCH_X86)
+
 #include "games/bl2.h"
 #include "games/game_hook.h"
 
@@ -20,8 +22,6 @@ class TPSAoDKHook : public BL2Hook {
 template <>
 struct GameTraits<TPSAoDKHook> {
     static constexpr auto NAME = "TPS + AoDK";
-    static constexpr bool IS_64BIT = false;
-    static constexpr bool IS_UE4 = false;
 
     static bool matches_executable(const std::string& executable) {
         return executable == "BorderlandsPreSequel.exe" || executable == "TinyTina.exe";
@@ -29,5 +29,7 @@ struct GameTraits<TPSAoDKHook> {
 };
 
 }  // namespace unrealsdk::games
+
+#endif
 
 #endif /* GAMES_TPS_AODK_H */

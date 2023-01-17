@@ -102,10 +102,7 @@ struct GameHook {
  */
 template <typename T, typename = std::enable_if_t<std::is_base_of_v<GameHook, T>, void>>
 struct GameTraits {
-    /// True if this hook is for a 64-bit game
-    static constexpr bool IS_64BIT{};
-    /// True if this hook is for a UE4 game
-    static constexpr bool IS_UE4{};
+    static constexpr const char* const NAME{};
 
     /**
      * @brief Checks if this hook matches the given executable name.

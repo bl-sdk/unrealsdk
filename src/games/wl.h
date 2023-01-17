@@ -3,6 +3,8 @@
 
 #include "pch.h"
 
+#if defined(UE4) && defined(ARCH_X64)
+
 #include "games/bl3.h"
 #include "games/game_hook.h"
 
@@ -13,8 +15,6 @@ class WLHook : public BL3Hook {};
 template <>
 struct GameTraits<WLHook> {
     static constexpr auto NAME = "Wonderlands";
-    static constexpr bool IS_64BIT = true;
-    static constexpr bool IS_UE4 = true;
 
     static bool matches_executable(const std::string& executable) {
         return executable == "Wonderlands.exe";
@@ -22,5 +22,7 @@ struct GameTraits<WLHook> {
 };
 
 }  // namespace unrealsdk::games
+
+#endif
 
 #endif /* GAMES_WL_H */
