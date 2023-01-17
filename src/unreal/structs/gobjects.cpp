@@ -6,7 +6,7 @@ namespace unrealsdk::unreal {
 
 #ifdef UE4
 
-[[nodiscard]] FUObjectItem* FChunkedFixedUObjectArray::at(size_t idx) const {
+FUObjectItem* FChunkedFixedUObjectArray::at(size_t idx) const {
     if (idx > this->Count) {
         throw std::out_of_range("FChunkedFixedUObjectArray index out of range");
     }

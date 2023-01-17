@@ -4,9 +4,9 @@
 
 namespace unrealsdk::utils {
 
-// NOLINTBEGIN(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory,
-// cppcoreguidelines-pro-bounds-pointer-arithmetic)
-static_assert(sizeof(wchar_t) == sizeof(wchar_t), "wchar_t is different size to wchar_t");
+// NOLINTBEGIN(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory)
+
+static_assert(sizeof(wchar_t) == sizeof(char16_t), "wchar_t is different size to char16_t");
 
 std::string narrow(const std::wstring& wstr) {
     if (wstr.empty()) {
@@ -38,12 +38,13 @@ std::wstring widen(const std::string& str) {
     }
 
     auto num_chars =
-        MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), NULL, 0);
-    wchar_t* wstr = reinterpret_cast<wchar_t*>(malloc((num_chars + 1) * sizeof(wchar_t)));
-    if (!wstr) {
+        MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), nullptr, 0);
+    auto wstr = reinterpret_cast<wchar_t*>(malloc((num_chars + 1) * sizeof(wchar_t)));
+    if (wstr == nullptr) {
         throw std::runtime_error("Failed to convert utf8 string!");
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-narrowing-conversions)
     MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.size(), reinterpret_cast<wchar_t*>(wstr),
                         num_chars);
     wstr[num_chars] = L'\0';
@@ -54,7 +55,6 @@ std::wstring widen(const std::string& str) {
     return ret;
 }
 
-// NOLINTEND(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory,
-// cppcoreguidelines-pro-bounds-pointer-arithmetic)
+// NOLINTEND(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory)
 
 }  // namespace unrealsdk::utils

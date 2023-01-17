@@ -44,12 +44,10 @@ void init(void) {
     options.verbosity_flag = nullptr;
 
     // loguru::init expects a proper argc/v so we need to fake one
-    // NOLINTBEGIN(modernize-avoid-c-arrays)
     int fake_argc = 1;
     char fake_executable[] = LOG_FAKE_EXECUTABLE_NAME;
     char* fake_argv[] = {static_cast<char*>(fake_executable), nullptr};
     loguru::init(fake_argc, static_cast<char**>(fake_argv), options);
-    // NOLINTEND(modernize-avoid-c-arrays)
 
 #ifndef DEBUG
     if (env::defined(env::EXTERNAL_CONSOLE))

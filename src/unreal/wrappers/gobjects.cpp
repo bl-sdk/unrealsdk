@@ -52,11 +52,11 @@ GObjects::Iterator GObjects::begin(void) const {
     return {*this, static_cast<size_t>(std::max(this->internal->ObjFirstGCIndex, 0))};
 }
 
-[[nodiscard]] size_t GObjects::size(void) const {
+size_t GObjects::size(void) const {
     return this->internal->ObjLastNonGCIndex - std::max(this->internal->ObjFirstGCIndex, 0);
 }
 
-[[nodiscard]] UObject* GObjects::obj_at(size_t idx) const {
+UObject* GObjects::obj_at(size_t idx) const {
     if (idx > this->internal->ObjObjects.Count) {
         throw std::out_of_range("GObjects index out of range");
     }
@@ -69,11 +69,11 @@ GObjects::Iterator GObjects::begin(void) const {
     return {*this, 0};
 }
 
-[[nodiscard]] size_t GObjects::size(void) const {
+size_t GObjects::size(void) const {
     return this->internal->size();
 }
 
-[[nodiscard]] UObject* GObjects::obj_at(size_t idx) const {
+UObject* GObjects::obj_at(size_t idx) const {
     return this->internal->at(idx);
 }
 

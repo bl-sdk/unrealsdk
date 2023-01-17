@@ -39,7 +39,6 @@ T get_numeric(env_var_key env_var, T default_value = 0) {
     auto str = get(env_var);
 
     T value;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto res = std::from_chars(str.c_str(), str.c_str() + str.size(), value);
     return res.ec == std::errc() ? value : default_value;
 }

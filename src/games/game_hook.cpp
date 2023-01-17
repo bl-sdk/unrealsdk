@@ -71,10 +71,8 @@ void hook(void) {
 
 GameHook::GameHook() {
     auto [start_val, size_val] = sigscan::get_exe_range();
-    // NOLINTBEGIN(cppcoreguidelines-prefer-member-initializer)
     this->start = start_val;
     this->size = size_val;
-    // NOLINTEND(cppcoreguidelines-prefer-member-initializer)
 }
 
 void GameHook::hook() {

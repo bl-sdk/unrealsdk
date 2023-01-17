@@ -10,11 +10,11 @@ GNames::GNames(internal_type internal) : internal(internal) {}
 
 #if defined(UE4)
 
-[[nodiscard]] size_t GNames::size(void) const {
+size_t GNames::size(void) const {
     return this->internal->Count;
 }
 
-[[nodiscard]] FNameEntry* GNames::at(size_t idx) const {
+FNameEntry* GNames::at(size_t idx) const {
     if (idx > this->internal->Count) {
         throw std::out_of_range("GObjects index out of range");
     }
@@ -23,11 +23,11 @@ GNames::GNames(internal_type internal) : internal(internal) {}
 
 #elif defined(UE3)
 
-[[nodiscard]] size_t GNames::size(void) const {
+size_t GNames::size(void) const {
     return this->internal->size();
 }
 
-[[nodiscard]] FNameEntry* GNames::at(size_t idx) const {
+FNameEntry* GNames::at(size_t idx) const {
     return this->internal->at(idx);
 }
 

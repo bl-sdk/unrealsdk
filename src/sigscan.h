@@ -24,7 +24,6 @@ struct Pattern {
      * @param offset The constant offset to add to the found address.
      * @return A sigscan pattern.
      */
-    // NOLINTBEGIN(modernize-avoid-c-arrays)
     template <size_t n>
     Pattern(const char (&bytes)[n], const char (&mask)[n], size_t offset = 0)
         : bytes(reinterpret_cast<const uint8_t*>(bytes)),
@@ -33,7 +32,6 @@ struct Pattern {
           size(n - 1) {}
 
     static_assert(sizeof(uint8_t) == sizeof(char), "uint8_t is different size to char");
-    // NOLINTEND(modernize-avoid-c-arrays)
 };
 
 /**

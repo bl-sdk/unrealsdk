@@ -107,10 +107,8 @@ bool call_function(UObject* obj, FFrame* stack, void* /*result*/, UFunction* fun
             continue;
         }
 
-        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         unrealsdk::game->fframe_step(stack, stack->Object,
                                      frame == nullptr ? nullptr : frame + prop->Offset_Internal);
-        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
 
     WrappedArgs args{func, frame};
@@ -121,7 +119,6 @@ bool call_function(UObject* obj, FFrame* stack, void* /*result*/, UFunction* fun
     }
 
     if (block_function) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         stack->Code++;
     } else {
         stack->Code = original_code;

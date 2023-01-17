@@ -15,9 +15,7 @@ class UProperty;
 
 class UStruct : public UField {
    public:
-    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,
-    //             modernize-avoid-c-arrays,
-    //             readability-identifier-naming)
+    // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
 #ifdef UE4
     /* Struct this inherits from, may be null */
@@ -65,11 +63,9 @@ class UStruct : public UField {
      *
      * @return The size which must be allocated
      */
-    size_t get_struct_size(void) const;
+    [[nodiscard]] size_t get_struct_size(void) const;
 
-    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers,
-    //           modernize-avoid-c-arrays,
-    //           readability-identifier-naming)
+    // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

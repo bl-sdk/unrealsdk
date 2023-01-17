@@ -11,9 +11,7 @@ namespace unrealsdk::unreal {
 
 class UClass : public UStruct {
    public:
-    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,
-    //             modernize-avoid-c-arrays,
-    //             readability-identifier-naming)
+    // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
 #ifdef UE4
    private:
@@ -29,9 +27,7 @@ class UClass : public UStruct {
     UObject* ClassDefaultObject;
 #endif
 
-    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers,
-    //           modernize-avoid-c-arrays,
-    //           readability-identifier-naming)
+    // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

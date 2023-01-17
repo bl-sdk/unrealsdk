@@ -12,9 +12,7 @@ struct FNameEntry {
     static constexpr auto NAME_WIDE_MASK = 0x1;
     static constexpr auto NAME_INDEX_SHIFT = 1;
 
-    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,
-    //             modernize-avoid-c-arrays,
-    //             readability-identifier-naming)
+    // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
 #ifdef UE4
     int32_t Index;
@@ -42,9 +40,7 @@ struct FNameEntry {
         wchar_t WideName[NAME_SIZE];
     };
 
-    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers,
-    //           modernize-avoid-c-arrays,
-    //           readability-identifier-naming)
+    // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 
     /**
      * @brief Checks if this entry holds a wide string.

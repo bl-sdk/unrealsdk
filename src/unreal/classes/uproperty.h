@@ -11,9 +11,7 @@ namespace unrealsdk::unreal {
 
 class UProperty : public UField {
    public:
-    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,
-    //             modernize-avoid-c-arrays,
-    //             readability-identifier-naming)
+    // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
 #ifdef UE4
     int32_t ArrayDim;
@@ -59,9 +57,7 @@ class UProperty : public UField {
     uint8_t UnknownData01[0x18];
 #endif
 
-    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers,
-    //           modernize-avoid-c-arrays,
-    //           readability-identifier-naming)
+    // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)
