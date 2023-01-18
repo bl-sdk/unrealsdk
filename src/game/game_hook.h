@@ -1,5 +1,5 @@
-#ifndef GAMES_GAME_HOOK_H
-#define GAMES_GAME_HOOK_H
+#ifndef GAME_GAME_HOOK_H
+#define GAME_GAME_HOOK_H
 
 #include "pch.h"
 
@@ -10,10 +10,51 @@
 namespace unrealsdk::unreal {
 
 struct FName;
+class UObject;
 
-}
+}  // namespace unrealsdk::unreal
 
-namespace unrealsdk::games {
+namespace unrealsdk::game {
+
+/**
+ * @brief Hooks the current game, and initalizes all other functions in this module.
+ */
+void init(void);
+
+/**
+ * @brief Gets a reference to the GObjects wrapper.
+ *
+ * @return A reference to the GObjects wrapper.
+ */
+const unreal::GObjects& gobjects(void);
+
+/**
+ * @brief Gets a reference to the GNames wrapper.
+ *
+ * @return A reference to the GNames wrapper.
+ */
+const unreal::GNames& gnames(void);
+
+/**
+ * @brief Calls FName::Init, set to add new names and split numbers.
+ *
+ * @param name Pointer to the name to initalize.
+ * @param str The string to initalize the name to.
+ * @param number The number to initalize the name to.
+ */
+void fname_init(unreal::FName* name, const std::wstring& str, int32_t number);
+void fname_init(unreal::FName* name, const wchar_t* str, int32_t number);
+
+/**
+ * @brief Calls FFrame::Step.
+ *
+ * @param frame The frame to step.
+ * @param obj The object the frame is coming from.
+ * @param param The parameter.
+ */
+void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param);
+
+#pragma region Hook Classes
 
 /**
  * @brief Base class for hooking a game.
@@ -24,11 +65,6 @@ struct GameHook {
     uintptr_t start;
     /// Size of the executable, to be used in sigscans
     size_t size;
-
-    /**
-     * @brief Applies any anti-debug hooks, as required.
-     */
-    virtual void hook_antidebug(void) {}
 
     /**
      * @brief Hooks `UObject::ProcessEvent` and points it at the hook manager.
@@ -64,34 +100,17 @@ struct GameHook {
     GameHook(void);
     virtual ~GameHook() = default;
 
-    /// Wrapper around gobjects
-    unreal::GObjects gobjects;
-    /// Wrapper around gnames
-    unreal::GNames gnames;
-
     /**
      * @brief Hooks the current game.
-     * @note May apply game-specific hooks or hex edits as needed.
+     * @note May be overridden to apply game-specific hooks or hex edits as needed.
      */
     virtual void hook(void);
 
-    /**
-     * @brief Calls FName::Init, set to add new names and split numbers.
-     *
-     * @param name Pointer to the name to initalize.
-     * @param str The string to initalize the name to.
-     * @param number The number to initalize the name to.
-     */
+    // Inner objects/methods accessed by the globals function wrappers
+    unreal::GObjects gobjects;
+    unreal::GNames gnames;
     virtual void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) const = 0;
     virtual void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const = 0;
-
-    /**
-     * @brief Calls FFrame::Step.
-     *
-     * @param frame The frame to step.
-     * @param obj The object the frame is coming from.
-     * @param param The parameter.
-     */
     virtual void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const = 0;
 };
 
@@ -113,12 +132,8 @@ struct GameTraits {
     static bool matches_executable(const std::string& executable);
 };
 
-/**
- * @brief Hooks the current game.
- * @note Initalizes `unrealsdk::game`.
- */
-void hook(void);
+#pragma endregion
 
-}  // namespace unrealsdk::games
+}  // namespace unrealsdk::game
 
-#endif /* GAMES_GAME_HOOK_H */
+#endif /* GAME_GAME_HOOK_H */

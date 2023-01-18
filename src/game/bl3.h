@@ -1,14 +1,14 @@
-#ifndef GAMES_BL3_H
-#define GAMES_BL3_H
+#ifndef GAME_BL3_H
+#define GAME_BL3_H
 
 #include "pch.h"
 
 #if defined(UE4) && defined(ARCH_X64)
 
-#include "games/game_hook.h"
+#include "game/game_hook.h"
 #include "unreal/structs/fname.h"
 
-namespace unrealsdk::games {
+namespace unrealsdk::game {
 
 class BL3Hook : public GameHook {
    protected:
@@ -42,8 +42,8 @@ struct GameTraits<BL3Hook> {
     }
 };
 
-}  // namespace unrealsdk::games
+}  // namespace unrealsdk::game
 
 #endif
 
-#endif /* GAMES_BL3_H */
+#endif /* GAME_BL3_H */

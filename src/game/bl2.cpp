@@ -2,8 +2,8 @@
 
 #if defined(UE3) && defined(ARCH_X86)
 
-#include "games/bl2.h"
-#include "games/game_hook.h"
+#include "game/bl2.h"
+#include "game/game_hook.h"
 #include "hook_manager.h"
 #include "sigscan.h"
 #include "unreal/classes/ufunction.h"
@@ -15,7 +15,12 @@
 using namespace unrealsdk::sigscan;
 using namespace unrealsdk::unreal;
 
-namespace unrealsdk::games {
+namespace unrealsdk::game {
+
+void BL2Hook::hook(void) {
+    hook_antidebug();
+    GameHook::hook();
+}
 
 #pragma region AntiDebug
 
@@ -185,6 +190,8 @@ void BL2Hook::hook_call_function(void) {
 
 #pragma endregion
 
+#pragma region Globals
+
 void BL2Hook::find_gobjects(void) {
     static const Pattern GOBJECTS_SIG{"\x00\x00\x00\x00\x8B\x04\xB1\x8B\x40\x08",
                                       "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
@@ -207,6 +214,10 @@ void BL2Hook::find_gnames(void) {
     this->gnames = GNames(gnames_ptr);
 }
 
+#pragma endregion
+
+#pragma region FName::Init
+
 void BL2Hook::find_fname_init(void) {
     static const Pattern FNAME_INIT_SIG{
         "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x50\x81\xEC\x9C\x0C",
@@ -227,6 +238,10 @@ void BL2Hook::fname_init(FName* name, const wchar_t* str, int32_t number) const 
     reinterpret_cast<fname_init_func>(this->fname_init_ptr)(name, str, number, 1, 1);
 }
 
+#pragma endregion
+
+#pragma region FFrame::Step
+
 void BL2Hook::find_fframe_step(void) {
     static const Pattern FFRAME_STEP_SIG{"\x55\x8B\xEC\x8B\x41\x18\x0F\xB6\x10",
                                          "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
@@ -238,6 +253,8 @@ void BL2Hook::fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* par
     this->fframe_step_ptr(frame, obj, param);
 }
 
-}  // namespace unrealsdk::games
+#pragma endregion
+
+}  // namespace unrealsdk::game
 
 #endif

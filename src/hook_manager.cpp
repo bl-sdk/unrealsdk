@@ -107,7 +107,7 @@ bool call_function(UObject* obj, FFrame* stack, void* /*result*/, UFunction* fun
             continue;
         }
 
-        unrealsdk::game->fframe_step(stack, stack->Object,
+        unrealsdk::game::fframe_step(stack, stack->Object,
                                      frame == nullptr ? nullptr : frame + prop->Offset_Internal);
     }
 

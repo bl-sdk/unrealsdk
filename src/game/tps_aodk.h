@@ -1,14 +1,14 @@
-#ifndef GAMES_TPS_AODK_H
-#define GAMES_TPS_AODK_H
+#ifndef GAME_TPS_AODK_H
+#define GAME_TPS_AODK_H
 
 #include "pch.h"
 
 #if defined(UE3) && defined(ARCH_X86)
 
-#include "games/bl2.h"
-#include "games/game_hook.h"
+#include "game/bl2.h"
+#include "game/game_hook.h"
 
-namespace unrealsdk::games {
+namespace unrealsdk::game {
 
 class TPSAoDKHook : public BL2Hook {
    protected:
@@ -28,8 +28,8 @@ struct GameTraits<TPSAoDKHook> {
     }
 };
 
-}  // namespace unrealsdk::games
+}  // namespace unrealsdk::game
 
 #endif
 
-#endif /* GAMES_TPS_AODK_H */
+#endif /* GAME_TPS_AODK_H */

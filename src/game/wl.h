@@ -1,14 +1,14 @@
-#ifndef GAMES_WL_H
-#define GAMES_WL_H
+#ifndef GAME_WL_H
+#define GAME_WL_H
 
 #include "pch.h"
 
 #if defined(UE4) && defined(ARCH_X64)
 
-#include "games/bl3.h"
-#include "games/game_hook.h"
+#include "game/bl3.h"
+#include "game/game_hook.h"
 
-namespace unrealsdk::games {
+namespace unrealsdk::game {
 
 class WLHook : public BL3Hook {};
 
@@ -21,8 +21,8 @@ struct GameTraits<WLHook> {
     }
 };
 
-}  // namespace unrealsdk::games
+}  // namespace unrealsdk::game
 
 #endif
 
-#endif /* GAMES_WL_H */
+#endif /* GAME_WL_H */

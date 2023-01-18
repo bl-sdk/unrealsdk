@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "games/game_hook.h"
+#include "game/game_hook.h"
 #include "hook_manager.h"
 #include "unrealsdk.h"
 
@@ -9,7 +9,6 @@ namespace unrealsdk {
 // Keep an internal mutable var, but only expose a const reference
 static PathsList paths_internal;
 const PathsList& paths = paths_internal;
-// Note: `unrealsdk::game` is defined in `games/game_hook.cpp`, so it can do the same
 
 hook_manager::map hooks{};
 bool log_all_calls = false;
@@ -44,7 +43,7 @@ void init(HMODULE this_module) {
 
     update_paths(this_module);
 
-    games::hook();
+    game::init();
 }
 
 }  // namespace unrealsdk

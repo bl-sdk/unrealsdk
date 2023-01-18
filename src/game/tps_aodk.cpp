@@ -2,12 +2,12 @@
 
 #if defined(UE3) && defined(ARCH_X86)
 
-#include "games/tps_aodk.h"
+#include "game/tps_aodk.h"
 #include "sigscan.h"
 
 using namespace unrealsdk::sigscan;
 
-namespace unrealsdk::games {
+namespace unrealsdk::game {
 
 void TPSAoDKHook::find_gnames(void) {
     static const Pattern GNAMES_SIG{"\x00\x00\x00\x00\x8B\x04\xB1\x5E\x5D\xC3\x8B\x15",
@@ -32,6 +32,6 @@ void TPSAoDKHook::fname_init(unreal::FName* name, const wchar_t* str, int32_t nu
     reinterpret_cast<fname_init_func>(this->fname_init_ptr)(name, str, number, 1, 1, 0);
 }
 
-}  // namespace unrealsdk::games
+}  // namespace unrealsdk::game
 
 #endif

@@ -3,8 +3,6 @@
 
 #include "pch.h"
 
-#include "unreal/classes/uobject.h"
-
 #ifdef UE4
 #include "unreal/structs/gobjects.h"
 #else
@@ -12,6 +10,8 @@
 #endif
 
 namespace unrealsdk::unreal {
+
+class UObject;
 
 class GObjects {
    public:

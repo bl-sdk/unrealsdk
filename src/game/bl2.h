@@ -1,17 +1,18 @@
-#ifndef GAMES_BL2_H
-#define GAMES_BL2_H
+#ifndef GAME_BL2_H
+#define GAME_BL2_H
 
 #include "pch.h"
 
 #if defined(UE3) && defined(ARCH_X86)
 
-#include "games/game_hook.h"
+#include "game/game_hook.h"
 
-namespace unrealsdk::games {
+namespace unrealsdk::game {
 
 class BL2Hook : public GameHook {
    protected:
-    void hook_antidebug(void) override;
+    static void hook_antidebug(void);
+
     void hook_process_event(void) override;
     void hook_call_function(void) override;
     void find_gobjects(void) override;
@@ -31,6 +32,8 @@ class BL2Hook : public GameHook {
     fframe_step_func fframe_step_ptr;
 
    public:
+    void hook(void) override;
+
     void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) const override;
     void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const override;
     void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const override;
@@ -45,8 +48,8 @@ struct GameTraits<BL2Hook> {
     }
 };
 
-}  // namespace unrealsdk::games
+}  // namespace unrealsdk::game
 
 #endif
 
-#endif /* GAMES_BL2_H */
+#endif /* GAME_BL2_H */
