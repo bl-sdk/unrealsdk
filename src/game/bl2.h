@@ -16,6 +16,21 @@ class BL2Hook : public GameHook {
      */
     static void hook_antidebug(void);
 
+    /**
+     * @brief Hex edits out the protection on the set command.
+     */
+    static void hexedit_set_command(void);
+
+    /**
+     * @brief Hex edits out the `obj dump` array limit.
+     */
+    static void hexedit_array_limit(void);
+
+    /**
+     * @brief Hex edits out the `obj dump` array limit message.
+     */
+    virtual void hexedit_array_limit_message(void);
+
     void hook_process_event(void) override;
     void hook_call_function(void) override;
     void find_gobjects(void) override;

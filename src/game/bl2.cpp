@@ -22,6 +22,10 @@ void BL2Hook::hook(void) {
     hook_antidebug();
 
     GameHook::hook();
+
+    hexedit_set_command();
+    hexedit_array_limit();
+    hexedit_array_limit_message();
 }
 
 #pragma region AntiDebug
@@ -106,6 +110,63 @@ void BL2Hook::hook_antidebug(void) {
         if (status != MH_OK) {
             LOG(ERROR, "Failed to enable NtQueryInformationProcess hook: %x", status);
         }
+    }
+}
+
+#pragma endregion
+
+#pragma region Hex Edits
+
+void BL2Hook::hexedit_set_command(void) {
+    static const Pattern SET_COMMAND_SIG{"\x83\xC4\x0C\x85\xC0\x75\x1A\x6A\x01\x8D",
+                                         "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+    auto set_command = sigscan<uint8_t*>(SET_COMMAND_SIG);
+    if (set_command == nullptr) {
+        LOG(MISC, "Couldn't find set command signature, assuming already hex edited");
+    } else {
+        LOG(MISC, "Set Command: 0x%p", set_command);
+
+        // NOLINTBEGIN(readability-magic-numbers)
+        unlock_range(set_command + 5, 2);
+        set_command[5] = 0x90;
+        set_command[6] = 0x90;
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+void BL2Hook::hexedit_array_limit(void) {
+    static const Pattern ARRAY_LIMIT_SIG{"\x7E\x05\xB9\x64\x00\x00\x00\x3B\xF9\x0F\x8D",
+                                         "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+    auto array_limit = sigscan<uint8_t*>(ARRAY_LIMIT_SIG);
+    if (array_limit == nullptr) {
+        LOG(MISC, "Couldn't find array limit signature, assuming already hex edited");
+    } else {
+        LOG(MISC, "Array Limit: 0x%p", array_limit);
+
+        // NOLINTBEGIN(readability-magic-numbers)
+        unlock_range(array_limit, 1);
+        array_limit[0] = 0xEB;
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+void BL2Hook::hexedit_array_limit_message(void) {
+    static const Pattern ARRAY_LIMIT_MESSAGE{
+        "\x0F\x8C\x7B\x00\x00\x00\x8B\x8D\x9C\xEE\xFF\xFF\x83\xC0\x9D\x50",
+        "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+    auto array_limit_msg = sigscan<uint8_t*>(ARRAY_LIMIT_MESSAGE);
+    if (array_limit_msg == nullptr) {
+        LOG(MISC, "Couldn't find array limit message signature, assuming already hex edited");
+    } else {
+        LOG(MISC, "Array Limit Message: 0x%p", array_limit_msg);
+
+        // NOLINTBEGIN(readability-magic-numbers)
+        unlock_range(array_limit_msg + 1, 1);
+        array_limit_msg[1] = 0x85;
+        // NOLINTEND(readability-magic-numbers)
     }
 }
 

@@ -12,6 +12,7 @@ namespace unrealsdk::game {
 
 class TPSAoDKHook : public BL2Hook {
    protected:
+    void hexedit_array_limit_message(void) override;
     void find_gnames(void) override;
 
    public:
