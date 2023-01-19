@@ -61,11 +61,6 @@ void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param);
  */
 struct GameHook {
    protected:
-    /// Start address of the executable, to be used in sigscans
-    uintptr_t start;
-    /// Size of the executable, to be used in sigscans
-    size_t size;
-
     /**
      * @brief Hooks `UObject::ProcessEvent` and points it at the hook manager.
      */
@@ -97,7 +92,7 @@ struct GameHook {
     virtual void find_fframe_step(void) = 0;
 
    public:
-    GameHook(void);
+    GameHook(void) = default;
     virtual ~GameHook() = default;
 
     /**

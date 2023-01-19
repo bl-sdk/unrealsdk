@@ -11,6 +11,9 @@ namespace unrealsdk::game {
 
 class BL2Hook : public GameHook {
    protected:
+    /**
+     * @brief Hooks the antidebug functions and disables them.
+     */
     static void hook_antidebug(void);
 
     void hook_process_event(void) override;

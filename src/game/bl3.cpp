@@ -5,14 +5,14 @@
 #include "game/bl3.h"
 #include "game/game_hook.h"
 #include "hook_manager.h"
-#include "sigscan.h"
+#include "memory.h"
 #include "unreal/classes/ufunction.h"
 #include "unreal/structs/fframe.h"
 #include "unreal/structs/fname.h"
 #include "unreal/wrappers/gobjects.h"
 #include "unreal/wrappers/wrappedargs.h"
 
-using namespace unrealsdk::sigscan;
+using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
@@ -38,8 +38,7 @@ void BL3Hook::hook_process_event(void) {
         "\x40\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x81\xEC\xF0\x00\x00\x00",
         "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
 
-    scan_and_detour(this->start, this->size, PROCESS_EVENT_SIG, process_event_hook,
-                    &process_event_ptr, "ProcessEvent");
+    sigscan_and_detour(PROCESS_EVENT_SIG, process_event_hook, &process_event_ptr, "ProcessEvent");
 }
 
 #pragma endregion
@@ -66,8 +65,7 @@ void BL3Hook::hook_call_function(void) {
         "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
         "\xFF\xFF\xFF"};
 
-    scan_and_detour(this->start, this->size, CALL_FUNCTION_SIG, call_function_hook,
-                    &call_function_ptr, "CallFunction");
+    sigscan_and_detour(CALL_FUNCTION_SIG, call_function_hook, &call_function_ptr, "CallFunction");
 }
 
 #pragma endregion
@@ -79,7 +77,7 @@ void BL3Hook::find_gobjects(void) {
         "\x48\x8D\x0D\x00\x00\x00\x00\xC6\x05\x00\x00\x00\x00\x01\xE8\x00\x00\x00\x00\xC6\x05",
         "\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF", 3};
 
-    auto gobjects_instr = scan(start, size, GOBJECTS_SIG);
+    auto gobjects_instr = sigscan(GOBJECTS_SIG);
     auto gobjects_ptr = read_offset<GObjects::internal_type>(gobjects_instr);
     LOG(MISC, "GObjects: 0x%p", gobjects_ptr);
 
@@ -96,7 +94,7 @@ void BL3Hook::find_gnames(void) {
         "\x00\xFF",
         0xB};
 
-    auto gnames_instr = scan(start, size, GNAMES_SIG);
+    auto gnames_instr = sigscan(GNAMES_SIG);
     auto gnames_ptr = *read_offset<GNames::internal_type*>(gnames_instr);
     LOG(MISC, "GNames: 0x%p", gnames_ptr);
 
@@ -112,7 +110,7 @@ void BL3Hook::find_fname_init(void) {
         "\x40\x53\x48\x83\xEC\x30\xC7\x44\x24\x00\x00\x00\x00\x00",
         "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00"};
 
-    this->fname_init_ptr = scan<fname_init_func*>(start, size, FNAME_INIT_PATTERN);
+    this->fname_init_ptr = sigscan<fname_init_func*>(FNAME_INIT_PATTERN);
     LOG(MISC, "FName::Init: 0x%p", this->fname_init_ptr);
 }
 
@@ -131,7 +129,7 @@ void BL3Hook::find_fframe_step(void) {
     static const Pattern FFRAME_STEP_SIG{"\x48\x8B\x41\x20\x4C\x8B\xD2\x48\x8B\xD1",
                                          "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
 
-    this->fframe_step_ptr = scan<fframe_step_func*>(this->start, this->size, FFRAME_STEP_SIG);
+    this->fframe_step_ptr = sigscan<fframe_step_func*>(FFRAME_STEP_SIG);
     LOG(MISC, "FFrame::Step: 0x%p", this->fframe_step_ptr);
 }
 void BL3Hook::fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const {

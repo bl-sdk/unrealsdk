@@ -6,7 +6,7 @@
 #include "game/game_hook.h"
 #include "game/tps_aodk.h"
 #include "game/wl.h"
-#include "sigscan.h"
+#include "memory.h"
 #include "unrealsdk.h"
 
 namespace unrealsdk::game {
@@ -81,12 +81,6 @@ void init(void) {
 #pragma endregion
 
 #pragma region Hook Classes
-
-GameHook::GameHook() {
-    auto [start_val, size_val] = sigscan::get_exe_range();
-    this->start = start_val;
-    this->size = size_val;
-}
 
 void GameHook::hook() {
     this->hook_process_event();

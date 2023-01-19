@@ -3,9 +3,9 @@
 #if defined(UE3) && defined(ARCH_X86)
 
 #include "game/tps_aodk.h"
-#include "sigscan.h"
+#include "memory.h"
 
-using namespace unrealsdk::sigscan;
+using namespace unrealsdk::memory;
 
 namespace unrealsdk::game {
 
@@ -13,7 +13,7 @@ void TPSAoDKHook::find_gnames(void) {
     static const Pattern GNAMES_SIG{"\x00\x00\x00\x00\x8B\x04\xB1\x5E\x5D\xC3\x8B\x15",
                                     "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF", 0};
 
-    auto gnames_instr = scan(start, size, GNAMES_SIG);
+    auto gnames_instr = sigscan(GNAMES_SIG);
     auto gnames_ptr = read_offset<unreal::GNames::internal_type>(gnames_instr);
     LOG(MISC, "GNames: 0x%p", gnames_ptr);
 
