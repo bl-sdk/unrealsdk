@@ -23,9 +23,13 @@ using process_event_func = void(UObject* obj, UFunction* func, void* params);
 
 static process_event_func* process_event_ptr;
 void process_event_hook(UObject* obj, UFunction* func, void* params) {
-    WrappedArgs args{func, params};
-    if (hook_manager::process_event(obj, func, args)) {
-        return;
+    try {
+        WrappedArgs args{func, params};
+        if (hook_manager::process_event(obj, func, args)) {
+            return;
+        }
+    } catch (const std::exception &ex) {
+        LOG(ERROR, "An exception occured during the ProcessEvent hook: %s", ex.what());
     }
 
     process_event_ptr(obj, func, params);
@@ -49,8 +53,12 @@ using call_function_func = void(UObject* obj, FFrame* stack, void* result, UFunc
 
 static call_function_func* call_function_ptr;
 void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* func) {
-    if (hook_manager::call_function(obj, stack, result, func)) {
-        return;
+    try {
+        if (hook_manager::call_function(obj, stack, result, func)) {
+            return;
+        }
+    } catch (const std::exception &ex) {
+        LOG(ERROR, "An exception occured during the CallFunction hook: %s", ex.what());
     }
 
     call_function_ptr(obj, stack, result, func);

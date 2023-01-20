@@ -189,9 +189,13 @@ static void __fastcall process_event_hook(UObject* obj,
                                           UFunction* func,
                                           void* params,
                                           void* result) {
-    WrappedArgs args{func, params};
-    if (hook_manager::process_event(obj, func, args)) {
-        return;
+    try {
+        WrappedArgs args{func, params};
+        if (hook_manager::process_event(obj, func, args)) {
+            return;
+        }
+    } catch (const std::exception &ex) {
+        LOG(ERROR, "An exception occured during the ProcessEvent hook: %s", ex.what());
     }
 
     process_event_ptr(obj, edx, func, params, result);
@@ -228,8 +232,12 @@ static void __fastcall call_function_hook(UObject* obj,
                                           FFrame* stack,
                                           void* result,
                                           UFunction* func) {
-    if (hook_manager::call_function(obj, stack, result, func)) {
-        return;
+    try {
+        if (hook_manager::call_function(obj, stack, result, func)) {
+            return;
+        }
+    } catch (const std::exception &ex) {
+        LOG(ERROR, "An exception occured during the CallFunction hook: %s", ex.what());
     }
 
     call_function_ptr(obj, edx, stack, result, func);

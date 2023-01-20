@@ -24,8 +24,8 @@ static bool check_hook_exists_and_log_call(const std::string& source,
                                            const UObject* obj) {
     if (unrealsdk::log_all_calls) {
         LOG(HOOKS, "===== %s called =====", source.c_str());
-        LOG(HOOKS, "Function Name: %s", func_name.c_str());
-        LOG(HOOKS, "Object Name: %s", obj->get_path_name<char>().c_str());
+        LOG(HOOKS, "Function: %s", func_name.c_str());
+        LOG(HOOKS, "Object: %s", obj->get_path_name<char>().c_str());
     }
 
     return unrealsdk::hooks.count(func_name) != 0;
@@ -47,9 +47,13 @@ static bool run_hooks(UFunction* func,
                       WrappedArgs& args) {
     bool block = false;
     for (const auto& [_, hook_function] : unrealsdk::hooks[func_name]) {
-        if (hook_function(func, obj, args)) {
-            block = true;
-            // Deliberately don't break, so that other hook functions get a chance to run too
+        try {
+            if (hook_function(func, obj, args)) {
+                block = true;
+                // Deliberately don't break, so that other hook functions get a chance to run too
+            }
+        } catch (const std::exception &ex) {
+            LOG(ERROR, "An exception occured during hook processing: %s", ex.what());
         }
     }
 
