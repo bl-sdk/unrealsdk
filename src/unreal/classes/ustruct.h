@@ -30,8 +30,12 @@ class UStruct : public UField {
     int32_t MinAlignment;
     /* Script bytecode associated with this object */
     TArray<uint8_t> Script;
+
+   public:
     /* In memory only: Linked list of properties from most-derived to base */
     UProperty* PropertyLink;
+
+   private:
     /* In memory only: Linked list of object reference properties from most-derived to base */
     UProperty* RefLink;
     /* In memory only: Linked list of properties requiring destruction. Note this does not include
@@ -52,18 +56,60 @@ class UStruct : public UField {
 
    private:
     uint16_t PropertySize;
-    uint8_t UnknownData01[0x2E];
+    uint8_t UnknownData01[0x1A];
+
+   public:
+    UProperty* PropertyLink;
+
+   private:
+    uint8_t UnknownData02[0x10];
 
     TArray<UObject*> ScriptObjectReferences;
 #endif
 
    public:
+    struct PropertyIterator {
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = UProperty*;
+        using pointer = UProperty**;
+        using reference = UProperty*;
+
+       private:
+        UProperty* prop;
+
+       public:
+        PropertyIterator(UProperty* prop);
+
+        reference operator*() const;
+
+        PropertyIterator& operator++();
+        PropertyIterator operator++(int);
+
+        bool operator==(const PropertyIterator& rhs) const;
+        bool operator!=(const PropertyIterator& rhs) const;
+    };
+
     /**
      * @brief Get the actual size of the described structure, including alignment.
      *
      * @return The size which must be allocated
      */
     [[nodiscard]] size_t get_struct_size(void) const;
+
+    /**
+     * @brief Gets an iterator to the start of this struct's properties.
+     *
+     * @return The iterator.
+     */
+    [[nodiscard]] PropertyIterator begin(void) const;
+
+    /**
+     * @brief Gets an iterator to the end of this struct's properties.
+     *
+     * @return The iterator.
+     */
+    [[nodiscard]] static PropertyIterator end(void);
 
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 };
