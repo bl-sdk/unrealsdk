@@ -39,6 +39,14 @@ using std::uint32_t;
 using std::uint64_t;
 using std::uint8_t;
 
+static_assert(sizeof(float) == sizeof(uint32_t), "float is not 32-bit");
+static_assert(sizeof(double) == sizeof(uint64_t), "double is not 64-bit");
+using float32_t = float;
+using float64_t = double;
+#if __cplusplus >= 202002L
+#warning Replace float32/64 with standard versions
+#endif
+
 #ifdef ARCH_X64
 static_assert(sizeof(uintptr_t) == sizeof(uint64_t),
               "Architecture define doesn't align with pointer size");

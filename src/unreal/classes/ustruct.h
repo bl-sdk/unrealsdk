@@ -4,6 +4,7 @@
 #include "unreal/classes/ufield.h"
 #include "unreal/classes/uproperty.h"
 #include "unreal/structs/tarray.h"
+#include "unreal/wrappers/prop_traits.h"
 
 namespace unrealsdk::unreal {
 
@@ -110,6 +111,17 @@ class UStruct : public UField {
      * @return The iterator.
      */
     [[nodiscard]] static PropertyIterator end(void);
+
+    /**
+     * @brief Finds a child property by name, and validates that it's of the expected type.
+     * @note Throws exceptions if the child is not found of of an invalid type.
+     *
+     * @tparam T The expected property type.
+     * @param name The name of the property.
+     * @return The found property object.
+     */
+    template <typename T>
+    [[nodiscard]] T* find_and_validate(const FName& name) const;
 
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 };
