@@ -10,7 +10,7 @@
 #include "unreal/classes/uobject.h"
 #include "unreal/structs/fframe.h"
 #include "unreal/wrappers/gobjects.h"
-#include "unreal/wrappers/wrappedargs.h"
+#include "unreal/wrappers/wrapped_args.h"
 
 using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;

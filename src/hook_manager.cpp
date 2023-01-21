@@ -4,7 +4,7 @@
 #include "unreal/classes/ufunction.h"
 #include "unreal/classes/uobject.h"
 #include "unreal/structs/fframe.h"
-#include "unreal/wrappers/wrappedargs.h"
+#include "unreal/wrappers/wrapped_args.h"
 #include "unrealsdk.h"
 
 using namespace unrealsdk::unreal;
