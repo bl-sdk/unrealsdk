@@ -1,40 +1,49 @@
 #include "pch.h"
 
+#include "unreal/classes/ufield.h"
 #include "unreal/classes/ustruct.h"
 
 namespace unrealsdk::unreal {
 
-
 #pragma region Iterator
 
-UStruct::PropertyIterator::PropertyIterator(UProperty* prop) : prop(prop) {}
+UStruct::FieldIterator::FieldIterator(const UStruct* this_struct, UField* field)
+    : this_struct(this_struct), field(field) {}
 
-UStruct::PropertyIterator::reference UStruct::PropertyIterator::operator*() const {
-    return prop;
+UStruct::FieldIterator::reference UStruct::FieldIterator::operator*() const {
+    return this->field;
 }
 
-UStruct::PropertyIterator& UStruct::PropertyIterator::operator++() {
-    prop = prop->PropertyLinkNext;
+UStruct::FieldIterator& UStruct::FieldIterator::operator++() {
+    this->field = this->field->Next;
+    while (this->field == nullptr && this->this_struct != nullptr) {
+        this->this_struct = this->this_struct->SuperField;
+
+        if (this->this_struct != nullptr) {
+            this->field = this->this_struct->Children;
+        }
+    }
+
     return *this;
 }
-UStruct::PropertyIterator UStruct::PropertyIterator::operator++(int) {
+UStruct::FieldIterator UStruct::FieldIterator::operator++(int) {
     auto tmp = *this;
     ++(*this);
     return tmp;
 }
 
-bool UStruct::PropertyIterator::operator==(const UStruct::PropertyIterator& rhs) const {
-    return this->prop == rhs.prop;
+bool UStruct::FieldIterator::operator==(const UStruct::FieldIterator& rhs) const {
+    return this->this_struct == rhs.this_struct && this->field == rhs.field;
 };
-bool UStruct::PropertyIterator::operator!=(const UStruct::PropertyIterator& rhs) const {
+bool UStruct::FieldIterator::operator!=(const UStruct::FieldIterator& rhs) const {
     return !(*this == rhs);
 };
 
-UStruct::PropertyIterator UStruct::begin(void) const {
-    return {this->PropertyLink};
+UStruct::FieldIterator UStruct::begin(void) const {
+    return {this, this->Children};
 }
-UStruct::PropertyIterator UStruct::end(void) {
-    return {nullptr};
+UStruct::FieldIterator UStruct::end(void) {
+    return {nullptr, nullptr};
 }
 
 #pragma endregion
@@ -45,6 +54,16 @@ size_t UStruct::get_struct_size(void) const {
 #else
     return this->PropertySize;
 #endif
+}
+
+UField* UStruct::find(const FName& name) const {
+    for (auto field : *this) {
+        if (field->Name == name) {
+            return field;
+        }
+    }
+
+    throw std::invalid_argument("Couldn't find property " + (std::string)name);
 }
 
 }  // namespace unrealsdk::unreal

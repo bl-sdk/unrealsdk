@@ -4,7 +4,6 @@
 #include "unreal/classes/ufield.h"
 #include "unreal/classes/uproperty.h"
 #include "unreal/structs/tarray.h"
-#include "unreal/wrappers/prop_traits.h"
 
 namespace unrealsdk::unreal {
 
@@ -69,26 +68,27 @@ class UStruct : public UField {
 #endif
 
    public:
-    struct PropertyIterator {
+    struct FieldIterator {
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = UProperty*;
-        using pointer = UProperty**;
-        using reference = UProperty*;
+        using value_type = UField*;
+        using pointer = UField**;
+        using reference = UField*;
 
        private:
-        UProperty* prop;
+        const UStruct* this_struct;
+        UField* field;
 
        public:
-        PropertyIterator(UProperty* prop);
+        FieldIterator(const UStruct* this_struct, UField* field);
 
         reference operator*() const;
 
-        PropertyIterator& operator++();
-        PropertyIterator operator++(int);
+        FieldIterator& operator++();
+        FieldIterator operator++(int);
 
-        bool operator==(const PropertyIterator& rhs) const;
-        bool operator!=(const PropertyIterator& rhs) const;
+        bool operator==(const FieldIterator& rhs) const;
+        bool operator!=(const FieldIterator& rhs) const;
     };
 
     /**
@@ -103,22 +103,31 @@ class UStruct : public UField {
      *
      * @return The iterator.
      */
-    [[nodiscard]] PropertyIterator begin(void) const;
+    [[nodiscard]] FieldIterator begin(void) const;
 
     /**
      * @brief Gets an iterator to the end of this struct's properties.
      *
      * @return The iterator.
      */
-    [[nodiscard]] static PropertyIterator end(void);
+    [[nodiscard]] static FieldIterator end(void);
 
     /**
-     * @brief Finds a child property by name, and validates that it's of the expected type.
-     * @note Throws exceptions if the child is not found of of an invalid type.
+     * @brief Finds a child field by name.
+     * @note Throws an exception if the child is not found.
      *
-     * @tparam T The expected property type.
-     * @param name The name of the property.
-     * @return The found property object.
+     * @param name The name of the field.
+     * @return The found field object.
+     */
+    [[nodiscard]] UField* find(const FName& name) const;
+
+    /**
+     * @brief Finds a child field by name, and validates that it's of the expected type.
+     * @note Throws exceptions if the child is not found, or if it's of an invalid type.
+     *
+     * @tparam T The expected field type.
+     * @param name The name of the field.
+     * @return The found field object.
      */
     template <typename T>
     [[nodiscard]] T* find_and_validate(const FName& name) const;

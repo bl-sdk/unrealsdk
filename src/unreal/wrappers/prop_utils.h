@@ -56,21 +56,14 @@ void set_property(T* prop, size_t idx, uintptr_t base_addr, typename PropTraits<
 
 template <typename T>
 [[nodiscard]] T* UStruct::find_and_validate(const FName& name) const {
-    const auto CLASS = FName{PropTraits<T>::CLASS};
+    const auto EXPECTED_CLASS = FName{PropTraits<T>::CLASS};
 
-    for (auto prop : *this) {
-        if (prop->Name != name) {
-            continue;
-        }
-
-        auto cls_fname = reinterpret_cast<UObject*>(prop->Class)->Name;
-        if (cls_fname != CLASS) {
-            throw std::invalid_argument("Property was of invalid type " + (std::string)cls_fname);
-        }
-        return reinterpret_cast<T*>(prop);
+    auto field = this->find(name);
+    auto field_class = field->Class->Name;
+    if (field_class != EXPECTED_CLASS) {
+        throw std::invalid_argument("Property was of invalid type " + (std::string)field_class);
     }
-
-    throw std::invalid_argument("Couldn't find property " + (std::string)name);
+    return reinterpret_cast<T*>(field);
 }
 
 template <typename T>
