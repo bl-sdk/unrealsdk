@@ -1,5 +1,5 @@
-#ifndef UNREAL_CLASSES_PROPERTIES_NUMERIC_H
-#define UNREAL_CLASSES_PROPERTIES_NUMERIC_H
+#ifndef UNREAL_CLASSES_PROPERTIES_COPYABLE_PROPERTY_H
+#define UNREAL_CLASSES_PROPERTIES_COPYABLE_PROPERTY_H
 
 #include "pch.h"
 
@@ -7,14 +7,8 @@
 #include "unreal/wrappers/prop_traits.h"
 
 /*
-This file describes all properties which can be read/written by a simple copy, and whoose classes
- don't need to add any extra fields to `UProperty`.
-This isn't always the same as what you'd intuitively call a value vs reference type, for example:
-
-`UObjectProperty` is copyable, even though it's a pointer, since we can copy the pointer (by value)
- to have our own reference.
-`UStructProperty` is not copyable, even though it's a value type, since we need to wrap it into a
- `WrappedStruct` to be able to access it's inner fields.
+This file describes all properties which can be read/written by a simple copy, and whose classes
+ don't need to add any extra fields to `UProperty` (or at least not any we care about).
 */
 
 namespace unrealsdk::unreal {
@@ -31,8 +25,12 @@ struct PropTraits<CopyableProperty<T>> {
     using Value = T;
     static const wchar_t* const CLASS;
 
-    static Value get(uintptr_t addr) { return *reinterpret_cast<Value*>(addr); }
-    static void set(uintptr_t addr, Value value) { *reinterpret_cast<Value*>(addr) = value; }
+    static Value get(CopyableProperty<T>* /*prop*/, uintptr_t addr) {
+        return *reinterpret_cast<Value*>(addr);
+    }
+    static void set(CopyableProperty<T>* /*prop*/, uintptr_t addr, Value value) {
+        *reinterpret_cast<Value*>(addr) = value;
+    }
 };
 
 using UInt8Property = CopyableProperty<int8_t>;
@@ -48,8 +46,6 @@ using UUInt64Property = CopyableProperty<uint64_t>;
 using UFloatProperty = CopyableProperty<float32_t>;
 using UDoubleProperty = CopyableProperty<float64_t>;
 
-using UObjectProperty = CopyableProperty<UObject*>;
-using UClassProperty = CopyableProperty<UClass*>;
 using UNameProperty = CopyableProperty<FName>;
 
 template <>
@@ -76,10 +72,6 @@ template <>
 inline const wchar_t* const PropTraits<UDoubleProperty>::CLASS = L"DoubleProperty";
 
 template <>
-inline const wchar_t* const PropTraits<UObjectProperty>::CLASS = L"ObjectProperty";
-template <>
-inline const wchar_t* const PropTraits<UClassProperty>::CLASS = L"ClassProperty";
-template <>
 inline const wchar_t* const PropTraits<UNameProperty>::CLASS = L"NameProperty";
 
 #if defined(_MSC_VER) && defined(ARCH_X86)
@@ -88,4 +80,4 @@ inline const wchar_t* const PropTraits<UNameProperty>::CLASS = L"NameProperty";
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_CLASSES_PROPERTIES_NUMERIC_H */
+#endif /* UNREAL_CLASSES_PROPERTIES_COPYABLE_PROPERTY_H */

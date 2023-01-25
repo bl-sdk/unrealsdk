@@ -34,7 +34,7 @@ class WrappedStruct {
      */
     template <typename T>
     void set(const FName& name, typename PropTraits<T>::Value value) {
-        this->set<T>(name, value, 0);
+        this->set<T>(name, 0, value);
     }
     template <typename T>
     void set(const FName& name, size_t idx, typename PropTraits<T>::Value value);

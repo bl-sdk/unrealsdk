@@ -29,7 +29,7 @@ template <typename T>
     if (idx > prop->ArrayDim) {
         throw std::out_of_range("Property index out of range");
     }
-    return PropTraits<T>::get(base_addr + prop->Offset_Internal + (idx * prop->ElementSize));
+    return PropTraits<T>::get(prop, base_addr + prop->Offset_Internal + (idx * prop->ElementSize));
 }
 
 /**
@@ -46,7 +46,7 @@ void set_property(T* prop, size_t idx, uintptr_t base_addr, typename PropTraits<
     if (idx > prop->ArrayDim) {
         throw std::out_of_range("Property index out of range");
     }
-    return PropTraits<T>::set(base_addr + prop->Offset_Internal + (idx * prop->ElementSize), value);
+    return PropTraits<T>::set(prop, base_addr + prop->Offset_Internal + (idx * prop->ElementSize), value);
 }
 
 }  // namespace

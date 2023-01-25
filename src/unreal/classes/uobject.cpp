@@ -51,4 +51,14 @@ std::wstring UObject::get_path_name(void) const {
     return stream.str();
 }
 
+bool UObject::is_instance(UClass* cls) const {
+    for (const UStruct* obj_cls = this->Class; obj_cls != nullptr; obj_cls = obj_cls->SuperField) {
+        if (obj_cls == cls) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 }  // namespace unrealsdk::unreal

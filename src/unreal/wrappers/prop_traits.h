@@ -19,18 +19,20 @@ struct PropTraits {
     /**
      * @brief Gets the value of the described property type from the given address.
      *
+     * @param prop The property being get.
      * @param addr The address to read the value from.
      * @return The property's value.
      */
-    [[nodiscard]] static Value get(uintptr_t addr);
+    [[nodiscard]] static Value get(T* prop, uintptr_t addr);
 
     /**
      * @brief Sets the value of the described property type at the given address.
      *
+     * @param prop The property being set.
      * @param addr The address to write the value to.
      * @param value The property's new value.
      */
-    static void set(uintptr_t addr, Value value);
+    static void set(T* prop, uintptr_t addr, Value value);
 };
 
 };  // namespace unrealsdk::unreal

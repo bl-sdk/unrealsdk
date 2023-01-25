@@ -83,7 +83,7 @@ class UObject {
      */
     template <typename T>
     void set(const FName& name, typename PropTraits<T>::Value value) {
-        this->set<T>(name, value, 0);
+        this->set<T>(name, 0, value);
     }
     template <typename T>
     void set(const FName& name, size_t idx, typename PropTraits<T>::Value value);
@@ -96,6 +96,14 @@ class UObject {
      */
     template <typename T>
     [[nodiscard]] std::basic_string<T> get_path_name(void) const;
+
+    /**
+     * @brief Checks if this object is an instance of a class.
+     *
+     * @param cls The class to check.
+     * @return True if this object is an instance of the given class.
+     */
+    bool is_instance(UClass* cls) const;
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)
