@@ -1,6 +1,8 @@
 #ifndef UNREAL_CLASSES_UPROPERTY_H
 #define UNREAL_CLASSES_UPROPERTY_H
 
+#include "pch.h"
+
 #include "unreal/classes/ufield.h"
 
 namespace unrealsdk::unreal {
@@ -8,6 +10,24 @@ namespace unrealsdk::unreal {
 #if defined(_MSC_VER) && defined(ARCH_X86)
 #pragma pack(push, 0x4)
 #endif
+
+/*
+There is a massive issue with `UProperty`.
+
+We've observed that it's 0x80 bytes big in BL2, but it's only 0x74 in TPS
+These are both 32-bit UE3 games, so we want to support them both from the same dll.
+
+The extra 0xC bytes are placed right at the end, which makes accesses within `UProperty` itself
+ simple enough, especially since we don't care about whatever fields they are.
+The issue is subclasses. We very much do care about fields on subclasses, which will be placed
+ after the variable offset.
+Luckily, we can read the size off of `Core.Property` at runtime, and do some maths to work out the
+ actual offsets of the fields we want, using the helper function `read_field`.
+
+This means:
+- All accesses to UProperty subclasses' fields **MUST** be done through `read_field`.
+- All accesses to base UProperty fields **MUST** be direct, and **MUST NOT** use `read_field`
+*/
 
 class UProperty : public UField {
    public:
@@ -55,7 +75,38 @@ class UProperty : public UField {
 
    private:
     uint8_t UnknownData01[0x18];
+
+    /**
+     * @brief Gets the size of this class.
+     *
+     * @return The size of this class.
+     */
+    [[nodiscard]] static size_t class_size(void);
+
 #endif
+   public:
+    /**
+     * @brief Reads a field on a UProperty subclass, taking into account it's variable length.
+     *
+     * @tparam PropertyType The subclass of UProperty to read the field off of (should be picked up
+     *                      automatically).
+     * @tparam FieldType The type of the field being read (should be picked up automatically).
+     * @param prop The property to read the field off of.
+     * @param field Pointer to member of the field to read.
+     * @return The field's value.
+     */
+    template <typename PropertyType,
+              typename FieldType,
+              typename = std::enable_if_t<std::is_base_of_v<UProperty, PropertyType>>>
+    FieldType read_field(FieldType PropertyType::*field) {
+#ifdef UE4
+        return reinterpret_cast<PropertyType*>(this)->*field;
+#else
+        return *reinterpret_cast<FieldType*>(
+            reinterpret_cast<uintptr_t>(&(reinterpret_cast<PropertyType*>(this)->*field))
+            - sizeof(UProperty) + UProperty::class_size());
+#endif
+    }
 
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 };

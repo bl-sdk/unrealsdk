@@ -16,7 +16,9 @@ class UObject;
 #endif
 
 class UObjectProperty : public UProperty {
-   public:
+   private:
+    friend PropTraits<UObjectProperty>;
+
     // NOLINTNEXTLINE(readability-identifier-naming)
     UClass* PropertyClass;
 };

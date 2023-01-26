@@ -16,7 +16,9 @@ class UScriptStruct;
 #endif
 
 class UStructProperty : public UProperty {
-   public:
+   private:
+    friend PropTraits<UStructProperty>;
+
     // NOLINTNEXTLINE(readability-identifier-naming)
     UScriptStruct* Struct;
 };

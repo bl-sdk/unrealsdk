@@ -11,9 +11,10 @@ PropTraits<UObjectProperty>::Value PropTraits<UObjectProperty>::get(UObjectPrope
 }
 
 void PropTraits<UObjectProperty>::set(UObjectProperty* prop, uintptr_t addr, Value value) {
-    if (!value->is_instance(prop->PropertyClass)) {
-        throw std::runtime_error("Object is not instance of "
-                                 + (std::string)prop->PropertyClass->Name);
+    auto prop_cls = prop->read_field(&UObjectProperty::PropertyClass);
+
+    if (!value->is_instance(prop_cls)) {
+        throw std::runtime_error("Object is not instance of " + (std::string)prop_cls->Name);
     }
     *reinterpret_cast<Value*>(addr) = value;
 }
