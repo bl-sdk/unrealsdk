@@ -2,10 +2,11 @@
 
 #include "unreal/classes/ufield.h"
 #include "unreal/classes/ustruct.h"
+#include "utils.h"
 
 namespace unrealsdk::unreal {
 
-#pragma region Iterator
+#pragma region Field Iterator
 
 UStruct::FieldIterator::FieldIterator(const UStruct* this_struct, UField* field)
     : this_struct(this_struct), field(field) {}
@@ -15,7 +16,9 @@ UStruct::FieldIterator::reference UStruct::FieldIterator::operator*() const {
 }
 
 UStruct::FieldIterator& UStruct::FieldIterator::operator++() {
-    this->field = this->field->Next;
+    if (this->field != nullptr) {
+        this->field = this->field->Next;
+    }
     while (this->field == nullptr && this->this_struct != nullptr) {
         this->this_struct = this->this_struct->SuperField;
 
@@ -39,11 +42,47 @@ bool UStruct::FieldIterator::operator!=(const UStruct::FieldIterator& rhs) const
     return !(*this == rhs);
 };
 
-UStruct::FieldIterator UStruct::begin(void) const {
-    return {this, this->Children};
+utils::IteratorProxy<UStruct::FieldIterator> UStruct::fields(void) const {
+    FieldIterator begin{this, this->Children};
+
+    // If we start out pointing at null (because this struct has no direct children), increment once
+    //  to find the actual first field
+    if (*begin == nullptr) {
+        begin++;
+    }
+
+    return {begin, {nullptr, nullptr}};
 }
-UStruct::FieldIterator UStruct::end(void) {
-    return {nullptr, nullptr};
+
+#pragma endregion
+
+#pragma region Property Iterator
+
+UStruct::PropertyIterator::PropertyIterator(UProperty* prop) : prop(prop) {}
+
+UStruct::PropertyIterator::reference UStruct::PropertyIterator::operator*() const {
+    return prop;
+}
+
+UStruct::PropertyIterator& UStruct::PropertyIterator::operator++() {
+    prop = prop->PropertyLinkNext;
+    return *this;
+}
+UStruct::PropertyIterator UStruct::PropertyIterator::operator++(int) {
+    auto tmp = *this;
+    ++(*this);
+    return tmp;
+}
+
+bool UStruct::PropertyIterator::operator==(const UStruct::PropertyIterator& rhs) const {
+    return this->prop == rhs.prop;
+};
+bool UStruct::PropertyIterator::operator!=(const UStruct::PropertyIterator& rhs) const {
+    return !(*this == rhs);
+};
+
+utils::IteratorProxy<UStruct::PropertyIterator> UStruct::properties(void) const {
+    return {{this->PropertyLink}, {nullptr}};
 }
 
 #pragma endregion
@@ -57,7 +96,7 @@ size_t UStruct::get_struct_size(void) const {
 }
 
 UField* UStruct::find(const FName& name) const {
-    for (auto field : *this) {
+    for (auto field : this->fields()) {
         if (field->Name == name) {
             return field;
         }

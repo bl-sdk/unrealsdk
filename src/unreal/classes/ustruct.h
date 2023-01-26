@@ -4,6 +4,7 @@
 #include "unreal/classes/ufield.h"
 #include "unreal/classes/uproperty.h"
 #include "unreal/structs/tarray.h"
+#include "utils.h"
 
 namespace unrealsdk::unreal {
 
@@ -91,26 +92,48 @@ class UStruct : public UField {
         bool operator!=(const FieldIterator& rhs) const;
     };
 
+    struct PropertyIterator {
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = UProperty*;
+        using pointer = UProperty**;
+        using reference = UProperty*;
+
+       private:
+        UProperty* prop;
+
+       public:
+        PropertyIterator(UProperty* prop);
+
+        reference operator*() const;
+
+        PropertyIterator& operator++();
+        PropertyIterator operator++(int);
+
+        bool operator==(const PropertyIterator& rhs) const;
+        bool operator!=(const PropertyIterator& rhs) const;
+    };
+
+    /**
+     * @brief Gets an iterator over this struct's fields.
+     *
+     * @return The iterator.
+     */
+    [[nodiscard]] utils::IteratorProxy<FieldIterator> fields(void) const;
+
+    /**
+     * @brief Gets an iterator over this struct's properties.
+     *
+     * @return The iterator.
+     */
+    [[nodiscard]] utils::IteratorProxy<PropertyIterator> properties(void) const;
+
     /**
      * @brief Get the actual size of the described structure, including alignment.
      *
      * @return The size which must be allocated
      */
     [[nodiscard]] size_t get_struct_size(void) const;
-
-    /**
-     * @brief Gets an iterator to the start of this struct's properties.
-     *
-     * @return The iterator.
-     */
-    [[nodiscard]] FieldIterator begin(void) const;
-
-    /**
-     * @brief Gets an iterator to the end of this struct's properties.
-     *
-     * @return The iterator.
-     */
-    [[nodiscard]] static FieldIterator end(void);
 
     /**
      * @brief Finds a child field by name.
