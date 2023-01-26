@@ -1,5 +1,4 @@
 #include "pch.h"
-#include <stdexcept>
 
 #include "unreal/classes/properties/uobjectproperty.h"
 #include "unreal/classes/uclass.h"

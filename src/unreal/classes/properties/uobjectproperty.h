@@ -3,11 +3,13 @@
 
 #include "pch.h"
 
-#include "unreal/classes/uobject.h"
 #include "unreal/classes/uproperty.h"
 #include "unreal/wrappers/prop_traits.h"
 
 namespace unrealsdk::unreal {
+
+class UClass;
+class UObject;
 
 #if defined(_MSC_VER) && defined(ARCH_X86)
 #pragma pack(push, 0x4)
