@@ -9,6 +9,7 @@ constexpr env_var_key CONSOLE_VERBOSITY = "UNREALSDK_CONSOLE_LOG_LEVEL";
 constexpr env_var_key FILE_VERBOSITY = "UNREALSDK_FILE_LOG_LEVEL";
 constexpr env_var_key GAME_OVERRIDE = "UNREALSDK_GAME_OVERRIDE";
 constexpr env_var_key UPROPERTY_SIZE = "UNREALSDK_UPROPERTY_SIZE";
+constexpr env_var_key ALLOC_ALIGNMENT = "UNREALSDK_ALLOC_ALIGNMENT";
 
 /**
  * @brief Checks if an enviroment variable is defined.

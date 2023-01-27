@@ -13,6 +13,7 @@ Enviroment Variable           | Usage
 `UNREALSDK_FILE_LOG_LEVEL`    | Changes the default file logging level. May use either the level names or their numerical values.
 `UNREALSDK_GAME_OVERRIDE`     | Override the executable name used for game detection.
 `UNREALSDK_UPROPERTY_SIZE`    | Changes the size the `UProperty` class is assumed to have.
+`UNREALSDK_ALLOC_ALIGNMENT`   | Changes the alignment used when calling the unreal memory allocation functions.
 
 # Developing
 To get started developing:

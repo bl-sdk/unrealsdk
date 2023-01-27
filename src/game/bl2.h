@@ -37,8 +37,8 @@ class BL2Hook : public GameHook {
     void find_gnames(void) override;
     void find_fname_init(void) override;
     void find_fframe_step(void) override;
+    void find_gmalloc(void) override;
 
-    /// Pointer to FName::Init
     // Deliberately storing in a void pointer because the type changes in bl2/tps
     void* fname_init_ptr;
 
@@ -46,8 +46,20 @@ class BL2Hook : public GameHook {
     typedef void(__thiscall* fframe_step_func)(unreal::FFrame* stack,
                                                unreal::UObject* obj,
                                                void* param);
-    /// Pointer to FFrame::Step
     fframe_step_func fframe_step_ptr;
+
+    struct FMalloc;
+    struct FMallocVFtable {
+        void* exec;
+        void*(__thiscall* malloc)(FMalloc* self, uint32_t len, uint32_t align);
+        void*(__thiscall* realloc)(FMalloc* self, void* original, uint32_t len, uint32_t align);
+        void*(__thiscall* free)(FMalloc* self, void* data);
+    };
+    struct FMalloc {
+        FMallocVFtable* vftable;
+    };
+
+    FMalloc* gmalloc;
 
    public:
     void hook(void) override;
@@ -55,6 +67,9 @@ class BL2Hook : public GameHook {
     void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) const override;
     void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const override;
     void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const override;
+    [[nodiscard]] void* malloc(size_t len) const override;
+    [[nodiscard]] void* realloc(void* original, size_t len) const override;
+    void free(void* data) const override;
 };
 
 template <>

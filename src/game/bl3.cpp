@@ -28,7 +28,7 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
         if (hook_manager::process_event(obj, func, args)) {
             return;
         }
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
         LOG(ERROR, "An exception occured during the ProcessEvent hook: %s", ex.what());
     }
 
@@ -57,7 +57,7 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
         if (hook_manager::call_function(obj, stack, result, func)) {
             return;
         }
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
         LOG(ERROR, "An exception occured during the CallFunction hook: %s", ex.what());
     }
 
@@ -142,6 +142,45 @@ void BL3Hook::find_fframe_step(void) {
 }
 void BL3Hook::fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const {
     this->fframe_step_ptr(frame, obj, param);
+}
+
+#pragma endregion
+
+#pragma region FMemory
+
+void BL3Hook::find_gmalloc(void) {
+    static const Pattern MALLOC_PATTERN{
+        "\x48\x89\x5C\x24\x00\x57\x48\x83\xEC\x20\x48\x8B\xF9\x8B\xDA\x48\x8B\x0D\x00\x00\x00\x00"
+        "\x48\x85\xC9",
+        "\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00"
+        "\xFF\xFF\xFF"};
+
+    static const Pattern REALLOC_PATTERN{
+        "\x48\x89\x5C\x24\x00\x48\x89\x74\x24\x00\x57\x48\x83\xEC\x20\x48\x8B\xF1\x41\x8B\xD8\x48"
+        "\x8B\x0D\x00\x00\x00\x00\x48\x8B\xFA",
+        "\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+        "\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF"};
+
+    static const Pattern FREE_PATTERN{
+        "\x48\x85\xC9\x74\x00\x53\x48\x83\xEC\x20\x48\x8B\xD9\x48\x8B\x0D\x00\x00\x00\x00",
+        "\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00"};
+
+    this->fmemory_malloc_ptr = sigscan<fmemory_malloc_func*>(MALLOC_PATTERN);
+    this->fmemory_realloc_ptr = sigscan<fmemory_realloc_func*>(REALLOC_PATTERN);
+    this->fmemory_free_ptr = sigscan<fmemory_free_func*>(FREE_PATTERN);
+
+    LOG(MISC, "FMemory::Malloc: 0x%p", this->fmemory_malloc_ptr);
+    LOG(MISC, "FMemory::Realloc: 0x%p", this->fmemory_realloc_ptr);
+    LOG(MISC, "FMemory::Free: 0x%p", this->fmemory_free_ptr);
+}
+void* BL3Hook::malloc(size_t len) const {
+    return this->fmemory_malloc_ptr(len, 0);
+}
+void* BL3Hook::realloc(void* original, size_t len) const {
+    return this->fmemory_realloc_ptr(original, len, 0);
+}
+void BL3Hook::free(void* data) const {
+    this->fmemory_free_ptr(data);
 }
 
 #pragma endregion

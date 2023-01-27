@@ -30,6 +30,15 @@ void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) {
 void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) {
     hook_instance->fframe_step(frame, obj, param);
 }
+void* malloc(size_t len) {
+    return hook_instance->malloc(len);
+}
+void* realloc(void* original, size_t len) {
+    return hook_instance->realloc(original, len);
+}
+void free(void* data) {
+    return hook_instance->free(data);
+}
 
 #pragma endregion
 
@@ -89,6 +98,21 @@ void GameHook::hook() {
     this->find_gnames();
     this->find_fname_init();
     this->find_fframe_step();
+    this->find_gmalloc();
+}
+
+uint32_t GameHook::get_alignment(size_t len) {
+    static auto override = env::get_numeric<uint32_t>(env::ALLOC_ALIGNMENT);
+    if (override != 0) {
+        return override;
+    }
+
+    // Not all UE versions support alignment 0 = auto, so reimplement it ourselves
+    static const constexpr auto LARGE_ALIGNMENT_THRESHOLD = 16;
+    static const constexpr auto LARGE_ALIGNMENT = 16;
+    static const constexpr auto SMALL_ALIGNMENT = 8;
+
+    return len >= LARGE_ALIGNMENT_THRESHOLD ? LARGE_ALIGNMENT : SMALL_ALIGNMENT;
 }
 
 #pragma endregion

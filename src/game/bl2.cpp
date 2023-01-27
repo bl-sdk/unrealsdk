@@ -194,7 +194,7 @@ static void __fastcall process_event_hook(UObject* obj,
         if (hook_manager::process_event(obj, func, args)) {
             return;
         }
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
         LOG(ERROR, "An exception occured during the ProcessEvent hook: %s", ex.what());
     }
 
@@ -236,7 +236,7 @@ static void __fastcall call_function_hook(UObject* obj,
         if (hook_manager::call_function(obj, stack, result, func)) {
             return;
         }
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
         LOG(ERROR, "An exception occured during the CallFunction hook: %s", ex.what());
     }
 
@@ -320,6 +320,28 @@ void BL2Hook::find_fframe_step(void) {
 }
 void BL2Hook::fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const {
     this->fframe_step_ptr(frame, obj, param);
+}
+
+#pragma endregion
+
+#pragma region FMemory
+
+void BL2Hook::find_gmalloc(void) {
+    static const Pattern GMALLOC_PATTERN{"\x00\x00\x00\x00\xFF\xD7\x83\xC4\x04\x89\x45\xE4",
+                                         "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+    auto sig_address = sigscan(GMALLOC_PATTERN);
+    this->gmalloc = *read_offset<FMalloc**>(sig_address);
+    LOG(MISC, "GMalloc: 0x%p", this->gmalloc);
+}
+void* BL2Hook::malloc(size_t len) const {
+    return this->gmalloc->vftable->malloc(this->gmalloc, len, get_alignment(len));
+}
+void* BL2Hook::realloc(void* original, size_t len) const {
+    return this->gmalloc->vftable->realloc(this->gmalloc, original, len, get_alignment(len));
+}
+void BL2Hook::free(void* data) const {
+    this->gmalloc->vftable->free(this->gmalloc, data);
 }
 
 #pragma endregion

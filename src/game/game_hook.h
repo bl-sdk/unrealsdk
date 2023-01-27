@@ -54,6 +54,40 @@ void fname_init(unreal::FName* name, const wchar_t* str, int32_t number);
  */
 void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param);
 
+/**
+ * @brief Calls unreal's malloc function.
+ *
+ * @tparam T The type to cast the return to.
+ * @param len The amount of bytes to allocate.
+ * @return A pointer to the allocated memory.
+ */
+[[nodiscard]] void* malloc(size_t len);
+template <typename T>
+[[nodiscard]] T* malloc(size_t len) {
+    return reinterpret_cast<T*>(malloc(len));
+}
+
+/**
+ * @brief Calls unreal's realloc function.
+ *
+ * @tparam T The type to cast the return to.
+ * @param original The original memory to re-allocate.
+ * @param len The amount of bytes to allocate.
+ * @return A pointer to the re-allocated memory.
+ */
+[[nodiscard]] void* realloc(void* original, size_t len);
+template <typename T>
+[[nodiscard]] T* realloc(void* original, size_t len) {
+    return reinterpret_cast<T*>(realloc(original, len));
+}
+
+/**
+ * @brief Calls unreal's free function.
+ *
+ * @param data The memory to free.
+ */
+void free(void* data);
+
 #pragma region Hook Classes
 
 /**
@@ -61,6 +95,8 @@ void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param);
  */
 struct GameHook {
    protected:
+#pragma region Virtual Functions
+
     /**
      * @brief Hooks `UObject::ProcessEvent` and points it at the hook manager.
      */
@@ -91,6 +127,21 @@ struct GameHook {
      */
     virtual void find_fframe_step(void) = 0;
 
+    /**
+     * @brief Finds `GMalloc`, and sets up such that `malloc`, `realloc`, and `free` may be called.
+     */
+    virtual void find_gmalloc(void) = 0;
+
+#pragma endregion
+
+    /**
+     * @brief Helper to get the alignment for use with the GMalloc functions.
+     *
+     * @param len The amount of bytes requested to be allocated
+     * @return The alignment.
+     */
+    static uint32_t get_alignment(size_t len);
+
    public:
     GameHook(void) = default;
     virtual ~GameHook() = default;
@@ -107,6 +158,9 @@ struct GameHook {
     virtual void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) const = 0;
     virtual void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const = 0;
     virtual void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const = 0;
+    [[nodiscard]] virtual void* malloc(size_t len) const = 0;
+    [[nodiscard]] virtual void* realloc(void* original, size_t len) const = 0;
+    virtual void free(void* data) const = 0;
 };
 
 /**
