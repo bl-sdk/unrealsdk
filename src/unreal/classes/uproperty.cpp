@@ -1,9 +1,11 @@
 #include "pch.h"
+#include <stdint.h>
 
 #include "unreal/classes/uclass.h"
 #include "unreal/classes/uproperty.h"
 #include "unreal/structs/fname.h"
 #include "game/game_hook.h"
+#include "env.h"
 
 namespace unrealsdk::unreal {
 
@@ -11,6 +13,11 @@ namespace unrealsdk::unreal {
 
 size_t UProperty::class_size(void) {
     static size_t size = 0;
+    if (size != 0) {
+        return size;
+    }
+
+    size = env::get_numeric<size_t>(env::UPROPERTY_SIZE);
     if (size != 0) {
         return size;
     }
