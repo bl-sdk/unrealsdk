@@ -1,6 +1,8 @@
 #ifndef UNREAL_WRAPPERS_WRAPPED_STRUCT_H
 #define UNREAL_WRAPPERS_WRAPPED_STRUCT_H
 
+#include "unreal/classes/ustruct.h"
+#include "unreal/classes/ustruct_funcs.h"
 #include "unreal/structs/fname.h"
 #include "unreal/wrappers/prop_traits.h"
 
@@ -22,7 +24,10 @@ class WrappedStruct {
      * @return The property's new value.
      */
     template <typename T>
-    [[nodiscard]] typename PropTraits<T>::Value get(const FName& name, size_t idx = 0);
+    [[nodiscard]] typename PropTraits<T>::Value get(const FName& name, size_t idx = 0) {
+        return get_property<T>(this->type->find_and_validate<T>(name), idx,
+                               reinterpret_cast<uintptr_t>(this->base));
+    }
 
     /**
      * @brief Sets a property on this struct
@@ -37,7 +42,10 @@ class WrappedStruct {
         this->set<T>(name, 0, value);
     }
     template <typename T>
-    void set(const FName& name, size_t idx, typename PropTraits<T>::Value value);
+    void set(const FName& name, size_t idx, typename PropTraits<T>::Value value) {
+        set_property<T>(this->type->find_and_validate<T>(name), idx,
+                        reinterpret_cast<uintptr_t>(this->base), value);
+    }
 };
 
 }  // namespace unrealsdk::unreal
