@@ -10,11 +10,7 @@ namespace unrealsdk::unreal {
 
 template <typename T>
 void TArray<T>::reserve(size_t new_cap) {
-    // Prefer not to shrink so that there are less chances for things to go wrong
-    if (new_cap <= this->max) {
-        return;
-    }
-    if (new_cap > INT32_MAX) {
+    if (new_cap > MAX_CAPACITY) {
         throw std::length_error("Tried to increase TArray beyond max capacity!");
     }
 
@@ -34,7 +30,7 @@ void TArray<T>::reserve(size_t new_cap) {
      it's valid after.
     */
     auto old_data = this->data;
-    this->data = game::realloc(this->data, new_size);
+    this->data = game::realloc<T>(this->data, new_size);
     if (this->data == nullptr) {
         this->data = old_data;
         throw std::runtime_error("Failed to allocate memory to resize array!");

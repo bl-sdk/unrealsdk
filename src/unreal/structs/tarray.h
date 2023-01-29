@@ -16,12 +16,21 @@ struct TArray {
     int32_t count;
     int32_t max;
 
+    static constexpr const auto MAX_CAPACITY = INT32_MAX;
+
     /**
      * @brief Gets the size of the array.
      *
      * @return The size of the array.
      */
     [[nodiscard]] size_t size(void) const { return this->count; };
+
+    /**
+     * @brief Gets the capacity of the array.
+     *
+     * @return The capacity of the array.
+     */
+    [[nodiscard]] size_t capacity(void) const { return this->max; };
 
     /**
      * @brief Get an element in the array.
