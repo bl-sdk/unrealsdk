@@ -33,6 +33,14 @@ struct TArray {
     [[nodiscard]] size_t capacity(void) const { return this->max; };
 
     /**
+     * @brief Reserves memory to increase the capacity of this array.
+     * @note A `TArray<void>` is assumed to have 1-byte elements for the purposes of this function.
+     *
+     * @param new_cap The new capacity, in number of elements.
+     */
+    void reserve(size_t new_cap);
+
+    /**
      * @brief Get an element in the array.
      *
      * @param idx The index to get.
@@ -64,13 +72,74 @@ struct TArray {
         return this->operator[](idx);
     }
 
+#pragma region Iterator
+    template <typename U = T,
+              typename = std::enable_if_t<std::is_same_v<U, T> && std::negation_v<std::is_void<U>>>>
+    struct Iterator {
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = U;
+        using pointer = U*;
+        using reference = U;
+
+       private:
+        TArray<U>* arr;
+        size_t idx{};
+
+       public:
+        Iterator(TArray<U>* arr) : arr(arr) {}
+
+        reference operator*() const { return (*this->arr)[this->idx]; };
+
+        Iterator& operator++() {
+            ++this->idx;
+            // Use `arr == nullptr` as the end condition, so we behave a little better if the array
+            //  grows during iteration - we can't guarentee control over this iterator as well as
+            //  the others
+            if (this->idx >= arr->count) {
+                arr = nullptr;
+            }
+            return *this;
+        };
+        Iterator operator++(int) {
+            auto tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        bool operator==(const Iterator& rhs) const {
+            if (this->arr == nullptr && rhs.arr == nullptr) {
+                return true;
+            }
+            return this->arr == rhs.arr && this->idx == rhs.idx;
+        }
+        bool operator!=(const Iterator& rhs) const { return !(*this == rhs); };
+    };
+
     /**
-     * @brief Reserves memory to increase the capacity of this array.
-     * @note A `TArray<void>` is assumed to have 1-byte elements for the purposes of this function.
+     * @brief Gets an iterator to the start of this array.
+     * @note Will continue to work if the array changes size during iteration. Shrinking beyond the
+     *       element currently pointed at is undefined behaviour.
      *
-     * @param new_cap The new capacity, in number of elements.
+     * @return The iterator.
      */
-    void reserve(size_t new_cap);
+    template <typename U = T,
+              typename = std::enable_if_t<std::is_same_v<U, T> && std::negation_v<std::is_void<U>>>>
+    [[nodiscard]] Iterator<U> begin(void) {
+        return {this->count == 0 ? nullptr : this};
+    }
+
+    /**
+     * @brief Gets an iterator to the end of this array.
+     *
+     * @return The iterator.
+     */
+    template <typename U = T,
+              typename = std::enable_if_t<std::is_same_v<U, T> && std::negation_v<std::is_void<U>>>>
+    [[nodiscard]] static Iterator<U> end(void) {
+        return {nullptr};
+    }
+#pragma endregion
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

@@ -69,6 +69,7 @@ class UStruct : public UField {
 #endif
 
    public:
+#pragma region Iterators
     struct FieldIterator {
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
@@ -127,6 +128,7 @@ class UStruct : public UField {
      * @return The iterator.
      */
     [[nodiscard]] utils::IteratorProxy<PropertyIterator> properties(void) const;
+#pragma endregion
 
     /**
      * @brief Get the actual size of the described structure, including alignment.
