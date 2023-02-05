@@ -51,10 +51,26 @@ std::wstring UObject::get_path_name(void) const {
     return stream.str();
 }
 
-bool UObject::is_instance(UClass* cls) const {
+bool UObject::is_instance(const UClass* cls) const {
     for (const UStruct* obj_cls = this->Class; obj_cls != nullptr; obj_cls = obj_cls->SuperField) {
         if (obj_cls == cls) {
             return true;
+        }
+    }
+
+    return false;
+}
+
+bool UObject::is_implementation(const UClass* iface, FImplementedInterface** impl_out) const {
+    for (auto obj_cls = this->Class; obj_cls != nullptr;
+         obj_cls = reinterpret_cast<UClass*>(obj_cls->SuperField)) {
+        for (auto obj_iface : obj_cls->Interfaces) {
+            if (obj_iface.Class == iface) {
+                if (impl_out != nullptr) {
+                    *impl_out = &obj_iface;
+                }
+                return true;
+            }
         }
     }
 

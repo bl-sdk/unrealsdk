@@ -2,6 +2,8 @@
 #define UNREAL_CLASSES_UCLASS_H
 
 #include "unreal/classes/ustruct.h"
+#include "unreal/structs/fimplementedinterface.h"
+#include "unreal/structs/tarray.h"
 
 namespace unrealsdk::unreal {
 
@@ -19,12 +21,32 @@ class UClass : public UStruct {
 
    public:
     UObject* ClassDefaultObject;
+
+   private:
+    uint8_t UnknownData01[0xA0];
+
+   public:
+    TArray<FImplementedInterface> Interfaces;
 #else
    private:
+    // Misc Fields I found within this block in BL2, but which we don't care about enough for me to
+    //  find in UE4, or to want to increase the compile times by including
+
+    // 0xE8: TArray<FRepRecord> ClassReps;
+    // 0xF4: TArray<UField*> NetFields;
+    // 0x100: TArray<FName> HideCategories;
+    // 0x10C: TArray<FName> AutoExpandCategories;
+
     uint8_t UnknownData00[0xCC];
 
    public:
     UObject* ClassDefaultObject;
+
+   private:
+    uint8_t UnknownData01[0x48];
+
+   public:
+    TArray<FImplementedInterface> Interfaces;
 #endif
 
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)

@@ -12,6 +12,7 @@ namespace unrealsdk::unreal {
 #pragma pack(push, 0x4)
 #endif
 
+class FImplementedInterface;
 class UClass;
 
 class UObject {
@@ -99,11 +100,22 @@ class UObject {
 
     /**
      * @brief Checks if this object is an instance of a class.
+     * @note Does not check interfaces, only plain inheritance.
      *
      * @param cls The class to check.
      * @return True if this object is an instance of the given class.
      */
-    bool is_instance(UClass* cls) const;
+    bool is_instance(const UClass* cls) const;
+
+    /**
+     * @brief Checks if this object implements an interface.
+     *
+     * @param iface The interface to check.
+     * @param[out] impl_out If not null, gets set to the interface implementation for this object
+     *                      (assuming it's found).
+     * @return True if this object implements of the given interface.
+     */
+    bool is_implementation(const UClass* iface, FImplementedInterface** impl_out = nullptr) const;
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)
