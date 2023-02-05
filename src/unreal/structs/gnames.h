@@ -52,12 +52,12 @@ struct FNameEntry {
 
 #ifdef UE4
 
-struct FChunkedFNameEntryArray {
+struct TStaticIndirectArrayThreadSafeRead_FNameEntry {
     // NOLINTBEGIN(readability-identifier-naming)
     enum {
-        NumElementsPerChunk = 0x4000,
-        MaxChunkCount = 0x80,
-        ChunkTableSize = (2 * 1024 * 1024 + NumElementsPerChunk - 1) / NumElementsPerChunk
+        MaxTotalElements = 4 * 1024 * 1024,
+        ElementsPerChunk = 16384,
+        ChunkTableSize = (MaxTotalElements + ElementsPerChunk - 1) / ElementsPerChunk
     };
 
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)

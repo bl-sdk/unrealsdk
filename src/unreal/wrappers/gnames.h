@@ -14,7 +14,7 @@ namespace unrealsdk::unreal {
 class GNames {
    public:
 #ifdef UE4
-    using internal_type = FChunkedFNameEntryArray*;
+    using internal_type = TStaticIndirectArrayThreadSafeRead_FNameEntry*;
 #else
     using internal_type = TArray<FNameEntry*>*;
 #endif
