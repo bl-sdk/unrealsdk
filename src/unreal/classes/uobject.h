@@ -72,7 +72,7 @@ class UObject {
      * @return The property's new value.
      */
     template <typename T>
-    [[nodiscard]] typename PropTraits<T>::Value get(const FName& name, size_t idx = 0);
+    [[nodiscard]] typename PropTraits<T>::Value get(const FName& name, size_t idx = 0) const;
 
     /**
      * @brief Sets a property on this struct

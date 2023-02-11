@@ -11,7 +11,7 @@
 namespace unrealsdk::unreal {
 
 template <typename T>
-[[nodiscard]] typename PropTraits<T>::Value UObject::get(const FName& name, size_t idx) {
+[[nodiscard]] typename PropTraits<T>::Value UObject::get(const FName& name, size_t idx) const {
     return get_property<T>(this->Class->find_and_validate<T>(name), idx,
                            reinterpret_cast<uintptr_t>(this));
 }

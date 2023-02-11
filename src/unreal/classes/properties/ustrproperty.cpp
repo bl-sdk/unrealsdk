@@ -9,13 +9,13 @@ namespace unrealsdk::unreal {
 
 using FString = TArray<wchar_t>;
 
-PropTraits<UStrProperty>::Value PropTraits<UStrProperty>::get(UStrProperty* /*prop*/,
+PropTraits<UStrProperty>::Value PropTraits<UStrProperty>::get(const UStrProperty* /*prop*/,
                                                               uintptr_t addr) {
     auto str = reinterpret_cast<FString*>(addr);
     return {str->data, str->size()};
 }
 
-void PropTraits<UStrProperty>::set(UStrProperty* /*prop*/, uintptr_t addr, Value value) {
+void PropTraits<UStrProperty>::set(const UStrProperty* /*prop*/, uintptr_t addr, Value value) {
     auto str = reinterpret_cast<FString*>(addr);
 
     auto new_size = value.size();

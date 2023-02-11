@@ -28,8 +28,8 @@ struct PropTraits<UInterfaceProperty> {
     using Value = UObject*;
     static inline const wchar_t* const CLASS = L"InterfaceProperty";
 
-    static Value get(UInterfaceProperty* prop, uintptr_t addr);
-    static void set(UInterfaceProperty* prop, uintptr_t addr, Value value);
+    static Value get(const UInterfaceProperty* prop, uintptr_t addr);
+    static void set(const UInterfaceProperty* prop, uintptr_t addr, Value value);
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

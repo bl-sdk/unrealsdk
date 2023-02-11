@@ -28,8 +28,8 @@ struct PropTraits<UStructProperty> {
     using Value = WrappedStruct;
     static inline const wchar_t* const CLASS = L"StructProperty";
 
-    static Value get(UStructProperty* prop, uintptr_t addr);
-    static void set(UStructProperty* prop, uintptr_t addr, Value value);
+    static Value get(const UStructProperty* prop, uintptr_t addr);
+    static void set(const UStructProperty* prop, uintptr_t addr, Value value);
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

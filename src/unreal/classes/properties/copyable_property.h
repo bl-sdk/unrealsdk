@@ -25,10 +25,10 @@ struct PropTraits<CopyableProperty<T>> {
     using Value = T;
     static const wchar_t* const CLASS;
 
-    static Value get(CopyableProperty<T>* /*prop*/, uintptr_t addr) {
+    static Value get(const CopyableProperty<T>* /*prop*/, uintptr_t addr) {
         return *reinterpret_cast<Value*>(addr);
     }
-    static void set(CopyableProperty<T>* /*prop*/, uintptr_t addr, Value value) {
+    static void set(const CopyableProperty<T>* /*prop*/, uintptr_t addr, Value value) {
         *reinterpret_cast<Value*>(addr) = value;
     }
 };

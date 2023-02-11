@@ -5,12 +5,12 @@
 
 namespace unrealsdk::unreal {
 
-PropTraits<UObjectProperty>::Value PropTraits<UObjectProperty>::get(UObjectProperty* /*prop*/,
+PropTraits<UObjectProperty>::Value PropTraits<UObjectProperty>::get(const UObjectProperty* /*prop*/,
                                                                     uintptr_t addr) {
     return *reinterpret_cast<Value*>(addr);
 }
 
-void PropTraits<UObjectProperty>::set(UObjectProperty* prop, uintptr_t addr, Value value) {
+void PropTraits<UObjectProperty>::set(const UObjectProperty* prop, uintptr_t addr, Value value) {
     // Ensure the object is of a valid class
     if (value != nullptr) {
         auto prop_cls = prop->read_field(&UObjectProperty::PropertyClass);

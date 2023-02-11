@@ -23,7 +23,7 @@ struct PropTraits {
      * @param addr The address to read the value from.
      * @return The property's value.
      */
-    [[nodiscard]] static Value get(T* prop, uintptr_t addr);
+    [[nodiscard]] static Value get(const T* prop, uintptr_t addr);
 
     /**
      * @brief Sets the value of the described property type at the given address.
@@ -32,7 +32,7 @@ struct PropTraits {
      * @param addr The address to write the value to.
      * @param value The property's new value.
      */
-    static void set(T* prop, uintptr_t addr, Value value);
+    static void set(const T* prop, uintptr_t addr, Value value);
 };
 
 /**
@@ -45,7 +45,7 @@ struct PropTraits {
  * @return The property's value.
  */
 template <typename T>
-[[nodiscard]] typename PropTraits<T>::Value get_property(T* prop, size_t idx, uintptr_t base_addr) {
+[[nodiscard]] typename PropTraits<T>::Value get_property(const T* prop, size_t idx, uintptr_t base_addr) {
     if (idx > prop->ArrayDim) {
         throw std::out_of_range("Property index out of range");
     }
@@ -62,7 +62,7 @@ template <typename T>
  * @param value The property's new value.
  */
 template <typename T>
-void set_property(T* prop, size_t idx, uintptr_t base_addr, typename PropTraits<T>::Value value) {
+void set_property(const T* prop, size_t idx, uintptr_t base_addr, typename PropTraits<T>::Value value) {
     if (idx > prop->ArrayDim) {
         throw std::out_of_range("Property index out of range");
     }

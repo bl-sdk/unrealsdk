@@ -12,7 +12,7 @@ class UStruct;
 
 class WrappedStruct {
    public:
-    UStruct* type;
+    const UStruct* type;
     void* base;
 
     /**
@@ -24,7 +24,7 @@ class WrappedStruct {
      * @return The property's new value.
      */
     template <typename T>
-    [[nodiscard]] typename PropTraits<T>::Value get(const FName& name, size_t idx = 0) {
+    [[nodiscard]] typename PropTraits<T>::Value get(const FName& name, size_t idx = 0) const {
         return get_property<T>(this->type->find_and_validate<T>(name), idx,
                                reinterpret_cast<uintptr_t>(this->base));
     }
