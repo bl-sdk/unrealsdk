@@ -6,9 +6,16 @@
 #include "unreal/classes/uobject.h"
 #include "unreal/classes/ustruct.h"
 #include "unreal/classes/ustruct_funcs.h"
+#include "unreal/wrappers/bound_function.h"
 #include "unreal/wrappers/prop_traits.h"
 
 namespace unrealsdk::unreal {
+
+class UFunction;
+
+template <>
+[[nodiscard]] typename PropTraits<UFunction>::Value UObject::get<UFunction>(const FName& name,
+                                                                            size_t idx) const;
 
 template <typename T>
 [[nodiscard]] typename PropTraits<T>::Value UObject::get(const FName& name, size_t idx) const {

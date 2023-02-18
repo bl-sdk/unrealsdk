@@ -102,7 +102,7 @@ UField* UStruct::find(const FName& name) const {
         }
     }
 
-    throw std::invalid_argument("Couldn't find property " + (std::string)name);
+    throw std::invalid_argument("Couldn't find field " + (std::string)name);
 }
 
 }  // namespace unrealsdk::unreal

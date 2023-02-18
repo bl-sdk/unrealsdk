@@ -6,6 +6,7 @@
 #include "unreal/classes/uclass.h"
 #include "unreal/classes/ustruct.h"
 #include "unreal/structs/fname.h"
+#include "unreal/wrappers/prop_traits.h"
 
 namespace unrealsdk::unreal {
 

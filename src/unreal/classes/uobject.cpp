@@ -1,7 +1,12 @@
 #include "pch.h"
 
 #include "unreal/classes/uclass.h"
+#include "unreal/classes/ufunction.h"
 #include "unreal/classes/uobject.h"
+#include "unreal/classes/ustruct_funcs.h"
+#include "unreal/structs/fname.h"
+#include "unreal/wrappers/bound_function.h"
+#include "unreal/wrappers/prop_traits.h"
 
 namespace unrealsdk::unreal {
 
@@ -75,6 +80,23 @@ bool UObject::is_implementation(const UClass* iface, FImplementedInterface** imp
     }
 
     return false;
+}
+
+template <>
+typename PropTraits<UFunction>::Value UObject::get<UFunction>(const FName& name, size_t idx) const {
+    if (idx != 0) {
+        throw std::out_of_range("Functions cannot have an array index!");
+    }
+
+    // All the other property getters are const, since obviously a getter shouldn't modify the
+    // object. Since calling a function may do so however, bound functions need a mutable reference.
+    // This means we need a const cast. This is technically undefined behaviour, but since our code
+    // only passes the reference around, and never modifies the object, we should be fine.
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
+    auto mutable_obj = const_cast<UObject*>(this);
+
+    return {this->Class->find_and_validate<UFunction>(name), mutable_obj};
 }
 
 }  // namespace unrealsdk::unreal
