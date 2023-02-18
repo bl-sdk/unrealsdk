@@ -12,20 +12,25 @@ using namespace unrealsdk::unreal;
 namespace unrealsdk::hook_manager {
 
 /**
- * @brief Checks if we have a hook on a function, and logs the call if needed.
+ * @brief Checks if a hook may be called, and logs the call if needed.
  *
  * @param source The source of the hook, used for logging.
  * @param func_name The path name of the function which was called.
  * @param obj The object which called the function.
- * @return True if a hook exists for this function.
+ * @return True if a hook exists for this function and may be called.
  */
-static bool check_hook_exists_and_log_call(const std::string& source,
-                                           const std::string& func_name,
-                                           const UObject* obj) {
+static bool check_hook_allowed_and_log_call(const std::string& source,
+                                            const std::string& func_name,
+                                            const UObject* obj) {
     if (unrealsdk::log_all_calls) {
         LOG(HOOKS, "===== %s called =====", source.c_str());
         LOG(HOOKS, "Function: %s", func_name.c_str());
         LOG(HOOKS, "Object: %s", obj->get_path_name<char>().c_str());
+    }
+
+    if (unrealsdk::inject_next_call) {
+        unrealsdk::inject_next_call = false;
+        return false;
     }
 
     return unrealsdk::hooks.count(func_name) != 0;
@@ -52,7 +57,7 @@ static bool run_hooks(UFunction* func,
                 block = true;
                 // Deliberately don't break, so that other hook functions get a chance to run too
             }
-        } catch (const std::exception &ex) {
+        } catch (const std::exception& ex) {
             LOG(ERROR, "An exception occured during hook processing: %s", ex.what());
         }
     }
@@ -62,7 +67,7 @@ static bool run_hooks(UFunction* func,
 
 bool process_event(UObject* obj, UFunction* func, WrappedArgs& args) {
     auto func_name = func->get_path_name<char>();
-    if (!check_hook_exists_and_log_call("ProcessEvent", func_name, obj)) {
+    if (!check_hook_allowed_and_log_call("ProcessEvent", func_name, obj)) {
         return false;
     }
 
@@ -95,7 +100,7 @@ bool call_function(UObject* obj, FFrame* stack, void* /*result*/, UFunction* fun
     */
 
     auto func_name = func->get_path_name<char>();
-    if (!check_hook_exists_and_log_call("CallFunction", func_name, obj)) {
+    if (!check_hook_allowed_and_log_call("CallFunction", func_name, obj)) {
         return false;
     }
 

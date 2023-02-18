@@ -45,6 +45,12 @@ void BL3Hook::hook_process_event(void) {
     sigscan_and_detour(PROCESS_EVENT_SIG, process_event_hook, &process_event_ptr, "ProcessEvent");
 }
 
+void BL3Hook::process_event(unreal::UObject* object,
+                    unreal::UFunction* func,
+                    void* params) const {
+    process_event_hook(object, func, params);
+}
+
 #pragma endregion
 
 #pragma region CallFunction

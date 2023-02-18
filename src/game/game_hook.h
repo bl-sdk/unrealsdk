@@ -11,6 +11,7 @@ namespace unrealsdk::unreal {
 
 struct FName;
 class UObject;
+class UFunction;
 
 }  // namespace unrealsdk::unreal
 
@@ -88,6 +89,15 @@ template <typename T>
  */
 void free(void* data);
 
+/**
+ * @brief Calls `UObject::ProcessEvent`.
+ *
+ * @param object The object to process an event on.
+ * @param func The function to call.
+ * @param params The function's params
+ */
+void process_event(unreal::UObject* object, unreal::UFunction* func, void* params);
+
 #pragma region Hook Classes
 
 /**
@@ -161,6 +171,9 @@ struct GameHook {
     [[nodiscard]] virtual void* malloc(size_t len) const = 0;
     [[nodiscard]] virtual void* realloc(void* original, size_t len) const = 0;
     virtual void free(void* data) const = 0;
+    virtual void process_event(unreal::UObject* object,
+                               unreal::UFunction* func,
+                               void* params) const = 0;
 };
 
 /**

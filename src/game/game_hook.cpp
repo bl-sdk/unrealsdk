@@ -39,6 +39,9 @@ void* realloc(void* original, size_t len) {
 void free(void* data) {
     return hook_instance->free(data);
 }
+void process_event(unreal::UObject* object, unreal::UFunction* function, void* params) {
+    hook_instance->process_event(object, function, params);
+}
 
 #pragma endregion
 

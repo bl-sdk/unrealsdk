@@ -40,6 +40,9 @@ class BL3Hook : public GameHook {
     [[nodiscard]] void* malloc(size_t len) const override;
     [[nodiscard]] void* realloc(void* original, size_t len) const override;
     void free(void* data) const override;
+    void process_event(unreal::UObject* object,
+                       unreal::UFunction* func,
+                       void* params) const override;
 };
 
 template <>

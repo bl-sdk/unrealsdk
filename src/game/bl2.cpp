@@ -215,6 +215,12 @@ void BL2Hook::hook_process_event(void) {
     sigscan_and_detour(PROCESS_EVENT_SIG, process_event_hook, &process_event_ptr, "ProcessEvent");
 }
 
+void BL2Hook::process_event(unreal::UObject* object,
+                    unreal::UFunction* func,
+                    void* params) const {
+    process_event_hook(object, nullptr, func, params, nullptr);
+}
+
 #pragma endregion
 
 #pragma region CallFunction
