@@ -174,10 +174,12 @@ void BL3Hook::find_gmalloc(void) {
     LOG(MISC, "FMemory::Free: 0x%p", this->fmemory_free_ptr);
 }
 void* BL3Hook::malloc(size_t len) const {
-    return this->fmemory_malloc_ptr(len, 0);
+    auto ret = this->fmemory_malloc_ptr(len, get_alignment(len));
+    memset(ret, 0, len);
+    return ret;
 }
 void* BL3Hook::realloc(void* original, size_t len) const {
-    return this->fmemory_realloc_ptr(original, len, 0);
+    return this->fmemory_realloc_ptr(original, len, get_alignment(len));
 }
 void BL3Hook::free(void* data) const {
     this->fmemory_free_ptr(data);

@@ -335,7 +335,9 @@ void BL2Hook::find_gmalloc(void) {
     LOG(MISC, "GMalloc: 0x%p", this->gmalloc);
 }
 void* BL2Hook::malloc(size_t len) const {
-    return this->gmalloc->vftable->malloc(this->gmalloc, len, get_alignment(len));
+    auto ret = this->gmalloc->vftable->malloc(this->gmalloc, len, get_alignment(len));
+    memset(ret, 0, len);
+    return ret;
 }
 void* BL2Hook::realloc(void* original, size_t len) const {
     return this->gmalloc->vftable->realloc(this->gmalloc, original, len, get_alignment(len));
