@@ -16,17 +16,26 @@ class UFunction;
 template <>
 [[nodiscard]] typename PropTraits<UFunction>::Value UObject::get<UFunction>(const FName& name,
                                                                             size_t idx) const;
+template <>
+[[nodiscard]] typename PropTraits<UFunction>::Value UObject::get<UFunction>(const UFunction* prop,
+                                                                            size_t idx) const;
 
 template <typename T>
 [[nodiscard]] typename PropTraits<T>::Value UObject::get(const FName& name, size_t idx) const {
-    return get_property<T>(this->Class->find_and_validate<T>(name), idx,
-                           reinterpret_cast<uintptr_t>(this));
+    return this->get<T>(this->Class->find_and_validate<T>(name), idx);
+}
+template <typename T>
+[[nodiscard]] typename PropTraits<T>::Value UObject::get(const T* prop, size_t idx) const {
+    return get_property<T>(prop, idx, reinterpret_cast<uintptr_t>(this));
 }
 
 template <typename T>
 void UObject::set(const FName& name, size_t idx, typename PropTraits<T>::Value value) {
-    set_property<T>(this->Class->find_and_validate<T>(name), idx, reinterpret_cast<uintptr_t>(this),
-                    value);
+    this->set<T>(this->Class->find_and_validate<T>(name), idx, value);
+}
+template <typename T>
+void UObject::set(const T* prop, size_t idx, typename PropTraits<T>::Value value) {
+    set_property<T>(prop, idx, reinterpret_cast<uintptr_t>(this), value);
 }
 
 }  // namespace unrealsdk::unreal

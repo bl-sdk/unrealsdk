@@ -15,7 +15,6 @@
 #include "unreal/wrappers/wrapped_args.h"
 #include "unrealsdk.h"
 
-
 using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;
 
@@ -192,9 +191,8 @@ static bool shipping_console_command_hook(unreal::UFunction* /*func*/,
         command_property = args.type->find_and_validate<UStrProperty>(L"Command"_fn);
     }
 
-    auto command =
-        get_property<UStrProperty>(command_property, 0, reinterpret_cast<uintptr_t>(args.base));
-    BoundFunction{console_command_func, obj}.call<void, UStrProperty>(command);
+    obj->get(console_command_func)
+        .call<void, UStrProperty>(args.get<UStrProperty>(command_property));
     return true;
 }
 
