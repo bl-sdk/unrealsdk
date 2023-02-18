@@ -6,11 +6,15 @@
 #include "game/game_hook.h"
 #include "hook_manager.h"
 #include "memory.h"
+#include "unreal/classes/properties/ustrproperty.h"
 #include "unreal/classes/ufunction.h"
 #include "unreal/classes/uobject.h"
 #include "unreal/structs/fframe.h"
+#include "unreal/wrappers/bound_function.h"
 #include "unreal/wrappers/gobjects.h"
 #include "unreal/wrappers/wrapped_args.h"
+#include "unrealsdk.h"
+
 
 using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;
@@ -26,6 +30,7 @@ void BL2Hook::hook(void) {
     hexedit_set_command();
     hexedit_array_limit();
     hexedit_array_limit_message();
+    hook_say_bypass();
 }
 
 #pragma region AntiDebug
@@ -172,6 +177,34 @@ void BL2Hook::hexedit_array_limit_message(void) {
 
 #pragma endregion
 
+#pragma region Say Bypass
+
+static bool shipping_console_command_hook(unreal::UFunction* /*func*/,
+                                          unreal::UObject* obj,
+                                          unreal::WrappedArgs& args) {
+    static UFunction* console_command_func = nullptr;
+    static UStrProperty* command_property = nullptr;
+
+    // Optimize so we only call find once for each
+    // TODO: can be removed once we have a general optimized `UStruct::find`
+    if (console_command_func == nullptr) {
+        console_command_func = obj->Class->find_and_validate<UFunction>(L"ConsoleCommand"_fn);
+        command_property = args.type->find_and_validate<UStrProperty>(L"Command"_fn);
+    }
+
+    auto command =
+        get_property<UStrProperty>(command_property, 0, reinterpret_cast<uintptr_t>(args.base));
+    BoundFunction{console_command_func, obj}.call<void, UStrProperty>(command);
+    return true;
+}
+
+void BL2Hook::hook_say_bypass(void) {
+    unrealsdk::hooks["Engine.Console:ShippingConsoleCommand"]["unrealsdk_bl2_say_bypass"] =
+        &shipping_console_command_hook;
+}
+
+#pragma endregion
+
 #pragma region ProcessEvent
 
 // This function is actually thiscall, but MSVC won't let us declare static thiscall functions
@@ -215,9 +248,7 @@ void BL2Hook::hook_process_event(void) {
     sigscan_and_detour(PROCESS_EVENT_SIG, process_event_hook, &process_event_ptr, "ProcessEvent");
 }
 
-void BL2Hook::process_event(unreal::UObject* object,
-                    unreal::UFunction* func,
-                    void* params) const {
+void BL2Hook::process_event(unreal::UObject* object, unreal::UFunction* func, void* params) const {
     process_event_hook(object, nullptr, func, params, nullptr);
 }
 

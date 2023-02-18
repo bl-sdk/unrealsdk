@@ -2,13 +2,13 @@
 #define UNREAL_WRAPPERS_BOUND_FUNCTION_H
 
 #include "pch.h"
-#include <vadefs.h>
 
 #include "game/game_hook.h"
 #include "unreal/classes/uclass.h"
 #include "unreal/classes/ufunction.h"
 #include "unreal/classes/uproperty.h"
 #include "unreal/wrappers/prop_traits.h"
+#include "unreal/wrappers/wrapped_args.h"
 
 namespace unrealsdk::unreal {
 
@@ -119,6 +119,28 @@ class BoundFunction {
         } else {
             validate_no_more_params(base_prop);
         }
+
+        this->call_with_params(params);
+
+        if constexpr (std::is_void_v<R>) {
+            game::free(params);
+        } else {
+            // TODO: use after free when the return is a reference type (structs, arrays)
+            auto ret = this->get_return_value<R>(reinterpret_cast<uintptr_t>(params));
+            game::free(params);
+            return ret;
+        }
+    }
+    template <typename R>
+    typename PropTraits<R>::Value call(const WrappedArgs& args) {
+        if (args.type != this->func) {
+            throw std::runtime_error(
+                "Tried to call a function using wrapped args of a different function.");
+        }
+
+        auto size = this->func->get_struct_size();
+        auto params = game::malloc(size);
+        memcpy(params, args.base, size);
 
         this->call_with_params(params);
 

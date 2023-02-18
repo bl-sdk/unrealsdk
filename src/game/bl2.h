@@ -27,6 +27,11 @@ class BL2Hook : public GameHook {
     static void hexedit_array_limit(void);
 
     /**
+     * @brief Bypasses the say console command suppression.
+     */
+    static void hook_say_bypass(void);
+
+    /**
      * @brief Hex edits out the `obj dump` array limit message.
      */
     virtual void hexedit_array_limit_message(void);
