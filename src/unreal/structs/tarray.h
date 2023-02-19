@@ -34,11 +34,16 @@ struct TArray {
 
     /**
      * @brief Reserves memory to increase the capacity of this array.
-     * @note A `TArray<void>` is assumed to have 1-byte elements for the purposes of this function.
      *
      * @param new_cap The new capacity, in number of elements.
+     * @param element_size The size of each element.
      */
-    void reserve(size_t new_cap);
+    template <typename U = T,
+              typename = std::enable_if_t<std::is_same_v<U, T> && std::negation_v<std::is_void<U>>>>
+    void reserve(size_t new_cap) {
+        this->reserve(new_cap, sizeof(U));
+    }
+    void reserve(size_t new_cap, size_t element_size);
 
     /**
      * @brief Get an element in the array.

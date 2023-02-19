@@ -9,17 +9,12 @@
 namespace unrealsdk::unreal {
 
 template <typename T>
-void TArray<T>::reserve(size_t new_cap) {
+void TArray<T>::reserve(size_t new_cap, size_t element_size) {
     if (new_cap > MAX_CAPACITY) {
         throw std::length_error("Tried to increase TArray beyond max capacity!");
     }
 
-    size_t new_size{};
-    if constexpr (std::is_void_v<T>) {
-        new_size = new_cap;
-    } else {
-        new_size = sizeof(T) * new_cap;
-    }
+    size_t new_size = new_cap * element_size;
 
     /*
     If realloc fails, it'll return null, which we want to handle "gracefully" by throwing on our
