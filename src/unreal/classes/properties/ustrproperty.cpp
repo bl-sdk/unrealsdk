@@ -12,7 +12,14 @@ using FString = TArray<wchar_t>;
 PropTraits<UStrProperty>::Value PropTraits<UStrProperty>::get(const UStrProperty* /*prop*/,
                                                               uintptr_t addr) {
     auto str = reinterpret_cast<FString*>(addr);
-    return {str->data, str->size()};
+
+    // Remove a single trailing null, if necessary
+    auto size = str->size();
+    if (str->data[size] == L'\0') {
+        size--;
+    }
+
+    return {str->data, size};
 }
 
 void PropTraits<UStrProperty>::set(const UStrProperty* /*prop*/, uintptr_t addr, Value value) {
@@ -24,7 +31,7 @@ void PropTraits<UStrProperty>::set(const UStrProperty* /*prop*/, uintptr_t addr,
     }
 
     memcpy(str->data, value.data(), new_size * sizeof(*str->data));
-    str->data[new_size] = '\0';
+    str->data[new_size] = L'\0';
 
     // Rely on `TArray::reserve` to detect overruns
     str->count = static_cast<decltype(str->count)>(new_size);
