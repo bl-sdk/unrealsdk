@@ -20,7 +20,21 @@ GObjects::Iterator::reference GObjects::Iterator::operator*() const {
 }
 
 GObjects::Iterator& GObjects::Iterator::operator++() {
-    ++this->idx;
+    do {
+        // If we're on the last object, increment to max index
+        if (this->idx >= (this->gobjects.size() - 1)) {
+            this->idx = MAXSIZE_T;
+            break;
+        }
+
+        ++this->idx;
+
+        // If this index points to a null object, increment again
+        // We really should handle gc'd object entries better (in UE4), but this is a quick hack to
+        // get the iterator mostly working. In practice, you really shouldn't be iterating through
+        // all objects anyway.
+    } while (this->operator*() == nullptr);
+
     return *this;
 }
 GObjects::Iterator GObjects::Iterator::operator++(int) {
@@ -36,9 +50,12 @@ bool GObjects::Iterator::operator!=(const GObjects::Iterator& rhs) const {
     return !(*this == rhs);
 };
 
+GObjects::Iterator GObjects::begin(void) const {
+    return {*this, 0};
+}
 
 GObjects::Iterator GObjects::end(void) const {
-    return {*this, this->size()};
+    return {*this, MAXSIZE_T};
 }
 
 #pragma endregion
@@ -48,12 +65,8 @@ GObjects::GObjects(internal_type internal) : internal(internal) {}
 
 #if defined(UE4)
 
-GObjects::Iterator GObjects::begin(void) const {
-    return {*this, static_cast<size_t>(std::max(this->internal->ObjFirstGCIndex, 0))};
-}
-
 size_t GObjects::size(void) const {
-    return this->internal->ObjLastNonGCIndex - std::max(this->internal->ObjFirstGCIndex, 0);
+    return this->internal->ObjObjects.Count;
 }
 
 UObject* GObjects::obj_at(size_t idx) const {
@@ -64,10 +77,6 @@ UObject* GObjects::obj_at(size_t idx) const {
 }
 
 #elif defined(UE3)
-
-GObjects::Iterator GObjects::begin(void) const {
-    return {*this, 0};
-}
 
 size_t GObjects::size(void) const {
     return this->internal->size();
