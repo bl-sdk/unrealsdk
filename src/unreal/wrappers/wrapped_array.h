@@ -20,7 +20,23 @@ class WrappedArray {
      *
      * @return The size of the array.
      */
-    [[nodiscard]] size_t size(void) const { return this->base->size(); };
+    [[nodiscard]] size_t size(void) const;
+
+    /**
+     * @brief Reserves memory to change the capacity of this array.
+     * @note Can be used to shrink the array.
+     *
+     * @param new_cap The new capacity, in number of elements.
+     */
+    void reserve(size_t new_cap) const;
+
+    /**
+     * @brief Resizes the array.
+     * @note Does not necessarily impact reserved capacity, just current amount of elements.
+     *
+     * @param new_size The new size, in number of elements.
+     */
+    void resize(size_t new_size) const;
 
    private:
     /**

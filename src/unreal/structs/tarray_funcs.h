@@ -25,7 +25,8 @@ void TArray<T>::reserve(size_t new_cap, size_t element_size) {
      it's valid after.
     */
     auto old_data = this->data;
-    this->data = game::realloc<T>(this->data, new_size);
+    this->data = (this->data == nullptr) ? game::malloc<T>(new_size)
+                                         : game::realloc<T>(this->data, new_size);
     if (this->data == nullptr) {
         this->data = old_data;
         throw std::runtime_error("Failed to allocate memory to resize array!");

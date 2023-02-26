@@ -33,7 +33,8 @@ struct TArray {
     [[nodiscard]] size_t capacity(void) const { return this->max; };
 
     /**
-     * @brief Reserves memory to increase the capacity of this array.
+     * @brief Changes the capacity of this array, reserving new memory as needed.
+     * @note Can be used to shrink the capacity.
      *
      * @param new_cap The new capacity, in number of elements.
      * @param element_size The size of each element.
@@ -44,6 +45,36 @@ struct TArray {
         this->reserve(new_cap, sizeof(U));
     }
     void reserve(size_t new_cap, size_t element_size);
+
+    /**
+     * @brief Resizes the array.
+     *
+     * @param new_size The new size, in number of elements.
+     * @param element_size The size of each element.
+     */
+    template <typename U = T,
+              typename = std::enable_if_t<std::is_same_v<U, T> && std::negation_v<std::is_void<U>>>>
+    void resize(size_t new_size) {
+        this->resize(new_size, sizeof(U));
+    }
+    void resize(size_t new_size, size_t element_size) {
+        if (this->max < new_size) {
+            constexpr auto MIN_GROW = 4;
+            constexpr auto GROW_MULTIPLIER = 3;
+            constexpr auto GROW_DIVIDER = 8;
+            constexpr auto GROW_CONST = 16;
+
+            // Vaguely copying the standard UE grow with slack logic
+            auto new_capacity =
+                (new_size <= MIN_GROW)
+                    ? MIN_GROW
+                    : new_size + (GROW_MULTIPLIER * new_size / GROW_DIVIDER) + GROW_CONST;
+
+            this->reserve(new_capacity, element_size);
+        }
+
+        this->count = new_size;
+    }
 
     /**
      * @brief Get an element in the array.
