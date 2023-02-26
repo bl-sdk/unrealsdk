@@ -164,6 +164,11 @@ struct GameHook {
      */
     virtual void find_construct_object(void) = 0;
 
+    /**
+     * @brief Creates a console and sets the bind (if required), and hooks logging onto it.
+     */
+    virtual void inject_console(void) const = 0;
+
 #pragma endregion
 
     /**
@@ -196,11 +201,12 @@ struct GameHook {
     virtual void process_event(unreal::UObject* object,
                                unreal::UFunction* func,
                                void* params) const = 0;
-    [[nodiscard]] virtual unreal::UObject* construct_object(unreal::UClass* cls,
-                                                            unreal::UObject* outer,
-                                                            const unreal::FName& name,
-                                                            decltype(unreal::UObject::ObjectFlags) flags,
-                                                            unreal::UObject* template_obj) const = 0;
+    [[nodiscard]] virtual unreal::UObject* construct_object(
+        unreal::UClass* cls,
+        unreal::UObject* outer,
+        const unreal::FName& name,
+        decltype(unreal::UObject::ObjectFlags) flags,
+        unreal::UObject* template_obj) const = 0;
 };
 
 /**

@@ -50,8 +50,10 @@ static bool run_hooks(UFunction* func,
                       const std::string& func_name,
                       UObject* obj,
                       WrappedArgs& args) {
+    auto hook_list_copy = unrealsdk::hooks[func_name];
+
     bool block = false;
-    for (const auto& [_, hook_function] : unrealsdk::hooks[func_name]) {
+    for (const auto& [_, hook_function] : hook_list_copy) {
         try {
             if (hook_function(func, obj, args)) {
                 block = true;

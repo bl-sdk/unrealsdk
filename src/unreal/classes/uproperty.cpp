@@ -1,11 +1,10 @@
 #include "pch.h"
-#include <stdint.h>
 
+#include "env.h"
+#include "game/game_hook.h"
 #include "unreal/classes/uclass.h"
 #include "unreal/classes/uproperty.h"
 #include "unreal/structs/fname.h"
-#include "game/game_hook.h"
-#include "env.h"
 
 namespace unrealsdk::unreal {
 

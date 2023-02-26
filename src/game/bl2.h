@@ -27,11 +27,6 @@ class BL2Hook : public GameHook {
     static void hexedit_array_limit(void);
 
     /**
-     * @brief Bypasses the say console command suppression.
-     */
-    static void hook_say_bypass(void);
-
-    /**
      * @brief Hex edits out the `obj dump` array limit message.
      */
     virtual void hexedit_array_limit_message(void);
@@ -44,6 +39,7 @@ class BL2Hook : public GameHook {
     void find_fframe_step(void) override;
     void find_gmalloc(void) override;
     void find_construct_object(void) override;
+    void inject_console(void) const override;
 
     // Deliberately storing in a void pointer because the type changes in bl2/tps
     void* fname_init_ptr;

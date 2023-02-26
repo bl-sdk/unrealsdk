@@ -2,14 +2,19 @@
 
 #if defined(UE3) && defined(ARCH_X86)
 
+#include "env.h"
 #include "game/bl2.h"
 #include "game/game_hook.h"
 #include "hook_manager.h"
 #include "memory.h"
+#include "unreal/classes/properties/copyable_property.h"
+#include "unreal/classes/properties/uobjectproperty.h"
 #include "unreal/classes/properties/ustrproperty.h"
 #include "unreal/classes/ufunction.h"
 #include "unreal/classes/uobject.h"
+#include "unreal/classes/uobject_funcs.h"
 #include "unreal/structs/fframe.h"
+#include "unreal/structs/fname.h"
 #include "unreal/wrappers/bound_function.h"
 #include "unreal/wrappers/gobjects.h"
 #include "unreal/wrappers/wrapped_args.h"
@@ -29,7 +34,6 @@ void BL2Hook::hook(void) {
     hexedit_set_command();
     hexedit_array_limit();
     hexedit_array_limit_message();
-    hook_say_bypass();
 }
 
 #pragma region AntiDebug
@@ -176,11 +180,16 @@ void BL2Hook::hexedit_array_limit_message(void) {
 
 #pragma endregion
 
-#pragma region Say Bypass
+#pragma region Inject Console
 
-static bool shipping_console_command_hook(unreal::UFunction* /*func*/,
-                                          unreal::UObject* obj,
-                                          unreal::WrappedArgs& args) {
+static const std::string SAY_BYPASS_FUNC = "Engine.Console:ShippingConsoleCommand";
+static const std::string SAY_BYPASS_ID = "unrealsdk_bl2_say_bypass";
+static const std::string INJECT_CONSOLE_FUNC = "WillowGame.WillowGameViewportClient:PostRender";
+static const std::string INJECT_CONSOLE_ID = "unrealsdk_bl2_inject_console";
+
+static bool say_bypass_hook(unreal::UFunction* /*func*/,
+                            unreal::UObject* obj,
+                            unreal::WrappedArgs& args) {
     static UFunction* console_command_func = nullptr;
     static UStrProperty* command_property = nullptr;
 
@@ -196,9 +205,29 @@ static bool shipping_console_command_hook(unreal::UFunction* /*func*/,
     return true;
 }
 
-void BL2Hook::hook_say_bypass(void) {
-    unrealsdk::hooks["Engine.Console:ShippingConsoleCommand"]["unrealsdk_bl2_say_bypass"] =
-        &shipping_console_command_hook;
+static bool inject_console_hook(unreal::UFunction* /*func*/,
+                                unreal::UObject* obj,
+                                unreal::WrappedArgs& /*args*/) {
+    unrealsdk::hooks[INJECT_CONSOLE_FUNC].erase(INJECT_CONSOLE_ID);
+
+    auto console = obj->get<UObjectProperty>(L"ViewportConsole"_fn);
+    auto existing_console_key = console->get<UNameProperty>(L"ConsoleKey"_fn);
+
+    if (existing_console_key != L"None"_fn || existing_console_key == L"Undefine"_fn) {
+        LOG(MISC, "Console key is already set to '%s'", std::string{existing_console_key}.c_str());
+    } else {
+        auto wanted_console_key = env::get(env::CONSOLE_KEY, env::CONSOLE_KEY_DEFAULT);
+        console->set<UNameProperty>(L"ConsoleKey"_fn, unreal::FName{wanted_console_key});
+
+        LOG(MISC, "Set console key to '%s'", wanted_console_key.c_str());
+    }
+
+    return false;
+}
+
+void BL2Hook::inject_console(void) const {
+    unrealsdk::hooks[SAY_BYPASS_FUNC][SAY_BYPASS_ID] = &say_bypass_hook;
+    unrealsdk::hooks[INJECT_CONSOLE_FUNC][INJECT_CONSOLE_ID] = &inject_console_hook;
 }
 
 #pragma endregion

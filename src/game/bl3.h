@@ -20,6 +20,7 @@ class BL3Hook : public GameHook {
     void find_fframe_step(void) override;
     void find_gmalloc(void) override;
     void find_construct_object(void) override;
+    void inject_console(void) const override;
 
     using fname_init_func = unreal::FName (*)(const wchar_t* str,
                                               int32_t number,

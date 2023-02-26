@@ -104,12 +104,15 @@ void init(void) {
 void GameHook::hook() {
     this->hook_process_event();
     this->hook_call_function();
+
     this->find_gobjects();
     this->find_gnames();
     this->find_fname_init();
     this->find_fframe_step();
     this->find_gmalloc();
     this->find_construct_object();
+
+    this->inject_console();
 }
 
 uint32_t GameHook::get_alignment(size_t len) {

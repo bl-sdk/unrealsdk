@@ -21,6 +21,14 @@ class UObjectProperty : public UProperty {
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     UClass* PropertyClass;
+
+   public:
+    /**
+     * @brief Get the class of this property, which the values must be an instance of.
+     *
+     * @return This property's class.
+     */
+    [[nodiscard]] UClass* get_property_class(void) const;
 };
 
 template <>
