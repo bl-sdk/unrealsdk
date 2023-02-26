@@ -101,7 +101,7 @@ bool sigscan_and_detour(const Pattern& pattern,
 
 uintptr_t read_offset(uintptr_t address) {
 #ifdef ARCH_X64
-    return address + *reinterpret_cast<uint32_t*>(address) + 4;
+    return address + *reinterpret_cast<int32_t*>(address) + 4;
 #else
     return *reinterpret_cast<uintptr_t*>(address);
 #endif

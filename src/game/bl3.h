@@ -19,19 +19,33 @@ class BL3Hook : public GameHook {
     void find_fname_init(void) override;
     void find_fframe_step(void) override;
     void find_gmalloc(void) override;
+    void find_construct_object(void) override;
 
-    using fname_init_func = unreal::FName(const wchar_t* str, int32_t number, int32_t find_type);
-    fname_init_func* fname_init_ptr;
+    using fname_init_func = unreal::FName (*)(const wchar_t* str,
+                                              int32_t number,
+                                              int32_t find_type);
+    fname_init_func fname_init_ptr;
 
-    using fframe_step_func = void(unreal::FFrame* stack, unreal::UObject* obj, void* param);
-    fframe_step_func* fframe_step_ptr;
+    using fframe_step_func = void (*)(unreal::FFrame* stack, unreal::UObject* obj, void* param);
+    fframe_step_func fframe_step_ptr;
 
-    using fmemory_malloc_func = void*(uint64_t len, uint32_t align);
-    using fmemory_realloc_func = void*(void* original, uint64_t len, uint32_t align);
-    using fmemory_free_func = void(void* data);
-    fmemory_malloc_func* fmemory_malloc_ptr;
-    fmemory_realloc_func* fmemory_realloc_ptr;
-    fmemory_free_func* fmemory_free_ptr;
+    using fmemory_malloc_func = void* (*)(uint64_t len, uint32_t align);
+    using fmemory_realloc_func = void* (*)(void* original, uint64_t len, uint32_t align);
+    using fmemory_free_func = void (*)(void* data);
+    fmemory_malloc_func fmemory_malloc_ptr;
+    fmemory_realloc_func fmemory_realloc_ptr;
+    fmemory_free_func fmemory_free_ptr;
+
+    using construct_obj_func = unreal::UObject* (*)(unreal::UClass* cls,
+                                                    unreal::UObject* obj,
+                                                    unreal::FName name,
+                                                    uint32_t flags,
+                                                    uint32_t internal_flags,
+                                                    unreal::UObject* template_obj,
+                                                    uint32_t copy_transients_from_class_defaults,
+                                                    void* instance_graph,
+                                                    uint32_t assume_template_is_archetype);
+    construct_obj_func construct_obj_ptr;
 
    public:
     void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) const override;
@@ -43,6 +57,11 @@ class BL3Hook : public GameHook {
     void process_event(unreal::UObject* object,
                        unreal::UFunction* func,
                        void* params) const override;
+    [[nodiscard]] unreal::UObject* construct_object(unreal::UClass* cls,
+                                                    unreal::UObject* outer,
+                                                    const unreal::FName& name,
+                                                    decltype(unreal::UObject::ObjectFlags) flags,
+                                                    unreal::UObject* template_obj) const override;
 };
 
 template <>

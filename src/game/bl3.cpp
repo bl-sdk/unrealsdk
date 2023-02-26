@@ -45,9 +45,7 @@ void BL3Hook::hook_process_event(void) {
     sigscan_and_detour(PROCESS_EVENT_SIG, process_event_hook, &process_event_ptr, "ProcessEvent");
 }
 
-void BL3Hook::process_event(unreal::UObject* object,
-                    unreal::UFunction* func,
-                    void* params) const {
+void BL3Hook::process_event(unreal::UObject* object, unreal::UFunction* func, void* params) const {
     process_event_hook(object, func, params);
 }
 
@@ -124,7 +122,7 @@ void BL3Hook::find_fname_init(void) {
         "\x40\x53\x48\x83\xEC\x30\xC7\x44\x24\x00\x00\x00\x00\x00",
         "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00"};
 
-    this->fname_init_ptr = sigscan<fname_init_func*>(FNAME_INIT_PATTERN);
+    this->fname_init_ptr = sigscan<fname_init_func>(FNAME_INIT_PATTERN);
     LOG(MISC, "FName::Init: 0x%p", this->fname_init_ptr);
 }
 
@@ -143,7 +141,7 @@ void BL3Hook::find_fframe_step(void) {
     static const Pattern FFRAME_STEP_SIG{"\x48\x8B\x41\x20\x4C\x8B\xD2\x48\x8B\xD1",
                                          "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
 
-    this->fframe_step_ptr = sigscan<fframe_step_func*>(FFRAME_STEP_SIG);
+    this->fframe_step_ptr = sigscan<fframe_step_func>(FFRAME_STEP_SIG);
     LOG(MISC, "FFrame::Step: 0x%p", this->fframe_step_ptr);
 }
 void BL3Hook::fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const {
@@ -171,9 +169,9 @@ void BL3Hook::find_gmalloc(void) {
         "\x48\x85\xC9\x74\x00\x53\x48\x83\xEC\x20\x48\x8B\xD9\x48\x8B\x0D\x00\x00\x00\x00",
         "\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00"};
 
-    this->fmemory_malloc_ptr = sigscan<fmemory_malloc_func*>(MALLOC_PATTERN);
-    this->fmemory_realloc_ptr = sigscan<fmemory_realloc_func*>(REALLOC_PATTERN);
-    this->fmemory_free_ptr = sigscan<fmemory_free_func*>(FREE_PATTERN);
+    this->fmemory_malloc_ptr = sigscan<fmemory_malloc_func>(MALLOC_PATTERN);
+    this->fmemory_realloc_ptr = sigscan<fmemory_realloc_func>(REALLOC_PATTERN);
+    this->fmemory_free_ptr = sigscan<fmemory_free_func>(FREE_PATTERN);
 
     LOG(MISC, "FMemory::Malloc: 0x%p", this->fmemory_malloc_ptr);
     LOG(MISC, "FMemory::Realloc: 0x%p", this->fmemory_realloc_ptr);
@@ -189,6 +187,29 @@ void* BL3Hook::realloc(void* original, size_t len) const {
 }
 void BL3Hook::free(void* data) const {
     this->fmemory_free_ptr(data);
+}
+
+#pragma endregion
+
+#pragma region ConstructObject
+
+void BL3Hook::find_construct_object(void) {
+    static const Pattern CONSTRUCT_OBJECT_PATTERN{
+        "\xE8\x00\x00\x00\x00\x41\x89\x3E\x4D\x8D\x46\x04",
+        "\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF", 1};
+    
+    auto construct_obj_instr = sigscan(CONSTRUCT_OBJECT_PATTERN);
+    this->construct_obj_ptr = read_offset<construct_obj_func>(construct_obj_instr);
+    LOG(MISC, "StaticConstructObject: 0x%p", this->construct_obj_ptr);
+}
+
+unreal::UObject* BL3Hook::construct_object(unreal::UClass* cls,
+                                           unreal::UObject* outer,
+                                           const unreal::FName& name,
+                                           decltype(unreal::UObject::ObjectFlags) flags,
+                                           unreal::UObject* template_obj) const {
+    return this->construct_obj_ptr(cls, outer, name, flags, 0, template_obj, 0 /* false */, nullptr,
+                                   0 /* false */);
 }
 
 #pragma endregion

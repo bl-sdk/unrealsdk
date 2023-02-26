@@ -3,14 +3,15 @@
 
 #include "pch.h"
 
-#include "unreal/structs/fframe.h"
+#include "unreal/classes/uobject.h"
+#include "unreal/structs/fname.h"
 #include "unreal/wrappers/gnames.h"
 #include "unreal/wrappers/gobjects.h"
 
 namespace unrealsdk::unreal {
 
-struct FName;
-class UObject;
+struct FFrame;
+class UClass;
 class UFunction;
 
 }  // namespace unrealsdk::unreal
@@ -83,6 +84,22 @@ template <typename T>
 }
 
 /**
+ * @brief Constructs a new object
+ *
+ * @param cls The class to construct. Required.
+ * @param outer The outer object to construct the new object under.
+ * @param name The new object's name.
+ * @param flags Object flags to set.
+ * @param template_obj The template object to use
+ * @return
+ */
+[[nodiscard]] unreal::UObject* construct_object(unreal::UClass* cls,
+                                                unreal::UObject* outer,
+                                                const unreal::FName& name = {0, 0},
+                                                decltype(unreal::UObject::ObjectFlags) flags = 0,
+                                                unreal::UObject* template_obj = nullptr);
+
+/**
  * @brief Calls unreal's free function.
  *
  * @param data The memory to free.
@@ -142,6 +159,11 @@ struct GameHook {
      */
     virtual void find_gmalloc(void) = 0;
 
+    /**
+     * @brief Finds `StaticConstructObject`, and sets up such that `construct_object` may be called.
+     */
+    virtual void find_construct_object(void) = 0;
+
 #pragma endregion
 
     /**
@@ -174,6 +196,11 @@ struct GameHook {
     virtual void process_event(unreal::UObject* object,
                                unreal::UFunction* func,
                                void* params) const = 0;
+    [[nodiscard]] virtual unreal::UObject* construct_object(unreal::UClass* cls,
+                                                            unreal::UObject* outer,
+                                                            const unreal::FName& name,
+                                                            decltype(unreal::UObject::ObjectFlags) flags,
+                                                            unreal::UObject* template_obj) const = 0;
 };
 
 /**

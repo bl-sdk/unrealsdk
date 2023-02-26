@@ -42,6 +42,13 @@ void free(void* data) {
 void process_event(unreal::UObject* object, unreal::UFunction* function, void* params) {
     hook_instance->process_event(object, function, params);
 }
+unreal::UObject* construct_object(unreal::UClass* cls,
+                                  unreal::UObject* outer,
+                                  const unreal::FName& name,
+                                  decltype(unreal::UObject::ObjectFlags) flags,
+                                  unreal::UObject* template_obj) {
+    return hook_instance->construct_object(cls, outer, name, flags, template_obj);
+}
 
 #pragma endregion
 
@@ -102,6 +109,7 @@ void GameHook::hook() {
     this->find_fname_init();
     this->find_fframe_step();
     this->find_gmalloc();
+    this->find_construct_object();
 }
 
 uint32_t GameHook::get_alignment(size_t len) {

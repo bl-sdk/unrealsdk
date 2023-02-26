@@ -43,6 +43,7 @@ class BL2Hook : public GameHook {
     void find_fname_init(void) override;
     void find_fframe_step(void) override;
     void find_gmalloc(void) override;
+    void find_construct_object(void) override;
 
     // Deliberately storing in a void pointer because the type changes in bl2/tps
     void* fname_init_ptr;
@@ -66,6 +67,17 @@ class BL2Hook : public GameHook {
 
     FMalloc* gmalloc;
 
+    // NOLINTNEXTLINE(modernize-use-using)
+    typedef unreal::UObject*(__cdecl* construct_obj_func)(unreal::UClass* cls,
+                                                          unreal::UObject* outer,
+                                                          unreal::FName name,
+                                                          uint64_t flags,
+                                                          unreal::UObject* template_obj,
+                                                          void* error_output_device,
+                                                          void* instance_graph,
+                                                          uint32_t assume_template_is_archetype);
+    construct_obj_func construct_obj_ptr;
+
    public:
     void hook(void) override;
 
@@ -78,6 +90,11 @@ class BL2Hook : public GameHook {
     void process_event(unreal::UObject* object,
                        unreal::UFunction* func,
                        void* params) const override;
+    [[nodiscard]] unreal::UObject* construct_object(unreal::UClass* cls,
+                                                    unreal::UObject* outer,
+                                                    const unreal::FName& name,
+                                                    decltype(unreal::UObject::ObjectFlags) flags,
+                                                    unreal::UObject* template_obj) const override;
 };
 
 template <>

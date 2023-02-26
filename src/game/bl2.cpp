@@ -383,6 +383,31 @@ void BL2Hook::free(void* data) const {
 
 #pragma endregion
 
+#pragma region ConstructObject
+
+void BL2Hook::find_construct_object(void) {
+    static const Pattern CONSTRUCT_OBJECT_PATTERN{
+        "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x83\xEC\x10\x53\x56"
+        "\x57\xA1\x00\x00\x00\x00\x33\xC5\x50\x8D\x45\xF4\x64\xA3\x00\x00\x00\x00\x8B\x7D\x08\x8A"
+        "\x87",
+        "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"
+        "\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF"
+        "\xFF"};
+    this->construct_obj_ptr = sigscan<construct_obj_func>(CONSTRUCT_OBJECT_PATTERN);
+    LOG(MISC, "StaticConstructObject: 0x%p", this->construct_obj_ptr);
+}
+
+unreal::UObject* BL2Hook::construct_object(unreal::UClass* cls,
+                                           unreal::UObject* outer,
+                                           const unreal::FName& name,
+                                           decltype(unreal::UObject::ObjectFlags) flags,
+                                           unreal::UObject* template_obj) const {
+    return this->construct_obj_ptr(cls, outer, name, flags, template_obj, nullptr, nullptr,
+                                   0 /* false */);
+}
+
+#pragma endregion
+
 }  // namespace unrealsdk::game
 
 #endif
