@@ -16,6 +16,7 @@
 #include "unreal/classes/uobject_funcs.h"
 #include "unreal/structs/fframe.h"
 #include "unreal/structs/fname.h"
+#include "unreal/structs/tarray.h"
 #include "unreal/wrappers/gobjects.h"
 #include "unreal/wrappers/wrapped_args.h"
 #include "unreal/wrappers/wrapped_struct.h"
@@ -228,6 +229,8 @@ unreal::UObject* BL3Hook::construct_object(unreal::UClass* cls,
 static const std::string INJECT_CONSOLE_FUNC = "/Script/Engine.PlayerController:ClientSetHUD";
 static const std::string INJECT_CONSOLE_ID = "unrealsdk_bl3_inject_console";
 
+static UObject* console = nullptr;
+
 static bool inject_console_hook(unreal::UFunction* /*func*/,
                                 unreal::UObject* obj,
                                 unreal::WrappedArgs& /*args*/) {
@@ -237,7 +240,7 @@ static bool inject_console_hook(unreal::UFunction* /*func*/,
     auto viewport = local_player->get<UObjectProperty>(L"ViewportClient"_fn);
     auto console_property =
         viewport->Class->find_and_validate<UObjectProperty>(L"ViewportConsole"_fn);
-    auto console = viewport->get(console_property);
+    console = viewport->get(console_property);
 
     if (console == nullptr) {
         auto default_console = console_property->get_property_class()->ClassDefaultObject;
@@ -287,6 +290,30 @@ static bool inject_console_hook(unreal::UFunction* /*func*/,
 
 void BL3Hook::inject_console(void) const {
     unrealsdk::hooks[INJECT_CONSOLE_FUNC][INJECT_CONSOLE_ID] = &inject_console_hook;
+}
+
+void BL3Hook::uconsole_output_text(const std::wstring& str) const {
+    static constexpr auto DEFAULT_OUTPUT_TEXT_VF_INDEX = 83;
+
+    if (console == nullptr) {
+        return;
+    }
+
+    auto size = str.size();
+    if (size > TArray<void>::MAX_CAPACITY) {
+        throw std::length_error("Tried to log a string longer than TArray max capacity!");
+    }
+    auto narrowed_size = static_cast<decltype(TArray<void>::count)>(size);
+
+    // We know the input string exists for the lifetime of this function, and we know the string we
+    // send to unreal will have a smaller lifetime within it.
+    // Rather than use a more well defined FString type, this means we can just reference the stl
+    // string's data directly, avoiding an extra copy.
+    TArray<const wchar_t> fstr{str.data(), narrowed_size, narrowed_size};
+
+    auto idx =
+        env::get_numeric<size_t>(env::UCONSOLE_OUTPUT_TEXT_VF_INDEX, DEFAULT_OUTPUT_TEXT_VF_INDEX);
+    console->call_virtual_function<void>(idx, &fstr);
 }
 
 #pragma endregion

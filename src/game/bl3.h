@@ -63,6 +63,7 @@ class BL3Hook : public GameHook {
                                                     const unreal::FName& name,
                                                     decltype(unreal::UObject::ObjectFlags) flags,
                                                     unreal::UObject* template_obj) const override;
+    void uconsole_output_text(const std::wstring& str) const override;
 };
 
 template <>

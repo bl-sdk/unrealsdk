@@ -49,6 +49,12 @@ unreal::UObject* construct_object(unreal::UClass* cls,
                                   unreal::UObject* template_obj) {
     return hook_instance->construct_object(cls, outer, name, flags, template_obj);
 }
+void uconsole_output_text(const std::wstring& str) {
+    // Since this is called so often, do some actual error checking to make sure the hook exists
+    if (hook_instance) {
+        hook_instance->uconsole_output_text(str);
+    }
+}
 
 #pragma endregion
 

@@ -205,14 +205,19 @@ static bool say_bypass_hook(unreal::UFunction* /*func*/,
     return true;
 }
 
+static BoundFunction console_output_text{};
+
 static bool inject_console_hook(unreal::UFunction* /*func*/,
                                 unreal::UObject* obj,
                                 unreal::WrappedArgs& /*args*/) {
     unrealsdk::hooks[INJECT_CONSOLE_FUNC].erase(INJECT_CONSOLE_ID);
 
     auto console = obj->get<UObjectProperty>(L"ViewportConsole"_fn);
-    auto existing_console_key = console->get<UNameProperty>(L"ConsoleKey"_fn);
 
+    // Grab this reference ASAP
+    console_output_text = console->get<UFunction>(L"OutputText"_fn);
+
+    auto existing_console_key = console->get<UNameProperty>(L"ConsoleKey"_fn);
     if (existing_console_key != L"None"_fn || existing_console_key == L"Undefine"_fn) {
         LOG(MISC, "Console key is already set to '%s'", std::string{existing_console_key}.c_str());
     } else {
@@ -228,6 +233,14 @@ static bool inject_console_hook(unreal::UFunction* /*func*/,
 void BL2Hook::inject_console(void) const {
     unrealsdk::hooks[SAY_BYPASS_FUNC][SAY_BYPASS_ID] = &say_bypass_hook;
     unrealsdk::hooks[INJECT_CONSOLE_FUNC][INJECT_CONSOLE_ID] = &inject_console_hook;
+}
+
+void BL2Hook::uconsole_output_text(const std::wstring& str) const {
+    if (console_output_text.func == nullptr) {
+        return;
+    }
+
+    console_output_text.call<void, UStrProperty>(str);
 }
 
 #pragma endregion

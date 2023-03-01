@@ -84,6 +84,22 @@ template <typename T>
 }
 
 /**
+ * @brief Calls unreal's free function.
+ *
+ * @param data The memory to free.
+ */
+void free(void* data);
+
+/**
+ * @brief Calls `UObject::ProcessEvent`.
+ *
+ * @param object The object to process an event on.
+ * @param func The function to call.
+ * @param params The function's params
+ */
+void process_event(unreal::UObject* object, unreal::UFunction* func, void* params);
+
+/**
  * @brief Constructs a new object
  *
  * @param cls The class to construct. Required.
@@ -100,20 +116,9 @@ template <typename T>
                                                 unreal::UObject* template_obj = nullptr);
 
 /**
- * @brief Calls unreal's free function.
- *
- * @param data The memory to free.
+ * @brief Calls `UConsole::OutputText` to write to the UE console.
  */
-void free(void* data);
-
-/**
- * @brief Calls `UObject::ProcessEvent`.
- *
- * @param object The object to process an event on.
- * @param func The function to call.
- * @param params The function's params
- */
-void process_event(unreal::UObject* object, unreal::UFunction* func, void* params);
+void uconsole_output_text(const std::wstring& str);
 
 #pragma region Hook Classes
 
@@ -207,6 +212,7 @@ struct GameHook {
         const unreal::FName& name,
         decltype(unreal::UObject::ObjectFlags) flags,
         unreal::UObject* template_obj) const = 0;
+    virtual void uconsole_output_text(const std::wstring& str) const = 0;
 };
 
 /**

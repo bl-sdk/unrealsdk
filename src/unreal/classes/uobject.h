@@ -25,7 +25,7 @@ class UObject {
     UObject& operator=(UObject&&) = delete;
     ~UObject() = delete;
 
-    void* vftable;
+    void** vftable;
 
     // NOLINTBEGIN(readability-identifier-naming)
 
@@ -64,7 +64,22 @@ class UObject {
     // NOLINTEND(readability-identifier-naming)
 
     /**
-     * @brief Gets a property on this struct.
+     * @brief Calls a virtual function on this object.
+     *
+     * @tparam R The return type of the function. May be void.
+     * @tparam Args The types of the function args. Should get picked up automatically.
+     * @param index The index of the function in the vftable.
+     * @param args The function's args.
+     * @return The function's return value.
+     */
+    template <typename R, typename... Args>
+    R call_virtual_function(size_t index, Args... args) const {
+        return reinterpret_cast<R (*)(const UObject*, Args...)>(this->vftable[index])(this,
+                                                                                      args...);
+    }
+
+    /**
+     * @brief Gets a property on this object.
      *
      * @tparam T The type of the property.
      * @param name The property's name to lookup.
