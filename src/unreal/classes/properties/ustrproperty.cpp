@@ -25,13 +25,13 @@ PropTraits<UStrProperty>::Value PropTraits<UStrProperty>::get(const UStrProperty
 void PropTraits<UStrProperty>::set(const UStrProperty* /*prop*/, uintptr_t addr, Value value) {
     auto str = reinterpret_cast<FString*>(addr);
 
-    auto new_size = value.size();
+    // Include the trailing null in the data we copy
+    auto new_size = value.size() + 1;
     if (new_size >= str->capacity()) {
-        str->reserve(new_size + 1);
+        str->reserve(new_size);
     }
 
-    memcpy(str->data, value.data(), new_size * sizeof(*str->data));
-    str->data[new_size] = L'\0';
+    memcpy(str->data, value.c_str(), new_size * sizeof(*str->data));
 
     // Rely on `TArray::reserve` to detect overruns
     str->count = static_cast<decltype(str->count)>(new_size);
