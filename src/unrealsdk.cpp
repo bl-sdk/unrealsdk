@@ -10,10 +10,6 @@ namespace unrealsdk {
 static PathsList paths_internal;
 const PathsList& paths = paths_internal;
 
-hook_manager::map hooks{};
-bool log_all_calls = false;
-bool inject_next_call = false;
-
 /**
  * @brief Updates the paths lists.
  *

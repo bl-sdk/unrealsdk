@@ -13,7 +13,6 @@
 #include "unreal/structs/fname.h"
 #include "unreal/wrappers/bound_function.h"
 #include "unreal/wrappers/wrapped_args.h"
-#include "unrealsdk.h"
 
 #if defined(UE3) && defined(ARCH_X86)
 
@@ -45,7 +44,7 @@ static bool say_bypass_hook(UFunction* /*func*/, UObject* obj, WrappedArgs& args
 static BoundFunction console_output_text{};
 
 static bool inject_console_hook(UFunction* /*func*/, UObject* obj, WrappedArgs& /*args*/) {
-    unrealsdk::hooks[INJECT_CONSOLE_FUNC].erase(INJECT_CONSOLE_ID);
+    hook_manager::hooks[INJECT_CONSOLE_FUNC].erase(INJECT_CONSOLE_ID);
 
     auto console = obj->get<UObjectProperty>(L"ViewportConsole"_fn);
 
@@ -66,8 +65,8 @@ static bool inject_console_hook(UFunction* /*func*/, UObject* obj, WrappedArgs& 
 }
 
 void BL2Hook::inject_console(void) {
-    unrealsdk::hooks[SAY_BYPASS_FUNC][SAY_BYPASS_ID] = &say_bypass_hook;
-    unrealsdk::hooks[INJECT_CONSOLE_FUNC][INJECT_CONSOLE_ID] = &inject_console_hook;
+    hook_manager::hooks[SAY_BYPASS_FUNC][SAY_BYPASS_ID] = &say_bypass_hook;
+    hook_manager::hooks[INJECT_CONSOLE_FUNC][INJECT_CONSOLE_ID] = &inject_console_hook;
 }
 
 void BL2Hook::uconsole_output_text(const std::wstring& str) const {

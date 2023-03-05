@@ -14,9 +14,6 @@ struct PathsList {
 };
 
 extern const PathsList& paths;
-extern hook_manager::map hooks;
-extern bool log_all_calls;
-extern bool inject_next_call;
 
 /**
  * @brief Initalizes the SDK.

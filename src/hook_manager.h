@@ -19,6 +19,10 @@ using func_name = std::string;
 using identifier = std::string;
 using map = std::unordered_map<func_name, std::unordered_map<identifier, std::function<callback>>>;
 
+extern map hooks;
+extern bool log_all_calls;
+extern bool inject_next_call;
+
 /**
  * @brief Handles a `UObject::ProcessEvent` call, processes any hooks, and decides if to block
  *        execution.

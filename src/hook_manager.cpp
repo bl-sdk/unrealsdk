@@ -1,15 +1,19 @@
 #include "pch.h"
 
+#include "game/game_hook.h"
 #include "hook_manager.h"
 #include "unreal/classes/ufunction.h"
 #include "unreal/classes/uobject.h"
 #include "unreal/structs/fframe.h"
 #include "unreal/wrappers/wrapped_args.h"
-#include "unrealsdk.h"
 
 using namespace unrealsdk::unreal;
 
 namespace unrealsdk::hook_manager {
+
+map hooks{};
+bool log_all_calls = false;
+bool inject_next_call = false;
 
 /**
  * @brief Checks if a hook may be called, and logs the call if needed.
@@ -22,18 +26,18 @@ namespace unrealsdk::hook_manager {
 static bool check_hook_allowed_and_log_call(const std::string& source,
                                             const std::string& func_name,
                                             const UObject* obj) {
-    if (unrealsdk::log_all_calls) {
+    if (log_all_calls) {
         LOG(HOOKS, "===== %s called =====", source.c_str());
         LOG(HOOKS, "Function: %s", func_name.c_str());
         LOG(HOOKS, "Object: %s", obj->get_path_name<char>().c_str());
     }
 
-    if (unrealsdk::inject_next_call) {
-        unrealsdk::inject_next_call = false;
+    if (inject_next_call) {
+        inject_next_call = false;
         return false;
     }
 
-    return unrealsdk::hooks.count(func_name) != 0;
+    return hooks.count(func_name) != 0;
 }
 
 /**
@@ -50,7 +54,9 @@ static bool run_hooks(UFunction* func,
                       const std::string& func_name,
                       UObject* obj,
                       WrappedArgs& args) {
-    auto hook_list_copy = unrealsdk::hooks[func_name];
+    // Grab a copy incase the hook removes itself from the list (which would invalidate the
+    // iterator)
+    auto hook_list_copy = hooks[func_name];
 
     bool block = false;
     for (const auto& [_, hook_function] : hook_list_copy) {
@@ -118,8 +124,8 @@ bool call_function(UObject* obj, FFrame* stack, void* /*result*/, UFunction* fun
             continue;
         }
 
-        unrealsdk::game::fframe_step(stack, stack->Object,
-                                     frame == nullptr ? nullptr : frame + prop->Offset_Internal);
+        game::fframe_step(stack, stack->Object,
+                          frame == nullptr ? nullptr : frame + prop->Offset_Internal);
     }
 
     WrappedArgs args{func, frame};

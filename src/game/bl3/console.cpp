@@ -15,7 +15,6 @@
 #include "unreal/wrappers/wrapped_args.h"
 #include "unreal/wrappers/wrapped_array.h"
 #include "unreal/wrappers/wrapped_struct.h"
-#include "unrealsdk.h"
 
 #if defined(UE4) && defined(ARCH_X64)
 
@@ -31,7 +30,7 @@ static UObject* console = nullptr;
 static bool inject_console_hook(UFunction* /*func*/,
                                 UObject* obj,
                                 WrappedArgs& /*args*/) {
-    unrealsdk::hooks[INJECT_CONSOLE_FUNC].erase(INJECT_CONSOLE_ID);
+    hook_manager::hooks[INJECT_CONSOLE_FUNC].erase(INJECT_CONSOLE_ID);
 
     auto local_player = obj->get<UObjectProperty>(L"Player"_fn);
     auto viewport = local_player->get<UObjectProperty>(L"ViewportClient"_fn);
@@ -86,7 +85,7 @@ static bool inject_console_hook(UFunction* /*func*/,
 }
 
 void BL3Hook::inject_console(void) {
-    unrealsdk::hooks[INJECT_CONSOLE_FUNC][INJECT_CONSOLE_ID] = &inject_console_hook;
+    hook_manager::hooks[INJECT_CONSOLE_FUNC][INJECT_CONSOLE_ID] = &inject_console_hook;
 }
 
 void BL3Hook::uconsole_output_text(const std::wstring& str) const {
