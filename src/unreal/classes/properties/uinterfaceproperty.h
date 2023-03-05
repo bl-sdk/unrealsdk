@@ -16,6 +16,14 @@ class UObject;
 #endif
 
 class UInterfaceProperty : public UProperty {
+   public:
+    UInterfaceProperty() = delete;
+    UInterfaceProperty(const UInterfaceProperty&) = delete;
+    UInterfaceProperty(UInterfaceProperty&&) = delete;
+    UInterfaceProperty& operator=(const UInterfaceProperty&) = delete;
+    UInterfaceProperty& operator=(UInterfaceProperty&&) = delete;
+    ~UInterfaceProperty() = delete;
+
    private:
     friend PropTraits<UInterfaceProperty>;
 

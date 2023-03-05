@@ -31,6 +31,13 @@ This means:
 
 class UProperty : public UField {
    public:
+    UProperty() = delete;
+    UProperty(const UProperty&) = delete;
+    UProperty(UProperty&&) = delete;
+    UProperty& operator=(const UProperty&) = delete;
+    UProperty& operator=(UProperty&&) = delete;
+    ~UProperty() = delete;
+
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
 #ifdef UE4

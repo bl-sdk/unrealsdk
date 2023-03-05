@@ -13,6 +13,13 @@ namespace unrealsdk::unreal {
 
 class UClass : public UStruct {
    public:
+    UClass() = delete;
+    UClass(const UClass&) = delete;
+    UClass(UClass&&) = delete;
+    UClass& operator=(const UClass&) = delete;
+    UClass& operator=(UClass&&) = delete;
+    ~UClass() = delete;
+
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
 #ifdef UE4

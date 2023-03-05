@@ -16,19 +16,26 @@ class UObject;
 #endif
 
 class UObjectProperty : public UProperty {
-   private:
-    friend PropTraits<UObjectProperty>;
-
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    UClass* PropertyClass;
-
    public:
+    UObjectProperty() = delete;
+    UObjectProperty(const UObjectProperty&) = delete;
+    UObjectProperty(UObjectProperty&&) = delete;
+    UObjectProperty& operator=(const UObjectProperty&) = delete;
+    UObjectProperty& operator=(UObjectProperty&&) = delete;
+    ~UObjectProperty() = delete;
+
     /**
      * @brief Get the class of this property, which the values must be an instance of.
      *
      * @return This property's class.
      */
     [[nodiscard]] UClass* get_property_class(void) const;
+
+   private:
+    friend PropTraits<UObjectProperty>;
+
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    UClass* PropertyClass;
 };
 
 template <>

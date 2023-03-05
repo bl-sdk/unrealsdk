@@ -16,6 +16,14 @@ class UScriptStruct;
 #endif
 
 class UStructProperty : public UProperty {
+   public:
+    UStructProperty() = delete;
+    UStructProperty(const UStructProperty&) = delete;
+    UStructProperty(UStructProperty&&) = delete;
+    UStructProperty& operator=(const UStructProperty&) = delete;
+    UStructProperty& operator=(UStructProperty&&) = delete;
+    ~UStructProperty() = delete;
+
    private:
     friend PropTraits<UStructProperty>;
 

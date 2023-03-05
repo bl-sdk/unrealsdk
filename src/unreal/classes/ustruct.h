@@ -16,6 +16,13 @@ class UProperty;
 
 class UStruct : public UField {
    public:
+    UStruct() = delete;
+    UStruct(const UStruct&) = delete;
+    UStruct(UStruct&&) = delete;
+    UStruct& operator=(const UStruct&) = delete;
+    UStruct& operator=(UStruct&&) = delete;
+    ~UStruct() = delete;
+
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
 #ifdef UE4

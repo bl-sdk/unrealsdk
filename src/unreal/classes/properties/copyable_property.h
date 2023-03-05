@@ -18,7 +18,15 @@ namespace unrealsdk::unreal {
 #endif
 
 template <typename T>
-class CopyableProperty : public UProperty {};
+class CopyableProperty : public UProperty {
+   public:
+    CopyableProperty<T>() = delete;
+    CopyableProperty<T>(const CopyableProperty<T>&) = delete;
+    CopyableProperty<T>(CopyableProperty<T>&&) = delete;
+    CopyableProperty<T>& operator=(const CopyableProperty<T>&) = delete;
+    CopyableProperty<T>& operator=(CopyableProperty<T>&&) = delete;
+    ~CopyableProperty<T>() = delete;
+};
 
 template <typename T>
 struct PropTraits<CopyableProperty<T>> {

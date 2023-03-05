@@ -13,6 +13,14 @@ namespace unrealsdk::unreal {
 #endif
 
 class UBoolProperty : public UProperty {
+   public:
+    UBoolProperty() = delete;
+    UBoolProperty(const UBoolProperty&) = delete;
+    UBoolProperty(UBoolProperty&&) = delete;
+    UBoolProperty& operator=(const UBoolProperty&) = delete;
+    UBoolProperty& operator=(UBoolProperty&&) = delete;
+    ~UBoolProperty() = delete;
+
    private:
     friend PropTraits<UBoolProperty>;
 

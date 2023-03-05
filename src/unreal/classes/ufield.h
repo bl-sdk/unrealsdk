@@ -11,6 +11,13 @@ namespace unrealsdk::unreal {
 
 class UField : public UObject {
    public:
+    UField() = delete;
+    UField(const UField&) = delete;
+    UField(UField&&) = delete;
+    UField& operator=(const UField&) = delete;
+    UField& operator=(UField&&) = delete;
+    ~UField() = delete;
+
     // NOLINTNEXTLINE(readability-identifier-naming)
     UField* Next;
 };

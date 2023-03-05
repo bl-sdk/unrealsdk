@@ -11,6 +11,13 @@ namespace unrealsdk::unreal {
 
 class UFunction : public UStruct {
    public:
+    UFunction() = delete;
+    UFunction(const UFunction&) = delete;
+    UFunction(UFunction&&) = delete;
+    UFunction& operator=(const UFunction&) = delete;
+    UFunction& operator=(UFunction&&) = delete;
+    ~UFunction() = delete;
+
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
 #ifdef UE4

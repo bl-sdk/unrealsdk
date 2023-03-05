@@ -14,6 +14,14 @@ namespace unrealsdk::unreal {
 #endif
 
 class UArrayProperty : public UProperty {
+   public:
+    UArrayProperty() = delete;
+    UArrayProperty(const UArrayProperty&) = delete;
+    UArrayProperty(UArrayProperty&&) = delete;
+    UArrayProperty& operator=(const UArrayProperty&) = delete;
+    UArrayProperty& operator=(UArrayProperty&&) = delete;
+    ~UArrayProperty() = delete;
+
    private:
     friend PropTraits<UArrayProperty>;
 

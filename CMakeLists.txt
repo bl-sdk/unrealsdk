@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.20)
+﻿cmake_minimum_required (VERSION 3.24)
 
 project(unrealsdk VERSION 1.0.0)
 
@@ -9,7 +9,7 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
-set(COMPILE_WARNING_AS_ERROR True)
+set(CMAKE_COMPILE_WARNING_AS_ERROR True)
 
 # Clang doesn't check the architecture define from the preset, so set it properly
 if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND (SDK_ARCH STREQUAL "x86"))

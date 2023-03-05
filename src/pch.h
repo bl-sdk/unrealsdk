@@ -2,10 +2,13 @@
 #define PCH_H
 
 #define WIN32_LEAN_AND_MEAN
+#define WIN32_NO_STATUS
 #define NOMINMAX
-#include <ntstatus.h>
 #include <windows.h>
 #include <winternl.h>
+
+#undef WIN32_NO_STATUS
+#include <ntstatus.h>
 
 #include "MinHook.h"
 

@@ -11,6 +11,13 @@ namespace unrealsdk::unreal {
 
 class UScriptStruct : public UStruct {
    public:
+    UScriptStruct() = delete;
+    UScriptStruct(const UScriptStruct&) = delete;
+    UScriptStruct(UScriptStruct&&) = delete;
+    UScriptStruct& operator=(const UScriptStruct&) = delete;
+    UScriptStruct& operator=(UScriptStruct&&) = delete;
+    ~UScriptStruct() = delete;
+
     // NOLINTNEXTLINE(readability-identifier-naming)
     uint32_t StructFlags;
 };

@@ -12,7 +12,15 @@ namespace unrealsdk::unreal {
 #pragma pack(push, 0x4)
 #endif
 
-class UStrProperty : public UProperty {};
+class UStrProperty : public UProperty {
+   public:
+    UStrProperty() = delete;
+    UStrProperty(const UStrProperty&) = delete;
+    UStrProperty(UStrProperty&&) = delete;
+    UStrProperty& operator=(const UStrProperty&) = delete;
+    UStrProperty& operator=(UStrProperty&&) = delete;
+    ~UStrProperty() = delete;
+};
 
 template <>
 struct PropTraits<UStrProperty> {
