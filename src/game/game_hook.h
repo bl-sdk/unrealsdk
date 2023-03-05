@@ -5,14 +5,16 @@
 
 #include "unreal/classes/uobject.h"
 #include "unreal/structs/fname.h"
-#include "unreal/wrappers/gnames.h"
-#include "unreal/wrappers/gobjects.h"
+
+using namespace unrealsdk::unreal;
 
 namespace unrealsdk::unreal {
 
-struct FFrame;
+class GNames;
+class GObjects;
 class UClass;
 class UFunction;
+struct FFrame;
 
 }  // namespace unrealsdk::unreal
 
@@ -28,14 +30,14 @@ void init(void);
  *
  * @return A reference to the GObjects wrapper.
  */
-const unreal::GObjects& gobjects(void);
+const GObjects& gobjects(void);
 
 /**
  * @brief Gets a reference to the GNames wrapper.
  *
  * @return A reference to the GNames wrapper.
  */
-const unreal::GNames& gnames(void);
+const GNames& gnames(void);
 
 /**
  * @brief Calls FName::Init, set to add new names and split numbers.
@@ -44,8 +46,8 @@ const unreal::GNames& gnames(void);
  * @param str The string to initalize the name to.
  * @param number The number to initalize the name to.
  */
-void fname_init(unreal::FName* name, const std::wstring& str, int32_t number);
-void fname_init(unreal::FName* name, const wchar_t* str, int32_t number);
+void fname_init(FName* name, const std::wstring& str, int32_t number);
+void fname_init(FName* name, const wchar_t* str, int32_t number);
 
 /**
  * @brief Calls FFrame::Step.
@@ -54,7 +56,7 @@ void fname_init(unreal::FName* name, const wchar_t* str, int32_t number);
  * @param obj The object the frame is coming from.
  * @param param The parameter.
  */
-void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param);
+void fframe_step(FFrame* frame, UObject* obj, void* param);
 
 /**
  * @brief Calls unreal's malloc function.
@@ -97,23 +99,23 @@ void free(void* data);
  * @param func The function to call.
  * @param params The function's params
  */
-void process_event(unreal::UObject* object, unreal::UFunction* func, void* params);
+void process_event(UObject* object, UFunction* func, void* params);
 
 /**
  * @brief Constructs a new object
  *
  * @param cls The class to construct. Required.
- * @param outer The outer object to construct the new object under.
+ * @param outer The outer object to construct the new object under. Required.
  * @param name The new object's name.
  * @param flags Object flags to set.
- * @param template_obj The template object to use
- * @return
+ * @param template_obj The template object to use.
+ * @return The constructed object.
  */
-[[nodiscard]] unreal::UObject* construct_object(unreal::UClass* cls,
-                                                unreal::UObject* outer,
-                                                const unreal::FName& name = {0, 0},
-                                                decltype(unreal::UObject::ObjectFlags) flags = 0,
-                                                unreal::UObject* template_obj = nullptr);
+[[nodiscard]] UObject* construct_object(UClass* cls,
+                                        UObject* outer,
+                                        const FName& name = {0, 0},
+                                        decltype(UObject::ObjectFlags) flags = 0,
+                                        UObject* template_obj = nullptr);
 
 /**
  * @brief Calls `UConsole::OutputText` to write to the UE console.
@@ -127,55 +129,6 @@ void uconsole_output_text(const std::wstring& str);
  */
 struct GameHook {
    protected:
-#pragma region Virtual Functions
-
-    /**
-     * @brief Hooks `UObject::ProcessEvent` and points it at the hook manager.
-     */
-    virtual void hook_process_event(void) = 0;
-
-    /**
-     * @brief Hooks `UObject::CallFunction` and points it at the hook manager.
-     */
-    virtual void hook_call_function(void) = 0;
-
-    /**
-     * @brief Finds GObjects, and populates the wrapper member.
-     */
-    virtual void find_gobjects(void) = 0;
-
-    /**
-     * @brief Finds GNames, and populates the wrapper member.
-     */
-    virtual void find_gnames(void) = 0;
-
-    /**
-     * @brief Finds `FName::Init`, and sets up such that `fname_init` may be called.
-     */
-    virtual void find_fname_init(void) = 0;
-
-    /**
-     * @brief Finds `FFrame::Step`, and sets up such that `fframe_step` may be called.
-     */
-    virtual void find_fframe_step(void) = 0;
-
-    /**
-     * @brief Finds `GMalloc`, and sets up such that `malloc`, `realloc`, and `free` may be called.
-     */
-    virtual void find_gmalloc(void) = 0;
-
-    /**
-     * @brief Finds `StaticConstructObject`, and sets up such that `construct_object` may be called.
-     */
-    virtual void find_construct_object(void) = 0;
-
-    /**
-     * @brief Creates a console and sets the bind (if required), and hooks logging onto it.
-     */
-    virtual void inject_console(void) const = 0;
-
-#pragma endregion
-
     /**
      * @brief Helper to get the alignment for use with the GMalloc functions.
      *
@@ -189,29 +142,25 @@ struct GameHook {
     virtual ~GameHook() = default;
 
     /**
-     * @brief Hooks the current game.
-     * @note May be overridden to apply game-specific hooks or hex edits as needed.
+     * @brief Hooks the current game and sets up all other functions on this object.
      */
-    virtual void hook(void);
+    virtual void hook(void) = 0;
 
-    // Inner objects/methods accessed by the globals function wrappers
-    unreal::GObjects gobjects;
-    unreal::GNames gnames;
-    virtual void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) const = 0;
-    virtual void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const = 0;
-    virtual void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const = 0;
+    // Inner methods accessed by the global wrappers
+    [[nodiscard]] virtual const GObjects& gobjects(void) const = 0;
+    [[nodiscard]] virtual const GNames& gnames(void) const = 0;
+    virtual void fname_init(FName* name, const std::wstring& str, int32_t number) const = 0;
+    virtual void fname_init(FName* name, const wchar_t* str, int32_t number) const = 0;
+    virtual void fframe_step(FFrame* frame, UObject* obj, void* param) const = 0;
     [[nodiscard]] virtual void* malloc(size_t len) const = 0;
     [[nodiscard]] virtual void* realloc(void* original, size_t len) const = 0;
     virtual void free(void* data) const = 0;
-    virtual void process_event(unreal::UObject* object,
-                               unreal::UFunction* func,
-                               void* params) const = 0;
-    [[nodiscard]] virtual unreal::UObject* construct_object(
-        unreal::UClass* cls,
-        unreal::UObject* outer,
-        const unreal::FName& name,
-        decltype(unreal::UObject::ObjectFlags) flags,
-        unreal::UObject* template_obj) const = 0;
+    virtual void process_event(UObject* object, UFunction* func, void* params) const = 0;
+    [[nodiscard]] virtual UObject* construct_object(UClass* cls,
+                                                    UObject* outer,
+                                                    const FName& name,
+                                                    decltype(UObject::ObjectFlags) flags,
+                                                    UObject* template_obj) const = 0;
     virtual void uconsole_output_text(const std::wstring& str) const = 0;
 };
 

@@ -1,13 +1,14 @@
 #include "pch.h"
 
 #include "env.h"
-#include "game/bl2.h"
-#include "game/bl3.h"
+#include "game/bl2/bl2.h"
+#include "game/bl3/bl3.h"
 #include "game/game_hook.h"
-#include "game/tps_aodk.h"
-#include "game/wl.h"
+#include "game/tps/tps.h"
 #include "memory.h"
 #include "unrealsdk.h"
+
+using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
@@ -15,19 +16,19 @@ static std::unique_ptr<GameHook> hook_instance;
 
 #pragma region Wrappers
 
-const unreal::GObjects& gobjects(void) {
-    return hook_instance->gobjects;
+const GObjects& gobjects(void) {
+    return hook_instance->gobjects();
 }
-const unreal::GNames& gnames(void) {
-    return hook_instance->gnames;
+const GNames& gnames(void) {
+    return hook_instance->gnames();
 }
-void fname_init(unreal::FName* name, const std::wstring& str, int32_t number) {
+void fname_init(FName* name, const std::wstring& str, int32_t number) {
     hook_instance->fname_init(name, str, number);
 }
-void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) {
+void fname_init(FName* name, const wchar_t* str, int32_t number) {
     hook_instance->fname_init(name, str, number);
 }
-void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) {
+void fframe_step(FFrame* frame, UObject* obj, void* param) {
     hook_instance->fframe_step(frame, obj, param);
 }
 void* malloc(size_t len) {
@@ -39,14 +40,14 @@ void* realloc(void* original, size_t len) {
 void free(void* data) {
     return hook_instance->free(data);
 }
-void process_event(unreal::UObject* object, unreal::UFunction* function, void* params) {
+void process_event(UObject* object, UFunction* function, void* params) {
     hook_instance->process_event(object, function, params);
 }
-unreal::UObject* construct_object(unreal::UClass* cls,
-                                  unreal::UObject* outer,
-                                  const unreal::FName& name,
-                                  decltype(unreal::UObject::ObjectFlags) flags,
-                                  unreal::UObject* template_obj) {
+UObject* construct_object(UClass* cls,
+                                  UObject* outer,
+                                  const FName& name,
+                                  decltype(UObject::ObjectFlags) flags,
+                                  UObject* template_obj) {
     return hook_instance->construct_object(cls, outer, name, flags, template_obj);
 }
 void uconsole_output_text(const std::wstring& str) {
@@ -64,7 +65,7 @@ void uconsole_output_text(const std::wstring& str) {
 // The first matching hook will be used, order matters.
 #ifdef ARCH_X64
 #ifdef UE4
-using all_known_games = std::tuple<BL3Hook, WLHook>;
+using all_known_games = std::tuple<BL3Hook>;
 #else
 #error No known games for UE3 x64
 #endif
@@ -72,7 +73,7 @@ using all_known_games = std::tuple<BL3Hook, WLHook>;
 #ifdef UE4
 #error No known games for UE4 x86
 #else
-using all_known_games = std::tuple<BL2Hook, TPSAoDKHook>;
+using all_known_games = std::tuple<BL2Hook, TPSHook>;
 #endif
 #endif
 
@@ -105,22 +106,6 @@ void init(void) {
 
 #pragma endregion
 
-#pragma region Hook Classes
-
-void GameHook::hook() {
-    this->hook_process_event();
-    this->hook_call_function();
-
-    this->find_gobjects();
-    this->find_gnames();
-    this->find_fname_init();
-    this->find_fframe_step();
-    this->find_gmalloc();
-    this->find_construct_object();
-
-    this->inject_console();
-}
-
 uint32_t GameHook::get_alignment(size_t len) {
     static auto override = env::get_numeric<uint32_t>(env::ALLOC_ALIGNMENT);
     if (override != 0) {
@@ -134,7 +119,5 @@ uint32_t GameHook::get_alignment(size_t len) {
 
     return len >= LARGE_ALIGNMENT_THRESHOLD ? LARGE_ALIGNMENT : SMALL_ALIGNMENT;
 }
-
-#pragma endregion
 
 }  // namespace unrealsdk::game

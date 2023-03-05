@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "unreal/structs/fname.h"
+#include "unreal/wrappers/gnames.h"
 #include "unrealsdk.h"
 #include "utils.h"
 
