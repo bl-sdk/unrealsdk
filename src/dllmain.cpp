@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include "game/selector.h"
 #include "unrealsdk.h"
 
 static HMODULE this_module;
@@ -12,9 +13,7 @@ static HMODULE this_module;
  */
 static DWORD WINAPI startup_thread(LPVOID /*unused*/)  {
     try {
-        // Make sure we initalize logging before anything else
-        unrealsdk::logging::init();
-        unrealsdk::init(this_module);
+        unrealsdk::init(unrealsdk::game::select_based_on_executable());
     } catch (std::exception& ex) {
         LOG(ERROR, "Exception occured while initalizing the sdk: %s", ex.what());
     }

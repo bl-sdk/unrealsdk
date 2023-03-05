@@ -1,11 +1,11 @@
 #include "pch.h"
 
-#include "game/game_hook.h"
 #include "hook_manager.h"
 #include "unreal/classes/ufunction.h"
 #include "unreal/classes/uobject.h"
 #include "unreal/structs/fframe.h"
 #include "unreal/wrappers/wrapped_args.h"
+#include "unrealsdk.h"
 
 using namespace unrealsdk::unreal;
 
@@ -113,7 +113,7 @@ bool call_function(UObject* obj, FFrame* stack, void* /*result*/, UFunction* fun
     }
 
     auto frame =
-        func->ParamsSize == 0 ? nullptr : static_cast<uint8_t*>(calloc(1, func->ParamsSize));
+        func->ParamsSize == 0 ? nullptr : static_cast<uint8_t*>(unrealsdk::u_malloc(func->ParamsSize));
     auto original_code = stack->Code;
 
     for (auto prop = reinterpret_cast<UProperty*>(func->Children);
@@ -124,15 +124,15 @@ bool call_function(UObject* obj, FFrame* stack, void* /*result*/, UFunction* fun
             continue;
         }
 
-        game::fframe_step(stack, stack->Object,
-                          frame == nullptr ? nullptr : frame + prop->Offset_Internal);
+        unrealsdk::fframe_step(stack, stack->Object,
+                               frame == nullptr ? nullptr : frame + prop->Offset_Internal);
     }
 
     WrappedArgs args{func, frame};
     auto block_function = run_hooks(func, func_name, obj, args);
 
     if (frame != nullptr) {
-        free(frame);
+        unrealsdk::u_free(frame);
     }
 
     if (block_function) {

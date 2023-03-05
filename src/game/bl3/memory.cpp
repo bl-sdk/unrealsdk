@@ -2,10 +2,12 @@
 
 #include "game/bl3/bl3.h"
 #include "memory.h"
+#include "unreal/utils.h"
 
 #if defined(UE4) && defined(ARCH_X64)
 
 using namespace unrealsdk::memory;
+using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
@@ -41,15 +43,15 @@ void BL3Hook::find_gmalloc(void) {
     LOG(MISC, "FMemory::Realloc: 0x%p", fmemory_realloc_ptr);
     LOG(MISC, "FMemory::Free: 0x%p", fmemory_free_ptr);
 }
-void* BL3Hook::malloc(size_t len) const {
-    auto ret = fmemory_malloc_ptr(len, get_alignment(len));
+void* BL3Hook::u_malloc(size_t len) const {
+    auto ret = fmemory_malloc_ptr(len, get_malloc_alignment(len));
     memset(ret, 0, len);
     return ret;
 }
-void* BL3Hook::realloc(void* original, size_t len) const {
-    return fmemory_realloc_ptr(original, len, get_alignment(len));
+void* BL3Hook::u_realloc(void* original, size_t len) const {
+    return fmemory_realloc_ptr(original, len, get_malloc_alignment(len));
 }
-void BL3Hook::free(void* data) const {
+void BL3Hook::u_free(void* data) const {
     fmemory_free_ptr(data);
 }
 

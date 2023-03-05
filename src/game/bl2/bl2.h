@@ -3,15 +3,16 @@
 
 #include "pch.h"
 
-#if defined(UE3) && defined(ARCH_X86)
+#include "game/abstract_hook.h"
+#include "game/selector.h"
 
-#include "game/game_hook.h"
+#if defined(UE3) && defined(ARCH_X86)
 
 using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
-class BL2Hook : public GameHook {
+class BL2Hook : public AbstractHook {
    protected:
     /**
      * @brief Hex edits out the `obj dump` array limit message.
@@ -89,9 +90,9 @@ class BL2Hook : public GameHook {
     void fname_init(FName* name, const std::wstring& str, int32_t number) const override;
     void fname_init(FName* name, const wchar_t* str, int32_t number) const override;
     void fframe_step(FFrame* frame, UObject* obj, void* param) const override;
-    [[nodiscard]] void* malloc(size_t len) const override;
-    [[nodiscard]] void* realloc(void* original, size_t len) const override;
-    void free(void* data) const override;
+    [[nodiscard]] void* u_malloc(size_t len) const override;
+    [[nodiscard]] void* u_realloc(void* original, size_t len) const override;
+    void u_free(void* data) const override;
     void process_event(UObject* object, UFunction* func, void* params) const override;
     [[nodiscard]] UObject* construct_object(UClass* cls,
                                             UObject* outer,

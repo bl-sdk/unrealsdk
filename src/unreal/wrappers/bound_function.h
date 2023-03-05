@@ -3,12 +3,12 @@
 
 #include "pch.h"
 
-#include "game/game_hook.h"
 #include "unreal/classes/uclass.h"
 #include "unreal/classes/ufunction.h"
 #include "unreal/classes/uproperty.h"
 #include "unreal/wrappers/prop_traits.h"
 #include "unreal/wrappers/wrapped_args.h"
+#include "unrealsdk.h"
 
 namespace unrealsdk::unreal {
 
@@ -111,7 +111,7 @@ class BoundFunction {
      */
     template <typename R, typename... Ts>
     typename PropTraits<R>::Value call(typename PropTraits<Ts>::Value... args) {
-        auto params = game::malloc(this->func->get_struct_size());
+        auto params = unrealsdk::u_malloc(this->func->get_struct_size());
 
         UProperty* base_prop = this->func->PropertyLink;
         if constexpr (sizeof...(Ts) > 0) {
@@ -123,11 +123,11 @@ class BoundFunction {
         this->call_with_params(params);
 
         if constexpr (std::is_void_v<R>) {
-            game::free(params);
+            unrealsdk::u_free(params);
         } else {
             // TODO: use after free when the return is a reference type (structs, arrays)
             auto ret = this->get_return_value<R>(reinterpret_cast<uintptr_t>(params));
-            game::free(params);
+            unrealsdk::u_free(params);
             return ret;
         }
     }
@@ -139,17 +139,17 @@ class BoundFunction {
         }
 
         auto size = this->func->get_struct_size();
-        auto params = game::malloc(size);
+        auto params = unrealsdk::u_malloc(size);
         memcpy(params, args.base, size);
 
         this->call_with_params(params);
 
         if constexpr (std::is_void_v<R>) {
-            game::free(params);
+            unrealsdk::u_free(params);
         } else {
             // TODO: use after free when the return is a reference type (structs, arrays)
             auto ret = this->get_return_value<R>(reinterpret_cast<uintptr_t>(params));
-            game::free(params);
+            unrealsdk::u_free(params);
             return ret;
         }
     }

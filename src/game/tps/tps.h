@@ -6,7 +6,7 @@
 #if defined(UE3) && defined(ARCH_X86)
 
 #include "game/bl2/bl2.h"
-#include "game/game_hook.h"
+#include "game/selector.h"
 
 using namespace unrealsdk::unreal;
 

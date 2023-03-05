@@ -3,15 +3,16 @@
 
 #include "pch.h"
 
-#if defined(UE4) && defined(ARCH_X64)
+#include "game/abstract_hook.h"
+#include "game/selector.h"
 
-#include "game/game_hook.h"
+#if defined(UE4) && defined(ARCH_X64)
 
 using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
-class BL3Hook : public GameHook {
+class BL3Hook : public AbstractHook {
    protected:
     /**
      * @brief Hooks `UObject::ProcessEvent` and points it at the hook manager.
@@ -66,9 +67,9 @@ class BL3Hook : public GameHook {
     void fname_init(FName* name, const std::wstring& str, int32_t number) const override;
     void fname_init(FName* name, const wchar_t* str, int32_t number) const override;
     void fframe_step(FFrame* frame, UObject* obj, void* param) const override;
-    [[nodiscard]] void* malloc(size_t len) const override;
-    [[nodiscard]] void* realloc(void* original, size_t len) const override;
-    void free(void* data) const override;
+    [[nodiscard]] void* u_malloc(size_t len) const override;
+    [[nodiscard]] void* u_realloc(void* original, size_t len) const override;
+    void u_free(void* data) const override;
     void process_event(UObject* object, UFunction* func, void* params) const override;
     [[nodiscard]] UObject* construct_object(UClass* cls,
                                             UObject* outer,

@@ -3,8 +3,8 @@
 
 #include "pch.h"
 
-#include "game/game_hook.h"
 #include "unreal/structs/tarray.h"
+#include "unrealsdk.h"
 
 namespace unrealsdk::unreal {
 
@@ -25,8 +25,8 @@ void TArray<T>::reserve(size_t new_cap, size_t element_size) {
      it's valid after.
     */
     auto old_data = this->data;
-    this->data = (this->data == nullptr) ? game::malloc<T>(new_size)
-                                         : game::realloc<T>(this->data, new_size);
+    this->data = (this->data == nullptr) ? unrealsdk::u_malloc<T>(new_size)
+                                         : unrealsdk::u_realloc<T>(this->data, new_size);
     if (this->data == nullptr) {
         this->data = old_data;
         throw std::runtime_error("Failed to allocate memory to resize array!");

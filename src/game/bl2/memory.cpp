@@ -2,19 +2,21 @@
 
 #include "game/bl2/bl2.h"
 #include "memory.h"
+#include "unreal/utils.h"
 
 #if defined(UE3) && defined(ARCH_X86)
 
 using namespace unrealsdk::memory;
+using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
 struct FMalloc;
 struct FMallocVFtable {
     void* exec;
-    void*(__thiscall* malloc)(FMalloc* self, uint32_t len, uint32_t align);
-    void*(__thiscall* realloc)(FMalloc* self, void* original, uint32_t len, uint32_t align);
-    void*(__thiscall* free)(FMalloc* self, void* data);
+    void*(__thiscall* u_malloc)(FMalloc* self, uint32_t len, uint32_t align);
+    void*(__thiscall* u_realloc)(FMalloc* self, void* original, uint32_t len, uint32_t align);
+    void*(__thiscall* u_free)(FMalloc* self, void* data);
 };
 struct FMalloc {
     FMallocVFtable* vftable;
@@ -30,16 +32,16 @@ void BL2Hook::find_gmalloc(void) {
     gmalloc = *read_offset<FMalloc**>(sig_address);
     LOG(MISC, "GMalloc: 0x%p", gmalloc);
 }
-void* BL2Hook::malloc(size_t len) const {
-    auto ret = gmalloc->vftable->malloc(gmalloc, len, get_alignment(len));
+void* BL2Hook::u_malloc(size_t len) const {
+    auto ret = gmalloc->vftable->u_malloc(gmalloc, len, get_malloc_alignment(len));
     memset(ret, 0, len);
     return ret;
 }
-void* BL2Hook::realloc(void* original, size_t len) const {
-    return gmalloc->vftable->realloc(gmalloc, original, len, get_alignment(len));
+void* BL2Hook::u_realloc(void* original, size_t len) const {
+    return gmalloc->vftable->u_realloc(gmalloc, original, len, get_malloc_alignment(len));
 }
-void BL2Hook::free(void* data) const {
-    gmalloc->vftable->free(gmalloc, data);
+void BL2Hook::u_free(void* data) const {
+    gmalloc->vftable->u_free(gmalloc, data);
 }
 
 }  // namespace unrealsdk::game

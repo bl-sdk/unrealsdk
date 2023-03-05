@@ -1,9 +1,10 @@
 #include "pch.h"
 
 #include "env.h"
-#include "game/game_hook.h"
 #include "logging.h"
+#include "unrealsdk.h"
 #include "utils.h"
+
 
 namespace unrealsdk::logging {
 
@@ -167,7 +168,7 @@ static void log_to_console(void* /*user_data*/, const loguru::Message& message) 
                   nullptr);
     }
 
-    game::uconsole_output_text(utils::widen(std::string{message.message} + "\n"));
+    unrealsdk::uconsole_output_text(utils::widen(std::string{message.message} + "\n"));
 }
 
 }  // namespace unrealsdk::logging

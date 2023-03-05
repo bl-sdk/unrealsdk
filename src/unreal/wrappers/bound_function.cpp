@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "unreal/wrappers/bound_function.h"
+#include "unrealsdk.h"
 
 namespace unrealsdk::unreal {
 
@@ -10,7 +11,7 @@ void BoundFunction::call_with_params(void* params) const {
     auto original_flags = this->func->FunctionFlags;
     this->func->FunctionFlags |= FUNC_NATIVE;
 
-    game::process_event(this->object, this->func, params);
+    process_event(this->object, this->func, params);
 
     func->FunctionFlags = original_flags;
 }

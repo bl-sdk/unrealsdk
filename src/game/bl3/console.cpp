@@ -15,6 +15,7 @@
 #include "unreal/wrappers/wrapped_args.h"
 #include "unreal/wrappers/wrapped_array.h"
 #include "unreal/wrappers/wrapped_struct.h"
+#include "unrealsdk.h"
 
 #if defined(UE4) && defined(ARCH_X64)
 
@@ -40,7 +41,7 @@ static bool inject_console_hook(UFunction* /*func*/,
 
     if (console == nullptr) {
         auto default_console = console_property->get_property_class()->ClassDefaultObject;
-        console = game::construct_object(default_console->Class, default_console->Outer);
+        console = unrealsdk::construct_object(default_console->Class, default_console->Outer);
         viewport->set<UObjectProperty>(L"ViewportConsole"_fn, console);
     }
 

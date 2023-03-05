@@ -1,11 +1,11 @@
 #include "pch.h"
 
 #include "env.h"
-#include "game/game_hook.h"
 #include "unreal/classes/uclass.h"
 #include "unreal/classes/uproperty.h"
 #include "unreal/structs/fname.h"
 #include "unreal/wrappers/gobjects.h"
+#include "unrealsdk.h"
 
 namespace unrealsdk::unreal {
 
@@ -24,7 +24,7 @@ size_t UProperty::class_size(void) {
 
     // Rather than bother with a findobject call, we can recover UProperty from any arbitrary object
     // UObject always has properties on it, we don't need to worry about what class we get
-    auto obj = *game::gobjects().begin();
+    auto obj = *unrealsdk::gobjects().begin();
     auto prop = obj->Class->PropertyLink;
 
     UStruct* cls = prop->Class;

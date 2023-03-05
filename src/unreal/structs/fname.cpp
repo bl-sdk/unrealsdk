@@ -1,8 +1,8 @@
 #include "pch.h"
 
-#include "game/game_hook.h"
 #include "unreal/structs/fname.h"
 #include "unreal/wrappers/gnames.h"
+#include "unrealsdk.h"
 #include "utils.h"
 
 namespace unrealsdk::unreal {
@@ -11,7 +11,7 @@ FName::FName(int32_t index, int32_t number) : index(index), number(number) {}
 
 FName::FName(const std::string& name, int32_t number) : FName(utils::widen(name), number){};
 FName::FName(const std::wstring& name, int32_t number) : index(0), number(0) {
-    game::fname_init(this, name, number);
+    unrealsdk::fname_init(this, name, number);
 }
 
 bool FName::operator==(const FName& other) const {
@@ -23,7 +23,7 @@ bool FName::operator!=(const FName& other) const {
 }
 
 std::ostream& operator<<(std::ostream& stream, const FName& name) {
-    auto entry = game::gnames().at(name.index);
+    auto entry = unrealsdk::gnames().at(name.index);
 
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
     if (entry->is_wide()) {
@@ -40,7 +40,7 @@ std::ostream& operator<<(std::ostream& stream, const FName& name) {
 }
 
 std::wostream& operator<<(std::wostream& stream, const FName& name) {
-    auto entry = unrealsdk::game::gnames().at(name.index);
+    auto entry = unrealsdk::gnames().at(name.index);
 
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
     if (entry->is_wide()) {
