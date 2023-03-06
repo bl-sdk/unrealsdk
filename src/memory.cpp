@@ -61,7 +61,6 @@ uintptr_t sigscan(const Pattern& pattern, uintptr_t start, size_t size) {
     return 0;
 }
 
-
 bool sigscan_and_detour(const Pattern& pattern,
                         void* detour,
                         void** original,
@@ -76,23 +75,23 @@ bool sigscan_and_detour(const Pattern& pattern,
                         uintptr_t start,
                         size_t size) {
     auto addr = sigscan<LPVOID>(pattern, start, size);
-    LOG(MISC, "%s: 0x%p", name.c_str(), addr);
+    LOG(MISC, "{}: {:p}", name, addr);
 
     if (addr == nullptr) {
-        LOG(ERROR, "Sigscan failed for %s", name.c_str());
+        LOG(ERROR, "Sigscan failed for {}", name);
         return false;
     }
 
     MH_STATUS status = MH_OK;
     status = MH_CreateHook(addr, detour, original);
     if (status != MH_OK) {
-        LOG(ERROR, "Failed to create hook for %s", name.c_str());
+        LOG(ERROR, "Failed to create hook for {}", name);
         return false;
     }
 
     status = MH_EnableHook(addr);
     if (status != MH_OK) {
-        LOG(ERROR, "Failed to enable hook for %s", name.c_str());
+        LOG(ERROR, "Failed to enable hook for {}", name);
         return false;
     }
 

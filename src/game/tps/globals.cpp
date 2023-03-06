@@ -20,7 +20,7 @@ void TPSHook::find_gnames(void) const {
 
     auto gnames_instr = sigscan(GNAMES_SIG);
     auto gnames_ptr = read_offset<GNames::internal_type>(gnames_instr);
-    LOG(MISC, "GNames: 0x%p", gnames_ptr);
+    LOG(MISC, "GNames: {:p}", reinterpret_cast<void*>(gnames_ptr));
 
     gnames_wrapper = GNames(gnames_ptr);
 }

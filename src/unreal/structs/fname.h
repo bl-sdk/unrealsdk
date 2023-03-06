@@ -49,6 +49,10 @@ struct FName {
     operator std::wstring() const;
 };
 
+#if defined(_MSC_VER) && defined(ARCH_X86)
+#pragma pack(pop)
+#endif
+
 /**
  * @brief Construct an FName literal from a wide string.
  *
@@ -57,10 +61,14 @@ struct FName {
  */
 FName operator"" _fn(const wchar_t* str, size_t len);
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
-#pragma pack(pop)
-#endif
-
 }  // namespace unrealsdk::unreal
+
+// Custom FName formatter, which just casts to a string first
+template <>
+struct std::formatter<unrealsdk::unreal::FName> : std::formatter<std::string> {
+    auto format(unrealsdk::unreal::FName name, std::format_context& ctx) {
+        return formatter<std::string>::format((std::string)name, ctx);
+    }
+};
 
 #endif /* UNREAL_STRUCTS_FNAME_H */

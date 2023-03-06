@@ -1,9 +1,9 @@
 #include "pch.h"
 
 #include "env.h"
+#include "game/abstract_hook.h"
 #include "game/bl2/bl2.h"
 #include "game/bl3/bl3.h"
-#include "game/abstract_hook.h"
 #include "game/tps/tps.h"
 
 using namespace unrealsdk::unreal;
@@ -39,7 +39,7 @@ static std::unique_ptr<AbstractHook> find_correct_hook(const std::string& execut
     } else {
         using game = std::tuple_element_t<i, all_known_games>;
         if (GameTraits<game>::matches_executable(executable)) {
-            LOG(INFO, "Using %s hook", GameTraits<game>::NAME);
+            LOG(INFO, "Using {} hook", GameTraits<game>::NAME);
             return std::make_unique<game>();
         }
         return find_correct_hook<i + 1>(executable);

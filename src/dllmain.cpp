@@ -11,11 +11,11 @@ static HMODULE this_module;
  *
  * @return unused.
  */
-static DWORD WINAPI startup_thread(LPVOID /*unused*/)  {
+static DWORD WINAPI startup_thread(LPVOID /*unused*/) {
     try {
         unrealsdk::init(unrealsdk::game::select_based_on_executable());
     } catch (std::exception& ex) {
-        LOG(ERROR, "Exception occured while initalizing the sdk: %s", ex.what());
+        LOG(ERROR, "Exception occured while initalizing the sdk: {}", ex.what());
     }
 
     return 1;

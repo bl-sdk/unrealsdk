@@ -28,9 +28,7 @@ static const std::string INJECT_CONSOLE_ID = "unrealsdk_bl3_inject_console";
 
 static UObject* console = nullptr;
 
-static bool inject_console_hook(UFunction* /*func*/,
-                                UObject* obj,
-                                WrappedArgs& /*args*/) {
+static bool inject_console_hook(UFunction* /*func*/, UObject* obj, WrappedArgs& /*args*/) {
     hook_manager::hooks[INJECT_CONSOLE_FUNC].erase(INJECT_CONSOLE_ID);
 
     auto local_player = obj->get<UObjectProperty>(L"Player"_fn);
@@ -62,8 +60,7 @@ static bool inject_console_hook(UFunction* /*func*/,
         FName console_key{0, 0};
 
         if (existing_console_key != L"None"_fn || existing_console_key == L"Undefine"_fn) {
-            LOG(MISC, "Console key is already set to '%s'",
-                std::string{existing_console_key}.c_str());
+            LOG(MISC, "Console key is already set to {}", existing_console_key);
 
             console_key = existing_console_key;
         } else {
@@ -73,7 +70,7 @@ static bool inject_console_hook(UFunction* /*func*/,
             inner_obj->get<UStructProperty>(L"ConsoleKey"_fn)
                 .set<UNameProperty>(L"KeyName"_fn, console_key);
 
-            LOG(MISC, "Set console key to '%s'", wanted_console_key.c_str());
+            LOG(MISC, "Set console key to '{}'", wanted_console_key);
         }
 
         // Make sure the array version is set to the same

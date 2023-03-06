@@ -71,7 +71,7 @@ void log(const LogMessage&& msg);
  */
 void set_console_level(Level level);
 
-using log_callback = void(*)(const LogMessage&);
+using log_callback = void (*)(const LogMessage&);
 
 /**
  * @brief Adds a callback to be run on each log message.
@@ -97,8 +97,8 @@ void remove_callback(log_callback callback);
  * @param ... The format string's contents.
  */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG(level, fmt, ...)                                                                  \
-    unrealsdk::logging::log({(unrealsdk::logging::Level::level), (fmt), (const char*)(__FUNCTION__), \
-                             (const char*)"", (__LINE__)})
+#define LOG(level, fmt, ...)                                                                      \
+    unrealsdk::logging::log({(unrealsdk::logging::Level::level), std::format((fmt), __VA_ARGS__), \
+                             (const char*)(__FUNCTION__), (const char*)"", (__LINE__)})
 
 #endif /* LOGGING_H */

@@ -35,7 +35,7 @@ static void __fastcall process_event_hook(UObject* obj,
             return;
         }
     } catch (const std::exception& ex) {
-        LOG(ERROR, "An exception occured during the ProcessEvent hook: %s", ex.what());
+        LOG(ERROR, "An exception occured during the ProcessEvent hook: {}", ex.what());
     }
 
     process_event_ptr(obj, edx, func, params, result);
@@ -77,7 +77,7 @@ static void __fastcall call_function_hook(UObject* obj,
             return;
         }
     } catch (const std::exception& ex) {
-        LOG(ERROR, "An exception occured during the CallFunction hook: %s", ex.what());
+        LOG(ERROR, "An exception occured during the CallFunction hook: {}", ex.what());
     }
 
     call_function_ptr(obj, edx, stack, result, func);

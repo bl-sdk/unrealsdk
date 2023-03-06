@@ -30,7 +30,7 @@ void BL2Hook::find_gmalloc(void) {
 
     auto sig_address = sigscan(GMALLOC_PATTERN);
     gmalloc = *read_offset<FMalloc**>(sig_address);
-    LOG(MISC, "GMalloc: 0x%p", gmalloc);
+    LOG(MISC, "GMalloc: {:p}", reinterpret_cast<void*>(gmalloc));
 }
 void* BL2Hook::u_malloc(size_t len) const {
     auto ret = gmalloc->vftable->u_malloc(gmalloc, len, get_malloc_alignment(len));

@@ -17,7 +17,7 @@ void TPSHook::hexedit_array_limit_message(void) const {
     if (array_limit_msg == nullptr) {
         LOG(MISC, "Couldn't find array limit message signature, assuming already hex edited");
     } else {
-        LOG(MISC, "Array Limit Message: 0x%p", array_limit_msg);
+        LOG(MISC, "Array Limit Message: {:p}", reinterpret_cast<void*>(array_limit_msg));
 
         // NOLINTBEGIN(readability-magic-numbers)
         unlock_range(array_limit_msg, 1);

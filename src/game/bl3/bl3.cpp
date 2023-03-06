@@ -35,7 +35,7 @@ void BL3Hook::find_fname_init(void) {
         "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00"};
 
     fname_init_ptr = sigscan<fname_init_func>(FNAME_INIT_PATTERN);
-    LOG(MISC, "FName::Init: 0x%p", fname_init_ptr);
+    LOG(MISC, "FName::Init: {:p}", reinterpret_cast<void*>(fname_init_ptr));
 }
 
 void BL3Hook::fname_init(FName* name, const std::wstring& str, int32_t number) const {
@@ -57,7 +57,7 @@ void BL3Hook::find_fframe_step(void) {
                                          "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
 
     fframe_step_ptr = sigscan<fframe_step_func>(FFRAME_STEP_SIG);
-    LOG(MISC, "FFrame::Step: 0x%p", fframe_step_ptr);
+    LOG(MISC, "FFrame::Step: {:p}", reinterpret_cast<void*>(fframe_step_ptr));
 }
 void BL3Hook::fframe_step(FFrame* frame, UObject* obj, void* param) const {
     fframe_step_ptr(frame, obj, param);
@@ -85,7 +85,7 @@ void BL3Hook::find_construct_object(void) {
 
     auto construct_obj_instr = sigscan(CONSTRUCT_OBJECT_PATTERN);
     construct_obj_ptr = read_offset<construct_obj_func>(construct_obj_instr);
-    LOG(MISC, "StaticConstructObject: 0x%p", construct_obj_ptr);
+    LOG(MISC, "StaticConstructObject: {:p}", reinterpret_cast<void*>(construct_obj_ptr));
 }
 
 UObject* BL3Hook::construct_object(UClass* cls,

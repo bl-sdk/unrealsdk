@@ -25,7 +25,7 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
             return;
         }
     } catch (const std::exception& ex) {
-        LOG(ERROR, "An exception occured during the ProcessEvent hook: %s", ex.what());
+        LOG(ERROR, "An exception occured during the ProcessEvent hook: {}", ex.what());
     }
 
     process_event_ptr(obj, func, params);
@@ -54,7 +54,7 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
             return;
         }
     } catch (const std::exception& ex) {
-        LOG(ERROR, "An exception occured during the CallFunction hook: %s", ex.what());
+        LOG(ERROR, "An exception occured during the CallFunction hook: {}", ex.what());
     }
 
     call_function_ptr(obj, stack, result, func);

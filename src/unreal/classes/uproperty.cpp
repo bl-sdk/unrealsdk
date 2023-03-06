@@ -38,10 +38,10 @@ size_t UProperty::class_size(void) {
     // If we couldn't find the class, default to our actual size
     if (cls == nullptr) {
         size = sizeof(UProperty);
-        LOG(WARNING, "Couldn't find UProperty class size, defaulting to: %#x", size);
+        LOG(WARNING, "Couldn't find UProperty class size, defaulting to: {:#x}", size);
     } else {
         size = cls->get_struct_size();
-        LOG(INFO, "UProperty class size: %#x", size);
+        LOG(MISC, "UProperty class size: {:#x}", size);
     }
     return size;
 }

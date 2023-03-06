@@ -39,9 +39,9 @@ void BL3Hook::find_gmalloc(void) {
     fmemory_realloc_ptr = sigscan<fmemory_realloc_func>(REALLOC_PATTERN);
     fmemory_free_ptr = sigscan<fmemory_free_func>(FREE_PATTERN);
 
-    LOG(MISC, "FMemory::Malloc: 0x%p", fmemory_malloc_ptr);
-    LOG(MISC, "FMemory::Realloc: 0x%p", fmemory_realloc_ptr);
-    LOG(MISC, "FMemory::Free: 0x%p", fmemory_free_ptr);
+    LOG(MISC, "FMemory::Malloc: {:p}", reinterpret_cast<void*>(fmemory_malloc_ptr));
+    LOG(MISC, "FMemory::Realloc: {:p}", reinterpret_cast<void*>(fmemory_realloc_ptr));
+    LOG(MISC, "FMemory::Free: {:p}", reinterpret_cast<void*>(fmemory_free_ptr));
 }
 void* BL3Hook::u_malloc(size_t len) const {
     auto ret = fmemory_malloc_ptr(len, get_malloc_alignment(len));

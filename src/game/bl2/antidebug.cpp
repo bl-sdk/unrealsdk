@@ -68,11 +68,13 @@ void BL2Hook::hook_antidebug(void) {
                                 reinterpret_cast<LPVOID>(NtSetInformationThread_hook),
                                 reinterpret_cast<LPVOID*>(&NtSetInformationThread_ptr), &target);
     if (status != MH_OK) {
-        LOG(ERROR, "Failed to create NtSetInformationThread hook: %x", status);
+        LOG(ERROR, "Failed to create NtSetInformationThread hook: {:x}",
+            static_cast<uint32_t>(status));
     } else {
         status = MH_EnableHook(target);
         if (status != MH_OK) {
-            LOG(ERROR, "Failed to enable NtSetInformationThread hook: %x", status);
+            LOG(ERROR, "Failed to enable NtSetInformationThread hook: {:x}",
+                static_cast<uint32_t>(status));
         }
     }
 
@@ -80,11 +82,13 @@ void BL2Hook::hook_antidebug(void) {
                                 reinterpret_cast<LPVOID>(NtQueryInformationProcess_hook),
                                 reinterpret_cast<LPVOID*>(&NtQueryInformationProcess_ptr), &target);
     if (status != MH_OK) {
-        LOG(ERROR, "Failed to create NtQueryInformationProcess hook: %x", status);
+        LOG(ERROR, "Failed to create NtQueryInformationProcess hook: {:x}",
+            static_cast<uint32_t>(status));
     } else {
         status = MH_EnableHook(target);
         if (status != MH_OK) {
-            LOG(ERROR, "Failed to enable NtQueryInformationProcess hook: %x", status);
+            LOG(ERROR, "Failed to enable NtQueryInformationProcess hook: {:x}",
+                static_cast<uint32_t>(status));
         }
     }
 }

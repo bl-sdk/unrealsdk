@@ -2,8 +2,8 @@
 
 #include "game/bl3/bl3.h"
 #include "memory.h"
-#include "unreal/wrappers/gobjects.h"
 #include "unreal/wrappers/gnames.h"
+#include "unreal/wrappers/gobjects.h"
 
 #if defined(UE4) && defined(ARCH_X64)
 
@@ -21,7 +21,7 @@ void BL3Hook::find_gobjects(void) {
 
     auto gobjects_instr = sigscan(GOBJECTS_SIG);
     auto gobjects_ptr = read_offset<GObjects::internal_type>(gobjects_instr);
-    LOG(MISC, "GObjects: 0x%p", gobjects_ptr);
+    LOG(MISC, "GObjects: {:p}", reinterpret_cast<void*>(gobjects_ptr));
 
     gobjects_wrapper = GObjects(gobjects_ptr);
 }
@@ -44,7 +44,7 @@ void BL3Hook::find_gnames(void) {
 
     auto gnames_instr = sigscan(GNAMES_SIG);
     auto gnames_ptr = *read_offset<GNames::internal_type*>(gnames_instr);
-    LOG(MISC, "GNames: 0x%p", gnames_ptr);
+    LOG(MISC, "GNames: {:p}", reinterpret_cast<void*>(gnames_ptr));
 
     gnames_wrapper = GNames(gnames_ptr);
 }

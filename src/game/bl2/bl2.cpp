@@ -43,7 +43,7 @@ void BL2Hook::find_fname_init(void) {
         "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
 
     this->fname_init_ptr = sigscan<void*>(FNAME_INIT_SIG);
-    LOG(MISC, "FName::Init: 0x%p", this->fname_init_ptr);
+    LOG(MISC, "FName::Init: {:p}", this->fname_init_ptr);
 }
 
 void BL2Hook::fname_init(FName* name, const std::wstring& str, int32_t number) const {
@@ -62,9 +62,7 @@ void BL2Hook::fname_init(FName* name, const wchar_t* str, int32_t number) const 
 #pragma region FFrame::Step
 
 // NOLINTNEXTLINE(modernize-use-using)
-typedef void(__thiscall* fframe_step_func)(FFrame* stack,
-                                           UObject* obj,
-                                           void* param);
+typedef void(__thiscall* fframe_step_func)(FFrame* stack, UObject* obj, void* param);
 static fframe_step_func fframe_step_ptr;
 
 void BL2Hook::find_fframe_step(void) {
@@ -72,7 +70,7 @@ void BL2Hook::find_fframe_step(void) {
                                          "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
 
     fframe_step_ptr = sigscan<fframe_step_func>(FFRAME_STEP_SIG);
-    LOG(MISC, "FFrame::Step: 0x%p", fframe_step_ptr);
+    LOG(MISC, "FFrame::Step: {:p}", reinterpret_cast<void*>(fframe_step_ptr));
 }
 void BL2Hook::fframe_step(FFrame* frame, UObject* obj, void* param) const {
     fframe_step_ptr(frame, obj, param);
@@ -84,13 +82,13 @@ void BL2Hook::fframe_step(FFrame* frame, UObject* obj, void* param) const {
 
 // NOLINTNEXTLINE(modernize-use-using)
 typedef UObject*(__cdecl* construct_obj_func)(UClass* cls,
-                                                      UObject* outer,
-                                                      FName name,
-                                                      uint64_t flags,
-                                                      UObject* template_obj,
-                                                      void* error_output_device,
-                                                      void* instance_graph,
-                                                      uint32_t assume_template_is_archetype);
+                                              UObject* outer,
+                                              FName name,
+                                              uint64_t flags,
+                                              UObject* template_obj,
+                                              void* error_output_device,
+                                              void* instance_graph,
+                                              uint32_t assume_template_is_archetype);
 static construct_obj_func construct_obj_ptr;
 
 void BL2Hook::find_construct_object(void) {
@@ -102,14 +100,14 @@ void BL2Hook::find_construct_object(void) {
         "\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF"
         "\xFF"};
     construct_obj_ptr = sigscan<construct_obj_func>(CONSTRUCT_OBJECT_PATTERN);
-    LOG(MISC, "StaticConstructObject: 0x%p", construct_obj_ptr);
+    LOG(MISC, "StaticConstructObject: {:p}", reinterpret_cast<void*>(construct_obj_ptr));
 }
 
 UObject* BL2Hook::construct_object(UClass* cls,
-                                           UObject* outer,
-                                           const FName& name,
-                                           decltype(UObject::ObjectFlags) flags,
-                                           UObject* template_obj) const {
+                                   UObject* outer,
+                                   const FName& name,
+                                   decltype(UObject::ObjectFlags) flags,
+                                   UObject* template_obj) const {
     return construct_obj_ptr(cls, outer, name, flags, template_obj, nullptr, nullptr,
                              0 /* false */);
 }

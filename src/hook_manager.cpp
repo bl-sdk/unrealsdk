@@ -27,9 +27,9 @@ static bool check_hook_allowed_and_log_call(const std::string& source,
                                             const std::string& func_name,
                                             const UObject* obj) {
     if (log_all_calls) {
-        LOG(MISC, "===== %s called =====", source.c_str());
-        LOG(MISC, "Function: %s", func_name.c_str());
-        LOG(MISC, "Object: %s", obj->get_path_name<char>().c_str());
+        LOG(MISC, "===== {} called =====", source);
+        LOG(MISC, "Function: {}", func_name);
+        LOG(MISC, "Object: {}", obj->get_path_name<char>());
     }
 
     if (inject_next_call) {
@@ -37,7 +37,7 @@ static bool check_hook_allowed_and_log_call(const std::string& source,
         return false;
     }
 
-    return hooks.count(func_name) != 0;
+    return hooks.contains(func_name);
 }
 
 /**
@@ -66,7 +66,7 @@ static bool run_hooks(UFunction* func,
                 // Deliberately don't break, so that other hook functions get a chance to run too
             }
         } catch (const std::exception& ex) {
-            LOG(ERROR, "An exception occured during hook processing: %s", ex.what());
+            LOG(ERROR, "An exception occured during hook processing: {}", ex.what());
         }
     }
 
@@ -112,8 +112,9 @@ bool call_function(UObject* obj, FFrame* stack, void* /*result*/, UFunction* fun
         return false;
     }
 
-    auto frame =
-        func->ParamsSize == 0 ? nullptr : static_cast<uint8_t*>(unrealsdk::u_malloc(func->ParamsSize));
+    auto frame = func->ParamsSize == 0
+                     ? nullptr
+                     : static_cast<uint8_t*>(unrealsdk::u_malloc(func->ParamsSize));
     auto original_code = stack->Code;
 
     for (auto prop = reinterpret_cast<UProperty*>(func->Children);

@@ -17,7 +17,7 @@ void BL2Hook::hexedit_set_command(void) {
     if (set_command == nullptr) {
         LOG(MISC, "Couldn't find set command signature, assuming already hex edited");
     } else {
-        LOG(MISC, "Set Command: 0x%p", set_command);
+        LOG(MISC, "Set Command: {:p}", reinterpret_cast<void*>(set_command));
 
         // NOLINTBEGIN(readability-magic-numbers)
         unlock_range(set_command, 2);
@@ -35,7 +35,7 @@ void BL2Hook::hexedit_array_limit(void) {
     if (array_limit == nullptr) {
         LOG(MISC, "Couldn't find array limit signature, assuming already hex edited");
     } else {
-        LOG(MISC, "Array Limit: 0x%p", array_limit);
+        LOG(MISC, "Array Limit: {:p}", reinterpret_cast<void*>(array_limit));
 
         // NOLINTBEGIN(readability-magic-numbers)
         unlock_range(array_limit, 1);
@@ -53,7 +53,7 @@ void BL2Hook::hexedit_array_limit_message(void) const {
     if (array_limit_msg == nullptr) {
         LOG(MISC, "Couldn't find array limit message signature, assuming already hex edited");
     } else {
-        LOG(MISC, "Array Limit Message: 0x%p", array_limit_msg);
+        LOG(MISC, "Array Limit Message: {:p}", reinterpret_cast<void*>(array_limit_msg));
 
         // NOLINTBEGIN(readability-magic-numbers)
         unlock_range(array_limit_msg + 1, 1);
