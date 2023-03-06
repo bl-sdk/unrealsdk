@@ -3,6 +3,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_NO_STATUS
+#define NOGDI
 #define NOMINMAX
 #include <windows.h>
 #include <winternl.h>
@@ -14,12 +15,18 @@
 
 #ifdef __cplusplus
 #include <array>
+#include <atomic>
 #include <charconv>
+#include <chrono>
 #include <cstdint>
 #include <filesystem>
+#include <format>
+#include <fstream>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -28,6 +35,7 @@
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
+
 
 // This is the only sdk header we'll include in the PCH, since automatically having the log macro
 // exposed is very convenient, and it doesn't depend on any other sdk headers
@@ -42,12 +50,21 @@ using std::uint32_t;
 using std::uint64_t;
 using std::uint8_t;
 
-static_assert(sizeof(float) == sizeof(uint32_t), "float is not 32-bit");
-static_assert(sizeof(double) == sizeof(uint64_t), "double is not 64-bit");
+#if __cplusplus > 202002L
+using std::float32_t;
+using std::float64_t;
+#else
+
+// NOLINTBEGIN(readability-magic-numbers)
+static_assert(std::numeric_limits<float>::is_iec559 && std::numeric_limits<float>::digits == 24,
+              "float is not ieee 32-bit");
+static_assert(std::numeric_limits<double>::is_iec559 && std::numeric_limits<double>::digits == 53,
+              "double is not ieee 64-bit");
+// NOLINTEND(readability-magic-numbers)
+
 using float32_t = float;
 using float64_t = double;
-#if __cplusplus >= 202002L
-#warning Replace float32/64 with standard versions
+
 #endif
 
 #ifdef ARCH_X64

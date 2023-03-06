@@ -27,9 +27,9 @@ static bool check_hook_allowed_and_log_call(const std::string& source,
                                             const std::string& func_name,
                                             const UObject* obj) {
     if (log_all_calls) {
-        LOG(HOOKS, "===== %s called =====", source.c_str());
-        LOG(HOOKS, "Function: %s", func_name.c_str());
-        LOG(HOOKS, "Object: %s", obj->get_path_name<char>().c_str());
+        LOG(MISC, "===== %s called =====", source.c_str());
+        LOG(MISC, "Function: %s", func_name.c_str());
+        LOG(MISC, "Object: %s", obj->get_path_name<char>().c_str());
     }
 
     if (inject_next_call) {

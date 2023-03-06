@@ -5,52 +5,174 @@
 #include "unrealsdk.h"
 #include "utils.h"
 
-
 namespace unrealsdk::logging {
 
-constexpr auto LOG_FILE_NAME = "unrealsdk.log";
+static constexpr auto LOG_FILE_NAME = "unrealsdk.log";
 
-constexpr auto CONSOLE_LOG_CALLBACK_NAME = "console";
+static std::mutex mutex{};
 
-constexpr auto DEFAULT_FILE_VERBOSITY = Verbosity::MISC;
-constexpr auto DEFAULT_CONSOLE_VERBOSITY = Verbosity::CONSOLE;
-
-// This one's just a pain to use safely since it needs to go into C arrays
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG_FAKE_EXECUTABLE_NAME "unrealsdk"
-
+static std::atomic<Level> unreal_console_level = Level::DEFAULT_CONSOLE_LEVEL;
 static HANDLE external_console_handle = nullptr;
-static Verbosity console_verbosity = DEFAULT_CONSOLE_VERBOSITY;
+static std::unique_ptr<std::ostream> log_file_stream;
 
-static const char* log_level_to_name(loguru::Verbosity level);
-static loguru::Verbosity name_to_log_level(const char* name);
+static std::vector<log_callback> all_log_callbacks{};
 
-static Verbosity log_level_from_env_var(env::env_var_key key, Verbosity default_value);
+bool callbacks_only = false;
 
-static void log_to_console(void* user_data, const loguru::Message& message);
+#pragma region Formatting
+
+/**
+ * @brief Truncates leading chunks of a string until it fits under a max width.
+ * @note Will return strings longer than the max width if it can't cleanly chunk them.
+ *
+ * @param str The string to truncate.
+ * @param seperators The characters to use as seperators between chunks.
+ * @param max_width The maximum width of the string.
+ * @return The truncated string.
+ */
+static std::string truncate_leading_chunks(const std::string& str,
+                                           const std::string& seperators,
+                                           size_t max_width) {
+    static const std::string TRUNCATION_PREFIX = "~ ";
+
+    auto width = str.size();
+    size_t start_pos = 0;
+    while (width > max_width) {
+        auto next_seperator_char = str.find_first_of(seperators, start_pos);
+        if (next_seperator_char == std::string::npos) {
+            break;
+        }
+        auto next_regular_char = str.find_first_not_of(seperators, next_seperator_char);
+        if (next_regular_char == std::string::npos) {
+            break;
+        }
+
+        // The first time we truncate something, we know we noew need to add the prefix on, so
+        // subtract it from max width
+        if (start_pos == 0) {
+            max_width -= TRUNCATION_PREFIX.size();
+        }
+
+        width -= (next_regular_char - start_pos);
+        start_pos = next_regular_char;
+    }
+
+    if (start_pos == 0) {
+        return str;
+    }
+
+    return TRUNCATION_PREFIX + str.substr(start_pos);
+}
+
+/**
+ * @brief Gets the name of a log level.
+ *
+ * @param level The log level
+ * @return The level's name.
+ */
+static std::string get_level_name(Level level) {
+    switch (level) {
+        default:
+        case Level::ERROR:
+            return "ERR";
+        case Level::WARNING:
+            return "WARN";
+        case Level::INFO:
+            return "INFO";
+        case Level::DEV_WARNING:
+            return "DWRN";
+        case Level::MISC:
+            return "MISC";
+    }
+}
+
+static constexpr auto DATE_WIDTH = 10;
+static constexpr auto TIME_WIDTH = 12;
+static constexpr auto LOCATION_WIDTH = 50;
+static constexpr auto LINE_WIDTH = 4;
+static constexpr auto LEVEL_WIDTH = 4;
+
+/**
+ * @brief Formats a log message following our internal style.
+ *
+ * @param msg The log message.
+ * @return The formatted message
+ */
+static std::string format_message(const LogMessage& msg) {
+    auto location = msg.function[0] != '\0'
+                        ? truncate_leading_chunks(msg.function, ":", LOCATION_WIDTH)
+                        : truncate_leading_chunks(msg.file, "\\/", LOCATION_WIDTH);
+
+    return std::format(
+        "{1:>{0}%F %T} {3:>{2}}@{5:<{4}d} {7:>{6}}| {8}\n", DATE_WIDTH + TIME_WIDTH + 1,
+        std::chrono::round<std::chrono::milliseconds>(msg.time), LOCATION_WIDTH, location,
+        LINE_WIDTH, msg.line, LEVEL_WIDTH, get_level_name(msg.level), msg.msg);
+}
+
+/**
+ * @brief Gets a header to display at the top of the log file
+ *
+ * @return The header.
+ */
+static std::string get_header(void) {
+    return std::format("{1:<{0}} {3:<{2}} {5:>{4}}@{7:<{6}} {9:>{8}}| \n", DATE_WIDTH, "date",
+                       TIME_WIDTH, "time", LOCATION_WIDTH, "location", LINE_WIDTH, "line",
+                       LEVEL_WIDTH, "v");
+}
+
+#pragma endregion
+
+/**
+ * @brief Gets a log level from it's string representation.
+ *
+ * @param str The string.
+ * @return The parsed log level, or `Level::INVALID`.
+ */
+static Level get_level_from_string(const std::string& str) {
+    if (str.empty()) {
+        return Level::INVALID;
+    }
+
+    // Start by matching first character
+    switch (str[0]) {
+        case 'E':
+            return Level::ERROR;
+        case 'W':
+            return Level::WARNING;
+        case 'I':
+            return Level::INFO;
+        case 'D':
+            return Level::DEV_WARNING;
+        case 'M':
+            return Level::MISC;
+        default:
+            break;
+    }
+
+    // Otherwise try parse as an int
+    uint32_t int_level = 0;
+    auto res = std::from_chars(str.c_str(), str.c_str() + str.size(), int_level);
+    if (res.ec == std::errc()) {
+        return Level::INVALID;
+    }
+    // If within range
+    if (static_cast<decltype(int_level)>(Level::MIN) <= int_level
+        && int_level <= static_cast<decltype(int_level)>(Level::MAX)) {
+        return static_cast<Level>(int_level);
+    }
+
+    return Level::INVALID;
+}
 
 void init(void) {
-    loguru::g_preamble_uptime = false;
-    loguru::g_stderr_verbosity = loguru::Verbosity_OFF;
-    loguru::set_verbosity_to_name_callback(log_level_to_name);
-    loguru::set_name_to_verbosity_callback(name_to_log_level);
+    if (callbacks_only) {
+        return;
+    }
 
-    console_verbosity = log_level_from_env_var(env::CONSOLE_VERBOSITY, DEFAULT_CONSOLE_VERBOSITY);
-    auto file_verbosity = log_level_from_env_var(env::FILE_VERBOSITY, DEFAULT_FILE_VERBOSITY);
-
-    loguru::add_file(LOG_FILE_NAME, loguru::Truncate, file_verbosity);
-
-    // Take max Verbosity and filter it in our callback instead
-    loguru::add_callback(CONSOLE_LOG_CALLBACK_NAME, log_to_console, nullptr, loguru::Verbosity_MAX);
-
-    loguru::Options options = {};
-    options.verbosity_flag = nullptr;
-
-    // loguru::init expects a proper argc/v so we need to fake one
-    int fake_argc = 1;
-    char fake_executable[] = LOG_FAKE_EXECUTABLE_NAME;
-    char* fake_argv[] = {static_cast<char*>(fake_executable), nullptr};
-    loguru::init(fake_argc, static_cast<char**>(fake_argv), options);
+    auto env_level = get_level_from_string(env::get(env::LOG_LEVEL));
+    if (env_level != Level::INVALID) {
+        unreal_console_level = env_level;
+    }
 
 #ifndef DEBUG
     if (env::defined(env::EXTERNAL_CONSOLE))
@@ -65,110 +187,59 @@ void init(void) {
             LOG(ERROR, "Failed to initalize external console!");
         }
     }
+
+    log_file_stream = std::make_unique<std::ofstream>(LOG_FILE_NAME, std::ofstream::trunc);
+    *log_file_stream << get_header() << std::flush;
 }
 
-void cleanup(void) {
-    loguru::shutdown();
-    if (external_console_handle != nullptr) {
-        CloseHandle(external_console_handle);
-        external_console_handle = nullptr;
+void log(const LogMessage&& msg) {
+    std::lock_guard<std::mutex> lock(mutex);
+
+    for (const auto& callback : all_log_callbacks) {
+        callback(msg);
     }
-}
 
-void set_console_verbosity(Verbosity level) {
-    console_verbosity = level;
-}
-
-void set_file_verbosity(Verbosity level) {
-    loguru::remove_callback(LOG_FILE_NAME);
-    loguru::add_file(LOG_FILE_NAME, loguru::Append, level);
-}
-
-/**
- * @brief Callback for loguru, used to name our custom log levels.
- * @note Instance of `verbosity_to_name_t`.
- *
- * @param level The verbosity level to try name.
- * @return Pointer to a string holding the name, or null.
- */
-static const char* log_level_to_name(loguru::Verbosity level) {
-    switch (level) {
-        case Verbosity::CONSOLE:
-            return "CON";
-        case Verbosity::MISC:
-            return "MISC";
-        case Verbosity::HOOKS:
-            return "HOOK";
-        case Verbosity::INTERNAL:
-            return "INT";
-        default:
-            return nullptr;
-    }
-}
-
-/**
- * @brief Callback for loguru, used to parse our custom log levels.
- * @note Instance of `name_to_verbosity_t`.
- *
- * @param name Pointer to a string holding the name to check.
- * @return The parsed verbosity level, or `Verbosity_INVALID`
- */
-static loguru::Verbosity name_to_log_level(const char* name) {
-    // NOLINTBEGIN(readability-else-after-return)
-    if (strcmp(name, "CON") == 0) {
-        return Verbosity::CONSOLE;
-    } else if (strcmp(name, "MISC") == 0) {
-        return Verbosity::MISC;
-    } else if (strcmp(name, "HOOK") == 0) {
-        return Verbosity::HOOKS;
-    } else if (strcmp(name, "INT") == 0) {
-        return Verbosity::INTERNAL;
-    } else {
-        return loguru::Verbosity_INVALID;
-    }
-    // NOLINTEND(readability-else-after-return)
-}
-
-/**
- * @brief Parses a log level from an enviroment variable.
- * @note Accepts both integers (which are in range) and level names
- *
- * @param key The enviroment variable.
- * @param default_value The default value to use if parsing was unsuccessful.
- * @return The parsed verbosity.
- */
-static Verbosity log_level_from_env_var(env::env_var_key key, Verbosity default_value) {
-    auto level_int = env::get_numeric<int>(key, Verbosity::INVALID);
-    if (Verbosity::MIN <= level_int && level_int <= Verbosity::MAX) {
-        return static_cast<Verbosity>(level_int);
-    }
-    auto level_from_str = loguru::get_verbosity_from_name(env::get(env::CONSOLE_VERBOSITY).c_str());
-    return level_from_str == Verbosity::INVALID ? default_value
-                                                : static_cast<Verbosity>(level_from_str);
-}
-
-/**
- * @brief Callback used to write log messages to console.
- * @note Instance of `log_handler_t`.
- *
- * @param message A struct holding the details of the message to log.
- */
-static void log_to_console(void* /*user_data*/, const loguru::Message& message) {
-    if (message.verbosity > console_verbosity) {
+    if (callbacks_only) {
         return;
     }
 
-    if (external_console_handle != nullptr) {
-        std::string full_message = message.preamble;
-        full_message += message.indentation;
-        full_message += message.prefix;
-        full_message += message.message;
-        full_message += "\n";
-        WriteFile(external_console_handle, full_message.c_str(), full_message.size(), nullptr,
-                  nullptr);
+    if (unreal_console_level >= msg.level) {
+        unrealsdk::uconsole_output_text(utils::widen(msg.msg));
     }
 
-    unrealsdk::uconsole_output_text(utils::widen(std::string{message.message} + "\n"));
+    if (external_console_handle != nullptr || log_file_stream) {
+        auto formatted = format_message(msg);
+
+        if (external_console_handle != nullptr) {
+            WriteFile(external_console_handle, formatted.c_str(), formatted.size(), nullptr,
+                      nullptr);
+        }
+
+        if (log_file_stream) {
+            *log_file_stream << formatted << std::flush;
+        }
+    }
+}
+
+void set_console_level(Level level) {
+    if (Level::MIN > level || level > Level::MAX) {
+        throw std::out_of_range("Log level out of range!");
+    }
+    unreal_console_level = level;
+}
+
+void add_callback(log_callback callback) {
+    std::lock_guard<std::mutex> lock(mutex);
+
+    all_log_callbacks.push_back(callback);
+}
+
+void remove_callback(log_callback callback) {
+    std::lock_guard<std::mutex> lock(mutex);
+
+    all_log_callbacks.erase(
+        std::remove(all_log_callbacks.begin(), all_log_callbacks.end(), callback),
+        all_log_callbacks.end());
 }
 
 }  // namespace unrealsdk::logging

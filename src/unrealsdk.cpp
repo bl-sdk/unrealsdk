@@ -12,8 +12,6 @@ static std::unique_ptr<game::AbstractHook> hook_instance;
 void init(std::unique_ptr<game::AbstractHook> game) {
     logging::init();
 
-    LOG(MISC, "Starting Initalization");
-
     if (MH_Initialize() != MH_OK) {
         throw std::runtime_error("Minhook initialization failed!");
     }

@@ -9,8 +9,7 @@ A few enviroment variables affect how the SDK behaves.
 Enviroment Variable                       | Usage
 :-----------------------------------------|:------
 `UNREALSDK_EXTERNAL_CONSOLE`              | If defined, creates an external console window mirroring what is written to the game's console. Always enabled in debug builds.
-`UNREALSDK_CONSOLE_LOG_LEVEL`             | Changes the default console logging level. May use either the level names or their numerical values.
-`UNREALSDK_FILE_LOG_LEVEL`                | Changes the default file logging level. May use either the level names or their numerical values.
+`UNREALSDK_LOG_LEVEL`                     | Changes the default logging level used in the unreal console. May use either the level names or their numerical values.
 `UNREALSDK_GAME_OVERRIDE`                 | Override the executable name used for game detection.
 `UNREALSDK_UPROPERTY_SIZE`                | Changes the size the `UProperty` class is assumed to have.
 `UNREALSDK_ALLOC_ALIGNMENT`               | Changes the alignment used when calling the unreal memory allocation functions.

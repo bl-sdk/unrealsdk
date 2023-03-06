@@ -1,77 +1,104 @@
 #ifndef LOGGING_H
 #define LOGGING_H
 
-#include <loguru.hpp>
+// Because this file in included in the pch, we can't include the pch here instead of these
+#include <chrono>
+#include <format>
+#include <string>
 
 namespace unrealsdk::logging {
 
-/**
- * @brief The verbosity levels we use in this project
- */
-enum Verbosity : loguru::Verbosity {
-    /// Log level for errors
-    ERROR = loguru::Verbosity_ERROR,
-    /// Log level for warnings
-    WARNING = loguru::Verbosity_WARNING,
-    /// Standard log level for info messages
-    INFO = loguru::Verbosity_INFO,
+enum class Level {
+    ERROR = 5,
+    WARNING = 4,
+    INFO = 3,
+    // Intended for warnings which don't concern users, so shouldn't be shown in the UE console
+    // (e.g. deprecation warnings)
+    DEV_WARNING = 2,
+    MISC = 1,
 
-    // Loguru lets us use 1-9 as extra debugging levels.
-    // Deliberately only going to use even values so Python can use the levels inbetween
+    DEFAULT_CONSOLE_LEVEL = INFO,
 
-    /// Catch all log level for messages in console - i.e. Python stdout, user input, etc.
-    CONSOLE = 2,
-    /// Catch all log level for misc info which we want to log, but only to the file
-    MISC = 4,
-    /// Log level for messages about hooked functions
-    HOOKS = 6,
-    /// Lowest log level internal debug logging
-    INTERNAL = 8,
+    MIN = MISC,
+    MAX = ERROR,
 
-    /// Minimum valid log level - should only be used for (inclusive) range checks
-    MIN = ERROR,
-    /// Maximum valid log level - should only be used for (inclusive) range checks
-    MAX = loguru::Verbosity_MAX,
-    /// Placeholder log level for invalid values
-    INVALID = loguru::Verbosity_INVALID,
+    INVALID = 0,
 };
 
+struct LogMessage {
+    LogMessage(Level level,
+               const std::string& msg,
+               const char* function,
+               const char* file,
+               int line)
+        : level(level),
+          msg(msg),
+          time(std::chrono::system_clock::now()),
+          function(function),
+          file(file),
+          line(line) {}
+
+    const Level level{};
+    const std::string& msg;
+    const std::chrono::system_clock::time_point time;
+    const char* function;
+    const char* file;
+    const int line;
+};
+
+// If true, disables all output and only runs the logging callbacks when a message is logged
+// Setting true before init is called ensures no external console or log file is created
+extern bool callbacks_only;
+
 /**
- * @brief Initalize the logging module.
+ * @brief Initalizes logging, creating the log files and external console as needed.
  */
 void init(void);
 
 /**
- * @brief Cleanup the logging module.
+ * @brief Internal function to log a message.
+ * @note Shouldn't call directly, use the `LOG()` macro instead.
+ *
+ * @param msg Message to log.
  */
-void cleanup(void);
+void log(const LogMessage&& msg);
 
 /**
- * @brief Set the verbosity level of console.
+ * @brief Sets the log level of the unreal console.
+ * @note Does not affect the log file or external console, if enabled.
  *
- * @param level The new verbosity level.
+ * @param level The new log level.
  */
-void set_console_verbosity(Verbosity level);
+void set_console_level(Level level);
+
+using log_callback = void(*)(const LogMessage&);
 
 /**
- * @brief Set the verbosity level of the log file.
+ * @brief Adds a callback to be run on each log message.
  *
- * @param verbosity The new verbosity level.
+ * @param callback The callback to add.
  */
-void set_file_verbosity(Verbosity level);
+void add_callback(log_callback callback);
+
+/**
+ * @brief Removes a callback from being run on each log message.
+ *
+ * @param callback The callback to remove.
+ */
+void remove_callback(log_callback callback);
 
 }  // namespace unrealsdk::logging
-
-// Can't use LOG_F with our custom levels, so a shortcut for most cases
 
 /**
  * @brief Logs a message.
  *
  * @param level The log level name.
- * @param msg The format string.
- * @param varags Format string contents.
+ * @param fmt The format string.
+ * @param ... The format string's contents.
  */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG(level, ...) VLOG_F(unrealsdk::logging::Verbosity::level, __VA_ARGS__)
+#define LOG(level, fmt, ...)                                                                  \
+    unrealsdk::logging::log({(unrealsdk::logging::Level::level), (fmt), (const char*)(__FUNCTION__), \
+                             (const char*)"", (__LINE__)})
 
-#endif
+#endif /* LOGGING_H */
