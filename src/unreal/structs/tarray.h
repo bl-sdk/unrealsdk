@@ -16,7 +16,7 @@ struct TArray {
     int32_t count;
     int32_t max;
 
-    static constexpr const auto MAX_CAPACITY = INT32_MAX;
+    static constexpr const auto MAX_CAPACITY = std::numeric_limits<decltype(count)>::max();
 
     /**
      * @brief Gets the size of the array.

@@ -23,7 +23,7 @@ GObjects::Iterator& GObjects::Iterator::operator++() {
     do {
         // If we're on the last object, increment to max index
         if (this->idx >= (this->gobjects.size() - 1)) {
-            this->idx = MAXSIZE_T;
+            this->idx = std::numeric_limits<size_t>::max();
             break;
         }
 
@@ -55,7 +55,7 @@ GObjects::Iterator GObjects::begin(void) const {
 }
 
 GObjects::Iterator GObjects::end(void) const {
-    return {*this, MAXSIZE_T};
+    return {*this, std::numeric_limits<size_t>::max()};
 }
 
 #pragma endregion

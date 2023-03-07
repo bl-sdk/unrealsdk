@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.24)
+﻿cmake_minimum_required (VERSION 3.24)
 
 project(unrealsdk VERSION 1.0.0)
 
@@ -24,6 +24,7 @@ add_subdirectory(libs/fmt)
 # Source Files
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/*.c" "src/*.cpp" "src/*.h" "src/*.hpp")
 
+set(CMAKE_SHARED_LIBRARY_PREFIX "")
 add_library(unrealsdk SHARED ${sources})
 target_include_directories(unrealsdk PUBLIC "src")
 target_link_libraries(unrealsdk PUBLIC minhook fmt)
@@ -48,6 +49,11 @@ if(MSVC)
 
     # UTF-8 encoded source files
     target_compile_options(unrealsdk PUBLIC "/utf-8")
+endif()
+
+if (MINGW)
+    # Want to link statically into a single dll
+    target_link_options(unrealsdk PUBLIC "-static")
 endif()
 
 # Postbuild
