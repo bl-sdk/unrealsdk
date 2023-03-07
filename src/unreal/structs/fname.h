@@ -1,6 +1,8 @@
 #ifndef UNREAL_STRUCTS_FNAME_H
 #define UNREAL_STRUCTS_FNAME_H
 
+#include "pch.h"
+
 namespace unrealsdk::unreal {
 
 #if defined(_MSC_VER) && defined(ARCH_X86)
@@ -65,8 +67,9 @@ FName operator"" _fn(const wchar_t* str, size_t len);
 
 // Custom FName formatter, which just casts to a string first
 template <>
-struct std::formatter<unrealsdk::unreal::FName> : std::formatter<std::string> {
-    auto format(unrealsdk::unreal::FName name, std::format_context& ctx) {
+struct unrealsdk::fmt::formatter<unrealsdk::unreal::FName>
+    : unrealsdk::fmt::formatter<std::string> {
+    auto format(unrealsdk::unreal::FName name, unrealsdk::fmt::format_context& ctx) {
         return formatter<std::string>::format((std::string)name, ctx);
     }
 };

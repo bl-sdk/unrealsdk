@@ -6,7 +6,7 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/user-includes.cmake")
    include("${CMAKE_CURRENT_SOURCE_DIR}/user-includes.cmake")
 endif()
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 set(CMAKE_COMPILE_WARNING_AS_ERROR True)
@@ -19,13 +19,14 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND (SDK_ARCH STREQUAL "x86"))
 endif()
 
 add_subdirectory(libs/minhook)
+add_subdirectory(libs/fmt)
 
 # Source Files
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/*.c" "src/*.cpp" "src/*.h" "src/*.hpp")
 
 add_library(unrealsdk SHARED ${sources})
 target_include_directories(unrealsdk PUBLIC "src")
-target_link_libraries(unrealsdk PUBLIC minhook)
+target_link_libraries(unrealsdk PUBLIC minhook fmt)
 
 target_compile_definitions(unrealsdk PUBLIC "${SDK_UE_VERSION}" "ARCH_$<UPPER_CASE:${SDK_ARCH}>")
 # CMake by default defines NDEBUG in release, we also want the opposite

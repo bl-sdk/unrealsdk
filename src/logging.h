@@ -3,8 +3,8 @@
 
 // Because this file in included in the pch, we can't include the pch here instead of these
 #include <chrono>
-#include <format>
 #include <string>
+#include "format.h"
 
 namespace unrealsdk::logging {
 
@@ -93,12 +93,12 @@ void remove_callback(log_callback callback);
  * @brief Logs a message.
  *
  * @param level The log level name.
- * @param fmt The format string.
- * @param ... The format string's contents.
+ * @param ... The format string + it's contents.
  */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG(level, fmt, ...)                                                                      \
-    unrealsdk::logging::log({(unrealsdk::logging::Level::level), std::format((fmt), __VA_ARGS__), \
-                             (const char*)(__FUNCTION__), (const char*)"", (__LINE__)})
+#define LOG(level, ...)                                                                        \
+    unrealsdk::logging::log({(unrealsdk::logging::Level::level),                               \
+                             unrealsdk::fmt::format(__VA_ARGS__), (const char*)(__FUNCTION__), \
+                             (const char*)"", (__LINE__)})
 
 #endif /* LOGGING_H */

@@ -37,7 +37,7 @@ static bool check_hook_allowed_and_log_call(const std::string& source,
         return false;
     }
 
-    return hooks.contains(func_name);
+    return hooks.count(func_name) != 0;
 }
 
 /**

@@ -20,7 +20,6 @@
 #include <chrono>
 #include <cstdint>
 #include <filesystem>
-#include <format>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -36,9 +35,12 @@
 #include <unordered_map>
 #include <unordered_set>
 
+// This file is just a forwarder for whichever formatting library is configured, it doesn't define
+// anything itself, so is fine to include here
+#include "format.h"
 
-// This is the only sdk header we'll include in the PCH, since automatically having the log macro
-// exposed is very convenient, and it doesn't depend on any other sdk headers
+// This file is mostly just here so that the `LOG` macro is automatically available everywhere
+// It only includes library headers, so is also ok to include
 #include "logging.h"
 
 using std::int16_t;

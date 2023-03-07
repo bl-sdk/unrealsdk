@@ -103,10 +103,10 @@ static std::string format_message(const LogMessage& msg) {
                         ? truncate_leading_chunks(msg.function, ":", LOCATION_WIDTH)
                         : truncate_leading_chunks(msg.file, "\\/", LOCATION_WIDTH);
 
-    return std::format(
-        "{1:>{0}%F %T} {3:>{2}}@{5:<{4}d} {7:>{6}}| {8}\n", DATE_WIDTH + TIME_WIDTH + 1,
-        std::chrono::round<std::chrono::milliseconds>(msg.time), LOCATION_WIDTH, location,
-        LINE_WIDTH, msg.line, LEVEL_WIDTH, get_level_name(msg.level), msg.msg);
+    return unrealsdk::fmt::format("{1:>{0}%F %H:%M:%S} {3:>{2}}@{5:<{4}d} {7:>{6}}| {8}\n", DATE_WIDTH + TIME_WIDTH + 1,
+                                  std::chrono::round<std::chrono::milliseconds>(msg.time),
+                                  LOCATION_WIDTH, location, LINE_WIDTH, msg.line, LEVEL_WIDTH,
+                                  get_level_name(msg.level), msg.msg);
 }
 
 /**
@@ -115,9 +115,9 @@ static std::string format_message(const LogMessage& msg) {
  * @return The header.
  */
 static std::string get_header(void) {
-    return std::format("{1:<{0}} {3:<{2}} {5:>{4}}@{7:<{6}} {9:>{8}}| \n", DATE_WIDTH, "date",
-                       TIME_WIDTH, "time", LOCATION_WIDTH, "location", LINE_WIDTH, "line",
-                       LEVEL_WIDTH, "v");
+    return unrealsdk::fmt::format("{1:<{0}} {3:<{2}} {5:>{4}}@{7:<{6}} {9:>{8}}| \n", DATE_WIDTH,
+                                  "date", TIME_WIDTH, "time", LOCATION_WIDTH, "location",
+                                  LINE_WIDTH, "line", LEVEL_WIDTH, "v");
 }
 
 #pragma endregion
