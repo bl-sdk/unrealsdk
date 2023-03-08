@@ -26,13 +26,13 @@ void BL3Hook::hook(void) {
 
 #pragma region FName::Init
 
-using fname_init_func = FName (*)(const wchar_t* str, int32_t number, int32_t find_type);
+using fname_init_func = void (*)(FName* self, const wchar_t* str, int32_t number, int32_t find_type, int32_t split_name, int32_t hardcode_idx);
 static fname_init_func fname_init_ptr;
 
 void BL3Hook::find_fname_init(void) {
     static const Pattern FNAME_INIT_PATTERN{
-        "\x40\x53\x48\x83\xEC\x30\xC7\x44\x24\x00\x00\x00\x00\x00",
-        "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00"};
+        "\x48\x89\x5C\x24\x00\x55\x56\x57\x48\x81\xEC\x60\x08\x00\x00",
+        "\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
 
     fname_init_ptr = sigscan<fname_init_func>(FNAME_INIT_PATTERN);
     LOG(MISC, "FName::Init: {:p}", reinterpret_cast<void*>(fname_init_ptr));
@@ -42,7 +42,7 @@ void BL3Hook::fname_init(FName* name, const std::wstring& str, int32_t number) c
     this->fname_init(name, str.c_str(), number);
 }
 void BL3Hook::fname_init(FName* name, const wchar_t* str, int32_t number) const {
-    *name = fname_init_ptr(str, number, 1);
+    fname_init_ptr(name, str, number, 1, 1 /* true */, -1);
 }
 
 #pragma endregion
