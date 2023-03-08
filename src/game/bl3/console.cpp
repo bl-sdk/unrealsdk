@@ -93,7 +93,8 @@ void BL3Hook::uconsole_output_text(const std::wstring& str) const {
         return;
     }
 
-    auto size = str.size();
+    // Include the null terminator in the size
+    auto size = str.size() + 1;
     if (size > TArray<void>::MAX_CAPACITY) {
         throw std::length_error("Tried to log a string longer than TArray max capacity!");
     }
@@ -103,7 +104,7 @@ void BL3Hook::uconsole_output_text(const std::wstring& str) const {
     // send to unreal will have a smaller lifetime within it.
     // Rather than use a more well defined FString type, this means we can just reference the stl
     // string's data directly, avoiding an extra copy.
-    TArray<const wchar_t> fstr{str.data(), narrowed_size, narrowed_size};
+    TArray<const wchar_t> fstr{str.c_str(), narrowed_size, narrowed_size};
 
     auto idx =
         env::get_numeric<size_t>(env::UCONSOLE_OUTPUT_TEXT_VF_INDEX, DEFAULT_OUTPUT_TEXT_VF_INDEX);
