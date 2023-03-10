@@ -66,5 +66,8 @@ void uconsole_output_text(const std::wstring& str) {
         hook_instance->uconsole_output_text(str);
     }
 }
+std::wstring uobject_path_name(const UObject* obj) {
+    return hook_instance->uobject_path_name(obj);
+}
 
 }  // namespace unrealsdk

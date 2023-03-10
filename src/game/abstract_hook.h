@@ -51,6 +51,7 @@ struct AbstractHook {
                                                     decltype(UObject::ObjectFlags) flags,
                                                     UObject* template_obj) const = 0;
     virtual void uconsole_output_text(const std::wstring& str) const = 0;
+    virtual std::wstring uobject_path_name(const UObject* obj) const = 0;
 };
 
 #pragma endregion

@@ -147,8 +147,9 @@ class BoundFunction {
         if constexpr (std::is_void_v<R>) {
             unrealsdk::u_free(params);
         } else {
-            // TODO: use after free when the return is a reference type (structs, arrays)
+            // TODO: use after free when the return is a reference type (structs, arrays),
             auto ret = this->get_return_value<R>(reinterpret_cast<uintptr_t>(params));
+            // TODO: memory leak when we don't clean up nested allocations
             unrealsdk::u_free(params);
             return ret;
         }

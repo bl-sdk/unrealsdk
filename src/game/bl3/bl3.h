@@ -55,6 +55,11 @@ class BL3Hook : public AbstractHook {
     static void find_construct_object(void);
 
     /**
+     * @brief Finds `UObject::GetPathName`, and sets up such that `uobject_path_name` may be called.
+     */
+    static void find_get_path_name(void);
+
+    /**
      * @brief Creates a console and sets the bind (if required), and hooks logging onto it.
      */
     static void inject_console(void);
@@ -77,6 +82,7 @@ class BL3Hook : public AbstractHook {
                                             decltype(UObject::ObjectFlags) flags,
                                             UObject* template_obj) const override;
     void uconsole_output_text(const std::wstring& str) const override;
+    std::wstring uobject_path_name(const UObject* obj) const override;
 };
 
 template <>

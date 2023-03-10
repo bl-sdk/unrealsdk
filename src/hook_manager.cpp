@@ -6,6 +6,7 @@
 #include "unreal/structs/fframe.h"
 #include "unreal/wrappers/wrapped_args.h"
 #include "unrealsdk.h"
+#include "utils.h"
 
 using namespace unrealsdk::unreal;
 
@@ -16,28 +17,31 @@ bool log_all_calls = false;
 bool inject_next_call = false;
 
 /**
- * @brief Checks if a hook may be called, and logs the call if needed.
- *
- * @param source The source of the hook, used for logging.
- * @param func_name The path name of the function which was called.
- * @param obj The object which called the function.
- * @return True if a hook exists for this function and may be called.
- */
-static bool check_hook_allowed_and_log_call(const std::string& source,
-                                            const std::string& func_name,
-                                            const UObject* obj) {
-    if (log_all_calls) {
-        LOG(MISC, "===== {} called =====", source);
-        LOG(MISC, "Function: {}", func_name);
-        LOG(MISC, "Object: {}", obj->get_path_name<char>());
-    }
-
+  * @brief Preprocess a function call to work out if to bother trying to run hooks on it.
+  *
+  * @param source The source of the hook, used for logging.
+  * @param func The function which was called.
+  * @param obj The object which called the function.
+  * @return A pair, of true and the function name if a hook may be called, or of false and an
+  *         unspecified string otherwise.
+  */
+static std::pair<bool, std::wstring> preprocess_hook(const std::string& source,
+                                                     const UFunction* func,
+                                                     const UObject* obj) {
     if (inject_next_call) {
         inject_next_call = false;
-        return false;
+        return {false, L""};
     }
 
-    return hooks.count(func_name) != 0;
+    auto func_name = func->get_path_name();
+
+    if (log_all_calls) {
+        LOG(MISC, "===== {} called =====", source);
+        LOG(MISC, "Function: {}", unrealsdk::utils::narrow(func_name));
+        LOG(MISC, "Object: {}", unrealsdk::utils::narrow(obj->get_path_name()));
+    }
+
+    return {hooks.count(func_name) != 0, func_name};
 }
 
 /**
@@ -51,7 +55,7 @@ static bool check_hook_allowed_and_log_call(const std::string& source,
  * @return True if to block execution, false if to continue.
  */
 static bool run_hooks(UFunction* func,
-                      const std::string& func_name,
+                      const std::wstring& func_name,
                       UObject* obj,
                       WrappedArgs& args) {
     // Grab a copy incase the hook removes itself from the list (which would invalidate the
@@ -74,8 +78,8 @@ static bool run_hooks(UFunction* func,
 }
 
 bool process_event(UObject* obj, UFunction* func, WrappedArgs& args) {
-    auto func_name = func->get_path_name<char>();
-    if (!check_hook_allowed_and_log_call("ProcessEvent", func_name, obj)) {
+    auto [has_hook, func_name] = preprocess_hook("ProcessEvent", func, obj);
+    if (!has_hook) {
         return false;
     }
 
@@ -107,8 +111,8 @@ bool call_function(UObject* obj, FFrame* stack, void* /*result*/, UFunction* fun
      implementation simpler.
     */
 
-    auto func_name = func->get_path_name<char>();
-    if (!check_hook_allowed_and_log_call("CallFunction", func_name, obj)) {
+    auto [has_hook, func_name] = preprocess_hook("CallFunction", func, obj);
+    if (!has_hook) {
         return false;
     }
 

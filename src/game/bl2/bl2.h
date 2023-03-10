@@ -100,6 +100,7 @@ class BL2Hook : public AbstractHook {
                                             decltype(UObject::ObjectFlags) flags,
                                             UObject* template_obj) const override;
     void uconsole_output_text(const std::wstring& str) const override;
+    std::wstring uobject_path_name(const UObject* obj) const override;
 };
 
 template <>

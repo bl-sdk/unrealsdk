@@ -117,11 +117,9 @@ class UObject {
     /**
      * @brief Get the object's full path name.
      *
-     * @tparam T the string type to get the name as.
      * @return The full path name.
      */
-    template <typename T>
-    [[nodiscard]] std::basic_string<T> get_path_name(void) const;
+    [[nodiscard]] std::wstring get_path_name(void) const;
 
     /**
      * @brief Checks if this object is an instance of a class.
@@ -130,7 +128,7 @@ class UObject {
      * @param cls The class to check.
      * @return True if this object is an instance of the given class.
      */
-    bool is_instance(const UClass* cls) const;
+    [[nodiscard]] bool is_instance(const UClass* cls) const;
 
     /**
      * @brief Checks if this object implements an interface.
@@ -140,7 +138,7 @@ class UObject {
      *                      (assuming it's found).
      * @return True if this object implements of the given interface.
      */
-    bool is_implementation(const UClass* iface, FImplementedInterface** impl_out = nullptr) const;
+    [[nodiscard]] bool is_implementation(const UClass* iface, FImplementedInterface** impl_out = nullptr) const;
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

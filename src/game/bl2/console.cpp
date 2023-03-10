@@ -20,17 +20,16 @@ using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
-static const std::string SAY_BYPASS_FUNC = "Engine.Console:ShippingConsoleCommand";
-static const std::string SAY_BYPASS_ID = "unrealsdk_bl2_say_bypass";
-static const std::string INJECT_CONSOLE_FUNC = "WillowGame.WillowGameViewportClient:PostRender";
-static const std::string INJECT_CONSOLE_ID = "unrealsdk_bl2_inject_console";
+static const std::wstring SAY_BYPASS_FUNC = L"Engine.Console:ShippingConsoleCommand";
+static const std::wstring SAY_BYPASS_ID = L"unrealsdk_bl2_say_bypass";
+static const std::wstring INJECT_CONSOLE_FUNC = L"WillowGame.WillowGameViewportClient:PostRender";
+static const std::wstring INJECT_CONSOLE_ID = L"unrealsdk_bl2_inject_console";
 
 static bool say_bypass_hook(UFunction* /*func*/, UObject* obj, WrappedArgs& args) {
     static UFunction* console_command_func = nullptr;
     static UStrProperty* command_property = nullptr;
 
     // Optimize so we only call find once for each
-    // TODO: can be removed once we have a general optimized `UStruct::find`
     if (console_command_func == nullptr) {
         console_command_func = obj->Class->find_and_validate<UFunction>(L"ConsoleCommand"_fn);
         command_property = args.type->find_and_validate<UStrProperty>(L"Command"_fn);

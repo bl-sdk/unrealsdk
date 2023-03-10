@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <sstream>
 
 #include "unreal/classes/uclass.h"
 #include "unreal/classes/ufunction.h"
@@ -7,10 +8,12 @@
 #include "unreal/structs/fname.h"
 #include "unreal/wrappers/bound_function.h"
 #include "unreal/wrappers/prop_traits.h"
+#include "unrealsdk.h"
 
 namespace unrealsdk::unreal {
 
-// TODO: replace with call directly to `UObject::[Get]PathName()`
+#ifdef UNREALSDK_INTERNAL_PATH_NAME
+
 /**
  * @brief Recursive helper to generate full object path name.
  *
@@ -18,43 +21,34 @@ namespace unrealsdk::unreal {
  * @param obj The object to get the path name of.
  * @param stream The stream to push the object name onto.
  */
-template <typename T>
-static void iter_path_name(const UObject* obj, std::basic_stringstream<T>& stream) {
+static void iter_path_name(const UObject* obj, std::wstringstream& stream) {
     if (obj->Outer != nullptr) {
         iter_path_name(obj->Outer, stream);
 
         static const FName PACKAGE_NAME = L"Package"_fn;
         if (obj->Outer->Class->Name != PACKAGE_NAME
             && obj->Outer->Outer->Class->Name == PACKAGE_NAME) {
-            if constexpr (std::is_same_v<T, char>) {
-                stream << ':';
-            } else {
-                stream << L':';
-            }
+            stream << L':';
         } else {
-            if constexpr (std::is_same_v<T, char>) {
-                stream << '.';
-            } else {
-                stream << L'.';
-            }
+            stream << L'.';
         }
     }
     stream << obj->Name;
 }
 
-template <>
-std::string UObject::get_path_name(void) const {
-    std::stringstream stream;
-    iter_path_name(this, stream);
-    return stream.str();
-}
-
-template <>
 std::wstring UObject::get_path_name(void) const {
     std::wstringstream stream;
     iter_path_name(this, stream);
     return stream.str();
 }
+
+#else
+
+std::wstring UObject::get_path_name(void) const {
+    return unrealsdk::uobject_path_name(this);
+}
+
+#endif
 
 bool UObject::is_instance(const UClass* cls) const {
     for (const UStruct* obj_cls = this->Class; obj_cls != nullptr; obj_cls = obj_cls->SuperField) {

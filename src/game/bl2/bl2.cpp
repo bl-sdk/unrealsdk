@@ -1,11 +1,15 @@
 #include "pch.h"
 
 #include "game/bl2/bl2.h"
+#include "hook_manager.h"
 #include "memory.h"
+#include "unreal/classes/properties/uobjectproperty.h"
+#include "unreal/classes/properties/ustrproperty.h"
 #include "unreal/classes/uclass.h"
 #include "unreal/classes/uobject.h"
 #include "unreal/structs/fframe.h"
 #include "unreal/structs/fname.h"
+#include "unreal/wrappers/bound_function.h"
 
 #if defined(UE3) && defined(ARCH_X86)
 
@@ -110,6 +114,35 @@ UObject* BL2Hook::construct_object(UClass* cls,
                                    UObject* template_obj) const {
     return construct_obj_ptr(cls, outer, name, flags, template_obj, nullptr, nullptr,
                              0 /* false */);
+}
+
+#pragma endregion
+
+#pragma region PathName
+
+std::wstring BL2Hook::uobject_path_name(const UObject* obj) const {
+    static UFunction* pathname_func = nullptr;
+
+    // Optimize so we only call find once
+    if (pathname_func == nullptr) {
+        pathname_func = obj->Class->find_and_validate<UFunction>(L"PathName"_fn);
+    }
+
+    // Bound functions need mutable references, since they might actually modify the object
+    // Object properties need mutable references, since you may want to modify the object you get
+    // We know when calling PathName neither of these apply, so we want this function to explicitly
+    // take a const reference - meaning we need a cast
+    // While this is technically undefined behaviour, we only pass the reference around, so this
+    // should be safe enough
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
+    auto mutable_obj = const_cast<UObject*>(obj);
+
+    // The hook manager calls this function to work out if to run a hook, so we need to inject next
+    // call to avoid recursion
+    hook_manager::inject_next_call = true;
+    return BoundFunction{pathname_func, mutable_obj}.call<UStrProperty, UObjectProperty>(
+        mutable_obj);
 }
 
 #pragma endregion

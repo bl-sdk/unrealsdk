@@ -15,8 +15,8 @@ class WrappedArgs;
 namespace unrealsdk::hook_manager {
 
 using callback = bool(unreal::UFunction*, unreal::UObject*, unreal::WrappedArgs&);
-using func_name = std::string;
-using identifier = std::string;
+using func_name = std::wstring;
+using identifier = std::wstring;
 using map = std::unordered_map<func_name, std::unordered_map<identifier, std::function<callback>>>;
 
 extern map hooks;

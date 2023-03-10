@@ -129,6 +129,11 @@ void process_event(UObject* object, UFunction* func, void* params);
  */
 void uconsole_output_text(const std::wstring& str);
 
+/**
+ * @brief Calls `UObject::PathName` on the given object.
+ */
+std::wstring uobject_path_name(const UObject* obj);
+
 }  // namespace unrealsdk
 
 #endif /* UNREALSDK_H */

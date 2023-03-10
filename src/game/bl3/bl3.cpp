@@ -2,6 +2,8 @@
 
 #include "game/bl3/bl3.h"
 #include "memory.h"
+#include "unreal/structs/tarray.h"
+#include "unrealsdk.h"
 
 #if defined(UE4) && defined(ARCH_X64)
 
@@ -20,13 +22,19 @@ void BL3Hook::hook(void) {
     find_fframe_step();
     find_gmalloc();
     find_construct_object();
+    find_get_path_name();
 
     inject_console();
 }
 
 #pragma region FName::Init
 
-using fname_init_func = void (*)(FName* self, const wchar_t* str, int32_t number, int32_t find_type, int32_t split_name, int32_t hardcode_idx);
+using fname_init_func = void (*)(FName* self,
+                                 const wchar_t* str,
+                                 int32_t number,
+                                 int32_t find_type,
+                                 int32_t split_name,
+                                 int32_t hardcode_idx);
 static fname_init_func fname_init_ptr;
 
 void BL3Hook::find_fname_init(void) {
@@ -95,6 +103,35 @@ UObject* BL3Hook::construct_object(UClass* cls,
                                    UObject* template_obj) const {
     return construct_obj_ptr(cls, outer, name, flags, 0, template_obj, 0 /* false */, nullptr,
                              0 /* false */);
+}
+
+#pragma endregion
+
+#pragma region PathName
+
+using get_path_name_func = void (*)(const UObject* self,
+                                    const UObject* stop_outer,
+                                    TArray<wchar_t>* str);
+static get_path_name_func get_path_name_ptr;
+
+void BL3Hook::find_get_path_name(void) {
+    static const Pattern GET_PATH_NAME_PATTERN{
+        "\x48\x89\x5C\x24\x00\x48\x89\x6C\x24\x00\x57\x48\x83\xEC\x20\x49\x8B\xF8\x48\x8B\xE9",
+        "\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+    get_path_name_ptr = sigscan<get_path_name_func>(GET_PATH_NAME_PATTERN);
+    LOG(MISC, "GetPathName: {:p}", reinterpret_cast<void*>(get_path_name_ptr));
+}
+
+std::wstring BL3Hook::uobject_path_name(const UObject* obj) const {
+    TArray<wchar_t> str{};
+    get_path_name_ptr(obj, nullptr, &str);
+    std::wstring ret{str.data, static_cast<std::wstring::size_type>(str.count)};
+    if (ret.back() == '\0') {
+        ret.pop_back();
+    }
+    unrealsdk::u_free(str.data);
+    return ret;
 }
 
 #pragma endregion

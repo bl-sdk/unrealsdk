@@ -23,8 +23,8 @@ using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
-static const std::string INJECT_CONSOLE_FUNC = "/Script/Engine.PlayerController:ClientSetHUD";
-static const std::string INJECT_CONSOLE_ID = "unrealsdk_bl3_inject_console";
+static const std::wstring INJECT_CONSOLE_FUNC = L"/Script/Engine.PlayerController:ClientSetHUD";
+static const std::wstring INJECT_CONSOLE_ID = L"unrealsdk_bl3_inject_console";
 
 static UObject* console = nullptr;
 
