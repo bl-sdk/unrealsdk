@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required (VERSION 3.24)
 
-project(unrealsdk VERSION 1.0.0)
+project(unrealsdk)
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/user-includes.cmake")
    include("${CMAKE_CURRENT_SOURCE_DIR}/user-includes.cmake")
