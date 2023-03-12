@@ -203,7 +203,7 @@ void log(const LogMessage&& msg) {
         return;
     }
 
-    if (unreal_console_level >= msg.level) {
+    if (unreal_console_level <= msg.level) {
         unrealsdk::uconsole_output_text(utils::widen(msg.msg));
     }
 
