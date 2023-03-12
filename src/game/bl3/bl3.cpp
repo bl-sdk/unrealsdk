@@ -2,6 +2,7 @@
 
 #include "game/bl3/bl3.h"
 #include "memory.h"
+#include "unreal/structs/fstring.h"
 #include "unreal/structs/tarray.h"
 #include "unrealsdk.h"
 
@@ -111,7 +112,7 @@ UObject* BL3Hook::construct_object(UClass* cls,
 
 using get_path_name_func = void (*)(const UObject* self,
                                     const UObject* stop_outer,
-                                    TArray<wchar_t>* str);
+                                    ManagedFString* str);
 static get_path_name_func get_path_name_ptr;
 
 void BL3Hook::find_get_path_name(void) {
@@ -124,14 +125,9 @@ void BL3Hook::find_get_path_name(void) {
 }
 
 std::wstring BL3Hook::uobject_path_name(const UObject* obj) const {
-    TArray<wchar_t> str{};
+    ManagedFString str{};
     get_path_name_ptr(obj, nullptr, &str);
-    std::wstring ret{str.data, static_cast<std::wstring::size_type>(str.count)};
-    if (ret.back() == '\0') {
-        ret.pop_back();
-    }
-    unrealsdk::u_free(str.data);
-    return ret;
+    return str;
 }
 
 #pragma endregion

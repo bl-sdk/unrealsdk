@@ -11,6 +11,7 @@
 #include "unreal/classes/uobject.h"
 #include "unreal/classes/uobject_funcs.h"
 #include "unreal/structs/fname.h"
+#include "unreal/structs/fstring.h"
 #include "unreal/wrappers/gobjects.h"
 #include "unreal/wrappers/wrapped_args.h"
 #include "unreal/wrappers/wrapped_array.h"
@@ -89,27 +90,15 @@ void BL3Hook::inject_console(void) {
 void BL3Hook::uconsole_output_text(const std::wstring& str) const {
     static constexpr auto DEFAULT_OUTPUT_TEXT_VF_INDEX = 83;
 
+    static auto idx =
+        env::get_numeric<size_t>(env::UCONSOLE_OUTPUT_TEXT_VF_INDEX, DEFAULT_OUTPUT_TEXT_VF_INDEX);
+
     if (console == nullptr) {
         return;
     }
 
-    // Include the null terminator in the size
-    auto size = str.size() + 1;
-    if (size > TArray<void>::MAX_CAPACITY) {
-        throw std::length_error("Tried to log a string longer than TArray max capacity!");
-    }
-    auto narrowed_size = static_cast<decltype(TArray<void>::count)>(size);
-
-    // We know the input string exists for the lifetime of this function, and we know the string we
-    // send to unreal will have a smaller lifetime within it.
-    // Rather than use a more well defined FString type, this means we can just reference the stl
-    // string's data directly, avoiding an extra copy.
-    TArray<const wchar_t> fstr{str.c_str(), narrowed_size, narrowed_size};
-
-    auto idx =
-        env::get_numeric<size_t>(env::UCONSOLE_OUTPUT_TEXT_VF_INDEX, DEFAULT_OUTPUT_TEXT_VF_INDEX);
-
-    console->call_virtual_function<void>(idx, &fstr);
+    TemporaryFString fstr{str};
+    console->call_virtual_function<void, TemporaryFString*>(idx, &fstr);
 }
 
 }  // namespace unrealsdk::game
