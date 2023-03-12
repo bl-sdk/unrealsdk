@@ -32,7 +32,7 @@ struct PropTraits {
      * @param addr The address to write the value to.
      * @param value The property's new value.
      */
-    static void set(const T* prop, uintptr_t addr, Value value);
+    static void set(const T* prop, uintptr_t addr, const Value& value);
 };
 
 /**
@@ -62,7 +62,7 @@ template <typename T>
  * @param value The property's new value.
  */
 template <typename T>
-void set_property(const T* prop, size_t idx, uintptr_t base_addr, typename PropTraits<T>::Value value) {
+void set_property(const T* prop, size_t idx, uintptr_t base_addr, const typename PropTraits<T>::Value& value) {
     if (idx > prop->ArrayDim) {
         throw std::out_of_range("Property index out of range");
     }

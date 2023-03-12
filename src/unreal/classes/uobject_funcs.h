@@ -30,11 +30,11 @@ template <typename T>
 }
 
 template <typename T>
-void UObject::set(const FName& name, size_t idx, typename PropTraits<T>::Value value) {
+void UObject::set(const FName& name, size_t idx, const typename PropTraits<T>::Value& value) {
     this->set<T>(this->Class->find_and_validate<T>(name), idx, value);
 }
 template <typename T>
-void UObject::set(const T* prop, size_t idx, typename PropTraits<T>::Value value) {
+void UObject::set(const T* prop, size_t idx, const typename PropTraits<T>::Value& value) {
     set_property<T>(prop, idx, reinterpret_cast<uintptr_t>(this), value);
 }
 

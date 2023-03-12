@@ -44,7 +44,7 @@ struct PropTraits<UBoolProperty> {
     static inline const wchar_t* const CLASS = L"BoolProperty";
 
     static Value get(const UBoolProperty* prop, uintptr_t addr);
-    static void set(const UBoolProperty* prop, uintptr_t addr, Value value);
+    static void set(const UBoolProperty* prop, uintptr_t addr, const Value& value);
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

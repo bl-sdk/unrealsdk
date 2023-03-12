@@ -83,7 +83,7 @@ class WrappedArray {
      * @return The item at that index.
      */
     template <typename T, typename = std::enable_if_t<std::is_base_of_v<UProperty, T>>>
-    void set_at(size_t idx, typename PropTraits<T>::Value value) {
+    void set_at(size_t idx, const typename PropTraits<T>::Value& value) {
         this->validate_access<T>(idx);
         return PropTraits<T>::set(
             reinterpret_cast<const T*>(this->type),

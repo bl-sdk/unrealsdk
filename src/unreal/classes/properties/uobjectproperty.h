@@ -44,7 +44,7 @@ struct PropTraits<UObjectProperty> {
     static inline const wchar_t* const CLASS = L"ObjectProperty";
 
     static Value get(const UObjectProperty* prop, uintptr_t addr);
-    static void set(const UObjectProperty* prop, uintptr_t addr, Value value);
+    static void set(const UObjectProperty* prop, uintptr_t addr, const Value& value);
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

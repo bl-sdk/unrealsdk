@@ -13,7 +13,7 @@ PropTraits<UStrProperty>::Value PropTraits<UStrProperty>::get(const UStrProperty
     return *reinterpret_cast<UnmanagedFString*>(addr);
 }
 
-void PropTraits<UStrProperty>::set(const UStrProperty* /*prop*/, uintptr_t addr, Value value) {
+void PropTraits<UStrProperty>::set(const UStrProperty* /*prop*/, uintptr_t addr, const Value& value) {
     *reinterpret_cast<UnmanagedFString*>(addr) = value;
 }
 

@@ -37,7 +37,7 @@ struct PropTraits<UStructProperty> {
     static inline const wchar_t* const CLASS = L"StructProperty";
 
     static Value get(const UStructProperty* prop, uintptr_t addr);
-    static void set(const UStructProperty* prop, uintptr_t addr, Value value);
+    static void set(const UStructProperty* prop, uintptr_t addr, const Value& value);
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

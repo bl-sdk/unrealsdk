@@ -14,7 +14,7 @@ PropTraits<UArrayProperty>::Value PropTraits<UArrayProperty>::get(const UArrayPr
     return {inner, reinterpret_cast<TArray<void>*>(addr)};
 }
 
-void PropTraits<UArrayProperty>::set(const UArrayProperty* prop, uintptr_t addr, Value value) {
+void PropTraits<UArrayProperty>::set(const UArrayProperty* prop, uintptr_t addr, const Value& value) {
     auto inner = prop->read_field(&UArrayProperty::Inner);
     if (value.type != inner) {
         throw std::runtime_error("Array does not contain fields of type " + (std::string)inner->Name);

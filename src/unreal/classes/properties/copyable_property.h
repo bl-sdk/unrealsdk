@@ -36,7 +36,7 @@ struct PropTraits<CopyableProperty<T>> {
     static Value get(const CopyableProperty<T>* /*prop*/, uintptr_t addr) {
         return *reinterpret_cast<Value*>(addr);
     }
-    static void set(const CopyableProperty<T>* /*prop*/, uintptr_t addr, Value value) {
+    static void set(const CopyableProperty<T>* /*prop*/, uintptr_t addr, const Value& value) {
         *reinterpret_cast<Value*>(addr) = value;
     }
 };

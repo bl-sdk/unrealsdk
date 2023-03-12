@@ -13,7 +13,7 @@ PropTraits<UStructProperty>::Value PropTraits<UStructProperty>::get(const UStruc
     return {this_struct, reinterpret_cast<void*>(addr)};
 }
 
-void PropTraits<UStructProperty>::set(const UStructProperty* prop, uintptr_t addr, Value value) {
+void PropTraits<UStructProperty>::set(const UStructProperty* prop, uintptr_t addr, const Value& value) {
     auto this_struct = prop->read_field(&UStructProperty::Struct);
     if (value.type != this_struct) {
         throw std::runtime_error("Struct is not an instance of " + (std::string)this_struct->Name);

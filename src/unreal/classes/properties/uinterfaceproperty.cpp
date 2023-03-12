@@ -19,7 +19,7 @@ PropTraits<UInterfaceProperty>::Value PropTraits<UInterfaceProperty>::get(
     return reinterpret_cast<FScriptInterface*>(addr)->obj;
 }
 
-void PropTraits<UInterfaceProperty>::set(const UInterfaceProperty* prop, uintptr_t addr, Value value) {
+void PropTraits<UInterfaceProperty>::set(const UInterfaceProperty* prop, uintptr_t addr, const Value& value) {
     auto prop_iface = prop->read_field(&UInterfaceProperty::InterfaceClass);
 
     size_t pointer_offset = 0;

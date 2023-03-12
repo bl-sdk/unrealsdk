@@ -48,8 +48,8 @@ class BoundFunction {
     template <typename T0, typename... Ts>
     static void set_param(uintptr_t params,
                           UProperty* prop,
-                          typename PropTraits<T0>::Value arg0,
-                          typename PropTraits<Ts>::Value... args) {
+                          const typename PropTraits<T0>::Value& arg0,
+                          const typename PropTraits<Ts>::Value&... args) {
         // Find the next param property
         while (prop != nullptr && (prop->PropertyFlags & PROP_FLAG_PARAM) == 0) {
             prop = prop->PropertyLinkNext;
@@ -110,7 +110,7 @@ class BoundFunction {
      * @return The function's return value.
      */
     template <typename R, typename... Ts>
-    typename PropTraits<R>::Value call(typename PropTraits<Ts>::Value... args) {
+    typename PropTraits<R>::Value call(const typename PropTraits<Ts>::Value&... args) {
         auto params = unrealsdk::u_malloc(this->func->get_struct_size());
 
         UProperty* base_prop = this->func->PropertyLink;

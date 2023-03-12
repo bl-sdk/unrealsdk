@@ -102,17 +102,17 @@ class UObject {
      * @param value The property's value.
      */
     template <typename T>
-    void set(const FName& name, typename PropTraits<T>::Value value) {
+    void set(const FName& name, const typename PropTraits<T>::Value& value) {
         this->set<T>(name, 0, value);
     }
     template <typename T>
-    void set(const T* prop, typename PropTraits<T>::Value value) {
+    void set(const T* prop, const typename PropTraits<T>::Value& value) {
         this->set<T>(prop, 0, value);
     }
     template <typename T>
-    void set(const FName& name, size_t idx, typename PropTraits<T>::Value value);
+    void set(const FName& name, size_t idx, const typename PropTraits<T>::Value& value);
     template <typename T>
-    void set(const T* prop, size_t idx, typename PropTraits<T>::Value value);
+    void set(const T* prop, size_t idx, const typename PropTraits<T>::Value& value);
 
     /**
      * @brief Get the object's full path name.

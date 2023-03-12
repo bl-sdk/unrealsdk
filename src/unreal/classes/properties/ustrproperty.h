@@ -28,7 +28,7 @@ struct PropTraits<UStrProperty> {
     static inline const wchar_t* const CLASS = L"StrProperty";
 
     static Value get(const UStrProperty* prop, uintptr_t addr);
-    static void set(const UStrProperty* prop, uintptr_t addr, Value value);
+    static void set(const UStrProperty* prop, uintptr_t addr, const Value& value);
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)
