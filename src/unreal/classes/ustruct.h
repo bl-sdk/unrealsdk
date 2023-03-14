@@ -12,6 +12,7 @@ namespace unrealsdk::unreal {
 #pragma pack(push, 0x4)
 #endif
 
+class UFunction;
 class UProperty;
 
 class UStruct : public UField {
@@ -145,24 +146,27 @@ class UStruct : public UField {
     [[nodiscard]] size_t get_struct_size(void) const;
 
     /**
-     * @brief Finds a child field by name.
+     * @brief Finds a child field/property by name.
      * @note Throws an exception if the child is not found.
+     * @note When known to be a property, property lookup is more efficient.
      *
-     * @param name The name of the field.
-     * @return The found field object.
+     * @param name The name of the child.
+     * @return The found child object.
      */
     [[nodiscard]] UField* find(const FName& name) const;
+    [[nodiscard]] UProperty* find_prop(const FName& name) const;
 
     /**
-     * @brief Finds a child field by name, and validates that it's of the expected type.
+     * @brief Finds a child property/function by name, and validates that it's of the expected type.
      * @note Throws exceptions if the child is not found, or if it's of an invalid type.
      *
-     * @tparam T The expected field type.
-     * @param name The name of the field.
-     * @return The found field object.
+     * @tparam T The expected property type.
+     * @param name The name of the child.
+     * @return The found child object.
      */
     template <typename T>
-    [[nodiscard]] T* find_and_validate(const FName& name) const;
+    [[nodiscard]] T* find_prop_and_validate(const FName& name) const;
+    [[nodiscard]] UFunction* find_func_and_validate(const FName& name) const;
 
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 };

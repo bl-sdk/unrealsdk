@@ -2,7 +2,7 @@
 
 #include "game/bl2/bl2.h"
 #include "memory.h"
-#include "unreal/utils.h"
+#include "unreal/alignment.h"
 
 #if defined(UE3) && defined(ARCH_X86)
 

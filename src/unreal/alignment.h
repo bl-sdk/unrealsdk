@@ -1,5 +1,5 @@
-#ifndef UNREAL_UTILS_H
-#define UNREAL_UTILS_H
+#ifndef UNREAL_ALIGNMENT_H
+#define UNREAL_ALIGNMENT_H
 
 #include "pch.h"
 
@@ -15,4 +15,4 @@ uint32_t get_malloc_alignment(size_t len);
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_UTILS_H */
+#endif /* UNREAL_ALIGNMENT_H */

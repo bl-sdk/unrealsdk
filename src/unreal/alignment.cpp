@@ -1,7 +1,7 @@
 #include "pch.h"
 
 #include "env.h"
-#include "unreal/utils.h"
+#include "unreal/alignment.h"
 
 namespace unrealsdk::unreal {
 
@@ -19,4 +19,4 @@ uint32_t get_malloc_alignment(size_t len) {
     return len >= LARGE_ALIGNMENT_THRESHOLD ? LARGE_ALIGNMENT : SMALL_ALIGNMENT;
 }
 
-}
+}  // namespace unrealsdk::unreal

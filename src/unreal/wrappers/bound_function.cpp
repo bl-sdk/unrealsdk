@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include "unreal/structs/fname.h"
 #include "unreal/wrappers/bound_function.h"
 #include "unrealsdk.h"
 
@@ -35,6 +36,11 @@ void BoundFunction::validate_no_more_params(UProperty* prop) {
 #endif
         throw std::runtime_error("Too few parameters to function call!");
     }
+}
+
+template <>
+FName cls_fname<UFunction>(void) {
+    return L"Function"_fn;
 }
 
 }  // namespace unrealsdk::unreal

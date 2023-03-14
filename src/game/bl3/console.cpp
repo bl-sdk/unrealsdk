@@ -35,7 +35,7 @@ static bool inject_console_hook(UFunction* /*func*/, UObject* obj, WrappedArgs& 
     auto local_player = obj->get<UObjectProperty>(L"Player"_fn);
     auto viewport = local_player->get<UObjectProperty>(L"ViewportClient"_fn);
     auto console_property =
-        viewport->Class->find_and_validate<UObjectProperty>(L"ViewportConsole"_fn);
+        viewport->Class->find_prop_and_validate<UObjectProperty>(L"ViewportConsole"_fn);
     console = viewport->get(console_property);
 
     if (console == nullptr) {

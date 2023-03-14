@@ -31,11 +31,11 @@ static bool say_bypass_hook(UFunction* /*func*/, UObject* obj, WrappedArgs& args
 
     // Optimize so we only call find once for each
     if (console_command_func == nullptr) {
-        console_command_func = obj->Class->find_and_validate<UFunction>(L"ConsoleCommand"_fn);
-        command_property = args.type->find_and_validate<UStrProperty>(L"Command"_fn);
+        console_command_func = obj->Class->find_func_and_validate(L"ConsoleCommand"_fn);
+        command_property = args.type->find_prop_and_validate<UStrProperty>(L"Command"_fn);
     }
 
-    obj->get(console_command_func)
+    obj->get<UFunction, BoundFunction>(console_command_func)
         .call<void, UStrProperty>(args.get<UStrProperty>(command_property));
     return true;
 }
@@ -48,7 +48,7 @@ static bool inject_console_hook(UFunction* /*func*/, UObject* obj, WrappedArgs& 
     auto console = obj->get<UObjectProperty>(L"ViewportConsole"_fn);
 
     // Grab this reference ASAP
-    console_output_text = console->get<UFunction>(L"OutputText"_fn);
+    console_output_text = console->get<UFunction, BoundFunction>(L"OutputText"_fn);
 
     auto existing_console_key = console->get<UNameProperty>(L"ConsoleKey"_fn);
     if (existing_console_key != L"None"_fn || existing_console_key == L"Undefine"_fn) {

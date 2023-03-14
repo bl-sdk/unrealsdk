@@ -4,6 +4,7 @@
 #include "pch.h"
 
 #include "unreal/classes/ufield.h"
+#include "unreal/structs/fname.h"
 
 namespace unrealsdk::unreal {
 

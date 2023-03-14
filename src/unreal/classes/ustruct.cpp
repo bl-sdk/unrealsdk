@@ -1,7 +1,11 @@
 #include "pch.h"
 
+#include "unreal/class_name.h"
 #include "unreal/classes/ufield.h"
+#include "unreal/classes/ufunction.h"
+#include "unreal/classes/uproperty.h"
 #include "unreal/classes/ustruct.h"
+#include "unreal/wrappers/bound_function.h"
 #include "utils.h"
 
 namespace unrealsdk::unreal {
@@ -103,6 +107,20 @@ UField* UStruct::find(const FName& name) const {
     }
 
     throw std::invalid_argument("Couldn't find field " + (std::string)name);
+}
+
+UProperty* UStruct::find_prop(const FName& name) const {
+    for (auto prop : this->properties()) {
+        if (prop->Name == name) {
+            return prop;
+        }
+    }
+
+    throw std::invalid_argument("Couldn't find property " + (std::string)name);
+}
+
+UFunction* UStruct::find_func_and_validate(const FName& name) const {
+    return validate_type<UFunction>(this->find(name));
 }
 
 }  // namespace unrealsdk::unreal

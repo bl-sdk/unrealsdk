@@ -5,9 +5,9 @@
 #include "unreal/classes/ufunction.h"
 #include "unreal/classes/uobject.h"
 #include "unreal/classes/ustruct_funcs.h"
+#include "unreal/prop_traits.h"
 #include "unreal/structs/fname.h"
 #include "unreal/wrappers/bound_function.h"
-#include "unreal/wrappers/prop_traits.h"
 #include "unrealsdk.h"
 
 namespace unrealsdk::unreal {
@@ -77,8 +77,7 @@ bool UObject::is_implementation(const UClass* iface, FImplementedInterface** imp
 }
 
 template <>
-typename PropTraits<UFunction>::Value UObject::get<UFunction>(const UFunction* prop,
-                                                              size_t idx) const {
+BoundFunction UObject::get<UFunction, BoundFunction>(const UFunction* prop, size_t idx) const {
     if (idx != 0) {
         throw std::out_of_range("Functions cannot have an array index!");
     }
@@ -96,8 +95,8 @@ typename PropTraits<UFunction>::Value UObject::get<UFunction>(const UFunction* p
     return {mutable_func, mutable_obj};
 }
 template <>
-typename PropTraits<UFunction>::Value UObject::get<UFunction>(const FName& name, size_t idx) const {
-    return this->get<UFunction>(this->Class->find_and_validate<UFunction>(name), idx);
+BoundFunction UObject::get<UFunction, BoundFunction>(const FName& name, size_t idx) const {
+    return this->get<UFunction, BoundFunction>(this->Class->find_func_and_validate(name), idx);
 }
 
 }  // namespace unrealsdk::unreal

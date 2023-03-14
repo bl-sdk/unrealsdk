@@ -4,7 +4,7 @@
 #include "pch.h"
 
 #include "unreal/classes/uproperty.h"
-#include "unreal/wrappers/prop_traits.h"
+#include "unreal/prop_traits.h"
 #include "unreal/wrappers/wrapped_struct.h"
 
 namespace unrealsdk::unreal {

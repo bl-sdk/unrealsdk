@@ -3,8 +3,8 @@
 
 #include "pch.h"
 
+#include "unreal/prop_traits.h"
 #include "unreal/structs/fname.h"
-#include "unreal/wrappers/prop_traits.h"
 
 namespace unrealsdk::unreal {
 
@@ -82,15 +82,16 @@ class UObject {
      * @brief Gets a property on this object.
      *
      * @tparam T The type of the property.
+     * @tparam V The value type of the property. Usually detected from property traits.
      * @param name The property's name to lookup.
      * @param prop The property to get.
      * @param idx The fixed array index to get the value at. Defaults to 0.
-     * @return The property's new value.
+     * @return The property's value.
      */
-    template <typename T>
-    [[nodiscard]] typename PropTraits<T>::Value get(const FName& name, size_t idx = 0) const;
-    template <typename T>
-    [[nodiscard]] typename PropTraits<T>::Value get(const T* prop, size_t idx = 0) const;
+    template <typename T, typename V = typename PropTraits<T>::Value>
+    [[nodiscard]] V get(const FName& name, size_t idx = 0) const;
+    template <typename T, typename V = typename PropTraits<T>::Value>
+    [[nodiscard]] V get(const T* prop, size_t idx = 0) const;
 
     /**
      * @brief Sets a property on this struct
@@ -138,7 +139,8 @@ class UObject {
      *                      (assuming it's found).
      * @return True if this object implements of the given interface.
      */
-    [[nodiscard]] bool is_implementation(const UClass* iface, FImplementedInterface** impl_out = nullptr) const;
+    [[nodiscard]] bool is_implementation(const UClass* iface,
+                                         FImplementedInterface** impl_out = nullptr) const;
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

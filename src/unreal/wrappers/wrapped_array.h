@@ -1,11 +1,12 @@
 #ifndef UNREAL_WRAPPERS_WRAPPED_ARRAY_H
 #define UNREAL_WRAPPERS_WRAPPED_ARRAY_H
 
+#include "unreal/class_name.h"
 #include "unreal/classes/uclass.h"
 #include "unreal/classes/uproperty.h"
+#include "unreal/prop_traits.h"
 #include "unreal/structs/fname.h"
 #include "unreal/structs/tarray.h"
-#include "unreal/wrappers/prop_traits.h"
 #include "utils.h"
 
 namespace unrealsdk::unreal {
@@ -45,11 +46,10 @@ class WrappedArray {
      * @tparam T The expected property type
      * @param idx The index being accessed.
      */
-    template <typename T, typename = std::enable_if_t<std::is_base_of_v<UProperty, T>>>
+    template <typename T>
     void validate_access(size_t idx) const {
-        const auto EXPECTED_CLASS = FName{PropTraits<T>::CLASS};
         auto property_class = this->type->Class->Name;
-        if (property_class != EXPECTED_CLASS) {
+        if (property_class != cls_fname<T>()) {
             throw std::invalid_argument("WrappedArray property was of invalid type "
                                         + (std::string)property_class);
         }
@@ -67,7 +67,7 @@ class WrappedArray {
      * @param idx The index to get.
      * @return The item at that index.
      */
-    template <typename T, typename = std::enable_if_t<std::is_base_of_v<UProperty, T>>>
+    template <typename T>
     [[nodiscard]] typename PropTraits<T>::Value get_at(size_t idx) const {
         this->validate_access<T>(idx);
         return PropTraits<T>::get(
@@ -82,7 +82,7 @@ class WrappedArray {
      * @param idx The index to get.
      * @return The item at that index.
      */
-    template <typename T, typename = std::enable_if_t<std::is_base_of_v<UProperty, T>>>
+    template <typename T>
     void set_at(size_t idx, const typename PropTraits<T>::Value& value) {
         this->validate_access<T>(idx);
         return PropTraits<T>::set(

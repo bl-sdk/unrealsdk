@@ -3,8 +3,8 @@
 
 #include "unreal/classes/ustruct.h"
 #include "unreal/classes/ustruct_funcs.h"
+#include "unreal/prop_traits.h"
 #include "unreal/structs/fname.h"
-#include "unreal/wrappers/prop_traits.h"
 
 namespace unrealsdk::unreal {
 
@@ -26,7 +26,7 @@ class WrappedStruct {
      */
     template <typename T>
     [[nodiscard]] typename PropTraits<T>::Value get(const FName& name, size_t idx = 0) const {
-        return this->get<T>(this->type->find_and_validate<T>(name), idx);
+        return this->get<T>(this->type->find_prop_and_validate<T>(name), idx);
     }
     template <typename T>
     [[nodiscard]] typename PropTraits<T>::Value get(const T* prop, size_t idx = 0) const {
@@ -52,7 +52,7 @@ class WrappedStruct {
     }
     template <typename T>
     void set(const FName& name, size_t idx, const typename PropTraits<T>::Value& value) {
-        return this->set<T>(this->type->find_and_validate<T>(name), idx, value);
+        return this->set<T>(this->type->find_prop_and_validate<T>(name), idx, value);
     }
     template <typename T>
     void set(const T* prop, size_t idx, const typename PropTraits<T>::Value& value) {

@@ -1,5 +1,5 @@
-#ifndef UNREAL_WRAPPERS_PROP_TRAITS_H
-#define UNREAL_WRAPPERS_PROP_TRAITS_H
+#ifndef UNREAL_PROP_TRAITS_H
+#define UNREAL_PROP_TRAITS_H
 
 namespace unrealsdk::unreal {
 
@@ -45,7 +45,9 @@ struct PropTraits {
  * @return The property's value.
  */
 template <typename T>
-[[nodiscard]] typename PropTraits<T>::Value get_property(const T* prop, size_t idx, uintptr_t base_addr) {
+[[nodiscard]] typename PropTraits<T>::Value get_property(const T* prop,
+                                                         size_t idx,
+                                                         uintptr_t base_addr) {
     if (idx > prop->ArrayDim) {
         throw std::out_of_range("Property index out of range");
     }
@@ -62,7 +64,10 @@ template <typename T>
  * @param value The property's new value.
  */
 template <typename T>
-void set_property(const T* prop, size_t idx, uintptr_t base_addr, const typename PropTraits<T>::Value& value) {
+void set_property(const T* prop,
+                  size_t idx,
+                  uintptr_t base_addr,
+                  const typename PropTraits<T>::Value& value) {
     if (idx > prop->ArrayDim) {
         throw std::out_of_range("Property index out of range");
     }
@@ -72,4 +77,4 @@ void set_property(const T* prop, size_t idx, uintptr_t base_addr, const typename
 
 };  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_WRAPPERS_PROP_TRAITS_H */
+#endif /* UNREAL_PROP_TRAITS_H */

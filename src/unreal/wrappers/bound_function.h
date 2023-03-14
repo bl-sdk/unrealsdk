@@ -3,14 +3,17 @@
 
 #include "pch.h"
 
+#include "unreal/class_name.h"
 #include "unreal/classes/uclass.h"
 #include "unreal/classes/ufunction.h"
 #include "unreal/classes/uproperty.h"
-#include "unreal/wrappers/prop_traits.h"
+#include "unreal/prop_traits.h"
 #include "unreal/wrappers/wrapped_args.h"
 #include "unrealsdk.h"
 
 namespace unrealsdk::unreal {
+
+class FName;
 
 class BoundFunction {
    public:
@@ -58,7 +61,7 @@ class BoundFunction {
         if (prop == nullptr) {
             throw std::runtime_error("Too many parameters to function call!");
         }
-        if (prop->Class->Name != FName{PropTraits<T0>::CLASS}) {
+        if (prop->Class->Name != cls_fname<T0>()) {
             throw std::invalid_argument("Property was of invalid type "
                                         + (std::string)prop->Class->Name);
         }
@@ -110,7 +113,8 @@ class BoundFunction {
      * @return The function's return value.
      */
     template <typename R, typename... Ts>
-    typename PropTraits<R>::Value call(const typename PropTraits<Ts>::Value&... args) {
+    std::conditional_t<std::is_void_v<R>, void, typename PropTraits<R>::Value> call(
+        const typename PropTraits<Ts>::Value&... args) {
         auto params = unrealsdk::u_malloc(this->func->get_struct_size());
 
         UProperty* base_prop = this->func->PropertyLink;
@@ -132,7 +136,8 @@ class BoundFunction {
         }
     }
     template <typename R>
-    typename PropTraits<R>::Value call(const WrappedArgs& args) {
+    std::conditional_t<std::is_void_v<R>, void, typename PropTraits<R>::Value> call(
+        const WrappedArgs& args) {
         if (args.type != this->func) {
             throw std::runtime_error(
                 "Tried to call a function using wrapped args of a different function.");
@@ -156,16 +161,14 @@ class BoundFunction {
     }
 };
 
-template <>
-struct PropTraits<UFunction> {
-    using Value = BoundFunction;
-    static inline const wchar_t* const CLASS = L"Function";
-};
+// UFunction isn't a property, so we don't define a prop traits class, we don't want the default
+// getters/setters to work, we don't want to be able to pass it as an arg to a function, etc.
 
+// Instead, we explictly instantiate `UObject->get<UFunction>` as the only getter.
+
+// Still define the class name though, so we can use it during lookups.
 template <>
-struct PropTraits<void> {
-    using Value = void;
-};
+FName cls_fname<UFunction>(void);
 
 }  // namespace unrealsdk::unreal
 

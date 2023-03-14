@@ -125,7 +125,7 @@ std::wstring BL2Hook::uobject_path_name(const UObject* obj) const {
 
     // Optimize so we only call find once
     if (pathname_func == nullptr) {
-        pathname_func = obj->Class->find_and_validate<UFunction>(L"PathName"_fn);
+        pathname_func = obj->Class->find_func_and_validate(L"PathName"_fn);
     }
 
     // Bound functions need mutable references, since they might actually modify the object

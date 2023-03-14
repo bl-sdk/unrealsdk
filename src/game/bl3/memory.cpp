@@ -2,7 +2,7 @@
 
 #include "game/bl3/bl3.h"
 #include "memory.h"
-#include "unreal/utils.h"
+#include "unreal/alignment.h"
 
 #if defined(UE4) && defined(ARCH_X64)
 
