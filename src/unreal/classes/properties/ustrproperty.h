@@ -23,7 +23,7 @@ class UStrProperty : public UProperty {
 };
 
 template <>
-struct PropTraits<UStrProperty> {
+struct PropTraits<UStrProperty> : public AbstractPropTraits<UStrProperty> {
     using Value = std::wstring;
     static inline const wchar_t* const CLASS = L"StrProperty";
 

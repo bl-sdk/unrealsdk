@@ -39,7 +39,7 @@ class UBoolProperty : public UProperty {
 };
 
 template <>
-struct PropTraits<UBoolProperty> {
+struct PropTraits<UBoolProperty> : public AbstractPropTraits<UBoolProperty> {
     using Value = bool;
     static inline const wchar_t* const CLASS = L"BoolProperty";
 

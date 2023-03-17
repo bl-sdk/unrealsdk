@@ -39,7 +39,7 @@ class UObjectProperty : public UProperty {
 };
 
 template <>
-struct PropTraits<UObjectProperty> {
+struct PropTraits<UObjectProperty> : public AbstractPropTraits<UObjectProperty> {
     using Value = UObject*;
     static inline const wchar_t* const CLASS = L"ObjectProperty";
 

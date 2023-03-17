@@ -32,7 +32,7 @@ class UInterfaceProperty : public UProperty {
 };
 
 template <>
-struct PropTraits<UInterfaceProperty> {
+struct PropTraits<UInterfaceProperty> : public AbstractPropTraits<UInterfaceProperty> {
     using Value = UObject*;
     static inline const wchar_t* const CLASS = L"InterfaceProperty";
 

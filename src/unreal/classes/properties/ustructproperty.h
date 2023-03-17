@@ -32,7 +32,7 @@ class UStructProperty : public UProperty {
 };
 
 template <>
-struct PropTraits<UStructProperty> {
+struct PropTraits<UStructProperty> : public AbstractPropTraits<UStructProperty> {
     using Value = WrappedStruct;
     static inline const wchar_t* const CLASS = L"StructProperty";
 

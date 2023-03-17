@@ -9,7 +9,7 @@ namespace unrealsdk::unreal {
  * @tparam T The UProperty class that's being described.
  */
 template <typename T>
-struct PropTraits {
+struct AbstractPropTraits {
     /// The value type used by the described property
     using Value = void*;
 
@@ -23,7 +23,7 @@ struct PropTraits {
      * @param addr The address to read the value from.
      * @return The property's value.
      */
-    [[nodiscard]] static Value get(const T* prop, uintptr_t addr);
+    [[nodiscard]] static Value get(const T* prop, uintptr_t addr) = delete;
 
     /**
      * @brief Sets the value of the described property type at the given address.
@@ -32,8 +32,11 @@ struct PropTraits {
      * @param addr The address to write the value to.
      * @param value The property's new value.
      */
-    static void set(const T* prop, uintptr_t addr, const Value& value);
+    static void set(const T* prop, uintptr_t addr, const Value& value) = delete;
 };
+
+template<typename T>
+struct PropTraits : public AbstractPropTraits<T> {};
 
 /**
  * @brief Gets the value of a property off of the given object.

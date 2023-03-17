@@ -29,7 +29,7 @@ class CopyableProperty : public UProperty {
 };
 
 template <typename T>
-struct PropTraits<CopyableProperty<T>> {
+struct PropTraits<CopyableProperty<T>> : public AbstractPropTraits<CopyableProperty<T>> {
     using Value = T;
     static const wchar_t* const CLASS;
 

@@ -30,7 +30,7 @@ class UArrayProperty : public UProperty {
 };
 
 template <>
-struct PropTraits<UArrayProperty> {
+struct PropTraits<UArrayProperty> : public AbstractPropTraits<UArrayProperty> {
     using Value = WrappedArray;
     static inline const wchar_t* const CLASS = L"ArrayProperty";
 
