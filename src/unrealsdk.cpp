@@ -14,8 +14,8 @@ void init(std::unique_ptr<game::AbstractHook> game) {
     logging::init();
 
     auto init_str = unrealsdk::fmt::format("unrealsdk {}", VERSION_STR);
-    LOG(INFO, init_str);
-    LOG(INFO, std::string(init_str.size(), '='));
+    LOG(INFO, "{}", init_str);
+    LOG(INFO, "{}", std::string(init_str.size(), '='));
 
     if (MH_Initialize() != MH_OK) {
         throw std::runtime_error("Minhook initialization failed!");

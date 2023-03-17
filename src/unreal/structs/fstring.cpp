@@ -1,5 +1,4 @@
 #include "pch.h"
-#include <vcruntime_string.h>
 
 #include "unreal/structs/fstring.h"
 #include "unreal/structs/tarray.h"

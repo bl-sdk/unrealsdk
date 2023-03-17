@@ -6,7 +6,7 @@
 #    *) cmake -DCMAKE_TOOLCHAIN_FILE=~/mingw-w64-x86_64.cmake ..
 
 set(CMAKE_SYSTEM_NAME Windows)
-set(TOOLCHAIN_PREFIX /mnt/p/unrealsdk/llvm-mingw-20220906-msvcrt-ubuntu-18.04-x86_64/bin/i686-w64-mingw32)
+set(TOOLCHAIN_PREFIX i686-w64-mingw32)
 
 # Cross compilers to use for C, C++ and Fortran
 set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}-gcc)

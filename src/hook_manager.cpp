@@ -41,7 +41,7 @@ static std::pair<bool, std::wstring> preprocess_hook(const std::string& source,
         LOG(MISC, "Object: {}", unrealsdk::utils::narrow(obj->get_path_name()));
     }
 
-    return {hooks.count(func_name) != 0, func_name};
+    return {hooks.contains(func_name), func_name};
 }
 
 /**
