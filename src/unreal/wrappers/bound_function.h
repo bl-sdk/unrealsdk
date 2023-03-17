@@ -168,7 +168,7 @@ class BoundFunction {
 
 // Still define the class name though, so we can use it during lookups.
 template <>
-FName cls_fname<UFunction>(void);
+[[nodiscard]] FName cls_fname<UFunction>(void);
 
 }  // namespace unrealsdk::unreal
 

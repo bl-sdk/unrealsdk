@@ -15,7 +15,7 @@ namespace unrealsdk::unreal {
  * @return The class' fname.
  */
 template <typename T>
-FName cls_fname(void) {
+[[nodiscard]] FName cls_fname(void) {
     static FName name{0, 0};
     static bool initalized = false;
 
