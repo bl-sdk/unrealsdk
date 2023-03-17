@@ -34,7 +34,8 @@ struct TArray {
 
     /**
      * @brief Changes the capacity of this array, reserving new memory as needed.
-     * @note Can be used to shrink the capacity.
+     * @note Can be used to shrink the capacity - caller must ensure any removed entries are already
+     *       destroyed, so they don't leak.
      *
      * @param new_cap The new capacity, in number of elements.
      * @param element_size The size of each element.
@@ -48,6 +49,7 @@ struct TArray {
 
     /**
      * @brief Resizes the array.
+     * @note Caller must ensure any removed entries are already destroyed, so they don't leak.
      *
      * @param new_size The new size, in number of elements.
      * @param element_size The size of each element.

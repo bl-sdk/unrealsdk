@@ -63,7 +63,8 @@ void cast_prop(const UProperty* prop, const F& func) {
         throw std::runtime_error("Unknown property type " + (std::string)prop->Class->Name);
     } else {
         using prop_type = std::tuple_element_t<i, all_known_properties>;
-        if (cls_fname<prop_type>() == prop->Class->Name) {
+        static const auto PROP_CLS_NAME = cls_fname<prop_type>();
+        if (PROP_CLS_NAME == prop->Class->Name) {
             func.template operator()<prop_type>(reinterpret_cast<const prop_type*>(prop));
         } else {
             cast_prop<F, i + 1>(prop, func);

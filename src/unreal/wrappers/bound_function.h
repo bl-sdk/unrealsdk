@@ -32,6 +32,13 @@ class BoundFunction {
     void call_with_params(void* params) const;
 
     /**
+     * @brief Frees a params struct used to call this function.
+     *
+     * @param params A pointer to this function's params struct.
+     */
+    void free_params(void* params) const;
+
+    /**
      * @brief Checks that there are no more required params for a function call.
      *
      * @param prop The next unparsed parameter property object.
@@ -127,35 +134,11 @@ class BoundFunction {
         this->call_with_params(params);
 
         if constexpr (std::is_void_v<R>) {
-            unrealsdk::u_free(params);
+            free_params(params);
         } else {
             // TODO: use after free when the return is a reference type (structs, arrays)
             auto ret = this->get_return_value<R>(reinterpret_cast<uintptr_t>(params));
-            unrealsdk::u_free(params);
-            return ret;
-        }
-    }
-    template <typename R>
-    std::conditional_t<std::is_void_v<R>, void, typename PropTraits<R>::Value> call(
-        const WrappedArgs& args) {
-        if (args.type != this->func) {
-            throw std::runtime_error(
-                "Tried to call a function using wrapped args of a different function.");
-        }
-
-        auto size = this->func->get_struct_size();
-        auto params = unrealsdk::u_malloc(size);
-        memcpy(params, args.base, size);
-
-        this->call_with_params(params);
-
-        if constexpr (std::is_void_v<R>) {
-            unrealsdk::u_free(params);
-        } else {
-            // TODO: use after free when the return is a reference type (structs, arrays),
-            auto ret = this->get_return_value<R>(reinterpret_cast<uintptr_t>(params));
-            // TODO: memory leak when we don't clean up nested allocations
-            unrealsdk::u_free(params);
+            free_params(params);
             return ret;
         }
     }

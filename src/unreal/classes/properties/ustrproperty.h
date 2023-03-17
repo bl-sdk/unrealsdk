@@ -29,6 +29,7 @@ struct PropTraits<UStrProperty> : public AbstractPropTraits<UStrProperty> {
 
     static Value get(const UStrProperty* prop, uintptr_t addr);
     static void set(const UStrProperty* prop, uintptr_t addr, const Value& value);
+    static void destroy(const UStrProperty* prop, uintptr_t addr);
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

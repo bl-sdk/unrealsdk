@@ -36,6 +36,7 @@ struct PropTraits<UArrayProperty> : public AbstractPropTraits<UArrayProperty> {
 
     static Value get(const UArrayProperty* prop, uintptr_t addr);
     static void set(const UArrayProperty* prop, uintptr_t addr, const Value& value);
+    static void destroy(const UArrayProperty* prop, uintptr_t addr);
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

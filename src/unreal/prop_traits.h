@@ -33,9 +33,17 @@ struct AbstractPropTraits {
      * @param value The property's new value.
      */
     static void set(const T* prop, uintptr_t addr, const Value& value) = delete;
+
+    /**
+     * @brief Destroys a property (which we manage), freeing any resources it holds.
+     *
+     * @param prop The property being freed.
+     * @param addr The address to read the value from.
+     */
+    static void destroy(const T* prop, uintptr_t addr) {}
 };
 
-template<typename T>
+template <typename T>
 struct PropTraits : public AbstractPropTraits<T> {};
 
 /**
@@ -58,7 +66,7 @@ template <typename T>
 }
 
 /**
- * @brief Set the property object
+ * @brief Sets the value of a property on the given object.
  *
  * @tparam T The property type.
  * @param prop The property to set the value of.
@@ -76,6 +84,23 @@ void set_property(const T* prop,
     }
     return PropTraits<T>::set(prop, base_addr + prop->Offset_Internal + (idx * prop->ElementSize),
                               value);
+}
+
+/**
+ * @brief Destroys a property (which we manage), freeing any resources it holds.
+ *
+ * @tparam T The property type.
+ * @param prop The property to destroy.
+ * @param idx The fixed array index to destroy the value at.
+ * @param base_addr The base address of the object getting destoryed.
+ */
+template <typename T>
+void destroy_property(const T* prop, size_t idx, uintptr_t base_addr) {
+    if (idx > prop->ArrayDim) {
+        throw std::out_of_range("Property index out of range");
+    }
+    return PropTraits<T>::destroy(prop,
+                                  base_addr + prop->Offset_Internal + (idx * prop->ElementSize));
 }
 
 };  // namespace unrealsdk::unreal
