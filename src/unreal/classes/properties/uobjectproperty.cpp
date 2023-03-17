@@ -9,12 +9,16 @@ UClass* UObjectProperty::get_property_class(void) const {
     return this->read_field(&UObjectProperty::PropertyClass);
 }
 
-PropTraits<UObjectProperty>::Value PropTraits<UObjectProperty>::get(const UObjectProperty* /*prop*/,
-                                                                    uintptr_t addr) {
+PropTraits<UObjectProperty>::Value PropTraits<UObjectProperty>::get(
+    const UObjectProperty* /*prop*/,
+    uintptr_t addr,
+    const std::shared_ptr<void>& /*parent*/) {
     return *reinterpret_cast<Value*>(addr);
 }
 
-void PropTraits<UObjectProperty>::set(const UObjectProperty* prop, uintptr_t addr, const Value& value) {
+void PropTraits<UObjectProperty>::set(const UObjectProperty* prop,
+                                      uintptr_t addr,
+                                      const Value& value) {
     // Ensure the object is of a valid class
     if (value != nullptr) {
         auto prop_cls = prop->get_property_class();

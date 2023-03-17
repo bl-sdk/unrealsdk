@@ -9,8 +9,10 @@
 
 namespace unrealsdk::unreal {
 
-PropTraits<UStrProperty>::Value PropTraits<UStrProperty>::get(const UStrProperty* /*prop*/,
-                                                              uintptr_t addr) {
+PropTraits<UStrProperty>::Value PropTraits<UStrProperty>::get(
+    const UStrProperty* /*prop*/,
+    uintptr_t addr,
+    const std::shared_ptr<void>& /*parent*/) {
     return *reinterpret_cast<UnmanagedFString*>(addr);
 }
 

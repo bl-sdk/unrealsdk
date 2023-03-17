@@ -4,8 +4,10 @@
 
 namespace unrealsdk::unreal {
 
-PropTraits<UBoolProperty>::Value PropTraits<UBoolProperty>::get(const UBoolProperty* prop,
-                                                                uintptr_t addr) {
+PropTraits<UBoolProperty>::Value PropTraits<UBoolProperty>::get(
+    const UBoolProperty* prop,
+    uintptr_t addr,
+    const std::shared_ptr<void>& /*parent*/) {
     auto mask = prop->read_field(&UBoolProperty::FieldMask);
     auto* bitfield = reinterpret_cast<decltype(UBoolProperty::FieldMask)*>(addr);
 

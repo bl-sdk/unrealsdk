@@ -33,7 +33,9 @@ struct PropTraits<CopyableProperty<T>> : public AbstractPropTraits<CopyablePrope
     using Value = T;
     static const wchar_t* const CLASS;
 
-    static Value get(const CopyableProperty<T>* /*prop*/, uintptr_t addr) {
+    static Value get(const CopyableProperty<T>* /*prop*/,
+                     uintptr_t addr,
+                     const std::shared_ptr<void>& /*parent*/) {
         return *reinterpret_cast<Value*>(addr);
     }
     static void set(const CopyableProperty<T>* /*prop*/, uintptr_t addr, const Value& value) {

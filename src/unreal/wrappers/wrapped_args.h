@@ -6,7 +6,9 @@
 namespace unrealsdk::unreal {
 
 // TODO: handle return value
-class WrappedArgs : public WrappedStruct {};
+class WrappedArgs : public WrappedStruct {
+    using WrappedStruct::WrappedStruct;
+};
 
 };  // namespace unrealsdk::unreal
 

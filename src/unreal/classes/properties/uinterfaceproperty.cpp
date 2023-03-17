@@ -15,11 +15,14 @@ struct FScriptInterface {
 
 PropTraits<UInterfaceProperty>::Value PropTraits<UInterfaceProperty>::get(
     const UInterfaceProperty* /*prop*/,
-    uintptr_t addr) {
+    uintptr_t addr,
+    const std::shared_ptr<void>& /*parent*/) {
     return reinterpret_cast<FScriptInterface*>(addr)->obj;
 }
 
-void PropTraits<UInterfaceProperty>::set(const UInterfaceProperty* prop, uintptr_t addr, const Value& value) {
+void PropTraits<UInterfaceProperty>::set(const UInterfaceProperty* prop,
+                                         uintptr_t addr,
+                                         const Value& value) {
     auto prop_iface = prop->read_field(&UInterfaceProperty::InterfaceClass);
 
     size_t pointer_offset = 0;

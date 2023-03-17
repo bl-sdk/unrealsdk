@@ -4,6 +4,16 @@
 
 namespace unrealsdk::unreal {
 
+WrappedArray::WrappedArray(const UProperty* type,
+                           TArray<void>* base,
+                           const std::shared_ptr<void>& parent)
+    : type(type), base(parent, base) {
+    if (type->ArrayDim > 1) {
+        throw std::runtime_error(
+            "Array has static array inner property - unsure how to handle, aborting!");
+    }
+}
+
 [[nodiscard]] size_t WrappedArray::size(void) const {
     return this->base->size();
 }

@@ -36,7 +36,9 @@ struct PropTraits<UInterfaceProperty> : public AbstractPropTraits<UInterfaceProp
     using Value = UObject*;
     static inline const wchar_t* const CLASS = L"InterfaceProperty";
 
-    static Value get(const UInterfaceProperty* prop, uintptr_t addr);
+    static Value get(const UInterfaceProperty* prop,
+                     uintptr_t addr,
+                     const std::shared_ptr<void>& parent);
     static void set(const UInterfaceProperty* prop, uintptr_t addr, const Value& value);
 };
 

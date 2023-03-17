@@ -9,15 +9,17 @@
 
 namespace unrealsdk::unreal {
 
-PropTraits<UArrayProperty>::Value PropTraits<UArrayProperty>::get(const UArrayProperty* prop,
-                                                                  uintptr_t addr) {
+PropTraits<UArrayProperty>::Value PropTraits<UArrayProperty>::get(
+    const UArrayProperty* prop,
+    uintptr_t addr,
+    const std::shared_ptr<void>& parent) {
     auto inner = prop->read_field(&UArrayProperty::Inner);
     if (prop->ArrayDim > 1) {
         throw std::runtime_error(
             "Array has static array inner property - unsure how to handle, aborting!");
     }
 
-    return {inner, reinterpret_cast<TArray<void>*>(addr)};
+    return {inner, reinterpret_cast<TArray<void>*>(addr), parent};
 }
 
 void PropTraits<UArrayProperty>::set(const UArrayProperty* prop,

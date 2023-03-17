@@ -8,10 +8,12 @@
 
 namespace unrealsdk::unreal {
 
-PropTraits<UStructProperty>::Value PropTraits<UStructProperty>::get(const UStructProperty* prop,
-                                                                    uintptr_t addr) {
+PropTraits<UStructProperty>::Value PropTraits<UStructProperty>::get(
+    const UStructProperty* prop,
+    uintptr_t addr,
+    const std::shared_ptr<void>& parent) {
     auto this_struct = prop->read_field(&UStructProperty::Struct);
-    return {this_struct, reinterpret_cast<void*>(addr)};
+    return {this_struct, reinterpret_cast<void*>(addr), parent};
 }
 
 void PropTraits<UStructProperty>::set(const UStructProperty* prop,

@@ -43,7 +43,9 @@ struct PropTraits<UObjectProperty> : public AbstractPropTraits<UObjectProperty> 
     using Value = UObject*;
     static inline const wchar_t* const CLASS = L"ObjectProperty";
 
-    static Value get(const UObjectProperty* prop, uintptr_t addr);
+    static Value get(const UObjectProperty* prop,
+                     uintptr_t addr,
+                     const std::shared_ptr<void>& parent);
     static void set(const UObjectProperty* prop, uintptr_t addr, const Value& value);
 };
 

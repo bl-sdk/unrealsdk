@@ -1,6 +1,8 @@
 #ifndef UNREAL_WRAPPERS_WRAPPED_ARRAY_H
 #define UNREAL_WRAPPERS_WRAPPED_ARRAY_H
 
+#include "pch.h"
+
 #include "unreal/class_name.h"
 #include "unreal/classes/uclass.h"
 #include "unreal/classes/uproperty.h"
@@ -14,7 +16,18 @@ namespace unrealsdk::unreal {
 class WrappedArray {
    public:
     const UProperty* type;
-    TArray<void>* base;
+    std::shared_ptr<TArray<void>> base;
+
+    /**
+     * @brief Constructs a new wrapped array.
+     *
+     * @param type The type of the array elements.
+     * @param base The base address of the array.
+     * @param parent The parent pointer this array was retrieved from, used to copy ownership.
+     */
+    WrappedArray(const UProperty* type,
+                 TArray<void>* base,
+                 const std::shared_ptr<void>& parent = {nullptr});
 
     /**
      * @brief Gets the size of the array.
@@ -25,7 +38,8 @@ class WrappedArray {
 
     /**
      * @brief Reserves memory to change the capacity of this array.
-     * @note Can be used to shrink the array.
+     * @note Can be used to shrink the capacity - caller must ensure any removed entries are already
+     *       destroyed, so they don't leak.
      *
      * @param new_cap The new capacity, in number of elements.
      */
@@ -34,6 +48,7 @@ class WrappedArray {
     /**
      * @brief Resizes the array.
      * @note Does not necessarily impact reserved capacity, just current amount of elements.
+     * @note Caller must ensure any removed entries are already destroyed, so they don't leak.
      *
      * @param new_size The new size, in number of elements.
      */
@@ -70,24 +85,35 @@ class WrappedArray {
     template <typename T>
     [[nodiscard]] typename PropTraits<T>::Value get_at(size_t idx) const {
         this->validate_access<T>(idx);
-        return PropTraits<T>::get(
-            reinterpret_cast<const T*>(this->type),
-            reinterpret_cast<uintptr_t>(this->base->data) + (idx * this->type->ElementSize));
+        return get_property<T>(reinterpret_cast<const T*>(this->type), idx,
+                               reinterpret_cast<uintptr_t>(this->base->data), this->base);
     }
 
     /**
      * @brief Sets an element in the array, with bounds and type checking.
      *
      * @tparam T The expected property type
-     * @param idx The index to get.
-     * @return The item at that index.
+     * @param idx The index to set.
+     * @param value The new value to set.
      */
     template <typename T>
     void set_at(size_t idx, const typename PropTraits<T>::Value& value) {
         this->validate_access<T>(idx);
-        return PropTraits<T>::set(
-            reinterpret_cast<const T*>(this->type),
-            reinterpret_cast<uintptr_t>(this->base->data) + (idx * this->type->ElementSize), value);
+        set_property<T>(reinterpret_cast<const T*>(this->type), idx,
+                        reinterpret_cast<uintptr_t>(this->base->data), value);
+    }
+
+    /**
+     * @brief Destroyes n element in the array, with bounds and type checking.
+     *
+     * @tparam T The expected property type
+     * @param idx The index to destory.
+     */
+    template <typename T>
+    void destroy_at(size_t idx) {
+        this->validate_access<T>(idx);
+        destroy_property<T>(reinterpret_cast<const T*>(this->type), idx,
+                            reinterpret_cast<uintptr_t>(this->base->data));
     }
 };
 

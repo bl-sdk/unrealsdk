@@ -34,7 +34,9 @@ struct PropTraits<UArrayProperty> : public AbstractPropTraits<UArrayProperty> {
     using Value = WrappedArray;
     static inline const wchar_t* const CLASS = L"ArrayProperty";
 
-    static Value get(const UArrayProperty* prop, uintptr_t addr);
+    static Value get(const UArrayProperty* prop,
+                     uintptr_t addr,
+                     const std::shared_ptr<void>& parent);
     static void set(const UArrayProperty* prop, uintptr_t addr, const Value& value);
     static void destroy(const UArrayProperty* prop, uintptr_t addr);
 };

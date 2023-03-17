@@ -36,7 +36,9 @@ struct PropTraits<UStructProperty> : public AbstractPropTraits<UStructProperty> 
     using Value = WrappedStruct;
     static inline const wchar_t* const CLASS = L"StructProperty";
 
-    static Value get(const UStructProperty* prop, uintptr_t addr);
+    static Value get(const UStructProperty* prop,
+                     uintptr_t addr,
+                     const std::shared_ptr<void>& parent);
     static void set(const UStructProperty* prop, uintptr_t addr, const Value& value);
     static void destroy(const UStructProperty* prop, uintptr_t addr);
 };

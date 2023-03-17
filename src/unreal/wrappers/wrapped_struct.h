@@ -1,6 +1,8 @@
 #ifndef UNREAL_WRAPPERS_WRAPPED_STRUCT_H
 #define UNREAL_WRAPPERS_WRAPPED_STRUCT_H
 
+#include "pch.h"
+
 #include "unreal/classes/ustruct.h"
 #include "unreal/classes/ustruct_funcs.h"
 #include "unreal/prop_traits.h"
@@ -13,7 +15,21 @@ class UStruct;
 class WrappedStruct {
    public:
     const UStruct* type;
-    void* base;
+    std::shared_ptr<void> base;
+
+    /**
+     * @brief Constructs a new wrapped struct.
+     * @note If just the type is given, allocates new memory (which we manage) for the properties.
+     * @note If a parent is given, copies it's ownership.
+     * @note Otherwise, does not manage the given base address.
+     *
+     * @param type The type of the struct.
+     * @param base The base address of the struct.
+     * @param parent The parent pointer this struct was retrieved from, used to copy ownership.
+     */
+    WrappedStruct(const UStruct* type);
+    WrappedStruct(const UStruct* type, void* base, const std::shared_ptr<void>& parent = {nullptr});
+    //WrappedStruct(const UStruct* type, void* base, const WrappedArray& parent);
 
     /**
      * @brief Gets a property on this struct.
@@ -30,7 +46,7 @@ class WrappedStruct {
     }
     template <typename T>
     [[nodiscard]] typename PropTraits<T>::Value get(const T* prop, size_t idx = 0) const {
-        return get_property<T>(prop, idx, reinterpret_cast<uintptr_t>(this->base));
+        return get_property<T>(prop, idx, reinterpret_cast<uintptr_t>(this->base.get()), this->base);
     }
 
     /**
@@ -56,7 +72,7 @@ class WrappedStruct {
     }
     template <typename T>
     void set(const T* prop, size_t idx, const typename PropTraits<T>::Value& value) {
-        set_property<T>(prop, idx, reinterpret_cast<uintptr_t>(this->base), value);
+        set_property<T>(prop, idx, reinterpret_cast<uintptr_t>(this->base.get()), value);
     }
 };
 

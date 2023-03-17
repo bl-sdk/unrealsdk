@@ -1,6 +1,8 @@
 #ifndef UNREAL_PROP_TRAITS_H
 #define UNREAL_PROP_TRAITS_H
 
+#include "pch.h"
+
 namespace unrealsdk::unreal {
 
 /**
@@ -21,9 +23,12 @@ struct AbstractPropTraits {
      *
      * @param prop The property being get.
      * @param addr The address to read the value from.
+     * @param parent Pointer to a parent allocation to copy ownership from (if applicable).
      * @return The property's value.
      */
-    [[nodiscard]] static Value get(const T* prop, uintptr_t addr) = delete;
+    [[nodiscard]] static Value get(const T* prop,
+                                   uintptr_t addr,
+                                   const std::shared_ptr<void>& parent) = delete;
 
     /**
      * @brief Sets the value of the described property type at the given address.
@@ -53,16 +58,20 @@ struct PropTraits : public AbstractPropTraits<T> {};
  * @param prop The property to get the value of.
  * @param idx The fixed array index to get the value at.
  * @param base_addr The base address of the object to read the property from.
+ * @param parent Pointer to a parent allocation to copy ownership from.
  * @return The property's value.
  */
 template <typename T>
 [[nodiscard]] typename PropTraits<T>::Value get_property(const T* prop,
                                                          size_t idx,
-                                                         uintptr_t base_addr) {
+                                                         uintptr_t base_addr,
+                                                         const std::shared_ptr<void>& parent = {
+                                                             nullptr}) {
     if (idx > prop->ArrayDim) {
         throw std::out_of_range("Property index out of range");
     }
-    return PropTraits<T>::get(prop, base_addr + prop->Offset_Internal + (idx * prop->ElementSize));
+    return PropTraits<T>::get(prop, base_addr + prop->Offset_Internal + (idx * prop->ElementSize),
+                              parent);
 }
 
 /**
