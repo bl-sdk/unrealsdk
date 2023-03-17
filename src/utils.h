@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "pch.h"
+
 namespace unrealsdk::utils {
 
 /**
@@ -48,5 +50,13 @@ struct IteratorProxy {
 };
 
 }  // namespace unrealsdk::utils
+
+// Custom wstring formatter, which calls narrow
+template <>
+struct unrealsdk::fmt::formatter<std::wstring> : unrealsdk::fmt::formatter<std::string> {
+    auto format(const std::wstring& str, unrealsdk::fmt::format_context& ctx) {
+        return formatter<std::string>::format(unrealsdk::utils::narrow(str), ctx);
+    }
+};
 
 #endif /* UTILS_H */

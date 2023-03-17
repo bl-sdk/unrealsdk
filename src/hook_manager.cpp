@@ -37,8 +37,8 @@ static std::pair<bool, std::wstring> preprocess_hook(const std::string& source,
 
     if (log_all_calls) {
         LOG(MISC, "===== {} called =====", source);
-        LOG(MISC, "Function: {}", unrealsdk::utils::narrow(func_name));
-        LOG(MISC, "Object: {}", unrealsdk::utils::narrow(obj->get_path_name()));
+        LOG(MISC, "Function: {}", func_name);
+        LOG(MISC, "Object: {}", obj->get_path_name());
     }
 
     return {hooks.contains(func_name), func_name};
