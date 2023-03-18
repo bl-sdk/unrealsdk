@@ -7,6 +7,8 @@
 
 namespace unrealsdk::unreal {
 
+struct FImplementedInterface;
+
 #if defined(_MSC_VER) && defined(ARCH_X86)
 #pragma pack(push, 0x4)
 #endif
@@ -57,6 +59,26 @@ class UClass : public UStruct {
 #endif
 
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
+
+    /**
+     * @brief Checks if this class inherits from another.
+     * @note Also returns true if this class *is* the given class.
+     *
+     * @param cls The class to check if this inferits from.
+     * @return True if this class is the given class, or inherits from it.
+     */
+    [[nodiscard]] bool inherits(const UClass* cls) const;
+
+    /**
+     * @brief Checks if this class implements an interface.
+     *
+     * @param iface The interface to check.
+     * @param[out] impl_out If not null, gets set to the interface implementation for this object
+     *                      (assuming it's found).
+     * @return True if this class implements the given interface.
+     */
+    [[nodiscard]] bool implements(const UClass* iface,
+                                  FImplementedInterface** impl_out = nullptr) const;
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

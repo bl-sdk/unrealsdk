@@ -6,6 +6,7 @@
 #include "unreal/classes/properties/copyable_property.h"
 #include "unreal/classes/properties/uarrayproperty.h"
 #include "unreal/classes/properties/uboolproperty.h"
+#include "unreal/classes/properties/uclassproperty.h"
 #include "unreal/classes/properties/uinterfaceproperty.h"
 #include "unreal/classes/properties/uobjectproperty.h"
 #include "unreal/classes/properties/ustrproperty.h"
@@ -33,6 +34,7 @@ using all_known_properties = std::tuple<
     // Other properties
     UArrayProperty,
     UBoolProperty,
+    UClassProperty,
     UInterfaceProperty,
     UObjectProperty,
     UStrProperty,

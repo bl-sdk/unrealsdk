@@ -137,7 +137,7 @@ class UObject {
      * @param iface The interface to check.
      * @param[out] impl_out If not null, gets set to the interface implementation for this object
      *                      (assuming it's found).
-     * @return True if this object implements of the given interface.
+     * @return True if this object implements the given interface.
      */
     [[nodiscard]] bool is_implementation(const UClass* iface,
                                          FImplementedInterface** impl_out = nullptr) const;
