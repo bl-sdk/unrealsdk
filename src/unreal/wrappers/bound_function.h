@@ -9,6 +9,7 @@
 #include "unreal/classes/uproperty.h"
 #include "unreal/prop_traits.h"
 #include "unreal/wrappers/wrapped_args.h"
+#include "unreal/wrappers/wrapped_struct.h"
 #include "unrealsdk.h"
 
 namespace unrealsdk::unreal {
@@ -21,6 +22,9 @@ class BoundFunction {
     UObject* object;
 
    private:
+#ifdef UE3
+    static constexpr auto PROP_FLAG_OPTIONAL = 0x10;
+#endif
     static constexpr auto PROP_FLAG_PARAM = 0x80;
     static constexpr auto PROP_FLAG_RETURN = 0x400;
 
@@ -32,11 +36,13 @@ class BoundFunction {
     void call_with_params(void* params) const;
 
     /**
-     * @brief Frees a params struct used to call this function.
+     * @brief Get the next parameter property in the chain.
+     * @note Includes optional properties.
      *
-     * @param params A pointer to this function's params struct.
+     * @param prop The current property to start at.
+     * @return The next parameter, or nullptr on reaching the end of the chain.
      */
-    void free_params(void* params) const;
+    [[nodiscard]] static UProperty* get_next_param(UProperty* prop);
 
     /**
      * @brief Checks that there are no more required params for a function call.
@@ -56,36 +62,55 @@ class BoundFunction {
      * @param args The remaining arguments.
      */
     template <typename T0, typename... Ts>
-    static void set_param(uintptr_t params,
+    static void set_param(WrappedStruct& params,
                           UProperty* prop,
                           const typename PropTraits<T0>::Value& arg0,
                           const typename PropTraits<Ts>::Value&... args) {
-        // Find the next param property
-        while (prop != nullptr && (prop->PropertyFlags & PROP_FLAG_PARAM) == 0) {
-            prop = prop->PropertyLinkNext;
-        }
-
         if (prop == nullptr) {
             throw std::runtime_error("Too many parameters to function call!");
-        }
-        if (prop->Class->Name != cls_fname<T0>()) {
-            throw std::invalid_argument("Property was of invalid type "
-                                        + (std::string)prop->Class->Name);
         }
         if (prop->ArrayDim > 1) {
             throw std::runtime_error(
                 "Function has static array argument - unsure how to handle, aborting!");
         }
 
-        set_property<T0>(reinterpret_cast<T0*>(prop), 0, params, arg0);
+        params.set<T0>(validate_type<T0>(prop), 0, arg0);
 
-        auto next = prop->PropertyLinkNext;
+        auto next = get_next_param(prop);
         if constexpr (sizeof...(Ts) > 0) {
             set_param<Ts...>(params, next, args...);
         } else {
             validate_no_more_params(next);
         }
     }
+
+    /**
+     * @brief Write all arguments into a function's params struct.
+     *
+     * @tparam Ts The types of the arguments.
+     * @param params The params struct to write to. Modified in place.
+     * @param args The arguments.
+     */
+    template <typename... Ts>
+    static void write_params(WrappedStruct& params, const typename PropTraits<Ts>::Value&... args) {
+        UProperty* prop = params.type->PropertyLink;
+        if ((prop->PropertyFlags & PROP_FLAG_PARAM) == 0) {
+            prop = get_next_param(prop);
+        }
+
+        if constexpr (sizeof...(Ts) > 0) {
+            set_param<Ts...>(params, prop, args...);
+        } else {
+            validate_no_more_params(prop);
+        }
+    }
+
+    template <typename R>
+    using call_return_type = std::conditional_t<std::is_void_v<R>,
+                                                void,
+                                                std::conditional_t<std::is_same_v<R, WrappedStruct>,
+                                                                   WrappedStruct,
+                                                                   typename PropTraits<R>::Value>>;
 
     /**
      * @brief Gets the return value of a completed function call.
@@ -95,51 +120,61 @@ class BoundFunction {
      * @return The function's return value.
      */
     template <typename R>
-    typename PropTraits<R>::Value get_return_value(uintptr_t params) {
-        UProperty* prop = this->func->PropertyLink;
-        while (prop != nullptr) {
-            if ((prop->PropertyFlags & PROP_FLAG_RETURN) != 0) {
-                if (prop->ArrayDim > 1) {
-                    throw std::runtime_error(
-                        "Function has static array return param - unsure how to handle, aborting!");
+    static call_return_type<R> get_return_value(const WrappedStruct& params) {
+        if constexpr (std::is_same_v<R, WrappedStruct>) {
+            return params;
+        } else if constexpr (!std::is_void_v<R>) {
+            for (const auto& prop : params.type->properties()) {
+                if ((prop->PropertyFlags & PROP_FLAG_RETURN) != 0) {
+                    if (prop->ArrayDim > 1) {
+                        throw std::runtime_error(
+                            "Function has static array return param - unsure how to handle, "
+                            "aborting!");
+                    }
+
+                    return get_property<R>(validate_type<R>(prop), 0,
+                                           reinterpret_cast<uintptr_t>(params.base.get()),
+                                           params.base);
                 }
-                return get_property<R>(reinterpret_cast<R*>(prop), 0, params);
             }
-            prop = prop->PropertyLinkNext;
+            throw std::runtime_error("Couldn't find return param!");
+        } else {
+            // If void: do nothing
         }
-        throw std::runtime_error("Couldn't find return param!");
     }
 
    public:
     /**
      * @brief Calls this function.
      *
-     * @tparam R The return type. May be void.
+     * @tparam R The return type. If `void`, the return value is ignored (even if it exists). If
+     *           `WrappedStruct`, returns the params struct after the call (useful for out params).
      * @tparam Ts The types of the arguments.
      * @param args The arguments.
+     * @param params A pre-filled struct of the function's parameters.
      * @return The function's return value.
      */
     template <typename R, typename... Ts>
-    std::conditional_t<std::is_void_v<R>, void, typename PropTraits<R>::Value> call(
-        const typename PropTraits<Ts>::Value&... args) {
-        auto params = unrealsdk::u_malloc(this->func->get_struct_size());
+    call_return_type<R> call(const typename PropTraits<Ts>::Value&... args) {
+        WrappedStruct params{this->func};
+        write_params<Ts...>(params, args...);
 
-        UProperty* base_prop = this->func->PropertyLink;
-        if constexpr (sizeof...(Ts) > 0) {
-            set_param<Ts...>(reinterpret_cast<uintptr_t>(params), base_prop, args...);
-        } else {
-            validate_no_more_params(base_prop);
+        this->call_with_params(params.base.get());
+        if constexpr (!std::is_void_v<R>) {
+            return this->get_return_value<R>(params);
+        }
+    }
+    template <typename R>
+    call_return_type<R> call(const WrappedStruct& params) {
+        if (params.type != this->func) {
+            throw std::runtime_error(
+                "Tried to call function with pre-filled parameters of incorrect type: "
+                + (std::string)params.type->Name);
         }
 
-        this->call_with_params(params);
-
-        if constexpr (std::is_void_v<R>) {
-            free_params(params);
-        } else {
-            // TODO: use after free when the return is a reference type (structs, arrays)
-            auto ret = this->get_return_value<R>(reinterpret_cast<uintptr_t>(params));
-            free_params(params);
-            return ret;
+        this->call_with_params(params.base.get());
+        if constexpr (!std::is_void_v<R>) {
+            return this->get_return_value<R>(params);
         }
     }
 };

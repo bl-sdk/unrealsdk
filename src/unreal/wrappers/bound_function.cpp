@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "unreal/cast_prop.h"
+#include "unreal/classes/uproperty.h"
 #include "unreal/prop_traits.h"
 #include "unreal/structs/fname.h"
 #include "unreal/wrappers/bound_function.h"
@@ -19,19 +20,15 @@ void BoundFunction::call_with_params(void* params) const {
     func->FunctionFlags = original_flags;
 }
 
-void BoundFunction::free_params(void* params) const {
-    for (const auto& prop : this->func->properties()) {
-        cast_prop(prop, [params]<typename T>(const T* prop) {
-            destroy_property<T>(prop, 0, reinterpret_cast<uintptr_t>(params));
-        });
+UProperty* BoundFunction::get_next_param(UProperty* prop) {
+    prop = prop->PropertyLinkNext;
+    while (prop != nullptr && (prop->PropertyFlags & PROP_FLAG_PARAM) == 0) {
+        prop = prop->PropertyLinkNext;
     }
+    return prop;
 }
 
 void BoundFunction::validate_no_more_params(UProperty* prop) {
-#ifdef UE3
-    static constexpr auto PROP_FLAG_OPTIONAL = 0x10;
-#endif
-
     for (; prop != nullptr; prop = prop->PropertyLinkNext) {
         if ((prop->PropertyFlags & PROP_FLAG_PARAM) == 0) {
             continue;

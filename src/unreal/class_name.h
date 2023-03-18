@@ -37,9 +37,10 @@ template <typename T>
  */
 template <typename T>
 T* validate_type(UObject* obj) {
-    auto cls = obj->Class->Name;
-    if (cls != cls_fname<T>()) {
-        throw std::invalid_argument("Property was of invalid type " + (std::string)cls);
+    static const auto EXPECTED_CLS_NAME = cls_fname<T>();
+    auto cls_name = obj->Class->Name;
+    if (cls_name != EXPECTED_CLS_NAME) {
+        throw std::invalid_argument("Property was of invalid type " + (std::string)cls_name);
     }
     return reinterpret_cast<T*>(obj);
 }
