@@ -3,6 +3,7 @@
 #include "game/bl2/bl2.h"
 #include "hook_manager.h"
 #include "memory.h"
+#include "unreal/classes/properties/uclassproperty.h"
 #include "unreal/classes/properties/uobjectproperty.h"
 #include "unreal/classes/properties/ustrproperty.h"
 #include "unreal/classes/uclass.h"
@@ -10,6 +11,9 @@
 #include "unreal/structs/fframe.h"
 #include "unreal/structs/fname.h"
 #include "unreal/wrappers/bound_function.h"
+#include "unreal/wrappers/gobjects.h"
+#include "unrealsdk.h"
+
 
 #if defined(UE3) && defined(ARCH_X86)
 
@@ -50,9 +54,6 @@ void BL2Hook::find_fname_init(void) {
     LOG(MISC, "FName::Init: {:p}", this->fname_init_ptr);
 }
 
-void BL2Hook::fname_init(FName* name, const std::wstring& str, int32_t number) const {
-    this->fname_init(name, str.c_str(), number);
-}
 void BL2Hook::fname_init(FName* name, const wchar_t* str, int32_t number) const {
     // NOLINTNEXTLINE(modernize-use-using)  - need a typedef for the __thiscall
     typedef void*(__thiscall * fname_init_func)(FName * name, const wchar_t* str, int32_t number,
@@ -143,6 +144,21 @@ std::wstring BL2Hook::uobject_path_name(const UObject* obj) const {
     hook_manager::inject_next_call = true;
     return BoundFunction{pathname_func, mutable_obj}.call<UStrProperty, UObjectProperty>(
         mutable_obj);
+}
+
+#pragma endregion
+
+#pragma region FindObject
+
+UObject* BL2Hook::find_object(UClass* cls, const std::wstring& name) const {
+    static UFunction* findobject_func = nullptr;
+
+    if (findobject_func == nullptr) {
+        findobject_func = cls->find_func_and_validate(L"FindObject"_fn);
+    }
+
+    return BoundFunction{findobject_func, cls}.call<UObjectProperty, UStrProperty, UClassProperty>(
+        name, cls);
 }
 
 #pragma endregion

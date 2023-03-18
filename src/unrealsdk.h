@@ -37,14 +37,14 @@ void init(std::unique_ptr<game::AbstractHook> game);
  *
  * @return A reference to the GObjects wrapper.
  */
-const GObjects& gobjects(void);
+[[nodiscard]] const GObjects& gobjects(void);
 
 /**
  * @brief Gets a reference to the GNames wrapper.
  *
  * @return A reference to the GNames wrapper.
  */
-const GNames& gnames(void);
+[[nodiscard]] const GNames& gnames(void);
 
 /**
  * @brief Calls FName::Init, set to add new names and split numbers.
@@ -132,7 +132,25 @@ void uconsole_output_text(const std::wstring& str);
 /**
  * @brief Calls `UObject::PathName` on the given object.
  */
-std::wstring uobject_path_name(const UObject* obj);
+[[nodiscard]] std::wstring uobject_path_name(const UObject* obj);
+
+/**
+ * @brief Finds a class by name.
+ *
+ * @param name The class name.
+ * @return The class object.
+ */
+[[nodiscard]] UClass* find_cls(FName name);
+
+/**
+ * @brief Finds an object by name.
+ *
+ * @param cls The object's class (or it's name).
+ * @param name The object's full path name.
+ * @return The object, or nullptr if unable to find.
+ */
+[[nodiscard]] UObject* find_object(FName cls, const std::wstring& name);
+[[nodiscard]] UObject* find_object(UClass* cls, const std::wstring& name);
 
 }  // namespace unrealsdk
 

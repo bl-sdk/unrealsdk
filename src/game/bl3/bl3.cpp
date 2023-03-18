@@ -24,6 +24,7 @@ void BL3Hook::hook(void) {
     find_gmalloc();
     find_construct_object();
     find_get_path_name();
+    find_static_find_object();
 
     inject_console();
 }
@@ -47,9 +48,6 @@ void BL3Hook::find_fname_init(void) {
     LOG(MISC, "FName::Init: {:p}", reinterpret_cast<void*>(fname_init_ptr));
 }
 
-void BL3Hook::fname_init(FName* name, const std::wstring& str, int32_t number) const {
-    this->fname_init(name, str.c_str(), number);
-}
 void BL3Hook::fname_init(FName* name, const wchar_t* str, int32_t number) const {
     fname_init_ptr(name, str, number, 1, 1 /* true */, -1);
 }
@@ -128,6 +126,32 @@ std::wstring BL3Hook::uobject_path_name(const UObject* obj) const {
     ManagedFString str{};
     get_path_name_ptr(obj, nullptr, &str);
     return str;
+}
+
+#pragma endregion
+
+#pragma region StaticFindObject
+
+using static_find_object_safe_func = UObject* (*)(const UClass* cls,
+                                                  uintptr_t package,
+                                                  const wchar_t* str,
+                                                  uint32_t exact_class);
+static static_find_object_safe_func static_find_object_ptr;
+
+void BL3Hook::find_static_find_object(void) {
+    static const Pattern STATIC_FIND_OBJECT_PATTERN{
+        "\x48\x89\x5C\x24\x00\x48\x89\x6C\x24\x00\x48\x89\x74\x24\x00\x57\x48\x83\xEC\x30\x80\x3D"
+        "\x00\x00\x00\x00\x00",
+        "\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+        "\x00\x00\x00\x00\xFF"};
+
+    static_find_object_ptr = sigscan<static_find_object_safe_func>(STATIC_FIND_OBJECT_PATTERN);
+    LOG(MISC, "StaticFindObjectSafe: {:p}", reinterpret_cast<void*>(static_find_object_ptr));
+}
+
+UObject* BL3Hook::find_object(UClass* cls, const std::wstring& name) const {
+    static constexpr auto ANY_PACKAGE = -1;
+    return static_find_object_ptr(cls, ANY_PACKAGE, name.c_str(), 0 /* false */);
 }
 
 #pragma endregion

@@ -27,6 +27,11 @@ template <typename T>
     return name;
 }
 
+template <>
+[[nodiscard]] inline FName cls_fname<UClass>(void) {
+    return L"Class"_fn;
+}
+
 /**
  * @brief Validates that an object is of the expected type.
  * @note Uses an exact type match, not if it's an instance.

@@ -1,5 +1,5 @@
-#ifndef GAME_GAME_HOOK_H
-#define GAME_GAME_HOOK_H
+#ifndef GAME_ABSTRACT_HOOK_H
+#define GAME_ABSTRACT_HOOK_H
 
 #include "pch.h"
 
@@ -38,7 +38,6 @@ struct AbstractHook {
     // Inner methods accessed by the global wrappers in `unrealsdk.h`
     [[nodiscard]] virtual const GObjects& gobjects(void) const = 0;
     [[nodiscard]] virtual const GNames& gnames(void) const = 0;
-    virtual void fname_init(FName* name, const std::wstring& str, int32_t number) const = 0;
     virtual void fname_init(FName* name, const wchar_t* str, int32_t number) const = 0;
     virtual void fframe_step(FFrame* frame, UObject* obj, void* param) const = 0;
     [[nodiscard]] virtual void* u_malloc(size_t len) const = 0;
@@ -51,11 +50,12 @@ struct AbstractHook {
                                                     decltype(UObject::ObjectFlags) flags,
                                                     UObject* template_obj) const = 0;
     virtual void uconsole_output_text(const std::wstring& str) const = 0;
-    virtual std::wstring uobject_path_name(const UObject* obj) const = 0;
+    [[nodiscard]] virtual std::wstring uobject_path_name(const UObject* obj) const = 0;
+    [[nodiscard]] virtual UObject* find_object(UClass* cls, const std::wstring& name) const = 0;
 };
 
 #pragma endregion
 
 }  // namespace unrealsdk::game
 
-#endif /* GAME_GAME_HOOK_H */
+#endif /* GAME_ABSTRACT_HOOK_H */

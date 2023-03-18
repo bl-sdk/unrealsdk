@@ -3,8 +3,12 @@
 #include "game/abstract_hook.h"
 #include "hook_manager.h"
 #include "logging.h"
+#include "unreal/class_name.h"
+#include "unreal/classes/uclass.h"
+#include "unreal/wrappers/gobjects.h"
 #include "unrealsdk.h"
 #include "version.h"
+
 
 namespace unrealsdk {
 
@@ -25,7 +29,43 @@ void init(std::unique_ptr<game::AbstractHook> game) {
     game->hook();
 
     hook_instance = std::move(game);
+}
 
+UClass* find_cls(FName name) {
+    static bool initalized = false;
+    static std::unordered_map<FName, UClass*> cache;
+    static UClass* uclass_class = nullptr;
+
+    // TODO: handle classes being added at runtime, handle conflicts
+
+    if (!initalized) {
+        // Start by grabbing UClass, working off of an arbitrary object
+        auto cls = (*gobjects().begin())->Class;
+        for (; cls->Class != cls; cls = cls->Class) {}
+        uclass_class = cls;
+
+        cache[uclass_class->Name] = uclass_class;
+
+        // Then add all other classes we can find
+        for (const auto& obj : gobjects()) {
+            if (obj == uclass_class) {
+                continue;
+            }
+            if (!obj->is_instance(uclass_class)) {
+                continue;
+            }
+
+            cache[obj->Name] = reinterpret_cast<UClass*>(obj);
+        }
+
+        initalized = true;
+    }
+
+    if (!cache.contains(name)) {
+        throw std::runtime_error("Could not find class: " + (std::string)name);
+    }
+
+    return cache[name];
 }
 
 #pragma region Wrappers
@@ -37,7 +77,7 @@ const GNames& gnames(void) {
     return hook_instance->gnames();
 }
 void fname_init(FName* name, const std::wstring& str, int32_t number) {
-    hook_instance->fname_init(name, str, number);
+    hook_instance->fname_init(name, str.c_str(), number);
 }
 void fname_init(FName* name, const wchar_t* str, int32_t number) {
     hook_instance->fname_init(name, str, number);
@@ -58,10 +98,10 @@ void process_event(UObject* object, UFunction* function, void* params) {
     hook_instance->process_event(object, function, params);
 }
 UObject* construct_object(UClass* cls,
-                                  UObject* outer,
-                                  const FName& name,
-                                  decltype(UObject::ObjectFlags) flags,
-                                  UObject* template_obj) {
+                          UObject* outer,
+                          const FName& name,
+                          decltype(UObject::ObjectFlags) flags,
+                          UObject* template_obj) {
     return hook_instance->construct_object(cls, outer, name, flags, template_obj);
 }
 void uconsole_output_text(const std::wstring& str) {
@@ -72,6 +112,12 @@ void uconsole_output_text(const std::wstring& str) {
 }
 std::wstring uobject_path_name(const UObject* obj) {
     return hook_instance->uobject_path_name(obj);
+}
+UObject* find_object(FName cls, const std::wstring& name) {
+    return hook_instance->find_object(find_cls(cls), name);
+}
+UObject* find_object(UClass* cls, const std::wstring& name) {
+    return hook_instance->find_object(cls, name);
 }
 
 }  // namespace unrealsdk

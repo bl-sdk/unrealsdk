@@ -18,7 +18,6 @@ class TPSHook : public BL2Hook {
     void find_gnames(void) const override;
 
    public:
-    void fname_init(FName* name, const std::wstring& str, int32_t number) const override;
     void fname_init(FName* name, const wchar_t* str, int32_t number) const override;
 
     [[nodiscard]] const GNames& gnames(void) const override;
