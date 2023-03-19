@@ -3,12 +3,9 @@
 #include "game/abstract_hook.h"
 #include "hook_manager.h"
 #include "logging.h"
-#include "unreal/class_name.h"
-#include "unreal/classes/uclass.h"
-#include "unreal/wrappers/gobjects.h"
+#include "unreal/find_class.h"
 #include "unrealsdk.h"
 #include "version.h"
-
 
 namespace unrealsdk {
 
@@ -29,43 +26,6 @@ void init(std::unique_ptr<game::AbstractHook> game) {
     game->hook();
 
     hook_instance = std::move(game);
-}
-
-UClass* find_cls(FName name) {
-    static bool initalized = false;
-    static std::unordered_map<FName, UClass*> cache;
-    static UClass* uclass_class = nullptr;
-
-    // TODO: handle classes being added at runtime, handle conflicts
-
-    if (!initalized) {
-        // Start by grabbing UClass, working off of an arbitrary object
-        auto cls = (*gobjects().begin())->Class;
-        for (; cls->Class != cls; cls = cls->Class) {}
-        uclass_class = cls;
-
-        cache[uclass_class->Name] = uclass_class;
-
-        // Then add all other classes we can find
-        for (const auto& obj : gobjects()) {
-            if (obj == uclass_class) {
-                continue;
-            }
-            if (!obj->is_instance(uclass_class)) {
-                continue;
-            }
-
-            cache[obj->Name] = reinterpret_cast<UClass*>(obj);
-        }
-
-        initalized = true;
-    }
-
-    if (!cache.contains(name)) {
-        throw std::runtime_error("Could not find class: " + (std::string)name);
-    }
-
-    return cache[name];
 }
 
 #pragma region Wrappers
@@ -105,7 +65,8 @@ UObject* construct_object(UClass* cls,
     return hook_instance->construct_object(cls, outer, name, flags, template_obj);
 }
 void uconsole_output_text(const std::wstring& str) {
-    // Since this is called so often, do some actual error checking to make sure the hook exists
+    // Since this is called by logging, which we know will happen plenty before/during
+    // initalization, just drop any messages which arrive before we have a hook to work with
     if (hook_instance) {
         hook_instance->uconsole_output_text(str);
     }
@@ -113,11 +74,14 @@ void uconsole_output_text(const std::wstring& str) {
 std::wstring uobject_path_name(const UObject* obj) {
     return hook_instance->uobject_path_name(obj);
 }
-UObject* find_object(FName cls, const std::wstring& name) {
-    return hook_instance->find_object(find_cls(cls), name);
-}
 UObject* find_object(UClass* cls, const std::wstring& name) {
     return hook_instance->find_object(cls, name);
+}
+UObject* find_object(const FName& cls, const std::wstring& name) {
+    return hook_instance->find_object(find_class(cls), name);
+}
+UObject* find_object(const std::wstring& cls, const std::wstring& name) {
+    return hook_instance->find_object(find_class(cls), name);
 }
 
 }  // namespace unrealsdk

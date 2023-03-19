@@ -135,22 +135,15 @@ void uconsole_output_text(const std::wstring& str);
 [[nodiscard]] std::wstring uobject_path_name(const UObject* obj);
 
 /**
- * @brief Finds a class by name.
- *
- * @param name The class name.
- * @return The class object.
- */
-[[nodiscard]] UClass* find_cls(FName name);
-
-/**
  * @brief Finds an object by name.
  *
  * @param cls The object's class (or it's name).
  * @param name The object's full path name.
  * @return The object, or nullptr if unable to find.
  */
-[[nodiscard]] UObject* find_object(FName cls, const std::wstring& name);
 [[nodiscard]] UObject* find_object(UClass* cls, const std::wstring& name);
+[[nodiscard]] UObject* find_object(const FName& cls, const std::wstring& name);
+[[nodiscard]] UObject* find_object(const std::wstring& cls, const std::wstring& name);
 
 }  // namespace unrealsdk
 
