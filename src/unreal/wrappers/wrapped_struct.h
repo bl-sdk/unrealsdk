@@ -26,10 +26,27 @@ class WrappedStruct {
      * @param type The type of the struct.
      * @param base The base address of the struct.
      * @param parent The parent pointer this struct was retrieved from, used to copy ownership.
+     * @param other The other wrapped struct to copy/move from. Only allowed if of the same type.
      */
     WrappedStruct(const UStruct* type);
     WrappedStruct(const UStruct* type, void* base, const std::shared_ptr<void>& parent = {nullptr});
-    //WrappedStruct(const UStruct* type, void* base, const WrappedArray& parent);
+    WrappedStruct(const WrappedStruct& other);
+    WrappedStruct(WrappedStruct&& other) noexcept;
+
+    /**
+     * @brief Assigns to the struct.
+     * @note Only allowed if of the same type.
+     *
+     * @param other The other wrapped struct to copy/move from
+     * @return A reference to this wrapped struct.
+     */
+    WrappedStruct& operator=(const WrappedStruct& other);
+    WrappedStruct& operator=(WrappedStruct&& other) noexcept;
+
+    /**
+     * @brief Destroys the wrapped struct
+     */
+    ~WrappedStruct() = default;
 
     /**
      * @brief Gets a property on this struct.
@@ -46,7 +63,8 @@ class WrappedStruct {
     }
     template <typename T>
     [[nodiscard]] typename PropTraits<T>::Value get(const T* prop, size_t idx = 0) const {
-        return get_property<T>(prop, idx, reinterpret_cast<uintptr_t>(this->base.get()), this->base);
+        return get_property<T>(prop, idx, reinterpret_cast<uintptr_t>(this->base.get()),
+                               this->base);
     }
 
     /**
@@ -75,6 +93,22 @@ class WrappedStruct {
         set_property<T>(prop, idx, reinterpret_cast<uintptr_t>(this->base.get()), value);
     }
 };
+
+/**
+ * @brief Recursively copies all properties on a struct.
+ *
+ * @param dest The address of the struct to copy to.
+ * @param src The source struct to copy from.
+ */
+void copy_struct(uintptr_t dest, const WrappedStruct& src);
+
+/**
+ * @brief Recursively destroys all properties on a struct.
+ *
+ * @param type The type of the struct.
+ * @param addr The address of the struct to destroy.
+ */
+void destroy_struct(const UStruct* type, uintptr_t addr);
 
 }  // namespace unrealsdk::unreal
 

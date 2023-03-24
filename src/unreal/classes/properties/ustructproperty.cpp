@@ -23,26 +23,11 @@ void PropTraits<UStructProperty>::set(const UStructProperty* prop,
     if (value.type != this_struct) {
         throw std::runtime_error("Struct is not an instance of " + (std::string)this_struct->Name);
     }
-
-    for (const auto& inner : this_struct->properties()) {
-        cast_prop(inner, [addr, &value]<typename T>(const T* inner) {
-            for (size_t i = 0; i < inner->ArrayDim; i++) {
-                set_property<T>(inner, i, addr, value.get<T>(inner, i));
-            }
-        });
-    }
+    copy_struct(addr, value);
 }
 
 void PropTraits<UStructProperty>::destroy(const UStructProperty* prop, uintptr_t addr) {
-    auto this_struct = prop->read_field(&UStructProperty::Struct);
-
-    for (const auto& inner : this_struct->properties()) {
-        cast_prop(inner, [addr]<typename T>(const T* inner) {
-            for (size_t i = 0; i < inner->ArrayDim; i++) {
-                destroy_property<T>(inner, i, addr);
-            }
-        });
-    }
+    destroy_struct(prop->read_field(&UStructProperty::Struct), addr);
 }
 
 }  // namespace unrealsdk::unreal
