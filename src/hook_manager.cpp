@@ -89,9 +89,6 @@ bool process_event(UObject* obj, UFunction* func, WrappedArgs& args) {
 bool call_function(UObject* obj, FFrame* stack, void* /*result*/, UFunction* func) {
     // NOLINTBEGIN(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory)
 
-    const auto EXPR_TOKEN_END_FUNCTION_PARMS = 0x16;
-    const auto PROPERTY_FLAG_RETURN_PARAM = 0x400;
-
     /*
     Early exit if we have no hook, so we don't mess with the stack.
 
@@ -122,9 +119,9 @@ bool call_function(UObject* obj, FFrame* stack, void* /*result*/, UFunction* fun
     auto original_code = stack->Code;
 
     for (auto prop = reinterpret_cast<UProperty*>(func->Children);
-         *stack->Code != EXPR_TOKEN_END_FUNCTION_PARMS;
+         *stack->Code != FFrame::EXPR_TOKEN_END_FUNCTION_PARMS;
          prop = reinterpret_cast<UProperty*>(prop->Next)) {
-        bool is_return_param = (prop->PropertyFlags & PROPERTY_FLAG_RETURN_PARAM) != 0;
+        bool is_return_param = (prop->PropertyFlags & UProperty::PROP_FLAG_RETURN) != 0;
         if (is_return_param) {
             continue;
         }

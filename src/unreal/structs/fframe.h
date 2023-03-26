@@ -34,6 +34,8 @@ struct FOutputDevice {
 };
 
 struct FFrame : public FOutputDevice {
+    static constexpr const auto EXPR_TOKEN_END_FUNCTION_PARMS = 0x16;
+
     UFunction* Node;
     UObject* Object;
     uint8_t* Code;

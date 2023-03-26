@@ -32,6 +32,12 @@ This means:
 
 class UProperty : public UField {
    public:
+#ifdef UE3
+    static constexpr auto PROP_FLAG_OPTIONAL = 0x10;
+#endif
+    static constexpr auto PROP_FLAG_PARAM = 0x80;
+    static constexpr auto PROP_FLAG_RETURN = 0x400;
+
     UProperty() = delete;
     UProperty(const UProperty&) = delete;
     UProperty(UProperty&&) = delete;

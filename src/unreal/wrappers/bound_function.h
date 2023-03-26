@@ -22,12 +22,6 @@ class BoundFunction {
     UObject* object;
 
    private:
-#ifdef UE3
-    static constexpr auto PROP_FLAG_OPTIONAL = 0x10;
-#endif
-    static constexpr auto PROP_FLAG_PARAM = 0x80;
-    static constexpr auto PROP_FLAG_RETURN = 0x400;
-
     /**
      * @brief Calls this function, given a pointer to it's params struct.
      *
@@ -94,7 +88,7 @@ class BoundFunction {
     template <typename... Ts>
     static void write_params(WrappedStruct& params, const typename PropTraits<Ts>::Value&... args) {
         UProperty* prop = params.type->PropertyLink;
-        if ((prop->PropertyFlags & PROP_FLAG_PARAM) == 0) {
+        if ((prop->PropertyFlags & UProperty::PROP_FLAG_PARAM) == 0) {
             prop = get_next_param(prop);
         }
 
@@ -125,7 +119,7 @@ class BoundFunction {
             return params;
         } else if constexpr (!std::is_void_v<R>) {
             for (const auto& prop : params.type->properties()) {
-                if ((prop->PropertyFlags & PROP_FLAG_RETURN) != 0) {
+                if ((prop->PropertyFlags & UProperty::PROP_FLAG_RETURN) != 0) {
                     if (prop->ArrayDim > 1) {
                         throw std::runtime_error(
                             "Function has static array return param - unsure how to handle, "
