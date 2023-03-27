@@ -8,7 +8,6 @@
 #include "unreal/classes/ufunction.h"
 #include "unreal/classes/uproperty.h"
 #include "unreal/prop_traits.h"
-#include "unreal/wrappers/wrapped_args.h"
 #include "unreal/wrappers/wrapped_struct.h"
 #include "unrealsdk.h"
 
@@ -159,7 +158,7 @@ class BoundFunction {
         }
     }
     template <typename R>
-    call_return_type<R> call(const WrappedStruct& params) {
+    call_return_type<R> call(const ReadOnlyWrappedStruct& params) {
         if (params.type != this->func) {
             throw std::runtime_error(
                 "Tried to call function with pre-filled parameters of incorrect type: "

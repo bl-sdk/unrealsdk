@@ -8,8 +8,7 @@
 
 namespace unrealsdk::unreal {
 
-
-void copy_struct(uintptr_t dest, const WrappedStruct& src) {
+void copy_struct(uintptr_t dest, const ReadOnlyWrappedStruct& src) {
     for (const auto& prop : src.type->properties()) {
         cast_prop(prop, [dest, &src]<typename T>(const T* prop) {
             for (size_t i = 0; i < prop->ArrayDim; i++) {
@@ -44,18 +43,30 @@ void destroy_struct(const UStruct* type, uintptr_t addr) {
     return {unrealsdk::u_malloc(type->get_struct_size()), deleter};
 }
 
-WrappedStruct::WrappedStruct(const UStruct* type) : type(type), base(alloc_struct(type)) {}
+ReadOnlyWrappedStruct::ReadOnlyWrappedStruct(const UStruct* type, void* base, const std::shared_ptr<void>& parent) :
+    type(type), base(parent, base) {}
 
-WrappedStruct::WrappedStruct(const UStruct* type, void* base, const std::shared_ptr<void>& parent)
-    : type(type), base(parent, base) {}
+ReadOnlyWrappedStruct::ReadOnlyWrappedStruct(ReadOnlyWrappedStruct&& other) noexcept
+    : type(std::exchange(other.type, nullptr)), base(std::exchange(other.base, {nullptr})) {}
 
-WrappedStruct::WrappedStruct(const WrappedStruct& other)
-    : type(other.type), base(alloc_struct(other.type)) {
+ReadOnlyWrappedStruct::ReadOnlyWrappedStruct(const UStruct* type, const std::shared_ptr<void>&& base) : type(type), base(base) {}
+
+ReadOnlyWrappedStruct& ReadOnlyWrappedStruct::operator=(ReadOnlyWrappedStruct&& other) noexcept {
+    std::swap(this->type, other.type);
+    std::swap(this->base, other.base);
+    return *this;
+}
+
+
+WrappedStruct::WrappedStruct(const UStruct* type) : ReadOnlyWrappedStruct(type, alloc_struct(type)) {}
+
+WrappedStruct::WrappedStruct(const UStruct* type, void* base, const std::shared_ptr<void>& parent) : ReadOnlyWrappedStruct(type, base, parent) {}
+
+WrappedStruct::WrappedStruct(const WrappedStruct& other) : ReadOnlyWrappedStruct(other.type, alloc_struct(other.type)) {
     copy_struct(reinterpret_cast<uintptr_t>(this->base.get()), other);
 }
 
-WrappedStruct::WrappedStruct(WrappedStruct&& other) noexcept
-    : type(std::exchange(other.type, nullptr)), base(std::exchange(other.base, {nullptr})) {}
+WrappedStruct::WrappedStruct(WrappedStruct&& other) noexcept : ReadOnlyWrappedStruct(std::move(other)) {}
 
 WrappedStruct& WrappedStruct::operator=(const WrappedStruct& other) {
     if (other.type != this->type) {
@@ -65,8 +76,7 @@ WrappedStruct& WrappedStruct::operator=(const WrappedStruct& other) {
     return *this;
 }
 WrappedStruct& WrappedStruct::operator=(WrappedStruct&& other) noexcept {
-    std::swap(this->type, other.type);
-    std::swap(this->base, other.base);
+    ReadOnlyWrappedStruct::operator=(std::move(other));
     return *this;
 }
 
