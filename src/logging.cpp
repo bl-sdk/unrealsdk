@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <chrono>
 
 #include "env.h"
 #include "logging.h"
@@ -99,12 +100,13 @@ static constexpr auto LEVEL_WIDTH = 4;
  * @return The formatted message
  */
 static std::string format_message(const LogMessage& msg) {
+    auto local_time = std::chrono::current_zone()->to_local(msg.time);
     auto location = msg.function[0] != '\0'
                         ? truncate_leading_chunks(msg.function, ":", LOCATION_WIDTH)
                         : truncate_leading_chunks(msg.file, "\\/", LOCATION_WIDTH);
 
     return unrealsdk::fmt::format("{1:>{0}%F %H:%M:%S} {3:>{2}}@{5:<{4}d} {7:>{6}}| {8}\n", DATE_WIDTH + TIME_WIDTH + 1,
-                                  std::chrono::round<std::chrono::milliseconds>(msg.time),
+                                  std::chrono::round<std::chrono::milliseconds>(local_time),
                                   LOCATION_WIDTH, location, LINE_WIDTH, msg.line, LEVEL_WIDTH,
                                   get_level_name(msg.level), msg.msg);
 }
