@@ -11,6 +11,8 @@ class UProperty;
 class UFunction;
 class UObject;
 
+class WrappedStruct;
+
 // NOLINTBEGIN(readability-identifier-naming)
 
 struct FOutParmRec {
@@ -42,14 +44,24 @@ struct FFrame : public FOutputDevice {
     void* Locals;
 
 #ifdef UE4
-private:
+   private:
     UProperty* LastProperty;
     void* LastPropertyAddress;
-public:
+
+   public:
 #endif
 
     FFrame* PreviousFrame;
     FOutParmRec* OutParams;
+
+    /**
+     * @brief Extracts the current function args, assuming stopped during the `CallFunction` hook.
+     * @note Steps `Code` to do so, leaving it pointing at the end of function params token.
+     *
+     * @param args The args struct to write to. Assumes type is already pointing to the function.
+     * @return The original position of `Code`.
+     */
+    uint8_t* extract_current_args(WrappedStruct& args);
 };
 
 // NOLINTEND(readability-identifier-naming)

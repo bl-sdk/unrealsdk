@@ -53,10 +53,11 @@ class PropertyProxy {
     }
 
     /**
-     * @brief Sets the return value.
+     * @brief Sets the stored value.
      *
      * @tparam T The property type.
-     * @param value The new return value.
+     * @param idx The fixed array index to get the value at. Defaults to 0.
+     * @param value The new stored value.
      */
     template <typename T>
     void set(const typename PropTraits<T>::Value& value) {
@@ -64,22 +65,36 @@ class PropertyProxy {
     }
     template <typename T>
     void set(size_t idx, const typename PropTraits<T>::Value& value) {
-        if (!this->has_value()) {
-            // Make sure we have the correct type before we allocate anything
-            validate_type<T>(this->prop);
+        if (this->prop == nullptr) {
+            throw std::runtime_error("Property does not exist!");
+        }
+        auto prop = validate_type<T>(this->prop);
 
-            auto deleter = [this](void* data) {
-                for (size_t i = 0; i < this->prop->ArrayDim; i++) {
-                    destroy_property<T>(this->prop, i, reinterpret_cast<uintptr_t>(data));
+        if (!this->has_value()) {
+            auto deleter = [prop](void* data) {
+                for (size_t i = 0; i < prop->ArrayDim; i++) {
+                    destroy_property<T>(prop, i, reinterpret_cast<uintptr_t>(data));
                 }
                 unrealsdk::u_free(data);
             };
 
-            value = {unrealsdk::u_malloc(this->prop->ElementSize * this->prop->ArrayDim), deleter};
+            this->value = {unrealsdk::u_malloc(prop->ElementSize * prop->ArrayDim), deleter};
         }
 
-        set_property(prop, idx, reinterpret_cast<uintptr_t>(this->value.get()), value);
+        set_property<T>(prop, idx, reinterpret_cast<uintptr_t>(this->value.get()), value);
     }
+
+    /**
+     * @brief Destroys the stored value.
+     */
+    void destroy(void);
+
+    /**
+     * @brief Copies the stored property to another address.
+     *
+     * @param addr The address to copy to.
+     */
+    void copy_to(uintptr_t addr);
 };
 
 }  // namespace unrealsdk::unreal

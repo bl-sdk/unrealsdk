@@ -6,7 +6,7 @@
 #include "unreal/classes/ufunction.h"
 #include "unreal/classes/uobject.h"
 #include "unreal/structs/fframe.h"
-#include "unreal/wrappers/wrapped_args.h"
+#include "unreal/wrappers/wrapped_struct.h"
 
 #if defined(UE4) && defined(ARCH_X64)
 
@@ -20,8 +20,20 @@ using process_event_func = void(UObject* obj, UFunction* func, void* params);
 static process_event_func* process_event_ptr;
 void process_event_hook(UObject* obj, UFunction* func, void* params) {
     try {
-        WrappedArgs args{func, params};
-        if (hook_manager::process_event(obj, func, args)) {
+        auto list = hook_manager::preprocess_hook("ProcessEvent", func, obj);
+        if (list != nullptr) {
+            ReadOnlyWrappedStruct args{func, params};
+            hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
+            bool block_execution = hook_manager::process_hook(*list, hook);
+
+            if (!block_execution) {
+                process_event_ptr(obj, func, params);
+            }
+
+            if (hook.ret.has_value()) {
+                hook.ret.copy_to(reinterpret_cast<uintptr_t>(params));
+            }
+
             return;
         }
     } catch (const std::exception& ex) {
@@ -50,7 +62,48 @@ using call_function_func = void(UObject* obj, FFrame* stack, void* result, UFunc
 static call_function_func* call_function_ptr;
 void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* func) {
     try {
-        if (hook_manager::call_function(obj, stack, result, func)) {
+        /*
+        NOTE: The early exit here also avoids access violations for a few special functions, e.g.:
+        ```
+        // /Script/Engine.KismetArrayLibrary:Array_Get
+        void UKismetArrayLibrary::Array_Get(TArray<int> TargetArray, int Index, int* Item);
+        ```
+
+        This function presents itself as only taking (arrays of) ints, but is actually generic. It
+        uses a native function which reads the actual property types out of the bytecode, and
+        essentially ignores the ones presented by the UFunction.
+
+        This means when we try extract args, the sizes don't line up, so we almost always get an
+        access violation.
+
+        There doesn't seem to be a good way to handle this generically, we would have to hardcode
+        each function, so by early exiting it only becomes a problem if someone hooks the function
+        directly.
+
+        As of writing this, we only know about the kismet array library functions doing this, which
+        probably aren't very interesting hooks, so deliberately choosing to ignore it to keep the
+        implementation simpler.
+        */
+
+        auto list = hook_manager::preprocess_hook("ProcessEvent", func, obj);
+        if (list != nullptr) {
+            WrappedStruct args{func};
+            auto original_code = stack->extract_current_args(args);
+
+            hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
+            bool block_execution = hook_manager::process_hook(*list, hook);
+
+            if (block_execution) {
+                stack->Code++;
+            } else {
+                stack->Code = original_code;
+                call_function_ptr(obj, stack, result, func);
+            }
+
+            if (hook.ret.has_value()) {
+                hook.ret.copy_to(reinterpret_cast<uintptr_t>(result));
+            }
+
             return;
         }
     } catch (const std::exception& ex) {

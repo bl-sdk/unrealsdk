@@ -1,6 +1,7 @@
 #ifndef UNREAL_CLASSES_UFUNCTION_H
 #define UNREAL_CLASSES_UFUNCTION_H
 
+#include "unreal/classes/uproperty.h"
 #include "unreal/classes/ustruct.h"
 
 namespace unrealsdk::unreal {
@@ -51,6 +52,14 @@ class UFunction : public UStruct {
     uint8_t UnknownData00[0x6];
     void* Func;
 #endif
+
+   public:
+    /**
+     * @brief Finds the return param for this function (if it exists).
+     *
+     * @return The return param, or `nullptr` if none exists.
+     */
+    [[nodiscard]] UProperty* find_return_param(void) const;
 
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 };

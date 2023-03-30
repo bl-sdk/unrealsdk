@@ -99,11 +99,12 @@ class BoundFunction {
     }
 
     template <typename R>
-    using call_return_type = std::conditional_t<std::is_void_v<R>,
-                                                void,
-                                                std::conditional_t<std::is_same_v<R, WrappedStruct>,
-                                                                   WrappedStruct,
-                                                                   typename PropTraits<R>::Value>>;
+    using call_return_type =
+        std::conditional_t<std::is_void_v<R>,
+                           void,
+                           std::conditional_t<std::is_same_v<R, ReadOnlyWrappedStruct>,
+                                              ReadOnlyWrappedStruct,
+                                              typename PropTraits<R>::Value>>;
 
     /**
      * @brief Gets the return value of a completed function call.
@@ -113,24 +114,21 @@ class BoundFunction {
      * @return The function's return value.
      */
     template <typename R>
-    static call_return_type<R> get_return_value(const WrappedStruct& params) {
-        if constexpr (std::is_same_v<R, WrappedStruct>) {
+    call_return_type<R> get_return_value(const ReadOnlyWrappedStruct& params) {
+        if constexpr (std::is_same_v<R, ReadOnlyWrappedStruct>) {
             return params;
         } else if constexpr (!std::is_void_v<R>) {
-            for (const auto& prop : params.type->properties()) {
-                if ((prop->PropertyFlags & UProperty::PROP_FLAG_RETURN) != 0) {
-                    if (prop->ArrayDim > 1) {
-                        throw std::runtime_error(
-                            "Function has static array return param - unsure how to handle, "
-                            "aborting!");
-                    }
-
-                    return get_property<R>(validate_type<R>(prop), 0,
-                                           reinterpret_cast<uintptr_t>(params.base.get()),
-                                           params.base);
-                }
+            auto ret = this->func->find_return_param();
+            if (ret == nullptr) {
+                throw std::runtime_error("Couldn't find return param!");
             }
-            throw std::runtime_error("Couldn't find return param!");
+            if (ret->ArrayDim > 1) {
+                throw std::runtime_error(
+                    "Function has static array return param - unsure how to handle, aborting!");
+            }
+
+            return get_property<R>(validate_type<R>(ret), 0,
+                                   reinterpret_cast<uintptr_t>(params.base.get()), params.base);
         } else {
             // If void: do nothing
         }

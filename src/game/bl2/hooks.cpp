@@ -1,11 +1,18 @@
 #include "pch.h"
+#include <stdexcept>
 
 #include "game/bl2/bl2.h"
 #include "hook_manager.h"
 #include "memory.h"
+#include "unreal/cast_prop.h"
 #include "unreal/classes/ufunction.h"
 #include "unreal/classes/uobject.h"
-#include "unreal/wrappers/wrapped_args.h"
+#include "unreal/classes/uproperty.h"
+#include "unreal/structs/fframe.h"
+#include "unreal/wrappers/bound_function.h"
+#include "unreal/wrappers/property_proxy.h"
+#include "unreal/wrappers/wrapped_struct.h"
+#include "unrealsdk.h"
 
 #if defined(UE3) && defined(ARCH_X86)
 
@@ -21,24 +28,43 @@ typedef void(__fastcall* process_event_func)(UObject* obj,
                                              void* /*edx*/,
                                              UFunction* func,
                                              void* params,
-                                             void* result);
+                                             void* /*null*/);
 
 static process_event_func process_event_ptr;
 static void __fastcall process_event_hook(UObject* obj,
                                           void* edx,
                                           UFunction* func,
                                           void* params,
-                                          void* result) {
+                                          void* null) {
     try {
-        WrappedArgs args{func, params};
-        if (hook_manager::process_event(obj, func, args)) {
+        // This arg seems to be in the process of being deprecated, no usage in ghidra, always seems
+        // to be null, and it's gone in later ue versions. Gathering some extra info just in case.
+        if (null != nullptr) {
+            LOG(DEV_WARNING, "Null param had a value in process event during func {} on obj {}",
+                func->get_path_name(), obj->get_path_name());
+        }
+
+        auto list = hook_manager::preprocess_hook("ProcessEvent", func, obj);
+        if (list != nullptr) {
+            ReadOnlyWrappedStruct args{func, params};
+            hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
+            bool block_execution = hook_manager::process_hook(*list, hook);
+
+            if (!block_execution) {
+                process_event_ptr(obj, edx, func, params, null);
+            }
+
+            if (hook.ret.has_value()) {
+                hook.ret.copy_to(reinterpret_cast<uintptr_t>(params));
+            }
+
             return;
         }
     } catch (const std::exception& ex) {
         LOG(ERROR, "An exception occured during the ProcessEvent hook: {}", ex.what());
     }
 
-    process_event_ptr(obj, edx, func, params, result);
+    process_event_ptr(obj, edx, func, params, null);
 }
 static_assert(std::is_same_v<decltype(&process_event_hook), process_event_func>,
               "process_event signature is incorrect");
@@ -73,7 +99,25 @@ static void __fastcall call_function_hook(UObject* obj,
                                           void* result,
                                           UFunction* func) {
     try {
-        if (hook_manager::call_function(obj, stack, result, func)) {
+        auto list = hook_manager::preprocess_hook("ProcessEvent", func, obj);
+        if (list != nullptr) {
+            WrappedStruct args{func};
+            auto original_code = stack->extract_current_args(args);
+
+            hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
+            bool block_execution = hook_manager::process_hook(*list, hook);
+
+            if (block_execution) {
+                stack->Code++;
+            } else {
+                stack->Code = original_code;
+                call_function_ptr(obj, edx, stack, result, func);
+            }
+
+            if (hook.ret.has_value()) {
+                hook.ret.copy_to(reinterpret_cast<uintptr_t>(result));
+            }
+
             return;
         }
     } catch (const std::exception& ex) {

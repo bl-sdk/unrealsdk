@@ -13,7 +13,6 @@
 #include "unreal/structs/fname.h"
 #include "unreal/structs/fstring.h"
 #include "unreal/wrappers/gobjects.h"
-#include "unreal/wrappers/wrapped_args.h"
 #include "unreal/wrappers/wrapped_array.h"
 #include "unreal/wrappers/wrapped_struct.h"
 #include "unrealsdk.h"
@@ -29,10 +28,10 @@ static const std::wstring INJECT_CONSOLE_ID = L"unrealsdk_bl3_inject_console";
 
 static UObject* console = nullptr;
 
-static bool inject_console_hook(UFunction* /*func*/, UObject* obj, WrappedArgs& /*args*/) {
+static bool inject_console_hook(hook_manager::HookDetails& hook) {
     hook_manager::hooks[INJECT_CONSOLE_FUNC].erase(INJECT_CONSOLE_ID);
 
-    auto local_player = obj->get<UObjectProperty>(L"Player"_fn);
+    auto local_player = hook.obj->get<UObjectProperty>(L"Player"_fn);
     auto viewport = local_player->get<UObjectProperty>(L"ViewportClient"_fn);
     auto console_property =
         viewport->Class->find_prop_and_validate<UObjectProperty>(L"ViewportConsole"_fn);
