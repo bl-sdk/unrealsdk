@@ -2,7 +2,6 @@
 #define UNREAL_WRAPPERS_PROPERTY_PROXY_H
 
 #include "pch.h"
-#include <stdexcept>
 
 #include "unreal/class_name.h"
 #include "unreal/prop_traits.h"
@@ -18,6 +17,16 @@ class PropertyProxy {
 
    private:
     std::shared_ptr<void> value;
+
+    /**
+     * @brief Get the address access to the value should use.
+     * @note Handle non-zero offsets correctly.
+     *
+     * @param data The data address. Defaults to `value`'s address (must be allocated beforehand).
+     * @return The address access to the value should use.
+     */
+    [[nodiscard]] uintptr_t get_value_addr(void) const;
+    [[nodiscard]] uintptr_t get_value_addr(void* data) const;
 
    public:
     /**
@@ -48,8 +57,8 @@ class PropertyProxy {
                 "Tried to get value of a property proxy which is yet to be set!");
         }
 
-        return get_property<T>(validate_type<T>(this->prop), idx,
-                               reinterpret_cast<uintptr_t>(this->value.get()), this->value);
+        return get_property<T>(validate_type<T>(this->prop), idx, this->get_value_addr(),
+                               this->value);
     }
 
     /**
@@ -71,9 +80,9 @@ class PropertyProxy {
         auto prop = validate_type<T>(this->prop);
 
         if (!this->has_value()) {
-            auto deleter = [prop](void* data) {
+            auto deleter = [this, prop](void* data) {
                 for (size_t i = 0; i < prop->ArrayDim; i++) {
-                    destroy_property<T>(prop, i, reinterpret_cast<uintptr_t>(data));
+                    destroy_property<T>(prop, i, this->get_value_addr(data));
                 }
                 unrealsdk::u_free(data);
             };
@@ -81,7 +90,7 @@ class PropertyProxy {
             this->value = {unrealsdk::u_malloc(prop->ElementSize * prop->ArrayDim), deleter};
         }
 
-        set_property<T>(prop, idx, reinterpret_cast<uintptr_t>(this->value.get()), value);
+        set_property<T>(prop, idx, this->get_value_addr(), value);
     }
 
     /**
@@ -95,6 +104,13 @@ class PropertyProxy {
      * @param addr The address to copy to.
      */
     void copy_to(uintptr_t addr);
+
+    /**
+     * @brief Copies the value of another address to the stored property.
+     *
+     * @param addr The address to copy from.
+     */
+    void copy_from(uintptr_t addr);
 };
 
 }  // namespace unrealsdk::unreal

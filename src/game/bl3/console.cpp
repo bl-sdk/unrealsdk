@@ -29,7 +29,7 @@ static const std::wstring INJECT_CONSOLE_ID = L"unrealsdk_bl3_inject_console";
 static UObject* console = nullptr;
 
 static bool inject_console_hook(hook_manager::HookDetails& hook) {
-    hook_manager::hooks[INJECT_CONSOLE_FUNC].erase(INJECT_CONSOLE_ID);
+    hook_manager::hooks[INJECT_CONSOLE_FUNC].pre.erase(INJECT_CONSOLE_ID);
 
     auto local_player = hook.obj->get<UObjectProperty>(L"Player"_fn);
     auto viewport = local_player->get<UObjectProperty>(L"ViewportClient"_fn);
@@ -83,7 +83,7 @@ static bool inject_console_hook(hook_manager::HookDetails& hook) {
 }
 
 void BL3Hook::inject_console(void) {
-    hook_manager::hooks[INJECT_CONSOLE_FUNC][INJECT_CONSOLE_ID] = &inject_console_hook;
+    hook_manager::hooks[INJECT_CONSOLE_FUNC].pre[INJECT_CONSOLE_ID] = &inject_console_hook;
 }
 
 void BL3Hook::uconsole_output_text(const std::wstring& str) const {

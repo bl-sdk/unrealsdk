@@ -50,7 +50,8 @@ static void __fastcall process_event_hook(UObject* obj,
             WrappedStruct args_base{func, params};
             WrappedStruct args(args_base);
             hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
-            bool block_execution = hook_manager::process_hook(*list, hook);
+
+            bool block_execution = hook_manager::run_hook_group(list->pre, hook);
 
             if (!block_execution) {
                 process_event_ptr(obj, edx, func, params, null);
@@ -59,6 +60,16 @@ static void __fastcall process_event_hook(UObject* obj,
             if (hook.ret.has_value()) {
                 hook.ret.copy_to(reinterpret_cast<uintptr_t>(params));
             }
+
+            if (list->post.empty()) {
+                return;
+            }
+
+            if (!hook.ret.has_value() && !block_execution) {
+                hook.ret.copy_from(reinterpret_cast<uintptr_t>(params));
+            }
+
+            hook_manager::run_hook_group(list->post, hook);
 
             return;
         }
@@ -107,7 +118,8 @@ static void __fastcall call_function_hook(UObject* obj,
             auto original_code = stack->extract_current_args(args);
 
             hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
-            bool block_execution = hook_manager::process_hook(*list, hook);
+
+            bool block_execution = hook_manager::run_hook_group(list->pre, hook);
 
             if (block_execution) {
                 stack->Code++;
@@ -119,6 +131,16 @@ static void __fastcall call_function_hook(UObject* obj,
             if (hook.ret.has_value()) {
                 hook.ret.copy_to(reinterpret_cast<uintptr_t>(result));
             }
+
+            if (list->post.empty()) {
+                return;
+            }
+
+            if (!hook.ret.has_value() && !block_execution) {
+                hook.ret.copy_from(reinterpret_cast<uintptr_t>(result));
+            }
+
+            hook_manager::run_hook_group(list->post, hook);
 
             return;
         }

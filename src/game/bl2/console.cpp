@@ -43,7 +43,7 @@ static bool say_bypass_hook(hook_manager::HookDetails& hook) {
 static BoundFunction console_output_text{};
 
 static bool inject_console_hook(hook_manager::HookDetails& hook) {
-    hook_manager::hooks[INJECT_CONSOLE_FUNC].erase(INJECT_CONSOLE_ID);
+    hook_manager::hooks[INJECT_CONSOLE_FUNC].pre.erase(INJECT_CONSOLE_ID);
 
     auto console = hook.obj->get<UObjectProperty>(L"ViewportConsole"_fn);
 
@@ -64,8 +64,8 @@ static bool inject_console_hook(hook_manager::HookDetails& hook) {
 }
 
 void BL2Hook::inject_console(void) {
-    hook_manager::hooks[SAY_BYPASS_FUNC][SAY_BYPASS_ID] = &say_bypass_hook;
-    hook_manager::hooks[INJECT_CONSOLE_FUNC][INJECT_CONSOLE_ID] = &inject_console_hook;
+    hook_manager::hooks[SAY_BYPASS_FUNC].pre[SAY_BYPASS_ID] = &say_bypass_hook;
+    hook_manager::hooks[INJECT_CONSOLE_FUNC].pre[INJECT_CONSOLE_ID] = &inject_console_hook;
 }
 
 void BL2Hook::uconsole_output_text(const std::wstring& str) const {

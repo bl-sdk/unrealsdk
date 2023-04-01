@@ -26,7 +26,8 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
             WrappedStruct args_base{func, params};
             WrappedStruct args(args_base);
             hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
-            bool block_execution = hook_manager::process_hook(*list, hook);
+
+            bool block_execution = hook_manager::run_hook_group(list->pre, hook);
 
             if (!block_execution) {
                 process_event_ptr(obj, func, params);
@@ -35,6 +36,16 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
             if (hook.ret.has_value()) {
                 hook.ret.copy_to(reinterpret_cast<uintptr_t>(params));
             }
+
+            if (list->post.empty()) {
+                return;
+            }
+
+            if (!hook.ret.has_value() && !block_execution) {
+                hook.ret.copy_from(reinterpret_cast<uintptr_t>(params));
+            }
+
+            hook_manager::run_hook_group(list->post, hook);
 
             return;
         }
@@ -93,7 +104,8 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
             auto original_code = stack->extract_current_args(args);
 
             hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
-            bool block_execution = hook_manager::process_hook(*list, hook);
+
+            bool block_execution = hook_manager::run_hook_group(list->pre, hook);
 
             if (block_execution) {
                 stack->Code++;
@@ -105,6 +117,16 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
             if (hook.ret.has_value()) {
                 hook.ret.copy_to(reinterpret_cast<uintptr_t>(result));
             }
+
+            if (list->post.empty()) {
+                return;
+            }
+
+            if (!hook.ret.has_value() && !block_execution) {
+                hook.ret.copy_from(reinterpret_cast<uintptr_t>(result));
+            }
+
+            hook_manager::run_hook_group(list->post, hook);
 
             return;
         }
