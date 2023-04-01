@@ -46,7 +46,9 @@ static void __fastcall process_event_hook(UObject* obj,
 
         auto list = hook_manager::preprocess_hook("ProcessEvent", func, obj);
         if (list != nullptr) {
-            ReadOnlyWrappedStruct args{func, params};
+            // Copy args so that hooks can't modify them, for parity with call function
+            WrappedStruct args_base{func, params};
+            WrappedStruct args(args_base);
             hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
             bool block_execution = hook_manager::process_hook(*list, hook);
 

@@ -10,7 +10,7 @@ namespace unrealsdk::unreal {
 class UObject;
 class UFunction;
 
-class ReadOnlyWrappedStruct;
+class WrappedStruct;
 
 }  // namespace unrealsdk::unreal
 
@@ -18,7 +18,7 @@ namespace unrealsdk::hook_manager {
 
 struct HookDetails {
     unreal::UObject* obj{};
-    unreal::ReadOnlyWrappedStruct& args;
+    unreal::WrappedStruct& args;
     unreal::PropertyProxy ret{nullptr};
     unreal::BoundFunction func{};
 };

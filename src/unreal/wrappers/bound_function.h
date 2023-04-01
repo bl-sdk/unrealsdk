@@ -102,8 +102,8 @@ class BoundFunction {
     using call_return_type =
         std::conditional_t<std::is_void_v<R>,
                            void,
-                           std::conditional_t<std::is_same_v<R, ReadOnlyWrappedStruct>,
-                                              ReadOnlyWrappedStruct,
+                           std::conditional_t<std::is_same_v<R, WrappedStruct>,
+                                              WrappedStruct,
                                               typename PropTraits<R>::Value>>;
 
     /**
@@ -114,8 +114,8 @@ class BoundFunction {
      * @return The function's return value.
      */
     template <typename R>
-    call_return_type<R> get_return_value(const ReadOnlyWrappedStruct& params) {
-        if constexpr (std::is_same_v<R, ReadOnlyWrappedStruct>) {
+    call_return_type<R> get_return_value(const WrappedStruct& params) {
+        if constexpr (std::is_same_v<R, WrappedStruct>) {
             return params;
         } else if constexpr (!std::is_void_v<R>) {
             auto ret = this->func->find_return_param();
@@ -156,7 +156,7 @@ class BoundFunction {
         }
     }
     template <typename R>
-    call_return_type<R> call(const ReadOnlyWrappedStruct& params) {
+    call_return_type<R> call(const WrappedStruct& params) {
         if (params.type != this->func) {
             throw std::runtime_error(
                 "Tried to call function with pre-filled parameters of incorrect type: "

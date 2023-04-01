@@ -12,41 +12,41 @@ namespace unrealsdk::unreal {
 
 class UStruct;
 
-class ReadOnlyWrappedStruct {
+class WrappedStruct {
    public:
     const UStruct* type;
     std::shared_ptr<void> base;
 
     /**
      * @brief Constructs a new wrapped struct.
-     * @note Copies parent ownership if given, otherwise does not manage the given base address.
+     * @note If just the type is given, allocates new memory (which we manage) for the properties.
+     * @note If a parent is given, copies it's ownership.
+     * @note Otherwise, does not manage the given base address.
      *
      * @param type The type of the struct.
      * @param base The base address of the struct.
      * @param parent The parent pointer this struct was retrieved from, used to copy ownership.
-     * @param other The other wrapped struct to move from. Only allowed if of the same type.
+     * @param other The other wrapped struct to copy/move from. Only allowed if of the same type.
      */
-    ReadOnlyWrappedStruct(const UStruct* type,
-                          void* base,
-                          const std::shared_ptr<void>& parent = {nullptr});
-    ReadOnlyWrappedStruct(ReadOnlyWrappedStruct&& other) noexcept;
+    WrappedStruct(const UStruct* type);
+    WrappedStruct(const UStruct* type, void* base, const std::shared_ptr<void>& parent = {nullptr});
+    WrappedStruct(const WrappedStruct& other);
+    WrappedStruct(WrappedStruct&& other) noexcept;
 
-   protected:
-    ReadOnlyWrappedStruct(const UStruct* type, const std::shared_ptr<void>&& base);
-
-   public:
     /**
-     * @brief Moves another struct into this one.
+     * @brief Assigns to the struct.
+     * @note Only allowed if of the same type.
      *
-     * @param other The other wrapped struct to move from
+     * @param other The other wrapped struct to copy/move from
      * @return A reference to this wrapped struct.
      */
-    ReadOnlyWrappedStruct& operator=(ReadOnlyWrappedStruct&& other) noexcept;
+    WrappedStruct& operator=(const WrappedStruct& other);
+    WrappedStruct& operator=(WrappedStruct&& other) noexcept;
 
     /**
      * @brief Destroys the wrapped struct
      */
-    ~ReadOnlyWrappedStruct() = default;
+    ~WrappedStruct() = default;
 
     /**
      * @brief Gets a property on this struct.
@@ -66,45 +66,6 @@ class ReadOnlyWrappedStruct {
         return get_property<T>(prop, idx, reinterpret_cast<uintptr_t>(this->base.get()),
                                this->base);
     }
-
-    // As a read-only reference, we really shouldn't be copying anything, so explictly delete copy
-    // construct/assignment
-    ReadOnlyWrappedStruct(const ReadOnlyWrappedStruct& other) = delete;
-    ReadOnlyWrappedStruct& operator=(const ReadOnlyWrappedStruct& other) = delete;
-};
-
-class WrappedStruct : public ReadOnlyWrappedStruct {
-   public:
-    /**
-     * @brief Constructs a new wrapped struct.
-     * @note If just the type is given, allocates new memory (which we manage) for the properties.
-     * @note If a parent is given, copies it's ownership.
-     * @note Otherwise, does not manage the given base address.
-     *
-     * @param type The type of the struct.
-     * @param base The base address of the struct.
-     * @param parent The parent pointer this struct was retrieved from, used to copy ownership.
-     * @param other The other wrapped struct to copy/move from. Only allowed if of the same type.
-     */
-    WrappedStruct(const UStruct* type);
-    WrappedStruct(const UStruct* type, void* base, const std::shared_ptr<void>& parent = {nullptr});
-    WrappedStruct(const WrappedStruct& other);
-    WrappedStruct(WrappedStruct&& other) noexcept;
-
-    /**
-     * @brief Assigns to the struct.
-     * @note Copy only allowed if of the same type.
-     *
-     * @param other The other wrapped struct to copy/move from
-     * @return A reference to this wrapped struct.
-     */
-    WrappedStruct& operator=(const WrappedStruct& other);
-    WrappedStruct& operator=(WrappedStruct&& other) noexcept;
-
-    /**
-     * @brief Destroys the wrapped struct
-     */
-    ~WrappedStruct() = default;
 
     /**
      * @brief Sets a property on this struct
@@ -139,7 +100,7 @@ class WrappedStruct : public ReadOnlyWrappedStruct {
  * @param dest The address of the struct to copy to.
  * @param src The source struct to copy from.
  */
-void copy_struct(uintptr_t dest, const ReadOnlyWrappedStruct& src);
+void copy_struct(uintptr_t dest, const WrappedStruct& src);
 
 /**
  * @brief Recursively destroys all properties on a struct.
