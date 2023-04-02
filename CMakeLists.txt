@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.24)
 
 project(unrealsdk)
 add_library(unrealsdk OBJECT)
@@ -13,8 +13,21 @@ set_target_properties(unrealsdk PROPERTIES
     COMPILE_WARNING_AS_ERROR True
 )
 
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+try_compile(supports_format
+    SOURCE_FROM_CONTENT test.cpp "  \
+    #include <version>\n            \
+    #ifndef __cpp_lib_format\n      \
+        #error\n                    \
+    #endif                          \
+    "
+    CXX_STANDARD 20
+)
+
 add_subdirectory(libs/minhook)
-add_subdirectory(libs/fmt)
+if(NOT ${supports_format})
+    add_subdirectory(libs/fmt)
+endif()
 
 set(standalone_sources
     "${CMAKE_CURRENT_SOURCE_DIR}/src/dllmain.cpp"
@@ -25,7 +38,10 @@ list(REMOVE_ITEM sources ${standalone_sources})
 target_sources(unrealsdk PRIVATE ${sources})
 
 target_include_directories(unrealsdk PUBLIC "src")
-target_link_libraries(unrealsdk PUBLIC minhook fmt)
+target_link_libraries(unrealsdk PUBLIC minhook)
+if(NOT ${supports_format})
+    target_link_libraries(unrealsdk PUBLIC fmt)
+endif()
 
 target_compile_definitions(unrealsdk PUBLIC
     "${UNREALSDK_UE_VERSION}"

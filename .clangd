@@ -1,8 +1,14 @@
-# Treat the pch as c++
 If:
     PathMatch: src/pch.h
 CompileFlags:
+    # Treat the pch as c++
     Add: [-xc++]
+Diagnostics:
+    # Event if we're not building fmtlib, clangd still tries to open it's header, and throws a file
+    # not found error. This actually happens in `format.h`, but it's started by the pch so need to
+    # suppress it here
+    # Actual file not founds will get caught by failing compilation
+    Suppress: pp_file_not_found
 ---
 # Suppress errors from outside the project
 If:
