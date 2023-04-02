@@ -176,7 +176,7 @@ void init(void) {
         unreal_console_level = env_level;
     }
 
-#ifndef DEBUG
+#ifdef NDEBUG
     if (env::defined(env::EXTERNAL_CONSOLE))
 #endif
     {

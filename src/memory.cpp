@@ -15,7 +15,7 @@ static std::tuple<uintptr_t, size_t> get_exe_range(void) {
         return *range;
     }
 
-    HMODULE exe_module = GetModuleHandle(nullptr);
+    HMODULE exe_module = GetModuleHandleA(nullptr);
 
     MEMORY_BASIC_INFORMATION mem;
     if (VirtualQuery(static_cast<LPCVOID>(exe_module), &mem, sizeof(mem)) == 0) {

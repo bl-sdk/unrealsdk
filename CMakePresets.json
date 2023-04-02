@@ -5,10 +5,13 @@
       "name": "_base",
       "hidden": true,
       "binaryDir": "${sourceDir}/out/build/${presetName}",
-      "installDir": "${sourceDir}/out/install/${presetName}"
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "cacheVariables": {
+        "UNREALSDK_STANDALONE": "True"
+      }
     },
     {
-      "name": "_clang",
+      "name": "_clang_x86",
       "hidden": true,
       "condition": {
         "type": "equals",
@@ -16,10 +19,18 @@
         "rhs": ""
       },
       "generator": "Ninja",
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++"
-      }
+      "toolchainFile": "cmake/clang-x86.cmake"
+    },
+    {
+      "name": "_clang_x64",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "$env{VSINSTALLDIR}",
+        "rhs": ""
+      },
+      "generator": "Ninja",
+      "toolchainFile": "cmake/clang-x64.cmake"
     },
     {
       "name": "_mingw_x86",
@@ -63,7 +74,7 @@
         "strategy": "external"
       },
       "cacheVariables": {
-        "SDK_ARCH": "x86"
+        "UNREALSDK_ARCH": "x86"
       }
     },
     {
@@ -74,21 +85,21 @@
         "strategy": "external"
       },
       "cacheVariables": {
-        "SDK_ARCH": "x64"
+        "UNREALSDK_ARCH": "x64"
       }
     },
     {
       "name": "_ue3",
       "hidden": true,
       "cacheVariables": {
-        "SDK_UE_VERSION": "UE3"
+        "UNREALSDK_UE_VERSION": "UE3"
       }
     },
     {
       "name": "_ue4",
       "hidden": true,
       "cacheVariables": {
-        "SDK_UE_VERSION": "UE4"
+        "UNREALSDK_UE_VERSION": "UE4"
       }
     },
     {
@@ -110,7 +121,7 @@
       "displayName": "UE3 x86 Debug (Clang)",
       "inherits": [
         "_base",
-        "_clang",
+        "_clang_x86",
         "_ue3",
         "_x86",
         "_debug"
@@ -121,7 +132,7 @@
       "displayName": "UE3 x86 Release (Clang)",
       "inherits": [
         "_base",
-        "_clang",
+        "_clang_x86",
         "_ue3",
         "_x86",
         "_release"
@@ -132,7 +143,7 @@
       "displayName": "UE4 x64 Debug (Clang)",
       "inherits": [
         "_base",
-        "_clang",
+        "_clang_x64",
         "_ue4",
         "_x64",
         "_debug"
@@ -143,7 +154,7 @@
       "displayName": "UE4 x64 Release (Clang)",
       "inherits": [
         "_base",
-        "_clang",
+        "_clang_x64",
         "_ue4",
         "_x64",
         "_release"

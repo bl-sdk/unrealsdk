@@ -1,44 +1,42 @@
-﻿cmake_minimum_required (VERSION 3.24)
+﻿cmake_minimum_required(VERSION 3.24)
 
 project(unrealsdk)
+add_library(unrealsdk OBJECT)
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/user-includes.cmake")
-   include("${CMAKE_CURRENT_SOURCE_DIR}/user-includes.cmake")
-endif()
+set(UNREALSDK_UE_VERSION "UE4" CACHE STRING "The unreal engine version to build the SDK for. One of 'UE3' or 'UE4'.")
+set(UNREALSDK_ARCH "x64" CACHE STRING "The architecture to build the sdk for. One of 'x86' or 'x64'.")
+set(UNREALSDK_STANDALONE False CACHE BOOL "If set, compiles an extra standalone static library, which initalizes the sdk but does nothing else.")
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_EXPORT_COMPILE_COMMANDS True)
-set(CMAKE_COMPILE_WARNING_AS_ERROR True)
-
-# Clang doesn't check the architecture define from the preset, so set it properly
-if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND (SDK_ARCH STREQUAL "x86"))
-    set(CMAKE_SIZEOF_VOID_P 4)
-    add_compile_options("-m32")
-    add_link_options("-m32")
-endif()
+target_compile_features(unrealsdk PUBLIC cxx_std_20)
+set_target_properties(unrealsdk PROPERTIES
+    EXPORT_COMPILE_COMMANDS True
+    COMPILE_WARNING_AS_ERROR True
+)
 
 add_subdirectory(libs/minhook)
 add_subdirectory(libs/fmt)
 
-# Source Files
+set(standalone_sources
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/dllmain.cpp"
+)
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/*.c" "src/*.cpp" "src/*.h" "src/*.hpp")
+list(REMOVE_ITEM sources ${standalone_sources})
 
-set(CMAKE_SHARED_LIBRARY_PREFIX "")
-add_library(unrealsdk SHARED ${sources})
+target_sources(unrealsdk PRIVATE ${sources})
+
 target_include_directories(unrealsdk PUBLIC "src")
 target_link_libraries(unrealsdk PUBLIC minhook fmt)
 
-target_compile_definitions(unrealsdk PUBLIC "${SDK_UE_VERSION}" "ARCH_$<UPPER_CASE:${SDK_ARCH}>")
-# CMake by default defines NDEBUG in release, we also want the opposite
-target_compile_definitions(unrealsdk PUBLIC "$<$<CONFIG:DEBUG>:DEBUG>")
-target_compile_definitions(unrealsdk PUBLIC "UNICODE" "_UNICODE")
+target_compile_definitions(unrealsdk PUBLIC
+    "${UNREALSDK_UE_VERSION}"
+    "ARCH_$<UPPER_CASE:${UNREALSDK_ARCH}>"
+    "$<$<BOOL:${UNREALSDK_STANDALONE}>:UNREALSDK_STANDALONE>"
+)
 
-# The precompiled header must be defined AFTER the compile defines
 target_precompile_headers(unrealsdk PUBLIC "src/pch.cpp")
 
 if(MSVC)
-    # Enable Edit and Continue.
+    # Enable Edit and Continue
     string(REPLACE "/Zi" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
     string(REPLACE "/Zi" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
     string(REPLACE "/Zi" "" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
@@ -51,21 +49,32 @@ if(MSVC)
     target_compile_options(unrealsdk PUBLIC "/utf-8")
 endif()
 
-if (MINGW)
-    # Want to link statically into a single dll
-    target_link_options(unrealsdk PUBLIC "-static")
-endif()
-
-# Postbuild
-set(POSTBUILD_SCRIPT "postbuild")
-if(CMAKE_HOST_WIN32)
-    set(POSTBUILD_SCRIPT "${POSTBUILD_SCRIPT}.bat")
-endif()
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${POSTBUILD_SCRIPT}")
-    add_custom_command(
-        TARGET unrealsdk
-        POST_BUILD
-        COMMAND ${POSTBUILD_SCRIPT} "\"$<SHELL_PATH:$<TARGET_FILE:unrealsdk>>\" \"${SDK_UE_VERSION}\" \"${SDK_ARCH}\" \"$<IF:$<CONFIG:DEBUG>,DEBUG,RELEASE>\""
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+if (UNREALSDK_STANDALONE)
+    add_library(unrealsdk_standalone SHARED ${standalone_sources})
+    target_link_libraries(unrealsdk_standalone PRIVATE unrealsdk)
+    set_target_properties(unrealsdk_standalone PROPERTIES
+        EXPORT_COMPILE_COMMANDS True
+        COMPILE_WARNING_AS_ERROR True
+        PREFIX ""
+        OUTPUT_NAME "unrealsdk"
     )
+
+    if (MINGW)
+        # Want to link statically into a single file
+        target_link_options(unrealsdk_standalone PRIVATE "-static")
+    endif()
+
+    # Postbuild
+    set(POSTBUILD_SCRIPT "postbuild")
+    if(CMAKE_HOST_WIN32)
+        set(POSTBUILD_SCRIPT "${POSTBUILD_SCRIPT}.bat")
+    endif()
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${POSTBUILD_SCRIPT}")
+        add_custom_command(
+            TARGET unrealsdk_standalone
+            POST_BUILD
+            COMMAND ${POSTBUILD_SCRIPT} "\"$<SHELL_PATH:$<TARGET_FILE:unrealsdk_standalone>>\" \"${UNREALSDK_UE_VERSION}\" \"${UNREALSDK_ARCH}\" \"$<IF:$<CONFIG:DEBUG>,DEBUG,RELEASE>\""
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        )
+    endif()
 endif()
