@@ -32,8 +32,8 @@ const HookList* preprocess_hook(const std::string& source,
 
     if (log_all_calls) {
         LOG(MISC, "===== {} called =====", source);
-        LOG(MISC, "Function: {}", func_name);
-        LOG(MISC, "Object: {}", obj->get_path_name());
+        LOG(MISC, L"Function: {}", func_name);
+        LOG(MISC, L"Object: {}", obj->get_path_name());
     }
 
     if (!hooks.contains(func_name)) {

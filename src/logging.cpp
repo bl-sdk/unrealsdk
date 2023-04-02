@@ -1,5 +1,4 @@
 #include "pch.h"
-#include <chrono>
 
 #include "env.h"
 #include "logging.h"
@@ -19,6 +18,30 @@ static std::unique_ptr<std::ostream> log_file_stream;
 static std::vector<log_callback> all_log_callbacks{};
 
 bool callbacks_only = false;
+
+LogMessage::LogMessage(Level level,
+                       std::string msg,
+                       const char* function,
+                       const char* file,
+                       int line)
+    : level(level),
+      msg(std::move(msg)),
+      time(std::chrono::system_clock::now()),
+      function(function),
+      file(file),
+      line(line) {}
+
+LogMessage::LogMessage(Level level,
+                       const std::wstring& msg,
+                       const char* function,
+                       const char* file,
+                       int line)
+    : level(level),
+      msg(utils::narrow(msg)),
+      time(std::chrono::system_clock::now()),
+      function(function),
+      file(file),
+      line(line) {}
 
 #pragma region Formatting
 
@@ -100,15 +123,14 @@ static constexpr auto LEVEL_WIDTH = 4;
  * @return The formatted message
  */
 static std::string format_message(const LogMessage& msg) {
-    auto local_time = std::chrono::current_zone()->to_local(msg.time);
-    auto location = msg.function[0] != '\0'
+    auto location = (msg.function != nullptr && msg.function[0] != '\0')
                         ? truncate_leading_chunks(msg.function, ":", LOCATION_WIDTH)
                         : truncate_leading_chunks(msg.file, "\\/", LOCATION_WIDTH);
 
-    return unrealsdk::fmt::format("{1:>{0}%F %H:%M:%S} {3:>{2}}@{5:<{4}d} {7:>{6}}| {8}\n", DATE_WIDTH + TIME_WIDTH + 1,
-                                  std::chrono::round<std::chrono::milliseconds>(local_time),
-                                  LOCATION_WIDTH, location, LINE_WIDTH, msg.line, LEVEL_WIDTH,
-                                  get_level_name(msg.level), msg.msg);
+    return unrealsdk::fmt::format(
+        "{1:>{0}%F %T}Z {3:>{2}}@{5:<{4}d} {7:>{6}}| {8}\n", DATE_WIDTH + 1 + TIME_WIDTH + 1,
+        std::chrono::round<std::chrono::milliseconds>(msg.time), LOCATION_WIDTH, location,
+        LINE_WIDTH, msg.line, LEVEL_WIDTH, get_level_name(msg.level), msg.msg);
 }
 
 /**
@@ -118,7 +140,7 @@ static std::string format_message(const LogMessage& msg) {
  */
 static std::string get_header(void) {
     return unrealsdk::fmt::format("{1:<{0}} {3:<{2}} {5:>{4}}@{7:<{6}} {9:>{8}}| \n", DATE_WIDTH,
-                                  "date", TIME_WIDTH, "time", LOCATION_WIDTH, "location",
+                                  "date", TIME_WIDTH + 1, "time", LOCATION_WIDTH, "location",
                                   LINE_WIDTH, "line", LEVEL_WIDTH, "v");
 }
 

@@ -40,7 +40,7 @@ static void __fastcall process_event_hook(UObject* obj,
         // This arg seems to be in the process of being deprecated, no usage in ghidra, always seems
         // to be null, and it's gone in later ue versions. Gathering some extra info just in case.
         if (null != nullptr) {
-            LOG(DEV_WARNING, "Null param had a value in process event during func {} on obj {}",
+            LOG(DEV_WARNING, L"Null param had a value in process event during func {} on obj {}",
                 func->get_path_name(), obj->get_path_name());
         }
 

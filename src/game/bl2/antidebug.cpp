@@ -20,8 +20,18 @@ typedef NTSTATUS(WINAPI* NtQueryInformationProcess_func)(HANDLE ProcessHandle,
                                                          ULONG ProcessInformationLength,
                                                          PULONG ReturnLength);
 
+#ifdef __MINGW32__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wenum-constexpr-conversion"
+#endif
+
 static constexpr auto ThreadHideFromDebugger = static_cast<THREAD_INFORMATION_CLASS>(17);
 static constexpr auto ProcessDebugObjectHandle = static_cast<PROCESSINFOCLASS>(30);
+
+#ifdef __MINGW32__
+#pragma GCC diagnostic pop
+#endif
+
 // NOLINTEND(readability-identifier-naming)
 
 // NOLINTBEGIN(readability-identifier-naming)

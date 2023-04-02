@@ -26,24 +26,32 @@ enum class Level {
 };
 
 struct LogMessage {
-    LogMessage(Level level,
-               const std::string& msg,
-               const char* function,
-               const char* file,
-               int line)
-        : level(level),
-          msg(msg),
-          time(std::chrono::system_clock::now()),
-          function(function),
-          file(file),
-          line(line) {}
-
     const Level level{};
-    const std::string& msg;
+    const std::string msg;
     const std::chrono::system_clock::time_point time;
     const char* function;
     const char* file;
     const int line;
+
+    /**
+     * @brief Constructs a new log message.
+     *
+     * @param level The log level.
+     * @param msg The message.
+     * @param function The function the message was logged from.
+     * @param file The file the message was logged from.
+     * @param line The line number the message was logged from.
+     */
+    LogMessage(Level level,
+               std::string msg,
+               const char* function,
+               const char* file,
+               int line);
+    LogMessage(Level level,
+               const std::wstring& msg,
+               const char* function,
+               const char* file,
+               int line);
 };
 
 // If true, disables all output and only runs the logging callbacks when a message is logged
