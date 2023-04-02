@@ -12,7 +12,7 @@ namespace unrealsdk::unreal {
 #pragma pack(push, 0x4)
 #endif
 
-class FImplementedInterface;
+struct FImplementedInterface;
 class UClass;
 
 class UObject {

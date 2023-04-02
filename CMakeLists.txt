@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+﻿cmake_minimum_required(VERSION 3.24)
 
 project(unrealsdk)
 add_library(unrealsdk OBJECT)
@@ -12,6 +12,11 @@ set_target_properties(unrealsdk PROPERTIES
     EXPORT_COMPILE_COMMANDS True
     COMPILE_WARNING_AS_ERROR True
 )
+if(MSVC)
+    target_compile_options(unrealsdk PRIVATE /W4)
+else()
+    target_compile_options(unrealsdk PRIVATE -Wall -Wextra -Wpedantic)
+endif()
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 try_compile(supports_format
@@ -74,6 +79,11 @@ if (UNREALSDK_STANDALONE)
         PREFIX ""
         OUTPUT_NAME "unrealsdk"
     )
+    if(MSVC)
+        target_compile_options(unrealsdk_standalone PRIVATE /W4)
+    else()
+        target_compile_options(unrealsdk_standalone PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
 
     if (MINGW)
         # Want to link statically into a single file

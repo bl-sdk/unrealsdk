@@ -13,7 +13,7 @@
 
 namespace unrealsdk::unreal {
 
-class FName;
+struct FName;
 
 class BoundFunction {
    public:
@@ -99,12 +99,11 @@ class BoundFunction {
     }
 
     template <typename R>
-    using call_return_type =
-        std::conditional_t<std::is_void_v<R>,
-                           void,
-                           std::conditional_t<std::is_same_v<R, WrappedStruct>,
-                                              WrappedStruct,
-                                              typename PropTraits<R>::Value>>;
+    using call_return_type = std::conditional_t<std::is_void_v<R>,
+                                                void,
+                                                std::conditional_t<std::is_same_v<R, WrappedStruct>,
+                                                                   WrappedStruct,
+                                                                   typename PropTraits<R>::Value>>;
 
     /**
      * @brief Gets the return value of a completed function call.

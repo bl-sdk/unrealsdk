@@ -15,7 +15,7 @@ size_t GNames::size(void) const {
 }
 
 FNameEntry* GNames::at(size_t idx) const {
-    if (idx > this->internal->Count) {
+    if (idx > (size_t)this->internal->Count) {
         throw std::out_of_range("GObjects index out of range");
     }
     return this->internal->at(idx);

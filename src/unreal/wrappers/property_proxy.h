@@ -77,20 +77,22 @@ class PropertyProxy {
         if (this->prop == nullptr) {
             throw std::runtime_error("Property does not exist!");
         }
-        auto prop = validate_type<T>(this->prop);
+        auto converted_prop = validate_type<T>(this->prop);
 
         if (!this->has_value()) {
-            auto deleter = [this, prop](void* data) {
-                for (size_t i = 0; i < prop->ArrayDim; i++) {
-                    destroy_property<T>(prop, i, this->get_value_addr(data));
+            auto deleter = [this, converted_prop](void* data) {
+                for (size_t i = 0; i < (size_t)converted_prop->ArrayDim; i++) {
+                    destroy_property<T>(converted_prop, i, this->get_value_addr(data));
                 }
                 unrealsdk::u_free(data);
             };
 
-            this->value = {unrealsdk::u_malloc(prop->ElementSize * prop->ArrayDim), deleter};
+            this->value = {
+                unrealsdk::u_malloc(converted_prop->ElementSize * converted_prop->ArrayDim),
+                deleter};
         }
 
-        set_property<T>(prop, idx, this->get_value_addr(), value);
+        set_property<T>(converted_prop, idx, this->get_value_addr(), value);
     }
 
     /**

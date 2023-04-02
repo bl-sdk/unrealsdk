@@ -4,10 +4,17 @@
 
 namespace unrealsdk::env {
 
-#ifdef __clang__
-// clang considers getenv deprecated
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+// `getenv` is considered deprecated, suppress that warning
+// There isn't cross platform alternative that's as easy, and we use it safely, immediately turning
+// the buffer into a `std::string`
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#endif
+
+#if defined(__clang__) || defined(__MINGW32__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
 bool defined(env_var_key env_var) {
@@ -23,8 +30,12 @@ std::string get(env_var_key env_var, const std::string& default_value) {
     return std::string{buf};
 }
 
-#ifdef __clang__
-#pragma clang diagnostic pop
+#if defined(__clang__) || defined(__MINGW32__)
+#pragma GCC diagnostic pop
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(pop)
 #endif
 
 }  // namespace unrealsdk::env

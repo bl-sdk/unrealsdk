@@ -60,7 +60,7 @@ struct TArray {
         this->resize(new_size, sizeof(U));
     }
     void resize(size_t new_size, size_t element_size) {
-        if (this->max < new_size) {
+        if ((size_t)this->max < new_size) {
             constexpr auto MIN_GROW = 4;
             constexpr auto GROW_MULTIPLIER = 3;
             constexpr auto GROW_DIVIDER = 8;
@@ -104,7 +104,7 @@ struct TArray {
     template <typename U = T,
               typename = std::enable_if_t<std::is_same_v<U, T> && std::negation_v<std::is_void<U>>>>
     [[nodiscard]] U at(size_t idx) const {
-        if (idx > this->count) {
+        if (idx > (size_t)this->count) {
             throw std::out_of_range("TArray index out of range");
         }
         return this->operator[](idx);
@@ -134,7 +134,7 @@ struct TArray {
             // Use `arr == nullptr` as the end condition, so we behave a little better if the array
             //  grows during iteration - we can't guarentee control over this iterator as well as
             //  the others
-            if (this->idx >= arr->count) {
+            if (this->idx >= (size_t)arr->count) {
                 arr = nullptr;
             }
             return *this;

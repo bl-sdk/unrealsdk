@@ -44,9 +44,9 @@ uintptr_t sigscan(const Pattern& pattern, uintptr_t start, size_t size) {
     auto start_ptr = reinterpret_cast<uint8_t*>(start);
 
     // The naive O(nm) search works well enough, even repeating it for each different pattern
-    for (auto i = 0; i < (size - pattern.size); i++) {
+    for (size_t i = 0; i < (size - pattern.size); i++) {
         bool found = true;
-        for (auto j = 0; j < pattern.size; j++) {
+        for (size_t j = 0; j < pattern.size; j++) {
             auto val = start_ptr[i + j];
             if ((val & pattern.mask[j]) != pattern.bytes[j]) {
                 found = false;

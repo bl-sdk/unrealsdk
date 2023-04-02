@@ -29,7 +29,7 @@ void PropertyProxy::copy_to(uintptr_t addr) {
         throw std::runtime_error("Cannot copy empty property!");
     }
     cast_prop(this->prop, [this, addr]<typename T>(const T* prop) {
-        for (size_t i = 0; i < prop->ArrayDim; i++) {
+        for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
             set_property<T>(prop, i, addr, this->get<T>(i));
         }
     });
@@ -37,7 +37,7 @@ void PropertyProxy::copy_to(uintptr_t addr) {
 
 void PropertyProxy::copy_from(uintptr_t addr) {
     cast_prop(this->prop, [this, addr]<typename T>(const T* prop) {
-        for (size_t i = 0; i < prop->ArrayDim; i++) {
+        for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
             this->set<T>(i, get_property(prop, i, addr));
         }
     });

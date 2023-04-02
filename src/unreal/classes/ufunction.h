@@ -10,6 +10,11 @@ namespace unrealsdk::unreal {
 #pragma pack(push, 0x4)
 #endif
 
+#if defined(__clang__) || defined(__MINGW32__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+#endif
+
 class UFunction : public UStruct {
    public:
     UFunction() = delete;
@@ -63,6 +68,10 @@ class UFunction : public UStruct {
 
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 };
+
+#if defined(__clang__) || defined(__MINGW32__)
+#pragma GCC diagnostic pop
+#endif
 
 #if defined(_MSC_VER) && defined(ARCH_X86)
 #pragma pack(pop)

@@ -11,7 +11,7 @@ bool FNameEntry::is_wide(void) const {
 #ifdef UE4
 
 FNameEntry* TStaticIndirectArrayThreadSafeRead_FNameEntry::at(size_t idx) const {
-    if (idx > this->Count) {
+    if (idx > (size_t)this->Count) {
         throw std::out_of_range("FNameEntry index out of range");
     }
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic,

@@ -69,7 +69,7 @@ class WrappedArray {
                                         + (std::string)property_class);
         }
 
-        if (idx > this->base->count) {
+        if (idx > (size_t)this->base->count) {
             throw std::out_of_range("WrappedArray index out of range");
         }
     }

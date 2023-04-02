@@ -7,6 +7,11 @@ namespace unrealsdk::unreal {
 #pragma pack(push, 0x4)
 #endif
 
+#if defined(__clang__) || defined(__MINGW32__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+#endif
+
 struct FNameEntry {
     static constexpr auto NAME_SIZE = 1024;
     static constexpr auto NAME_WIDE_MASK = 0x1;
@@ -52,6 +57,7 @@ struct FNameEntry {
 
 #ifdef UE4
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 struct TStaticIndirectArrayThreadSafeRead_FNameEntry {
     // NOLINTBEGIN(readability-identifier-naming)
     enum {
@@ -75,6 +81,10 @@ struct TStaticIndirectArrayThreadSafeRead_FNameEntry {
     [[nodiscard]] FNameEntry* at(size_t idx) const;
 };
 
+#endif
+
+#if defined(__clang__) || defined(__MINGW32__)
+#pragma GCC diagnostic pop
 #endif
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

@@ -12,6 +12,11 @@ namespace unrealsdk::unreal {
 #pragma pack(push, 0x4)
 #endif
 
+#if defined(__clang__) || defined(__MINGW32__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+#endif
+
 class UBoolProperty : public UProperty {
    public:
     UBoolProperty() = delete;
@@ -48,6 +53,10 @@ struct PropTraits<UBoolProperty> : public AbstractPropTraits<UBoolProperty> {
                      const std::shared_ptr<void>& parent);
     static void set(const UBoolProperty* prop, uintptr_t addr, const Value& value);
 };
+
+#if defined(__clang__) || defined(__MINGW32__)
+#pragma GCC diagnostic pop
+#endif
 
 #if defined(_MSC_VER) && defined(ARCH_X86)
 #pragma pack(pop)

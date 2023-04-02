@@ -8,7 +8,7 @@
 
 namespace unrealsdk::game {
 
-class AbstractHook;
+struct AbstractHook;
 
 }
 

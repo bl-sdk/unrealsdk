@@ -13,6 +13,11 @@ struct FImplementedInterface;
 #pragma pack(push, 0x4)
 #endif
 
+#if defined(__clang__) || defined(__MINGW32__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+#endif
+
 class UClass : public UStruct {
    public:
     UClass() = delete;
@@ -80,6 +85,10 @@ class UClass : public UStruct {
     [[nodiscard]] bool implements(const UClass* iface,
                                   FImplementedInterface** impl_out = nullptr) const;
 };
+
+#if defined(__clang__) || defined(__MINGW32__)
+#pragma GCC diagnostic pop
+#endif
 
 #if defined(_MSC_VER) && defined(ARCH_X86)
 #pragma pack(pop)
