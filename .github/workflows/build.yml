@@ -1,0 +1,98 @@
+name: Build
+
+on: [
+  push,
+  pull_request,
+  workflow_dispatch
+]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [
+          "clang-ue3-x86-release",
+          "clang-ue4-x64-release",
+          "msvc-ue3-x86-release",
+          "msvc-ue4-x64-release",
+        ]
+
+    steps:
+    - name: Checkout repository and submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Setup Clang (32bit)
+      if: contains(matrix.preset, 'clang') && contains(matrix.preset, 'x86')
+      uses: egor-tensin/setup-clang@v1
+      with:
+        platform: x86
+
+    - name: Setup Clang (64bit)
+      if: contains(matrix.preset, 'clang') && contains(matrix.preset, 'x64')
+      uses: egor-tensin/setup-clang@v1
+      with:
+        platform: x64
+
+    - name: Setup MSVC (32bit)
+      if: contains(matrix.preset, 'msvc') && contains(matrix.preset, 'x86')
+      uses: TheMrMilchmann/setup-msvc-dev@v2
+      with:
+        arch: x86
+
+    - name: Setup MSVC (64bit)
+      if: contains(matrix.preset, 'msvc') && contains(matrix.preset, 'x64')
+      uses: TheMrMilchmann/setup-msvc-dev@v2
+      with:
+        arch: x64
+
+    - name: Configure CMake
+      working-directory: ${{ env.GITHUB_WORKSPACE }}
+      run: cmake . --preset ${{ matrix.preset }}
+
+    - name: Build
+      working-directory: ${{ env.GITHUB_WORKSPACE }}
+      run: cmake --build out/build/${{ matrix.preset }}
+
+  build-ubuntu:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [
+          "mingw-ue3-x86-release",
+          "mingw-ue4-x64-release",
+        ]
+
+    steps:
+    - name: Checkout repository and submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Setup MinGW
+      if: contains(matrix.preset, 'mingw')
+      working-directory: ${{ env.GITHUB_WORKSPACE }}
+      # This is a bad hack but it makes it all work :)
+      # `egor-tensin/setup-mingw@v2` seems to get an older version, which causes a bunch of errors
+      # llvm-mingw seem to have the newest precompiled binaries
+      # Find the link for the latest `llvm-mingw-[date]-msvcrt-ubuntu-[version].tar.xz`, download
+      # it, extract it, and add it to our path
+      shell: bash
+      run: |
+        wget $(curl -s https://api.github.com/repos/mstorsjo/llvm-mingw/releases/latest | grep -Eo "https.+msvcrt-ubuntu.+\.tar\.xz")
+        tar -xf *msvcrt-ubuntu*.tar.xz
+        echo $(readlink -f *msvcrt-ubuntu*/)/bin >> $GITHUB_PATH
+
+    - name: Configure CMake
+      working-directory: ${{ env.GITHUB_WORKSPACE }}
+      run: cmake . --preset ${{ matrix.preset }}
+
+    - name: Build
+      working-directory: ${{ env.GITHUB_WORKSPACE }}
+      run: cmake --build out/build/${{ matrix.preset }}

@@ -50,7 +50,7 @@ std::unique_ptr<AbstractHook> select_based_on_executable(void) {
     std::filesystem::path exe_path{};
 
     std::array<char, FILENAME_MAX> buf{};
-    if (GetModuleFileNameA(nullptr, buf.data(), buf.size()) > 0) {
+    if (GetModuleFileNameA(nullptr, buf.data(), (DWORD)buf.size()) > 0) {
         exe_path = std::filesystem::path(buf.data());
     } else {
         LOG(ERROR, "Failed to get main executable's path!");

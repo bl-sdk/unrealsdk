@@ -133,7 +133,7 @@ std::wstring BL3Hook::uobject_path_name(const UObject* obj) const {
 #pragma region StaticFindObject
 
 using static_find_object_safe_func = UObject* (*)(const UClass* cls,
-                                                  uintptr_t package,
+                                                  intptr_t package,
                                                   const wchar_t* str,
                                                   uint32_t exact_class);
 static static_find_object_safe_func static_find_object_ptr;
@@ -150,7 +150,7 @@ void BL3Hook::find_static_find_object(void) {
 }
 
 UObject* BL3Hook::find_object(UClass* cls, const std::wstring& name) const {
-    static constexpr auto ANY_PACKAGE = -1;
+    static constexpr intptr_t ANY_PACKAGE = -1;
     return static_find_object_ptr(cls, ANY_PACKAGE, name.c_str(), 0 /* false */);
 }
 

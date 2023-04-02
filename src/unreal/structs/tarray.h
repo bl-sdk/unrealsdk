@@ -75,7 +75,7 @@ struct TArray {
             this->reserve(new_capacity, element_size);
         }
 
-        this->count = new_size;
+        this->count = (decltype(count))new_size;
     }
 
     /**
@@ -88,12 +88,12 @@ struct TArray {
               typename = std::enable_if_t<std::is_same_v<U, T> && std::negation_v<std::is_void<U>>>>
     [[nodiscard]] U operator[](size_t idx) const {
         return this->data[idx];
-    };
+    }
     template <typename U = T,
               typename = std::enable_if_t<std::is_same_v<U, T> && std::negation_v<std::is_void<U>>>>
     U& operator[](size_t idx) {
         return this->data[idx];
-    };
+    }
 
     /**
      * @brief Get an element in the array, with bounds checking.

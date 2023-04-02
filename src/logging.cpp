@@ -235,7 +235,7 @@ void log(const LogMessage&& msg) {
         auto formatted = format_message(msg);
 
         if (external_console_handle != nullptr) {
-            WriteFile(external_console_handle, formatted.c_str(), formatted.size(), nullptr,
+            WriteFile(external_console_handle, formatted.c_str(), (DWORD)formatted.size(), nullptr,
                       nullptr);
         }
 

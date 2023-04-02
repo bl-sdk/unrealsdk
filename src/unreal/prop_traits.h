@@ -112,6 +112,6 @@ void destroy_property(const T* prop, size_t idx, uintptr_t base_addr) {
                                   base_addr + prop->Offset_Internal + (idx * prop->ElementSize));
 }
 
-};  // namespace unrealsdk::unreal
+}  // namespace unrealsdk::unreal
 
 #endif /* UNREAL_PROP_TRAITS_H */

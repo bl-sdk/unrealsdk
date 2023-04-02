@@ -32,7 +32,7 @@ void TArray<T>::reserve(size_t new_cap, size_t element_size) {
         throw std::runtime_error("Failed to allocate memory to resize array!");
     }
 
-    this->max = new_cap;
+    this->max = (decltype(max))new_cap;
 }
 
 }  // namespace unrealsdk::unreal

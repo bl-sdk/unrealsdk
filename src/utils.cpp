@@ -45,8 +45,8 @@ std::wstring widen(const std::string& str) {
     }
 
     // NOLINTNEXTLINE(cppcoreguidelines-narrowing-conversions)
-    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.size(), reinterpret_cast<wchar_t*>(wstr),
-                        num_chars);
+    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (DWORD)str.size(),
+                        reinterpret_cast<wchar_t*>(wstr), num_chars);
     wstr[num_chars] = L'\0';
 
     std::wstring ret{wstr};
