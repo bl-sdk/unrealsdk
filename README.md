@@ -4,7 +4,7 @@
 A library to help interact with unreal engine objects from another module in the same address space.
 
 # Usage Overview
-To start, you need to initalize the sdk. This is called with a refernce to an `AbstractHook` - the
+To start, you need to initialize the sdk. This is called with a reference to an `AbstractHook` - the
 sdk can work with multiple (somewhat similar) UE versions from a single binary, so you need to tell
 it how exactly to hook everything. The easiest way is to let it autodetect.
 
@@ -14,7 +14,7 @@ unrealsdk::init(unrealsdk::game::select_based_on_executable());
 If this doesn't work correctly, you can always implement your own version (and then merge it back
 into this project).
 
-After initalizing, you probably want to setup some hooks. The sdk can run callbacks whenever an
+After initializing, you probably want to setup some hooks. The sdk can run callbacks whenever an
 unreal function is hooked, allowing you to interact with it's args, and mess with it's execution.
 Exact hook semantics are better documented in the `hook_manager.h` header.
 
@@ -42,11 +42,11 @@ auto op_string = hook.obj->get<UFunction, BoundFunction>(L"BuildOverpowerPromptS
                      .call<UStrProperty, UIntProperty, UIntProperty>(1, 10);
 ```
 
-# Enviroment Variables
-A few enviroment variables adjust the sdk's behaviour. Note that not all variables are used in all
+# Environment Variables
+A few environment variables adjust the sdk's behaviour. Note that not all variables are used in all
 build configurations.
 
-| Enviroment Variable                       | Usage                                                                                                                           |
+| Environment Variable                      | Usage                                                                                                                           |
 | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
 | `UNREALSDK_EXTERNAL_CONSOLE`              | If defined, creates an external console window mirroring what is written to the game's console. Always enabled in debug builds. |
 | `UNREALSDK_LOG_LEVEL`                     | Changes the default logging level used in the unreal console. May use either the level names or their numerical values.         |
@@ -82,7 +82,7 @@ You can configure the sdk by setting a few variables before including it:
   `unrealsdk.dll`. Generally useless if you're linking against it in your own project.
 
 # Standalone Builds
-As just mentioned, the sdk can be configured to create a small standalone dll. This just initalizes
+As just mentioned, the sdk can be configured to create a small standalone dll. This just initializes
 itself when loaded, but does nothing else. All the CMake presets are set up to build this.
 
 The standalone build is primarily useful when developing for the sdk itself, since it cuts out any

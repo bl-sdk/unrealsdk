@@ -50,23 +50,23 @@ LogMessage::LogMessage(Level level,
  * @note Will return strings longer than the max width if it can't cleanly chunk them.
  *
  * @param str The string to truncate.
- * @param seperators The characters to use as seperators between chunks.
+ * @param separators The characters to use as separators between chunks.
  * @param max_width The maximum width of the string.
  * @return The truncated string.
  */
 static std::string truncate_leading_chunks(const std::string& str,
-                                           const std::string& seperators,
+                                           const std::string& separators,
                                            size_t max_width) {
     static const std::string TRUNCATION_PREFIX = "~ ";
 
     auto width = str.size();
     size_t start_pos = 0;
     while (width > max_width) {
-        auto next_seperator_char = str.find_first_of(seperators, start_pos);
-        if (next_seperator_char == std::string::npos) {
+        auto next_separator_char = str.find_first_of(separators, start_pos);
+        if (next_separator_char == std::string::npos) {
             break;
         }
-        auto next_regular_char = str.find_first_not_of(seperators, next_seperator_char);
+        auto next_regular_char = str.find_first_not_of(separators, next_separator_char);
         if (next_regular_char == std::string::npos) {
             break;
         }
@@ -208,7 +208,7 @@ void init(void) {
                 LOG(ERROR, "Failed to get handle to external console!");
             }
         } else {
-            LOG(ERROR, "Failed to initalize external console!");
+            LOG(ERROR, "Failed to initialize external console!");
         }
     }
 

@@ -1,0 +1,9 @@
+[files]
+extend-exclude = [
+    "libs/*",
+    "LICENSE",
+    ".typos.toml"
+]
+
+[default.extend-words]
+UE = "UE"

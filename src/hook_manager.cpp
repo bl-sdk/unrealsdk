@@ -62,7 +62,7 @@ bool run_hook_group(const HookGroup& group, HookDetails& hook) {
         try {
             ret |= hook_function(hook);
         } catch (const std::exception& ex) {
-            LOG(ERROR, "An exception occured during hook processing: {}", ex.what());
+            LOG(ERROR, "An exception occurred during hook processing: {}", ex.what());
         }
     }
 

@@ -17,11 +17,11 @@ namespace unrealsdk::unreal {
 template <typename T>
 [[nodiscard]] FName cls_fname(void) {
     static FName name{0, 0};
-    static bool initalized = false;
+    static bool initialized = false;
 
-    if (!initalized) {
+    if (!initialized) {
         name = FName{PropTraits<T>::CLASS};
-        initalized = true;
+        initialized = true;
     }
 
     return name;

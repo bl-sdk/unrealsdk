@@ -107,7 +107,7 @@ T read_offset(uintptr_t address) {
 }
 
 /**
- * @brief Unlocks a region of memeory for full read/write access. Intended for hex edits.
+ * @brief Unlocks a region of memory for full read/write access. Intended for hex edits.
  *
  * @param start The start of the range to unlock.
  * @param size The size of the range to unlock.

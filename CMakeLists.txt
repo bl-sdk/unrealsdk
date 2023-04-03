@@ -5,7 +5,7 @@ add_library(unrealsdk OBJECT)
 
 set(UNREALSDK_UE_VERSION "UE4" CACHE STRING "The unreal engine version to build the SDK for. One of 'UE3' or 'UE4'.")
 set(UNREALSDK_ARCH "x64" CACHE STRING "The architecture to build the sdk for. One of 'x86' or 'x64'.")
-set(UNREALSDK_STANDALONE False CACHE BOOL "If set, compiles an extra standalone static library, which initalizes the sdk but does nothing else.")
+set(UNREALSDK_STANDALONE False CACHE BOOL "If set, compiles an extra standalone static library, which initializes the sdk but does nothing else.")
 
 target_compile_features(unrealsdk PUBLIC cxx_std_20)
 set_target_properties(unrealsdk PROPERTIES
