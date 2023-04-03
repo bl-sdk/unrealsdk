@@ -1,4 +1,4 @@
-name: Build
+name: CI
 
 on: [
   push,
@@ -6,9 +6,39 @@ on: [
   workflow_dispatch
 ]
 
+env:
+  # Important to pin the clang version, cause we also use it for linting
+  CLANG_VERSION: 16
+  CLANG_TIDY_JOBS: 4
+  # Since we use rather new c++ features, we need a rather new version of MinGW
+  # LLVM MinGW seems to be the newest prebuild binaries around
+  LLVM_MINGW_VERSION: llvm-mingw-20230320-msvcrt-ubuntu-18.04-x86_64
+  LLVM_MINGW_DOWNLOAD: https://github.com/mstorsjo/llvm-mingw/releases/download/20230320/llvm-mingw-20230320-msvcrt-ubuntu-18.04-x86_64.tar.xz
+
 jobs:
+  cache-clang:
+    runs-on: windows-latest
+
+    steps:
+    - name: Cache Clang
+      uses: actions/cache@v3
+      id: cache-clang
+      with:
+        path: C:\Program Files\LLVM
+        key: ${{ runner.os }}-clang-${{ env.CLANG_VERSION }}
+        lookup-only: true
+
+    - name: Setup Clang
+      if: steps.cache-clang.outputs.cache-hit != 'true'
+      uses: egor-tensin/setup-clang@v1
+      with:
+        version: ${{ env.CLANG_VERSION }}
+
+# ==============================================================================
+
   build-windows:
     runs-on: windows-latest
+    needs: cache-clang
 
     strategy:
       fail-fast: false
@@ -21,34 +51,24 @@ jobs:
         ]
 
     steps:
+    - name: Restore Clang Cache
+      if: contains(matrix.preset, 'clang')
+      uses: actions/cache/restore@v3
+      with:
+        path: C:\Program Files\LLVM
+        key: ${{ runner.os }}-clang-${{ env.CLANG_VERSION }}
+        fail-on-cache-miss: true
+
+    - name: Add MSVC to PATH
+      if: contains(matrix.preset, 'msvc')
+      uses: TheMrMilchmann/setup-msvc-dev@v2
+      with:
+        arch: ${{ fromJSON('["x86", "x64"]')[contains(matrix.preset, 'x64')] }}
+
     - name: Checkout repository and submodules
       uses: actions/checkout@v3
       with:
         submodules: recursive
-
-    - name: Setup Clang (32bit)
-      if: contains(matrix.preset, 'clang') && contains(matrix.preset, 'x86')
-      uses: egor-tensin/setup-clang@v1
-      with:
-        platform: x86
-
-    - name: Setup Clang (64bit)
-      if: contains(matrix.preset, 'clang') && contains(matrix.preset, 'x64')
-      uses: egor-tensin/setup-clang@v1
-      with:
-        platform: x64
-
-    - name: Setup MSVC (32bit)
-      if: contains(matrix.preset, 'msvc') && contains(matrix.preset, 'x86')
-      uses: TheMrMilchmann/setup-msvc-dev@v2
-      with:
-        arch: x86
-
-    - name: Setup MSVC (64bit)
-      if: contains(matrix.preset, 'msvc') && contains(matrix.preset, 'x64')
-      uses: TheMrMilchmann/setup-msvc-dev@v2
-      with:
-        arch: x64
 
     - name: Configure CMake
       working-directory: ${{ env.GITHUB_WORKSPACE }}
@@ -70,24 +90,19 @@ jobs:
         ]
 
     steps:
+    # It's not worth caching this because we lose the +x permission. It's recommended to tar the
+    # files to avoid that... which just brings us right back to where we started.
+    - name: Setup MinGW
+      if: contains(matrix.preset, 'mingw')
+      run: |
+        wget -nv ${{ env.LLVM_MINGW_DOWNLOAD }}
+        tar -xf ${{ env.LLVM_MINGW_VERSION }}.tar.xz -C ~/
+        echo $(readlink -f ~/${{ env.LLVM_MINGW_VERSION }}/bin) >> $GITHUB_PATH
+
     - name: Checkout repository and submodules
       uses: actions/checkout@v3
       with:
         submodules: recursive
-
-    - name: Setup MinGW
-      if: contains(matrix.preset, 'mingw')
-      working-directory: ${{ env.GITHUB_WORKSPACE }}
-      # This is a bad hack but it makes it all work :)
-      # `egor-tensin/setup-mingw@v2` seems to get an older version, which causes a bunch of errors
-      # llvm-mingw seem to have the newest precompiled binaries
-      # Find the link for the latest `llvm-mingw-[date]-msvcrt-ubuntu-[version].tar.xz`, download
-      # it, extract it, and add it to our path
-      shell: bash
-      run: |
-        wget $(curl -s https://api.github.com/repos/mstorsjo/llvm-mingw/releases/latest | grep -Eo "https.+msvcrt-ubuntu.+\.tar\.xz")
-        tar -xf *msvcrt-ubuntu*.tar.xz
-        echo $(readlink -f *msvcrt-ubuntu*/)/bin >> $GITHUB_PATH
 
     - name: Configure CMake
       working-directory: ${{ env.GITHUB_WORKSPACE }}
@@ -96,3 +111,76 @@ jobs:
     - name: Build
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: cmake --build out/build/${{ matrix.preset }}
+
+# ==============================================================================
+
+  clang-tidy:
+    runs-on: windows-latest
+    needs: cache-clang
+
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [
+          "clang-ue3-x86-release",
+          "clang-ue4-x64-release",
+        ]
+
+    steps:
+    - name: Restore Clang Cache
+      uses: actions/cache/restore@v3
+      with:
+        path: C:\Program Files\LLVM
+        key: ${{ runner.os }}-clang-${{ env.CLANG_VERSION }}
+        fail-on-cache-miss: true
+
+    # Needed for clang tidy to enable `-export-fixes`
+    - name: Install pyyaml
+      run: pip install pyyaml
+
+    - name: Checkout repository and submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Configure CMake
+      working-directory: ${{ env.GITHUB_WORKSPACE }}
+      run: cmake . --preset ${{ matrix.preset }} -DCMAKE_DISABLE_PRECOMPILE_HEADERS=On
+
+    - name: Run clang-tidy
+      shell: bash # To follow the shebang
+      run: run-clang-tidy -j ${{ env.CLANG_TIDY_JOBS }} -p out/build/${{ matrix.preset }} -export-fixes clang-tidy-fixes.yml
+
+    - name: Process clang-tidy warnings
+      uses: asarium/clang-tidy-action@v1
+      with:
+        fixesFile: clang-tidy-fixes.yml
+
+  clang-format:
+    runs-on: windows-latest
+    needs: cache-clang
+
+    steps:
+    - name: Restore Clang Cache
+      uses: actions/cache/restore@v3
+      with:
+        path: C:\Program Files\LLVM
+        key: ${{ runner.os }}-clang-${{ env.CLANG_VERSION }}
+        fail-on-cache-miss: true
+
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Run clang-format
+      shell: bash # for find / command substitution
+      run: clang-format -n -Werror $(find src -type f)
+
+  spelling:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Check spelling
+      uses: crate-ci/typos@master
