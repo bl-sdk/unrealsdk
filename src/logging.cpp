@@ -217,7 +217,7 @@ void init(void) {
 }
 
 void log(const LogMessage&& msg) {
-    std::lock_guard<std::mutex> lock(mutex);
+    const std::lock_guard<std::mutex> LOCK(mutex);
 
     for (const auto& callback : all_log_callbacks) {
         callback(msg);
@@ -253,13 +253,13 @@ void set_console_level(Level level) {
 }
 
 void add_callback(log_callback callback) {
-    std::lock_guard<std::mutex> lock(mutex);
+    const std::lock_guard<std::mutex> LOCK(mutex);
 
     all_log_callbacks.push_back(callback);
 }
 
 void remove_callback(log_callback callback) {
-    std::lock_guard<std::mutex> lock(mutex);
+    const std::lock_guard<std::mutex> LOCK(mutex);
 
     all_log_callbacks.erase(
         std::remove(all_log_callbacks.begin(), all_log_callbacks.end(), callback),

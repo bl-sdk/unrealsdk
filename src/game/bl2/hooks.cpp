@@ -47,13 +47,13 @@ static void __fastcall process_event_hook(UObject* obj,
         auto list = hook_manager::preprocess_hook("ProcessEvent", func, obj);
         if (list != nullptr) {
             // Copy args so that hooks can't modify them, for parity with call function
-            WrappedStruct args_base{func, params};
-            WrappedStruct args(args_base);
+            const WrappedStruct ARGS_BASE{func, params};
+            WrappedStruct args(ARGS_BASE);
             hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
 
-            bool block_execution = hook_manager::run_hook_group(list->pre, hook);
+            const bool BLOCK_EXECUTION = hook_manager::run_hook_group(list->pre, hook);
 
-            if (!block_execution) {
+            if (!BLOCK_EXECUTION) {
                 process_event_ptr(obj, edx, func, params, null);
             }
 
@@ -65,7 +65,7 @@ static void __fastcall process_event_hook(UObject* obj,
                 return;
             }
 
-            if (!hook.ret.has_value() && !block_execution) {
+            if (!hook.ret.has_value() && !BLOCK_EXECUTION) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(params));
             }
 
@@ -119,9 +119,9 @@ static void __fastcall call_function_hook(UObject* obj,
 
             hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
 
-            bool block_execution = hook_manager::run_hook_group(list->pre, hook);
+            const bool BLOCK_EXECUTION = hook_manager::run_hook_group(list->pre, hook);
 
-            if (block_execution) {
+            if (BLOCK_EXECUTION) {
                 stack->Code++;
             } else {
                 stack->Code = original_code;
@@ -136,7 +136,7 @@ static void __fastcall call_function_hook(UObject* obj,
                 return;
             }
 
-            if (!hook.ret.has_value() && !block_execution) {
+            if (!hook.ret.has_value() && !BLOCK_EXECUTION) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(result));
             }
 

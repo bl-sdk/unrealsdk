@@ -23,13 +23,13 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
         auto list = hook_manager::preprocess_hook("ProcessEvent", func, obj);
         if (list != nullptr) {
             // Copy args so that hooks can't modify them, for parity with call function
-            WrappedStruct args_base{func, params};
-            WrappedStruct args(args_base);
+            const WrappedStruct ARGS_BASE{func, params};
+            WrappedStruct args(ARGS_BASE);
             hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
 
-            bool block_execution = hook_manager::run_hook_group(list->pre, hook);
+            bool const BLOCK_EXECUTION = hook_manager::run_hook_group(list->pre, hook);
 
-            if (!block_execution) {
+            if (!BLOCK_EXECUTION) {
                 process_event_ptr(obj, func, params);
             }
 
@@ -41,7 +41,7 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
                 return;
             }
 
-            if (!hook.ret.has_value() && !block_execution) {
+            if (!hook.ret.has_value() && !BLOCK_EXECUTION) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(params));
             }
 
@@ -105,9 +105,9 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
 
             hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
 
-            bool block_execution = hook_manager::run_hook_group(list->pre, hook);
+            const bool BLOCK_EXECUTION = hook_manager::run_hook_group(list->pre, hook);
 
-            if (block_execution) {
+            if (BLOCK_EXECUTION) {
                 stack->Code++;
             } else {
                 stack->Code = original_code;
@@ -122,7 +122,7 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
                 return;
             }
 
-            if (!hook.ret.has_value() && !block_execution) {
+            if (!hook.ret.has_value() && !BLOCK_EXECUTION) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(result));
             }
 
