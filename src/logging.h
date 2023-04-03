@@ -42,11 +42,7 @@ struct LogMessage {
      * @param file The file the message was logged from.
      * @param line The line number the message was logged from.
      */
-    LogMessage(Level level,
-               std::string msg,
-               const char* function,
-               const char* file,
-               int line);
+    LogMessage(Level level, std::string msg, const char* function, const char* file, int line);
     LogMessage(Level level,
                const std::wstring& msg,
                const char* function,

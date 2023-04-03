@@ -3,6 +3,7 @@
 
 #include "pch.h"
 
+#include "unreal/class_name.h"
 #include "unreal/classes/properties/copyable_property.h"
 #include "unreal/classes/properties/uarrayproperty.h"
 #include "unreal/classes/properties/uboolproperty.h"
@@ -13,7 +14,6 @@
 #include "unreal/classes/properties/ustructproperty.h"
 #include "unreal/classes/ustruct.h"
 #include "unreal/prop_traits.h"
-#include "unreal/class_name.h"
 
 namespace unrealsdk::unreal {
 
@@ -46,7 +46,7 @@ using all_known_properties = std::tuple<
  * @tparam T The const pointer type to convert.
  * @return The base type.
  */
-template<typename T>
+template <typename T>
 using remove_const_pointer_t = std::remove_const_t<std::remove_pointer<T>>;
 
 /**
@@ -55,7 +55,8 @@ using remove_const_pointer_t = std::remove_const_t<std::remove_pointer<T>>;
  * @note Callback should have the signature `template<typename T> void callback(const T* prop)`
  *
  * @tparam F The type of the callback function. Should be picked up automatically.
- * @tparam i Index to start searching through properties at. Should always call with 0 (the default).
+ * @tparam i Index to start searching through properties at. Should always call with 0 (the
+ * default).
  * @param prop The property to cast.
  * @param func The callback function to call
  */
@@ -74,6 +75,6 @@ void cast_prop(const UProperty* prop, const F& func) {
     }
 }
 
-}
+}  // namespace unrealsdk::unreal
 
 #endif /* UNREAL_CAST_PROP_H */

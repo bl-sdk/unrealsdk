@@ -20,6 +20,6 @@ class UClass;
 [[nodiscard]] UClass* find_class(const FName& name);
 [[nodiscard]] UClass* find_class(const std::wstring& name);
 
-}
+}  // namespace unrealsdk::unreal
 
 #endif /* UNREAL_FIND_CLASS_H */
