@@ -9,7 +9,11 @@
 
 namespace unrealsdk {
 
-static std::unique_ptr<game::AbstractHook> hook_instance;
+namespace {
+
+std::unique_ptr<game::AbstractHook> hook_instance;
+
+}
 
 void init(std::unique_ptr<game::AbstractHook> game) {
     logging::init();

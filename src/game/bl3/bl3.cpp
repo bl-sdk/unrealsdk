@@ -31,13 +31,17 @@ void BL3Hook::hook(void) {
 
 #pragma region FName::Init
 
+namespace {
+
 using fname_init_func = void (*)(FName* self,
                                  const wchar_t* str,
                                  int32_t number,
                                  int32_t find_type,
                                  int32_t split_name,
                                  int32_t hardcode_idx);
-static fname_init_func fname_init_ptr;
+fname_init_func fname_init_ptr;
+
+}  // namespace
 
 void BL3Hook::find_fname_init(void) {
     static const Pattern FNAME_INIT_PATTERN{
@@ -56,8 +60,12 @@ void BL3Hook::fname_init(FName* name, const wchar_t* str, int32_t number) const 
 
 #pragma region FFrame::Step
 
+namespace {
+
 using fframe_step_func = void (*)(FFrame* stack, UObject* obj, void* param);
-static fframe_step_func fframe_step_ptr;
+fframe_step_func fframe_step_ptr;
+
+}  // namespace
 
 void BL3Hook::find_fframe_step(void) {
     static const Pattern FFRAME_STEP_SIG{"\x48\x8B\x41\x20\x4C\x8B\xD2\x48\x8B\xD1",
@@ -74,6 +82,8 @@ void BL3Hook::fframe_step(FFrame* frame, UObject* obj, void* param) const {
 
 #pragma region ConstructObject
 
+namespace {
+
 using construct_obj_func = UObject* (*)(UClass* cls,
                                         UObject* obj,
                                         FName name,
@@ -83,7 +93,9 @@ using construct_obj_func = UObject* (*)(UClass* cls,
                                         uint32_t copy_transients_from_class_defaults,
                                         void* instance_graph,
                                         uint32_t assume_template_is_archetype);
-static construct_obj_func construct_obj_ptr;
+construct_obj_func construct_obj_ptr;
+
+}  // namespace
 
 void BL3Hook::find_construct_object(void) {
     static const Pattern CONSTRUCT_OBJECT_PATTERN{
@@ -108,10 +120,14 @@ UObject* BL3Hook::construct_object(UClass* cls,
 
 #pragma region PathName
 
+namespace {
+
 using get_path_name_func = void (*)(const UObject* self,
                                     const UObject* stop_outer,
                                     ManagedFString* str);
-static get_path_name_func get_path_name_ptr;
+get_path_name_func get_path_name_ptr;
+
+}  // namespace
 
 void BL3Hook::find_get_path_name(void) {
     static const Pattern GET_PATH_NAME_PATTERN{
@@ -132,11 +148,15 @@ std::wstring BL3Hook::uobject_path_name(const UObject* obj) const {
 
 #pragma region StaticFindObject
 
+namespace {
+
 using static_find_object_safe_func = UObject* (*)(const UClass* cls,
                                                   intptr_t package,
                                                   const wchar_t* str,
                                                   uint32_t exact_class);
-static static_find_object_safe_func static_find_object_ptr;
+static_find_object_safe_func static_find_object_ptr;
+
+}  // namespace
 
 void BL3Hook::find_static_find_object(void) {
     static const Pattern STATIC_FIND_OBJECT_PATTERN{

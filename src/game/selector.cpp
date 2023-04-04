@@ -10,6 +10,8 @@ using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
+namespace {
+
 // Tuple of all hook types to consider.
 // The first matching hook will be used, order matters.
 #ifdef ARCH_X64
@@ -33,7 +35,7 @@ using all_known_games = std::tuple<BL2Hook, TPSHook>;
  * @param executable The executable name to match against.
  */
 template <int i = 0>
-static std::unique_ptr<AbstractHook> find_correct_hook(const std::string& executable) {
+std::unique_ptr<AbstractHook> find_correct_hook(const std::string& executable) {
     if constexpr (i >= std::tuple_size_v<all_known_games>) {
         throw std::runtime_error("Failed to find compatible game hook!");
     } else {
@@ -45,6 +47,8 @@ static std::unique_ptr<AbstractHook> find_correct_hook(const std::string& execut
         return find_correct_hook<i + 1>(executable);
     }
 }
+
+}  // namespace
 
 std::unique_ptr<AbstractHook> select_based_on_executable(void) {
     std::filesystem::path exe_path{};

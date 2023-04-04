@@ -11,6 +11,8 @@ using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
+namespace {
+
 struct FMalloc;
 struct FMallocVFtable {
     void* exec;
@@ -22,7 +24,9 @@ struct FMalloc {
     FMallocVFtable* vftable;
 };
 
-static FMalloc* gmalloc;
+FMalloc* gmalloc;
+
+}  // namespace
 
 void BL2Hook::find_gmalloc(void) {
     static const Pattern GMALLOC_PATTERN{"\x00\x00\x00\x00\xFF\xD7\x83\xC4\x04\x89\x45\xE4",

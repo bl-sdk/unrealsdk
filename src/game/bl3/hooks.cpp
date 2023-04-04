@@ -15,9 +15,13 @@ using namespace unrealsdk::memory;
 
 namespace unrealsdk::game {
 
-using process_event_func = void(UObject* obj, UFunction* func, void* params);
+namespace {
 
-static process_event_func* process_event_ptr;
+using process_event_func = void(UObject* obj, UFunction* func, void* params);
+process_event_func* process_event_ptr;
+
+}  // namespace
+
 void process_event_hook(UObject* obj, UFunction* func, void* params) {
     try {
         auto list = hook_manager::preprocess_hook("ProcessEvent", func, obj);
@@ -25,7 +29,7 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
             // Copy args so that hooks can't modify them, for parity with call function
             const WrappedStruct ARGS_BASE{func, params};
             WrappedStruct args(ARGS_BASE);
-            hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
+            hook_manager::HookDetails hook{obj, &args, {func->find_return_param()}, {func, obj}};
 
             bool const BLOCK_EXECUTION = hook_manager::run_hook_group(list->pre, hook);
 
@@ -70,9 +74,14 @@ void BL3Hook::process_event(UObject* object, UFunction* func, void* params) cons
     process_event_hook(object, func, params);
 }
 
+namespace {
+
 using call_function_func = void(UObject* obj, FFrame* stack, void* result, UFunction* func);
 
-static call_function_func* call_function_ptr;
+call_function_func* call_function_ptr;
+
+}  // namespace
+
 void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* func) {
     try {
         /*
@@ -103,7 +112,7 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
             WrappedStruct args{func};
             auto original_code = stack->extract_current_args(args);
 
-            hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
+            hook_manager::HookDetails hook{obj, &args, {func->find_return_param()}, {func, obj}};
 
             const bool BLOCK_EXECUTION = hook_manager::run_hook_group(list->pre, hook);
 

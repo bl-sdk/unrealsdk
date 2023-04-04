@@ -5,7 +5,9 @@
 #include "game/selector.h"
 #include "unrealsdk.h"
 
-static HMODULE this_module;
+namespace {
+
+HMODULE this_module;
 
 /**
  * @brief Main startup thread.
@@ -13,7 +15,7 @@ static HMODULE this_module;
  *
  * @return unused.
  */
-static DWORD WINAPI startup_thread(LPVOID /*unused*/) {
+DWORD WINAPI startup_thread(LPVOID /*unused*/) {
     try {
         unrealsdk::init(unrealsdk::game::select_based_on_executable());
     } catch (std::exception& ex) {
@@ -22,6 +24,8 @@ static DWORD WINAPI startup_thread(LPVOID /*unused*/) {
 
     return 1;
 }
+
+}  // namespace
 
 /**
  * @brief Main entry point.

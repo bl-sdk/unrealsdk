@@ -18,7 +18,7 @@ namespace unrealsdk::hook_manager {
 
 struct HookDetails {
     unreal::UObject* obj{};
-    unreal::WrappedStruct& args;
+    unreal::WrappedStruct* args{};
     unreal::PropertyProxy ret{nullptr};
     unreal::BoundFunction func{};
 };

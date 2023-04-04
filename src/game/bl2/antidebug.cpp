@@ -6,6 +6,8 @@
 
 namespace unrealsdk::game {
 
+namespace {
+
 // NOLINTBEGIN(readability-identifier-naming)
 // NOLINTNEXTLINE(modernize-use-using)  - need a typedef for calling conventions in msvc
 typedef NTSTATUS(WINAPI* NtSetInformationThread_func)(
@@ -25,8 +27,8 @@ typedef NTSTATUS(WINAPI* NtQueryInformationProcess_func)(HANDLE ProcessHandle,
 #pragma GCC diagnostic ignored "-Wenum-constexpr-conversion"
 #endif
 
-static constexpr auto ThreadHideFromDebugger = static_cast<THREAD_INFORMATION_CLASS>(17);
-static constexpr auto ProcessDebugObjectHandle = static_cast<PROCESSINFOCLASS>(30);
+constexpr auto ThreadHideFromDebugger = static_cast<THREAD_INFORMATION_CLASS>(17);
+constexpr auto ProcessDebugObjectHandle = static_cast<PROCESSINFOCLASS>(30);
 
 #if defined(__clang__) || defined(__MINGW32__)
 #pragma GCC diagnostic pop
@@ -35,11 +37,11 @@ static constexpr auto ProcessDebugObjectHandle = static_cast<PROCESSINFOCLASS>(3
 // NOLINTEND(readability-identifier-naming)
 
 // NOLINTBEGIN(readability-identifier-naming)
-static NtSetInformationThread_func NtSetInformationThread_ptr;
-static NTSTATUS NTAPI NtSetInformationThread_hook(HANDLE ThreadHandle,
-                                                  THREAD_INFORMATION_CLASS ThreadInformationClass,
-                                                  PVOID ThreadInformation,
-                                                  ULONG ThreadInformationLength) {
+NtSetInformationThread_func NtSetInformationThread_ptr;
+NTSTATUS NTAPI NtSetInformationThread_hook(HANDLE ThreadHandle,
+                                           THREAD_INFORMATION_CLASS ThreadInformationClass,
+                                           PVOID ThreadInformation,
+                                           ULONG ThreadInformationLength) {
     // NOLINTEND(readability-identifier-naming)
     if (ThreadInformationClass == ThreadHideFromDebugger) {
         return STATUS_SUCCESS;
@@ -52,12 +54,12 @@ static_assert(std::is_same_v<decltype(&NtSetInformationThread_hook), NtSetInform
               "NtSetInformationThread signature is incorrect");
 
 // NOLINTBEGIN(readability-identifier-naming)
-static NtQueryInformationProcess_func NtQueryInformationProcess_ptr;
-static NTSTATUS WINAPI NtQueryInformationProcess_hook(HANDLE ProcessHandle,
-                                                      PROCESSINFOCLASS ProcessInformationClass,
-                                                      PVOID ProcessInformation,
-                                                      ULONG ProcessInformationLength,
-                                                      PULONG ReturnLength) {
+NtQueryInformationProcess_func NtQueryInformationProcess_ptr;
+NTSTATUS WINAPI NtQueryInformationProcess_hook(HANDLE ProcessHandle,
+                                               PROCESSINFOCLASS ProcessInformationClass,
+                                               PVOID ProcessInformation,
+                                               ULONG ProcessInformationLength,
+                                               PULONG ReturnLength) {
     // NOLINTEND(readability-identifier-naming)
     if (ProcessInformationClass == ProcessDebugObjectHandle) {
         return STATUS_PORT_NOT_SET;
@@ -69,6 +71,8 @@ static NTSTATUS WINAPI NtQueryInformationProcess_hook(HANDLE ProcessHandle,
 static_assert(
     std::is_same_v<decltype(&NtQueryInformationProcess_hook), NtQueryInformationProcess_func>,
     "NtQueryInformationProcess signature is incorrect");
+
+}  // namespace
 
 void BL2Hook::hook_antidebug(void) {
     MH_STATUS status = MH_OK;

@@ -8,13 +8,15 @@
 
 namespace unrealsdk::unreal {
 
+namespace {
+
 // Cache of all known classes by FName
 // We leave duplicate names undefined
-static std::unordered_map<FName, UClass*> cache;
+std::unordered_map<FName, UClass*> cache;
 // UClass is important enough to have a separate cached value of
-static UClass* uclass_class = nullptr;
+UClass* uclass_class = nullptr;
 
-static void initialize_cache(void) {
+void initialize_cache(void) {
     cache.clear();
 
     // Start by grabbing UClass, working off of an arbitrary object
@@ -36,6 +38,8 @@ static void initialize_cache(void) {
         cache[obj->Name] = reinterpret_cast<UClass*>(obj);
     }
 }
+
+}  // namespace
 
 UClass* find_class(const FName& name) {
     if (cache.empty()) {

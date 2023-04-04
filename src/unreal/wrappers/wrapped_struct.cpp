@@ -8,6 +8,25 @@
 
 namespace unrealsdk::unreal {
 
+namespace {
+
+/**
+ * @brief Allocates a block of memory to hold a struct, with an appropriate deleter.
+ *
+ * @param type The type to allocate a struct of.
+ * @return A shared pointer to the block of memory.
+ */
+[[nodiscard]] std::shared_ptr<void> alloc_struct(const UStruct* type) {
+    auto deleter = [type](void* data) {
+        destroy_struct(type, reinterpret_cast<uintptr_t>(data));
+        unrealsdk::u_free(data);
+    };
+
+    return {unrealsdk::u_malloc(type->get_struct_size()), deleter};
+}
+
+}  // namespace
+
 void copy_struct(uintptr_t dest, const WrappedStruct& src) {
     for (const auto& prop : src.type->properties()) {
         cast_prop(prop, [dest, &src]<typename T>(const T* prop) {
@@ -26,21 +45,6 @@ void destroy_struct(const UStruct* type, uintptr_t addr) {
             }
         });
     }
-}
-
-/**
- * @brief Allocates a block of memory to hold a struct, with an appropriate deleter.
- *
- * @param type The type to allocate a struct of.
- * @return A shared pointer to the block of memory.
- */
-[[nodiscard]] static std::shared_ptr<void> alloc_struct(const UStruct* type) {
-    auto deleter = [type](void* data) {
-        destroy_struct(type, reinterpret_cast<uintptr_t>(data));
-        unrealsdk::u_free(data);
-    };
-
-    return {unrealsdk::u_malloc(type->get_struct_size()), deleter};
 }
 
 WrappedStruct::WrappedStruct(const UStruct* type) : type(type), base(alloc_struct(type)) {}

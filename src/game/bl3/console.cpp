@@ -23,12 +23,14 @@ using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
-static const std::wstring INJECT_CONSOLE_FUNC = L"/Script/Engine.PlayerController:ClientSetHUD";
-static const std::wstring INJECT_CONSOLE_ID = L"unrealsdk_bl3_inject_console";
+namespace {
 
-static UObject* console = nullptr;
+const std::wstring INJECT_CONSOLE_FUNC = L"/Script/Engine.PlayerController:ClientSetHUD";
+const std::wstring INJECT_CONSOLE_ID = L"unrealsdk_bl3_inject_console";
 
-static bool inject_console_hook(hook_manager::HookDetails& hook) {
+UObject* console = nullptr;
+
+bool inject_console_hook(hook_manager::HookDetails& hook) {
     hook_manager::hooks[INJECT_CONSOLE_FUNC].pre.erase(INJECT_CONSOLE_ID);
 
     auto local_player = hook.obj->get<UObjectProperty>(L"Player"_fn);
@@ -81,6 +83,8 @@ static bool inject_console_hook(hook_manager::HookDetails& hook) {
 
     return false;
 }
+
+}  // namespace
 
 void BL3Hook::inject_console(void) {
     hook_manager::hooks[INJECT_CONSOLE_FUNC].pre[INJECT_CONSOLE_ID] = &inject_console_hook;
