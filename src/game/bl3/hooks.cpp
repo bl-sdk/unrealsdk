@@ -15,21 +15,25 @@ using namespace unrealsdk::memory;
 
 namespace unrealsdk::game {
 
-using process_event_func = void(UObject* obj, UFunction* func, void* params);
+namespace {
 
-static process_event_func* process_event_ptr;
+using process_event_func = void(UObject* obj, UFunction* func, void* params);
+process_event_func* process_event_ptr;
+
+}  // namespace
+
 void process_event_hook(UObject* obj, UFunction* func, void* params) {
     try {
         auto list = hook_manager::preprocess_hook("ProcessEvent", func, obj);
         if (list != nullptr) {
             // Copy args so that hooks can't modify them, for parity with call function
-            WrappedStruct args_base{func, params};
-            WrappedStruct args(args_base);
-            hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
+            const WrappedStruct ARGS_BASE{func, params};
+            WrappedStruct args(ARGS_BASE);
+            hook_manager::HookDetails hook{obj, &args, {func->find_return_param()}, {func, obj}};
 
-            bool block_execution = hook_manager::run_hook_group(list->pre, hook);
+            bool const BLOCK_EXECUTION = hook_manager::run_hook_group(list->pre, hook);
 
-            if (!block_execution) {
+            if (!BLOCK_EXECUTION) {
                 process_event_ptr(obj, func, params);
             }
 
@@ -41,7 +45,7 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
                 return;
             }
 
-            if (!hook.ret.has_value() && !block_execution) {
+            if (!hook.ret.has_value() && !BLOCK_EXECUTION) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(params));
             }
 
@@ -50,7 +54,7 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
             return;
         }
     } catch (const std::exception& ex) {
-        LOG(ERROR, "An exception occured during the ProcessEvent hook: {}", ex.what());
+        LOG(ERROR, "An exception occurred during the ProcessEvent hook: {}", ex.what());
     }
 
     process_event_ptr(obj, func, params);
@@ -70,9 +74,14 @@ void BL3Hook::process_event(UObject* object, UFunction* func, void* params) cons
     process_event_hook(object, func, params);
 }
 
+namespace {
+
 using call_function_func = void(UObject* obj, FFrame* stack, void* result, UFunction* func);
 
-static call_function_func* call_function_ptr;
+call_function_func* call_function_ptr;
+
+}  // namespace
+
 void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* func) {
     try {
         /*
@@ -103,11 +112,11 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
             WrappedStruct args{func};
             auto original_code = stack->extract_current_args(args);
 
-            hook_manager::HookDetails hook{obj, args, {func->find_return_param()}, {func, obj}};
+            hook_manager::HookDetails hook{obj, &args, {func->find_return_param()}, {func, obj}};
 
-            bool block_execution = hook_manager::run_hook_group(list->pre, hook);
+            const bool BLOCK_EXECUTION = hook_manager::run_hook_group(list->pre, hook);
 
-            if (block_execution) {
+            if (BLOCK_EXECUTION) {
                 stack->Code++;
             } else {
                 stack->Code = original_code;
@@ -122,7 +131,7 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
                 return;
             }
 
-            if (!hook.ret.has_value() && !block_execution) {
+            if (!hook.ret.has_value() && !BLOCK_EXECUTION) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(result));
             }
 
@@ -131,7 +140,7 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
             return;
         }
     } catch (const std::exception& ex) {
-        LOG(ERROR, "An exception occured during the CallFunction hook: {}", ex.what());
+        LOG(ERROR, "An exception occurred during the CallFunction hook: {}", ex.what());
     }
 
     call_function_ptr(obj, stack, result, func);

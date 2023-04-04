@@ -13,8 +13,8 @@ PropTraits<UClassProperty>::Value PropTraits<UClassProperty>::get(
 }
 
 void PropTraits<UClassProperty>::set(const UClassProperty* prop,
-                                      uintptr_t addr,
-                                      const Value& value) {
+                                     uintptr_t addr,
+                                     const Value& value) {
     // Ensure the object is of a valid class
     if (value != nullptr) {
         auto prop_cls = prop->get_property_class();

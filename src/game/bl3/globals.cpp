@@ -12,7 +12,11 @@ using namespace unrealsdk::memory;
 
 namespace unrealsdk::game {
 
-static GObjects gobjects_wrapper{};
+namespace {
+
+GObjects gobjects_wrapper{};
+
+}
 
 void BL3Hook::find_gobjects(void) {
     static const Pattern GOBJECTS_SIG{
@@ -30,7 +34,11 @@ const GObjects& BL3Hook::gobjects(void) const {
     return gobjects_wrapper;
 };
 
-static GNames gnames_wrapper{};
+namespace {
+
+GNames gnames_wrapper{};
+
+}
 
 void BL3Hook::find_gnames(void) {
     static const Pattern GNAMES_SIG{

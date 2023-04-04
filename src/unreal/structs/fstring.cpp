@@ -8,6 +8,8 @@
 
 namespace unrealsdk::unreal {
 
+namespace {
+
 using size_type = decltype(TArray<wchar_t>::count);
 
 /**
@@ -16,13 +18,15 @@ using size_type = decltype(TArray<wchar_t>::count);
  * @param str The string to get the size of.
  * @return The size of the string.
  */
-static size_type valid_size(const std::wstring& str) {
-    size_t size = str.size() + 1;  // Include the null terminator
-    if (size > (size_t)std::numeric_limits<size_type>::max()) {
+size_type valid_size(const std::wstring& str) {
+    size_t const SIZE = str.size() + 1;  // Include the null terminator
+    if (SIZE > (size_t)std::numeric_limits<size_type>::max()) {
         throw std::length_error("Tried to allocate a string longer than TArray max capacity!");
     }
-    return static_cast<size_type>(size);
+    return static_cast<size_type>(SIZE);
 }
+
+}  // namespace
 
 #pragma region TemporaryFString
 

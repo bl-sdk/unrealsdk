@@ -7,12 +7,16 @@
 
 #if defined(UE3) && defined(ARCH_X86)
 
-namespace unrealsdk::game {
-
 using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;
 
-static GNames gnames_wrapper;
+namespace unrealsdk::game {
+
+namespace {
+
+GNames gnames_wrapper;
+
+}
 
 void TPSHook::find_gnames(void) const {
     static const Pattern GNAMES_SIG{"\x00\x00\x00\x00\x8B\x04\xB1\x5E\x5D\xC3\x8B\x15",

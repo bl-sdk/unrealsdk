@@ -101,7 +101,7 @@ void set_property(const T* prop,
  * @tparam T The property type.
  * @param prop The property to destroy.
  * @param idx The fixed array index to destroy the value at.
- * @param base_addr The base address of the object getting destoryed.
+ * @param base_addr The base address of the object getting destroyed.
  */
 template <typename T>
 void destroy_property(const T* prop, size_t idx, uintptr_t base_addr) {

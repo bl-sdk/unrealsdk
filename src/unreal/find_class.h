@@ -12,7 +12,7 @@ class UClass;
  * @brief Finds a class by name.
  * @note If two classes (presumably from different packages) share a name, calling with their FName
  *       returns an undefined instance. Calling with a string performs a fully qualified lookup,
- *       which is less efficent, but properly handles this case.
+ *       which is less efficient, but properly handles this case.
  *
  * @param name The class name.
  * @return The class object.
@@ -20,6 +20,6 @@ class UClass;
 [[nodiscard]] UClass* find_class(const FName& name);
 [[nodiscard]] UClass* find_class(const std::wstring& name);
 
-}
+}  // namespace unrealsdk::unreal
 
 #endif /* UNREAL_FIND_CLASS_H */

@@ -9,7 +9,11 @@
 
 namespace unrealsdk {
 
-static std::unique_ptr<game::AbstractHook> hook_instance;
+namespace {
+
+std::unique_ptr<game::AbstractHook> hook_instance;
+
+}
 
 void init(std::unique_ptr<game::AbstractHook> game) {
     logging::init();
@@ -22,7 +26,7 @@ void init(std::unique_ptr<game::AbstractHook> game) {
         throw std::runtime_error("Minhook initialization failed!");
     }
 
-    // Initalize the hook before moving it, to weed out any order of initalization problems.
+    // Initialize the hook before moving it, to weed out any order of initialization problems.
     game->hook();
 
     hook_instance = std::move(game);
@@ -66,7 +70,7 @@ UObject* construct_object(UClass* cls,
 }
 void uconsole_output_text(const std::wstring& str) {
     // Since this is called by logging, which we know will happen plenty before/during
-    // initalization, just drop any messages which arrive before we have a hook to work with
+    // initialization, just drop any messages which arrive before we have a hook to work with
     if (hook_instance) {
         hook_instance->uconsole_output_text(str);
     }

@@ -11,12 +11,16 @@ using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
+namespace {
+
 using fmemory_malloc_func = void* (*)(uint64_t len, uint32_t align);
 using fmemory_realloc_func = void* (*)(void* original, uint64_t len, uint32_t align);
 using fmemory_free_func = void (*)(void* data);
-static fmemory_malloc_func fmemory_malloc_ptr;
-static fmemory_realloc_func fmemory_realloc_ptr;
-static fmemory_free_func fmemory_free_ptr;
+fmemory_malloc_func fmemory_malloc_ptr;
+fmemory_realloc_func fmemory_realloc_ptr;
+fmemory_free_func fmemory_free_ptr;
+
+}  // namespace
 
 void BL3Hook::find_gmalloc(void) {
     static const Pattern MALLOC_PATTERN{

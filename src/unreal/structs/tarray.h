@@ -132,7 +132,7 @@ struct TArray {
         Iterator& operator++() {
             ++this->idx;
             // Use `arr == nullptr` as the end condition, so we behave a little better if the array
-            //  grows during iteration - we can't guarentee control over this iterator as well as
+            //  grows during iteration - we can't guarantee control over this iterator as well as
             //  the others
             if (this->idx >= (size_t)arr->count) {
                 arr = nullptr;

@@ -6,6 +6,7 @@ Checks: >
     bugprone-*
     clang-analyzer-*,
     cppcoreguidelines-*,
+    -cppcoreguidelines-avoid-do-while,
     -cppcoreguidelines-avoid-non-const-global-variables,
     -cppcoreguidelines-prefer-member-initializer,
     -cppcoreguidelines-pro-bounds-pointer-arithmetic,

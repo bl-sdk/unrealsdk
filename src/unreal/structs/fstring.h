@@ -55,7 +55,9 @@ struct UnmanagedFString : public TArray<wchar_t> {
      * @param str The stl string to construct this one from.
      * @param other The other FString to construct this one from.
      */
-    UnmanagedFString(decltype(data) data = nullptr, decltype(count) count = 0, decltype(max) max = 0);
+    UnmanagedFString(decltype(data) data = nullptr,
+                     decltype(count) count = 0,
+                     decltype(max) max = 0);
     UnmanagedFString(const std::string& str);
     UnmanagedFString(const std::wstring& str);
     UnmanagedFString(UnmanagedFString&& other) noexcept;
@@ -93,7 +95,6 @@ struct UnmanagedFString : public TArray<wchar_t> {
 
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
 struct ManagedFString : public UnmanagedFString {
-
     /**
      * @brief Construct a new managed FString.
      * @note Automatically converts utf8 to utf16 if needed.

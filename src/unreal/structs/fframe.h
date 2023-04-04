@@ -20,10 +20,10 @@ class WrappedStruct;
 
 // NOLINTBEGIN(readability-identifier-naming)
 
-struct FOutParmRec {
+struct FOutParamRec {
     UProperty* Property;
     void* PropAddr;
-    FOutParmRec* NextOutParm;
+    FOutParamRec* NextOutParam;
 };
 
 struct FOutputDevice {
@@ -41,7 +41,7 @@ struct FOutputDevice {
 };
 
 struct FFrame : public FOutputDevice {
-    static constexpr const auto EXPR_TOKEN_END_FUNCTION_PARMS = 0x16;
+    static constexpr const auto EXPR_TOKEN_END_FUNCTION_PARAMS = 0x16;
 
     UFunction* Node;
     UObject* Object;
@@ -57,7 +57,7 @@ struct FFrame : public FOutputDevice {
 #endif
 
     FFrame* PreviousFrame;
-    FOutParmRec* OutParams;
+    FOutParamRec* OutParams;
 
     /**
      * @brief Extracts the current function args, assuming stopped during the `CallFunction` hook.

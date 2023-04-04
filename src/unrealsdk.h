@@ -26,7 +26,7 @@ struct FFrame;
 namespace unrealsdk {
 
 /**
- * @brief Initalizes the sdk.
+ * @brief Initializes the sdk.
  *
  * @param game An instance of the hook type to use to hook the current game.
  */
@@ -49,9 +49,9 @@ void init(std::unique_ptr<game::AbstractHook> game);
 /**
  * @brief Calls FName::Init, set to add new names and split numbers.
  *
- * @param name Pointer to the name to initalize.
- * @param str The string to initalize the name to.
- * @param number The number to initalize the name to.
+ * @param name Pointer to the name to initialize.
+ * @param str The string to initialize the name to.
+ * @param number The number to initialize the name to.
  */
 void fname_init(FName* name, const std::wstring& str, int32_t number);
 void fname_init(FName* name, const wchar_t* str, int32_t number);

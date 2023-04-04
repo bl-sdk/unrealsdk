@@ -172,7 +172,7 @@ class BoundFunction {
 // UFunction isn't a property, so we don't define a prop traits class, we don't want the default
 // getters/setters to work, we don't want to be able to pass it as an arg to a function, etc.
 
-// Instead, we explictly instantiate `UObject->get<UFunction>` as the only getter.
+// Instead, we explicitly instantiate `UObject->get<UFunction>` as the only getter.
 
 // Still define the class name though, so we can use it during lookups.
 template <>

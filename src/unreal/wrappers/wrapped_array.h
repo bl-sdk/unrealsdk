@@ -104,10 +104,10 @@ class WrappedArray {
     }
 
     /**
-     * @brief Destroyes n element in the array, with bounds and type checking.
+     * @brief Destroys n element in the array, with bounds and type checking.
      *
      * @tparam T The expected property type
-     * @param idx The index to destory.
+     * @param idx The index to destroy.
      */
     template <typename T>
     void destroy_at(size_t idx) {

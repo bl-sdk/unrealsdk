@@ -14,7 +14,6 @@
 #include "unreal/wrappers/gobjects.h"
 #include "unrealsdk.h"
 
-
 #if defined(UE3) && defined(ARCH_X86)
 
 using namespace unrealsdk::memory;
@@ -66,9 +65,13 @@ void BL2Hook::fname_init(FName* name, const wchar_t* str, int32_t number) const 
 
 #pragma region FFrame::Step
 
+namespace {
+
 // NOLINTNEXTLINE(modernize-use-using)
 typedef void(__thiscall* fframe_step_func)(FFrame* stack, UObject* obj, void* param);
-static fframe_step_func fframe_step_ptr;
+fframe_step_func fframe_step_ptr;
+
+}  // namespace
 
 void BL2Hook::find_fframe_step(void) {
     static const Pattern FFRAME_STEP_SIG{"\x55\x8B\xEC\x8B\x41\x18\x0F\xB6\x10",
@@ -85,6 +88,8 @@ void BL2Hook::fframe_step(FFrame* frame, UObject* obj, void* param) const {
 
 #pragma region ConstructObject
 
+namespace {
+
 // NOLINTNEXTLINE(modernize-use-using)
 typedef UObject*(__cdecl* construct_obj_func)(UClass* cls,
                                               UObject* outer,
@@ -94,7 +99,9 @@ typedef UObject*(__cdecl* construct_obj_func)(UClass* cls,
                                               void* error_output_device,
                                               void* instance_graph,
                                               uint32_t assume_template_is_archetype);
-static construct_obj_func construct_obj_ptr;
+construct_obj_func construct_obj_ptr;
+
+}  // namespace
 
 void BL2Hook::find_construct_object(void) {
     static const Pattern CONSTRUCT_OBJECT_PATTERN{

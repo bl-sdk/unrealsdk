@@ -12,7 +12,11 @@ using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
-static GObjects gobjects_wrapper{};
+namespace {
+
+GObjects gobjects_wrapper{};
+
+}
 
 void BL2Hook::find_gobjects(void) {
     static const Pattern GOBJECTS_SIG{"\x00\x00\x00\x00\x8B\x04\xB1\x8B\x40\x08",
@@ -29,7 +33,11 @@ const GObjects& BL2Hook::gobjects(void) const {
     return gobjects_wrapper;
 };
 
-static GNames gnames_wrapper;
+namespace {
+
+GNames gnames_wrapper{};
+
+}
 
 void BL2Hook::find_gnames(void) const {
     static const Pattern GNAMES_SIG{"\x00\x00\x00\x00\x83\x3C\x81\x00\x74\x5C",
