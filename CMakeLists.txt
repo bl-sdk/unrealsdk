@@ -34,10 +34,7 @@ if(NOT ${supports_format})
     add_subdirectory(libs/fmt)
 endif()
 
-set(standalone_sources
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/dllmain.cpp"
-)
-file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/*.c" "src/*.cpp" "src/*.h" "src/*.hpp")
+file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/unrealsdk/*.cpp" "src/unrealsdk/*.h")
 list(REMOVE_ITEM sources ${standalone_sources})
 
 target_sources(unrealsdk PRIVATE ${sources})
@@ -51,10 +48,9 @@ endif()
 target_compile_definitions(unrealsdk PUBLIC
     "${UNREALSDK_UE_VERSION}"
     "ARCH_$<UPPER_CASE:${UNREALSDK_ARCH}>"
-    "$<$<BOOL:${UNREALSDK_STANDALONE}>:UNREALSDK_STANDALONE>"
 )
 
-target_precompile_headers(unrealsdk PUBLIC "src/pch.cpp")
+target_precompile_headers(unrealsdk PUBLIC "src/unrealsdk/pch.h")
 
 if(MSVC)
     # Enable Edit and Continue
@@ -71,14 +67,18 @@ if(MSVC)
 endif()
 
 if (UNREALSDK_STANDALONE)
+    file(GLOB_RECURSE standalone_sources CONFIGURE_DEPENDS "src/standalone/*.cpp" "src/standalone/*.h")
     add_library(unrealsdk_standalone SHARED ${standalone_sources})
+
     target_link_libraries(unrealsdk_standalone PRIVATE unrealsdk)
+
     set_target_properties(unrealsdk_standalone PROPERTIES
         EXPORT_COMPILE_COMMANDS True
         COMPILE_WARNING_AS_ERROR True
         PREFIX ""
         OUTPUT_NAME "unrealsdk"
     )
+
     if(MSVC)
         target_compile_options(unrealsdk_standalone PRIVATE /W4)
     else()
