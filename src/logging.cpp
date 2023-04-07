@@ -9,8 +9,6 @@ namespace unrealsdk::logging {
 
 namespace {
 
-constexpr auto LOG_FILE_NAME = "unrealsdk.log";
-
 std::mutex mutex{};
 
 std::atomic<Level> unreal_console_level = Level::DEFAULT_CONSOLE_LEVEL;
@@ -19,9 +17,9 @@ std::unique_ptr<std::ostream> log_file_stream;
 
 std::vector<log_callback> all_log_callbacks{};
 
-}  // namespace
-
 bool callbacks_only = false;
+
+}  // namespace
 
 LogMessage::LogMessage(Level level,
                        std::string msg,
@@ -200,7 +198,14 @@ Level get_level_from_string(const std::string& str) {
 
 }  // namespace
 
-void init(void) {
+void init(const std::string& filename, bool callbacks_only_arg) {
+    static bool initialized = false;
+    if (initialized) {
+        return;
+    }
+    initialized = true;
+
+    callbacks_only = callbacks_only_arg;
     if (callbacks_only) {
         return;
     }
@@ -224,7 +229,7 @@ void init(void) {
         }
     }
 
-    log_file_stream = std::make_unique<std::ofstream>(LOG_FILE_NAME, std::ofstream::trunc);
+    log_file_stream = std::make_unique<std::ofstream>(filename, std::ofstream::trunc);
     *log_file_stream << get_header() << std::flush;
 }
 

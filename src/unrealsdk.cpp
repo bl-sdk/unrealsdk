@@ -11,12 +11,14 @@ namespace unrealsdk {
 
 namespace {
 
+constexpr auto LOG_FILE_NAME = "unrealsdk.log";
+
 std::unique_ptr<game::AbstractHook> hook_instance;
 
-}
+}  // namespace
 
 void init(std::unique_ptr<game::AbstractHook> game) {
-    logging::init();
+    logging::init(LOG_FILE_NAME);
 
     auto init_str = unrealsdk::fmt::format("unrealsdk {}", VERSION_STR);
     LOG(INFO, "{}", init_str);

@@ -26,12 +26,16 @@ enum class Level {
 };
 
 struct LogMessage {
+    // NOLINTBEGIN(cppcoreguidelines-avoid-const-or-ref-data-members)
+
     const Level level{};
     const std::string msg;
     const std::chrono::system_clock::time_point time;
     const char* function;
     const char* file;
     const int line;
+
+    // NOLINTEND(cppcoreguidelines-avoid-const-or-ref-data-members)
 
     /**
      * @brief Constructs a new log message.
@@ -50,14 +54,16 @@ struct LogMessage {
                int line);
 };
 
-// If true, disables all output and only runs the logging callbacks when a message is logged
-// Setting true before init is called ensures no external console or log file is created
-extern bool callbacks_only;
-
 /**
  * @brief Initializes logging, creating the log files and external console as needed.
+ * @note Only the first call is used. This means manually calling this before initializing the sdk
+ *       overrides the defaults.
+ *
+ * @param filename The filename to write logs to.
+ * @param callbacks_only If true, disables all output, and only runs the logging callbacks. Means
+ *                       the filename arg is ignored.
  */
-void init(void);
+void init(const std::string& filename, bool callbacks_only = false);
 
 /**
  * @brief Internal function to log a message.
