@@ -16,12 +16,12 @@ namespace {
 
 GObjects gobjects_wrapper{};
 
-}
+const Pattern GOBJECTS_SIG{"\x00\x00\x00\x00\x8B\x04\xB1\x8B\x40\x08",
+                           "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+}  // namespace
 
 void BL2Hook::find_gobjects(void) {
-    static const Pattern GOBJECTS_SIG{"\x00\x00\x00\x00\x8B\x04\xB1\x8B\x40\x08",
-                                      "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
-
     auto gobjects_instr = sigscan(GOBJECTS_SIG);
     auto gobjects_ptr = read_offset<GObjects::internal_type>(gobjects_instr);
     LOG(MISC, "GObjects: {:p}", reinterpret_cast<void*>(gobjects_ptr));
@@ -37,12 +37,12 @@ namespace {
 
 GNames gnames_wrapper{};
 
-}
+const Pattern GNAMES_SIG{"\x00\x00\x00\x00\x83\x3C\x81\x00\x74\x5C",
+                         "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+}  // namespace
 
 void BL2Hook::find_gnames(void) const {
-    static const Pattern GNAMES_SIG{"\x00\x00\x00\x00\x83\x3C\x81\x00\x74\x5C",
-                                    "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
-
     auto gnames_instr = sigscan(GNAMES_SIG);
     auto gnames_ptr = read_offset<GNames::internal_type>(gnames_instr);
     LOG(MISC, "GNames: {:p}", reinterpret_cast<void*>(gnames_ptr));

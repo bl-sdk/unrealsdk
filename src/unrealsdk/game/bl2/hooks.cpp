@@ -30,8 +30,16 @@ typedef void(__fastcall* process_event_func)(UObject* obj,
                                              UFunction* func,
                                              void* params,
                                              void* /*null*/);
-
 process_event_func process_event_ptr;
+
+const Pattern PROCESS_EVENT_SIG{
+    "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x83\xEC\x50\xA1"
+    "\x00\x00\x00\x00\x33\xC5\x89\x45\xF0\x53\x56\x57\x50\x8D\x45\xF4\x64\xA3\x00\x00\x00"
+    "\x00\x8B\xF1\x89\x75\xEC",
+    "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF"
+    "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00"
+    "\x00\xFF\xFF\xFF\xFF\xFF"};
+
 void __fastcall process_event_hook(UObject* obj,
                                    void* edx,
                                    UFunction* func,
@@ -48,13 +56,13 @@ void __fastcall process_event_hook(UObject* obj,
         auto list = hook_manager::preprocess_hook("ProcessEvent", func, obj);
         if (list != nullptr) {
             // Copy args so that hooks can't modify them, for parity with call function
-            const WrappedStruct ARGS_BASE{func, params};
-            WrappedStruct args(ARGS_BASE);
+            const WrappedStruct args_base{func, params};
+            WrappedStruct args(args_base);
             hook_manager::HookDetails hook{obj, &args, {func->find_return_param()}, {func, obj}};
 
-            const bool BLOCK_EXECUTION = hook_manager::run_hook_group(list->pre, hook);
+            const bool block_execution = hook_manager::run_hook_group(list->pre, hook);
 
-            if (!BLOCK_EXECUTION) {
+            if (!block_execution) {
                 process_event_ptr(obj, edx, func, params, null);
             }
 
@@ -66,7 +74,7 @@ void __fastcall process_event_hook(UObject* obj,
                 return;
             }
 
-            if (hook.ret.prop != nullptr && !hook.ret.has_value() && !BLOCK_EXECUTION) {
+            if (hook.ret.prop != nullptr && !hook.ret.has_value() && !block_execution) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(params));
             }
 
@@ -86,14 +94,6 @@ static_assert(std::is_same_v<decltype(&process_event_hook), process_event_func>,
 }  // namespace
 
 void BL2Hook::hook_process_event(void) {
-    const Pattern PROCESS_EVENT_SIG{
-        "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x83\xEC\x50\xA1"
-        "\x00\x00\x00\x00\x33\xC5\x89\x45\xF0\x53\x56\x57\x50\x8D\x45\xF4\x64\xA3\x00\x00\x00"
-        "\x00\x8B\xF1\x89\x75\xEC",
-        "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF"
-        "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00"
-        "\x00\xFF\xFF\xFF\xFF\xFF"};
-
     sigscan_and_detour(PROCESS_EVENT_SIG, process_event_hook, &process_event_ptr, "ProcessEvent");
 }
 
@@ -109,8 +109,16 @@ typedef void(__fastcall* call_function_func)(UObject* obj,
                                              FFrame* stack,
                                              void* params,
                                              UFunction* func);
-
 call_function_func call_function_ptr;
+
+const Pattern CALL_FUNCTION_SIG{
+    "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x81\xEC\x00\x00"
+    "\x00\x00\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\xF0\x53\x56\x57\x50\x8D\x45\xF4\x64\xA3"
+    "\x00\x00\x00\x00\x8B\x7D\x10\x8B\x45\x0C",
+    "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\x00\x00\x00"
+    "\x00\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00"
+    "\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
+
 void __fastcall call_function_hook(UObject* obj,
                                    void* edx,
                                    FFrame* stack,
@@ -124,9 +132,9 @@ void __fastcall call_function_hook(UObject* obj,
 
             hook_manager::HookDetails hook{obj, &args, {func->find_return_param()}, {func, obj}};
 
-            const bool BLOCK_EXECUTION = hook_manager::run_hook_group(list->pre, hook);
+            const bool block_execution = hook_manager::run_hook_group(list->pre, hook);
 
-            if (BLOCK_EXECUTION) {
+            if (block_execution) {
                 stack->Code++;
             } else {
                 stack->Code = original_code;
@@ -135,14 +143,15 @@ void __fastcall call_function_hook(UObject* obj,
 
             if (hook.ret.has_value()) {
                 // Result is a pointer directly to where the property should go, remove the offset
-                hook.ret.copy_to(reinterpret_cast<uintptr_t>(result) - hook.ret.prop->Offset_Internal);
+                hook.ret.copy_to(reinterpret_cast<uintptr_t>(result)
+                                 - hook.ret.prop->Offset_Internal);
             }
 
             if (list->post.empty()) {
                 return;
             }
 
-            if (hook.ret.prop != nullptr && !hook.ret.has_value() && !BLOCK_EXECUTION) {
+            if (hook.ret.prop != nullptr && !hook.ret.has_value() && !block_execution) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(result)
                                    - hook.ret.prop->Offset_Internal);
             }
@@ -163,14 +172,6 @@ static_assert(std::is_same_v<decltype(&call_function_hook), call_function_func>,
 }  // namespace
 
 void BL2Hook::hook_call_function(void) {
-    const Pattern CALL_FUNCTION_SIG{
-        "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x81\xEC\x00\x00"
-        "\x00\x00\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\xF0\x53\x56\x57\x50\x8D\x45\xF4\x64\xA3"
-        "\x00\x00\x00\x00\x8B\x7D\x10\x8B\x45\x0C",
-        "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\x00\x00\x00"
-        "\x00\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00"
-        "\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
-
     sigscan_and_detour(CALL_FUNCTION_SIG, call_function_hook, &call_function_ptr, "CallFunction");
 }
 

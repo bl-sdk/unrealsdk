@@ -17,6 +17,8 @@ namespace unrealsdk::unreal {
 
 class UFunction : public UStruct {
    public:
+    static constexpr auto FUNC_NATIVE = 0x400;
+
     UFunction() = delete;
     UFunction(const UFunction&) = delete;
     UFunction(UFunction&&) = delete;

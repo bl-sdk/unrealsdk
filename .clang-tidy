@@ -41,13 +41,14 @@ CheckOptions:
     readability-identifier-naming.MacroDefinitionCase:  UPPER_CASE
 
     readability-identifier-naming.ClassCase:            CamelCase
-    readability-identifier-naming.StructCase:           CamelCase
     readability-identifier-naming.EnumCase:             CamelCase
+    readability-identifier-naming.StructCase:           CamelCase
 
+    readability-identifier-naming.ConstantMemberCase:   lower_case
     readability-identifier-naming.FunctionCase:         lower_case
+    readability-identifier-naming.LocalConstantCase:    lower_case
+    readability-identifier-naming.MemberCase:           lower_case
     readability-identifier-naming.NamespaceCase:        lower_case
     readability-identifier-naming.ParameterCase:        lower_case
     readability-identifier-naming.VariableCase:         lower_case
-    readability-identifier-naming.MemberCase:           lower_case
-    readability-identifier-naming.ConstantMemberCase:   lower_case
 ---

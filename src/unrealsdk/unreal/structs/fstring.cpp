@@ -19,11 +19,11 @@ using size_type = decltype(TArray<wchar_t>::count);
  * @return The size of the string.
  */
 size_type valid_size(const std::wstring& str) {
-    size_t const SIZE = str.size() + 1;  // Include the null terminator
-    if (SIZE > (size_t)std::numeric_limits<size_type>::max()) {
+    const size_t size = str.size() + 1;  // Include the null terminator
+    if (size > (size_t)std::numeric_limits<size_type>::max()) {
         throw std::length_error("Tried to allocate a string longer than TArray max capacity!");
     }
-    return static_cast<size_type>(SIZE);
+    return static_cast<size_type>(size);
 }
 
 }  // namespace

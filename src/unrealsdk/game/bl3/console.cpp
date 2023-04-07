@@ -28,6 +28,8 @@ namespace {
 const std::wstring INJECT_CONSOLE_FUNC = L"/Script/Engine.PlayerController:ClientSetHUD";
 const std::wstring INJECT_CONSOLE_ID = L"unrealsdk_bl3_inject_console";
 
+constexpr auto DEFAULT_OUTPUT_TEXT_VF_INDEX = 83;
+
 UObject* console = nullptr;
 
 bool inject_console_hook(hook_manager::HookDetails& hook) {
@@ -91,8 +93,6 @@ void BL3Hook::inject_console(void) {
 }
 
 void BL3Hook::uconsole_output_text(const std::wstring& str) const {
-    static constexpr auto DEFAULT_OUTPUT_TEXT_VF_INDEX = 83;
-
     static auto idx =
         env::get_numeric<size_t>(env::UCONSOLE_OUTPUT_TEXT_VF_INDEX, DEFAULT_OUTPUT_TEXT_VF_INDEX);
 

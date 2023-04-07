@@ -9,10 +9,21 @@ using namespace unrealsdk::memory;
 
 namespace unrealsdk::game {
 
-void BL2Hook::hexedit_set_command(void) {
-    static const Pattern SET_COMMAND_SIG{"\x83\xC4\x0C\x85\xC0\x75\x1A\x6A\x01\x8D",
-                                         "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF", 5};
+namespace {
 
+const Pattern SET_COMMAND_SIG{"\x83\xC4\x0C\x85\xC0\x75\x1A\x6A\x01\x8D",
+                              "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF", 5};
+
+const Pattern ARRAY_LIMIT_SIG{"\x7E\x05\xB9\x64\x00\x00\x00\x3B\xF9\x0F\x8D",
+                              "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+const Pattern ARRAY_LIMIT_MESSAGE{
+    "\x0F\x8C\x7B\x00\x00\x00\x8B\x8D\x9C\xEE\xFF\xFF\x83\xC0\x9D\x50",
+    "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+}  // namespace
+
+void BL2Hook::hexedit_set_command(void) {
     auto set_command = sigscan<uint8_t*>(SET_COMMAND_SIG);
     if (set_command == nullptr) {
         LOG(MISC, "Couldn't find set command signature, assuming already hex edited");
@@ -28,9 +39,6 @@ void BL2Hook::hexedit_set_command(void) {
 }
 
 void BL2Hook::hexedit_array_limit(void) {
-    static const Pattern ARRAY_LIMIT_SIG{"\x7E\x05\xB9\x64\x00\x00\x00\x3B\xF9\x0F\x8D",
-                                         "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
-
     auto array_limit = sigscan<uint8_t*>(ARRAY_LIMIT_SIG);
     if (array_limit == nullptr) {
         LOG(MISC, "Couldn't find array limit signature, assuming already hex edited");
@@ -45,10 +53,6 @@ void BL2Hook::hexedit_array_limit(void) {
 }
 
 void BL2Hook::hexedit_array_limit_message(void) const {
-    static const Pattern ARRAY_LIMIT_MESSAGE{
-        "\x0F\x8C\x7B\x00\x00\x00\x8B\x8D\x9C\xEE\xFF\xFF\x83\xC0\x9D\x50",
-        "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
-
     auto array_limit_msg = sigscan<uint8_t*>(ARRAY_LIMIT_MESSAGE);
     if (array_limit_msg == nullptr) {
         LOG(MISC, "Couldn't find array limit message signature, assuming already hex edited");

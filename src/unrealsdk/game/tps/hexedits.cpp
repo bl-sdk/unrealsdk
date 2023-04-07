@@ -9,10 +9,14 @@ using namespace unrealsdk::memory;
 
 namespace unrealsdk::game {
 
-void TPSHook::hexedit_array_limit_message(void) const {
-    static const Pattern ARRAY_LIMIT_MESSAGE{"\x7C\x7B\x8B\x8D\x94\xEE\xFF\xFF",
-                                             "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+namespace {
 
+const Pattern ARRAY_LIMIT_MESSAGE{"\x7C\x7B\x8B\x8D\x94\xEE\xFF\xFF",
+                                  "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+
+}
+
+void TPSHook::hexedit_array_limit_message(void) const {
     auto array_limit_msg = sigscan<uint8_t*>(ARRAY_LIMIT_MESSAGE);
     if (array_limit_msg == nullptr) {
         LOG(MISC, "Couldn't find array limit message signature, assuming already hex edited");

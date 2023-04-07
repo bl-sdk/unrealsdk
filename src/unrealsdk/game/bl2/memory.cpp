@@ -26,12 +26,12 @@ struct FMalloc {
 
 FMalloc* gmalloc;
 
+const Pattern GMALLOC_PATTERN{"\x00\x00\x00\x00\xFF\xD7\x83\xC4\x04\x89\x45\xE4",
+                              "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+
 }  // namespace
 
 void BL2Hook::find_gmalloc(void) {
-    static const Pattern GMALLOC_PATTERN{"\x00\x00\x00\x00\xFF\xD7\x83\xC4\x04\x89\x45\xE4",
-                                         "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
-
     auto sig_address = sigscan(GMALLOC_PATTERN);
     gmalloc = *read_offset<FMalloc**>(sig_address);
     LOG(MISC, "GMalloc: {:p}", reinterpret_cast<void*>(gmalloc));

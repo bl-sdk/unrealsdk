@@ -49,6 +49,8 @@ LogMessage::LogMessage(Level level,
 
 namespace {
 
+const std::string TRUNCATION_PREFIX = "~ ";
+
 /**
  * @brief Truncates leading chunks of a string until it fits under a max width.
  * @note Will return strings longer than the max width if it can't cleanly chunk them.
@@ -61,8 +63,6 @@ namespace {
 std::string truncate_leading_chunks(const std::string& str,
                                     const std::string& separators,
                                     size_t max_width) {
-    static const std::string TRUNCATION_PREFIX = "~ ";
-
     auto width = str.size();
     size_t start_pos = 0;
     while (width > max_width) {
@@ -234,7 +234,7 @@ void init(const std::string& filename, bool callbacks_only_arg) {
 }
 
 void log(const LogMessage&& msg) {
-    const std::lock_guard<std::mutex> LOCK(mutex);
+    const std::lock_guard<std::mutex> lock(mutex);
 
     for (const auto& callback : all_log_callbacks) {
         callback(msg);
@@ -270,13 +270,13 @@ void set_console_level(Level level) {
 }
 
 void add_callback(log_callback callback) {
-    const std::lock_guard<std::mutex> LOCK(mutex);
+    const std::lock_guard<std::mutex> lock(mutex);
 
     all_log_callbacks.push_back(callback);
 }
 
 void remove_callback(log_callback callback) {
-    const std::lock_guard<std::mutex> LOCK(mutex);
+    const std::lock_guard<std::mutex> lock(mutex);
 
     all_log_callbacks.erase(
         std::remove(all_log_callbacks.begin(), all_log_callbacks.end(), callback),
