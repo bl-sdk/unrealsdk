@@ -1,7 +1,7 @@
-#ifndef UNREAL_STRUCTS_TARRAY_H
-#define UNREAL_STRUCTS_TARRAY_H
+#ifndef UNREALSDK_UNREAL_STRUCTS_TARRAY_H
+#define UNREALSDK_UNREAL_STRUCTS_TARRAY_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
 namespace unrealsdk::unreal {
 
@@ -186,4 +186,4 @@ struct TArray {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_STRUCTS_TARRAY_H */
+#endif /* UNREALSDK_UNREAL_STRUCTS_TARRAY_H */

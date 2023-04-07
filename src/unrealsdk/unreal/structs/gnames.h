@@ -1,5 +1,5 @@
-#ifndef UNREAL_STRUCTS_GNAMES_H
-#define UNREAL_STRUCTS_GNAMES_H
+#ifndef UNREALSDK_UNREAL_STRUCTS_GNAMES_H
+#define UNREALSDK_UNREAL_STRUCTS_GNAMES_H
 
 namespace unrealsdk::unreal {
 
@@ -93,4 +93,4 @@ struct TStaticIndirectArrayThreadSafeRead_FNameEntry {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_STRUCTS_GNAMES_H */
+#endif /* UNREALSDK_UNREAL_STRUCTS_GNAMES_H */

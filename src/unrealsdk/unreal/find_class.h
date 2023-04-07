@@ -1,7 +1,7 @@
-#ifndef UNREAL_FIND_CLASS_H
-#define UNREAL_FIND_CLASS_H
+#ifndef UNREALSDK_UNREAL_FIND_CLASS_H
+#define UNREALSDK_UNREAL_FIND_CLASS_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
 namespace unrealsdk::unreal {
 
@@ -22,4 +22,4 @@ class UClass;
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_FIND_CLASS_H */
+#endif /* UNREALSDK_UNREAL_FIND_CLASS_H */

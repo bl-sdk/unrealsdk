@@ -1,5 +1,5 @@
-#ifndef PCH_H
-#define PCH_H
+#ifndef UNREALSDK_PCH_H
+#define UNREALSDK_PCH_H
 
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_NO_STATUS
@@ -11,7 +11,7 @@
 #undef WIN32_NO_STATUS
 #include <ntstatus.h>
 
-#include "MinHook.h"
+#include <MinHook.h>
 
 #ifdef __cplusplus
 #include <array>
@@ -37,11 +37,11 @@
 
 // This file is just a forwarder for whichever formatting library is configured, it doesn't define
 // anything itself, so is fine to include here
-#include "format.h"
+#include "unrealsdk/format.h"
 
 // This file is mostly just here so that the `LOG` macro is automatically available everywhere
 // It only includes library headers, so is also ok to include
-#include "logging.h"
+#include "unrealsdk/logging.h"
 
 using std::int16_t;
 using std::int32_t;
@@ -86,4 +86,4 @@ static_assert(sizeof(uintptr_t) == sizeof(uint32_t),
 #error Exactly one architecture must be defined
 #endif
 
-#endif /* PCH_H */
+#endif /* UNREALSDK_PCH_H */

@@ -1,10 +1,10 @@
-#ifndef LOGGING_H
-#define LOGGING_H
+#ifndef UNREALSDK_LOGGING_H
+#define UNREALSDK_LOGGING_H
 
 // Because this file in included in the pch, we can't include the pch here instead of these
 #include <chrono>
 #include <string>
-#include "format.h"
+#include "unrealsdk/format.h"
 
 namespace unrealsdk::logging {
 
@@ -111,4 +111,4 @@ void remove_callback(log_callback callback);
                              unrealsdk::fmt::format(__VA_ARGS__), (const char*)(__FUNCTION__), \
                              (const char*)"", (__LINE__)})
 
-#endif /* LOGGING_H */
+#endif /* UNREALSDK_LOGGING_H */

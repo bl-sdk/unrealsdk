@@ -1,15 +1,15 @@
-#ifndef UNREAL_WRAPPERS_BOUND_FUNCTION_H
-#define UNREAL_WRAPPERS_BOUND_FUNCTION_H
+#ifndef UNREALSDK_UNREAL_WRAPPERS_BOUND_FUNCTION_H
+#define UNREALSDK_UNREAL_WRAPPERS_BOUND_FUNCTION_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/class_name.h"
-#include "unreal/classes/uclass.h"
-#include "unreal/classes/ufunction.h"
-#include "unreal/classes/uproperty.h"
-#include "unreal/prop_traits.h"
-#include "unreal/wrappers/wrapped_struct.h"
-#include "unrealsdk.h"
+#include "unrealsdk/unreal/class_name.h"
+#include "unrealsdk/unreal/classes/uclass.h"
+#include "unrealsdk/unreal/classes/ufunction.h"
+#include "unrealsdk/unreal/classes/uproperty.h"
+#include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unreal/wrappers/wrapped_struct.h"
+#include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
 
@@ -180,4 +180,4 @@ template <>
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_WRAPPERS_BOUND_FUNCTION_H */
+#endif /* UNREALSDK_UNREAL_WRAPPERS_BOUND_FUNCTION_H */

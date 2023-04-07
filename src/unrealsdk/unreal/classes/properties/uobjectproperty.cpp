@@ -1,7 +1,7 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/classes/properties/uobjectproperty.h"
-#include "unreal/classes/uclass.h"
+#include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
+#include "unrealsdk/unreal/classes/uclass.h"
 
 namespace unrealsdk::unreal {
 

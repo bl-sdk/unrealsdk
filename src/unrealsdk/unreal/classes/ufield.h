@@ -1,7 +1,7 @@
-#ifndef UNREAL_CLASSES_UFIELD_H
-#define UNREAL_CLASSES_UFIELD_H
+#ifndef UNREALSDK_UNREAL_CLASSES_UFIELD_H
+#define UNREALSDK_UNREAL_CLASSES_UFIELD_H
 
-#include "unreal/classes/uobject.h"
+#include "unrealsdk/unreal/classes/uobject.h"
 
 namespace unrealsdk::unreal {
 
@@ -28,4 +28,4 @@ class UField : public UObject {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_CLASSES_UFIELD_H */
+#endif /* UNREALSDK_UNREAL_CLASSES_UFIELD_H */

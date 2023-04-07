@@ -1,19 +1,19 @@
-#ifndef UNREAL_CAST_PROP_H
-#define UNREAL_CAST_PROP_H
+#ifndef UNREALSDK_UNREAL_CAST_PROP_H
+#define UNREALSDK_UNREAL_CAST_PROP_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/class_name.h"
-#include "unreal/classes/properties/copyable_property.h"
-#include "unreal/classes/properties/uarrayproperty.h"
-#include "unreal/classes/properties/uboolproperty.h"
-#include "unreal/classes/properties/uclassproperty.h"
-#include "unreal/classes/properties/uinterfaceproperty.h"
-#include "unreal/classes/properties/uobjectproperty.h"
-#include "unreal/classes/properties/ustrproperty.h"
-#include "unreal/classes/properties/ustructproperty.h"
-#include "unreal/classes/ustruct.h"
-#include "unreal/prop_traits.h"
+#include "unrealsdk/unreal/class_name.h"
+#include "unrealsdk/unreal/classes/properties/copyable_property.h"
+#include "unrealsdk/unreal/classes/properties/uarrayproperty.h"
+#include "unrealsdk/unreal/classes/properties/uboolproperty.h"
+#include "unrealsdk/unreal/classes/properties/uclassproperty.h"
+#include "unrealsdk/unreal/classes/properties/uinterfaceproperty.h"
+#include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
+#include "unrealsdk/unreal/classes/properties/ustrproperty.h"
+#include "unrealsdk/unreal/classes/properties/ustructproperty.h"
+#include "unrealsdk/unreal/classes/ustruct.h"
+#include "unrealsdk/unreal/prop_traits.h"
 
 namespace unrealsdk::unreal {
 
@@ -77,4 +77,4 @@ void cast_prop(const UProperty* prop, const F& func) {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_CAST_PROP_H */
+#endif /* UNREALSDK_UNREAL_CAST_PROP_H */

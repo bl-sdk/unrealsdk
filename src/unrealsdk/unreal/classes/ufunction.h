@@ -1,8 +1,8 @@
-#ifndef UNREAL_CLASSES_UFUNCTION_H
-#define UNREAL_CLASSES_UFUNCTION_H
+#ifndef UNREALSDK_UNREAL_CLASSES_UFUNCTION_H
+#define UNREALSDK_UNREAL_CLASSES_UFUNCTION_H
 
-#include "unreal/classes/uproperty.h"
-#include "unreal/classes/ustruct.h"
+#include "unrealsdk/unreal/classes/uproperty.h"
+#include "unrealsdk/unreal/classes/ustruct.h"
 
 namespace unrealsdk::unreal {
 
@@ -79,4 +79,4 @@ class UFunction : public UStruct {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_CLASSES_UFUNCTION_H */
+#endif /* UNREALSDK_UNREAL_CLASSES_UFUNCTION_H */

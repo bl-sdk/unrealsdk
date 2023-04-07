@@ -1,6 +1,6 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/classes/properties/uboolproperty.h"
+#include "unrealsdk/unreal/classes/properties/uboolproperty.h"
 
 namespace unrealsdk::unreal {
 

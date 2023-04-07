@@ -1,8 +1,8 @@
-#ifndef SIGSCAN_H
-#define SIGSCAN_H
+#ifndef UNREALSDK_SIGSCAN_H
+#define UNREALSDK_SIGSCAN_H
 
-#include "pch.h"
 #include <vadefs.h>
+#include "unrealsdk/pch.h"
 
 namespace unrealsdk::memory {
 
@@ -119,4 +119,4 @@ inline void unlock_range(uint8_t* start, size_t size) {
 
 }  // namespace unrealsdk::memory
 
-#endif /* SIGSCAN_H */
+#endif /* UNREALSDK_SIGSCAN_H */

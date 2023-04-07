@@ -1,10 +1,10 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "env.h"
-#include "game/abstract_hook.h"
-#include "game/bl2/bl2.h"
-#include "game/bl3/bl3.h"
-#include "game/tps/tps.h"
+#include "unrealsdk/env.h"
+#include "unrealsdk/game/abstract_hook.h"
+#include "unrealsdk/game/bl2/bl2.h"
+#include "unrealsdk/game/bl3/bl3.h"
+#include "unrealsdk/game/tps/tps.h"
 
 using namespace unrealsdk::unreal;
 

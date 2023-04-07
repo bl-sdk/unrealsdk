@@ -1,9 +1,9 @@
-#ifndef GAME_SELECTOR_H
-#define GAME_SELECTOR_H
+#ifndef UNREALSDK_GAME_SELECTOR_H
+#define UNREALSDK_GAME_SELECTOR_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "game/abstract_hook.h"
+#include "unrealsdk/game/abstract_hook.h"
 
 namespace unrealsdk::game {
 
@@ -34,4 +34,4 @@ struct GameTraits {
 
 }  // namespace unrealsdk::game
 
-#endif /* GAME_SELECTOR_H */
+#endif /* UNREALSDK_GAME_SELECTOR_H */

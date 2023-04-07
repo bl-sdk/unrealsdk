@@ -1,9 +1,9 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/classes/properties/uinterfaceproperty.h"
-#include "unreal/classes/uclass.h"
-#include "unreal/classes/uobject.h"
-#include "unreal/structs/fimplementedinterface.h"
+#include "unrealsdk/unreal/classes/properties/uinterfaceproperty.h"
+#include "unrealsdk/unreal/classes/uclass.h"
+#include "unrealsdk/unreal/classes/uobject.h"
+#include "unrealsdk/unreal/structs/fimplementedinterface.h"
 
 namespace unrealsdk::unreal {
 

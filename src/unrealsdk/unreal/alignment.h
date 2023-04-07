@@ -1,7 +1,7 @@
-#ifndef UNREAL_ALIGNMENT_H
-#define UNREAL_ALIGNMENT_H
+#ifndef UNREALSDK_UNREAL_ALIGNMENT_H
+#define UNREALSDK_UNREAL_ALIGNMENT_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
 namespace unrealsdk::unreal {
 
@@ -15,4 +15,4 @@ uint32_t get_malloc_alignment(size_t len);
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_ALIGNMENT_H */
+#endif /* UNREALSDK_UNREAL_ALIGNMENT_H */

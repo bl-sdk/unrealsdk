@@ -1,5 +1,5 @@
-#ifndef ENV_H
-#define ENV_H
+#ifndef UNREALSDK_ENV_H
+#define UNREALSDK_ENV_H
 
 namespace unrealsdk::env {
 using env_var_key = const char*;
@@ -49,4 +49,4 @@ T get_numeric(env_var_key env_var, T default_value = 0) {
 }
 }  // namespace unrealsdk::env
 
-#endif /* ENV_H */
+#endif /* UNREALSDK_ENV_H */

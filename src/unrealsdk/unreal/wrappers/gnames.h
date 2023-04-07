@@ -1,12 +1,12 @@
-#ifndef UNREAL_WRAPPERS_GNAMES_H
-#define UNREAL_WRAPPERS_GNAMES_H
+#ifndef UNREALSDK_UNREAL_WRAPPERS_GNAMES_H
+#define UNREALSDK_UNREAL_WRAPPERS_GNAMES_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/structs/gnames.h"
+#include "unrealsdk/unreal/structs/gnames.h"
 
 #ifdef UE3
-#include "unreal/structs/tarray.h"
+#include "unrealsdk/unreal/structs/tarray.h"
 #endif
 
 namespace unrealsdk::unreal {
@@ -48,4 +48,4 @@ class GNames {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_WRAPPERS_GNAMES_H */
+#endif /* UNREALSDK_UNREAL_WRAPPERS_GNAMES_H */

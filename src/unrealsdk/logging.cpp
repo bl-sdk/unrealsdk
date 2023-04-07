@@ -1,9 +1,9 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "env.h"
-#include "logging.h"
-#include "unrealsdk.h"
-#include "utils.h"
+#include "unrealsdk/env.h"
+#include "unrealsdk/logging.h"
+#include "unrealsdk/unrealsdk.h"
+#include "unrealsdk/utils.h"
 
 namespace unrealsdk::logging {
 

@@ -1,10 +1,10 @@
-#ifndef UNREAL_CLASS_NAME_H
-#define UNREAL_CLASS_NAME_H
+#ifndef UNREALSDK_UNREAL_CLASS_NAME_H
+#define UNREALSDK_UNREAL_CLASS_NAME_H
 
-#include "unreal/classes/uclass.h"
-#include "unreal/classes/uobject.h"
-#include "unreal/prop_traits.h"
-#include "unreal/structs/fname.h"
+#include "unrealsdk/unreal/classes/uclass.h"
+#include "unrealsdk/unreal/classes/uobject.h"
+#include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unreal/structs/fname.h"
 
 namespace unrealsdk::unreal {
 
@@ -52,4 +52,4 @@ T* validate_type(UObject* obj) {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_CLASS_NAME_H */
+#endif /* UNREALSDK_UNREAL_CLASS_NAME_H */

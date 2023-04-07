@@ -1,10 +1,10 @@
-#ifndef UNREALSDK_H
-#define UNREALSDK_H
+#ifndef UNREALSDK_UNREALSDK_H
+#define UNREALSDK_UNREALSDK_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/classes/uobject.h"
-#include "unreal/structs/fname.h"
+#include "unrealsdk/unreal/classes/uobject.h"
+#include "unrealsdk/unreal/structs/fname.h"
 
 namespace unrealsdk::game {
 
@@ -147,4 +147,4 @@ void uconsole_output_text(const std::wstring& str);
 
 }  // namespace unrealsdk
 
-#endif /* UNREALSDK_H */
+#endif /* UNREALSDK_UNREALSDK_H */

@@ -1,7 +1,7 @@
-#ifndef UNREAL_PROP_TRAITS_H
-#define UNREAL_PROP_TRAITS_H
+#ifndef UNREALSDK_UNREAL_PROP_TRAITS_H
+#define UNREALSDK_UNREAL_PROP_TRAITS_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
 namespace unrealsdk::unreal {
 
@@ -114,4 +114,4 @@ void destroy_property(const T* prop, size_t idx, uintptr_t base_addr) {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_PROP_TRAITS_H */
+#endif /* UNREALSDK_UNREAL_PROP_TRAITS_H */

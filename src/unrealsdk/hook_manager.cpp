@@ -1,12 +1,12 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "hook_manager.h"
-#include "unreal/classes/ufunction.h"
-#include "unreal/classes/uobject.h"
-#include "unreal/structs/fframe.h"
-#include "unreal/wrappers/wrapped_struct.h"
-#include "unrealsdk.h"
-#include "utils.h"
+#include "unrealsdk/hook_manager.h"
+#include "unrealsdk/unreal/classes/ufunction.h"
+#include "unrealsdk/unreal/classes/uobject.h"
+#include "unrealsdk/unreal/structs/fframe.h"
+#include "unrealsdk/unreal/wrappers/wrapped_struct.h"
+#include "unrealsdk/unrealsdk.h"
+#include "unrealsdk/utils.h"
 
 using namespace unrealsdk::unreal;
 

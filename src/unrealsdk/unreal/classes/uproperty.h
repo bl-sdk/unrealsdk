@@ -1,10 +1,10 @@
-#ifndef UNREAL_CLASSES_UPROPERTY_H
-#define UNREAL_CLASSES_UPROPERTY_H
+#ifndef UNREALSDK_UNREAL_CLASSES_UPROPERTY_H
+#define UNREALSDK_UNREAL_CLASSES_UPROPERTY_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/classes/ufield.h"
-#include "unreal/structs/fname.h"
+#include "unrealsdk/unreal/classes/ufield.h"
+#include "unrealsdk/unreal/structs/fname.h"
 
 namespace unrealsdk::unreal {
 
@@ -140,4 +140,4 @@ class UProperty : public UField {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_CLASSES_UPROPERTY_H */
+#endif /* UNREALSDK_UNREAL_CLASSES_UPROPERTY_H */

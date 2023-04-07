@@ -1,10 +1,10 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/cast_prop.h"
-#include "unreal/classes/properties/ustructproperty.h"
-#include "unreal/classes/uscriptstruct.h"
-#include "unreal/prop_traits.h"
-#include "unreal/wrappers/wrapped_struct.h"
+#include "unrealsdk/unreal/cast_prop.h"
+#include "unrealsdk/unreal/classes/properties/ustructproperty.h"
+#include "unrealsdk/unreal/classes/uscriptstruct.h"
+#include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 
 namespace unrealsdk::unreal {
 

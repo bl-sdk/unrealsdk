@@ -1,9 +1,9 @@
-#ifndef UNREAL_STRUCTS_FSTRING_H
-#define UNREAL_STRUCTS_FSTRING_H
+#ifndef UNREALSDK_UNREAL_STRUCTS_FSTRING_H
+#define UNREALSDK_UNREAL_STRUCTS_FSTRING_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/structs/tarray.h"
+#include "unrealsdk/unreal/structs/tarray.h"
 
 namespace unrealsdk::unreal {
 
@@ -126,4 +126,4 @@ struct ManagedFString : public UnmanagedFString {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_STRUCTS_FSTRING_H */
+#endif /* UNREALSDK_UNREAL_STRUCTS_FSTRING_H */

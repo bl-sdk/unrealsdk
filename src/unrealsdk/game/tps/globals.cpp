@@ -1,9 +1,9 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "game/bl2/bl2.h"
-#include "game/tps/tps.h"
-#include "memory.h"
-#include "unreal/wrappers/gnames.h"
+#include "unrealsdk/game/bl2/bl2.h"
+#include "unrealsdk/game/tps/tps.h"
+#include "unrealsdk/memory.h"
+#include "unrealsdk/unreal/wrappers/gnames.h"
 
 #if defined(UE3) && defined(ARCH_X86)
 

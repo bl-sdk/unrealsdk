@@ -1,10 +1,10 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/structs/fstring.h"
-#include "unreal/structs/tarray.h"
-#include "unreal/structs/tarray_funcs.h"
-#include "unrealsdk.h"
-#include "utils.h"
+#include "unrealsdk/unreal/structs/fstring.h"
+#include "unrealsdk/unreal/structs/tarray.h"
+#include "unrealsdk/unreal/structs/tarray_funcs.h"
+#include "unrealsdk/unrealsdk.h"
+#include "unrealsdk/utils.h"
 
 namespace unrealsdk::unreal {
 

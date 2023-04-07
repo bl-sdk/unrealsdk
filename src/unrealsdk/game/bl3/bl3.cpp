@@ -1,10 +1,10 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "game/bl3/bl3.h"
-#include "memory.h"
-#include "unreal/structs/fstring.h"
-#include "unreal/structs/tarray.h"
-#include "unrealsdk.h"
+#include "unrealsdk/game/bl3/bl3.h"
+#include "unrealsdk/memory.h"
+#include "unrealsdk/unreal/structs/fstring.h"
+#include "unrealsdk/unreal/structs/tarray.h"
+#include "unrealsdk/unrealsdk.h"
 
 #if defined(UE4) && defined(ARCH_X64)
 

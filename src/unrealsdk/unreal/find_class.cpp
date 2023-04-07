@@ -1,10 +1,10 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/class_name.h"
-#include "unreal/classes/uclass.h"
-#include "unreal/find_class.h"
-#include "unreal/wrappers/gobjects.h"
-#include "unrealsdk.h"
+#include "unrealsdk/unreal/class_name.h"
+#include "unrealsdk/unreal/classes/uclass.h"
+#include "unrealsdk/unreal/find_class.h"
+#include "unrealsdk/unreal/wrappers/gobjects.h"
+#include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
 

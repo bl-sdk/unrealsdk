@@ -1,6 +1,6 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "game/bl2/bl2.h"
+#include "unrealsdk/game/bl2/bl2.h"
 
 #if defined(UE3) && defined(ARCH_X86)
 

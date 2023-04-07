@@ -1,11 +1,11 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "env.h"
-#include "unreal/classes/uclass.h"
-#include "unreal/classes/uproperty.h"
-#include "unreal/structs/fname.h"
-#include "unreal/wrappers/gobjects.h"
-#include "unrealsdk.h"
+#include "unrealsdk/env.h"
+#include "unrealsdk/unreal/classes/uclass.h"
+#include "unrealsdk/unreal/classes/uproperty.h"
+#include "unrealsdk/unreal/structs/fname.h"
+#include "unrealsdk/unreal/wrappers/gobjects.h"
+#include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
 

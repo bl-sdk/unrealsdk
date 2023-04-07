@@ -1,7 +1,7 @@
-#ifndef UNREAL_STRUCTS_FIMPLEMENTEDINTERFACE_H
-#define UNREAL_STRUCTS_FIMPLEMENTEDINTERFACE_H
+#ifndef UNREALSDK_UNREAL_STRUCTS_FIMPLEMENTEDINTERFACE_H
+#define UNREALSDK_UNREAL_STRUCTS_FIMPLEMENTEDINTERFACE_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
 namespace unrealsdk::unreal {
 
@@ -42,4 +42,4 @@ struct FImplementedInterface {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_STRUCTS_FIMPLEMENTEDINTERFACE_H */
+#endif /* UNREALSDK_UNREAL_STRUCTS_FIMPLEMENTEDINTERFACE_H */

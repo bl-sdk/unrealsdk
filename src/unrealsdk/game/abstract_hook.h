@@ -1,10 +1,10 @@
-#ifndef GAME_ABSTRACT_HOOK_H
-#define GAME_ABSTRACT_HOOK_H
+#ifndef UNREALSDK_GAME_ABSTRACT_HOOK_H
+#define UNREALSDK_GAME_ABSTRACT_HOOK_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/classes/uobject.h"
-#include "unreal/structs/fname.h"
+#include "unrealsdk/unreal/classes/uobject.h"
+#include "unrealsdk/unreal/structs/fname.h"
 
 using namespace unrealsdk::unreal;
 
@@ -58,4 +58,4 @@ struct AbstractHook {
 
 }  // namespace unrealsdk::game
 
-#endif /* GAME_ABSTRACT_HOOK_H */
+#endif /* UNREALSDK_GAME_ABSTRACT_HOOK_H */

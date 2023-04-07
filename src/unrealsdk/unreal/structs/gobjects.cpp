@@ -1,6 +1,6 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/structs/gobjects.h"
+#include "unrealsdk/unreal/structs/gobjects.h"
 
 namespace unrealsdk::unreal {
 

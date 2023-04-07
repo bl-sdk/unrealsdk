@@ -1,12 +1,12 @@
-#ifndef GAME_TPS_TPS_H
-#define GAME_TPS_TPS_H
+#ifndef UNREALSDK_GAME_TPS_TPS_H
+#define UNREALSDK_GAME_TPS_TPS_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
 #if defined(UE3) && defined(ARCH_X86)
 
-#include "game/bl2/bl2.h"
-#include "game/selector.h"
+#include "unrealsdk/game/bl2/bl2.h"
+#include "unrealsdk/game/selector.h"
 
 using namespace unrealsdk::unreal;
 
@@ -36,4 +36,4 @@ struct GameTraits<TPSHook> {
 
 #endif
 
-#endif /* GAME_TPS_TPS_H */
+#endif /* UNREALSDK_GAME_TPS_TPS_H */

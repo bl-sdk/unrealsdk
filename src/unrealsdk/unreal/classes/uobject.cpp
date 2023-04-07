@@ -1,14 +1,15 @@
-#include "pch.h"
 #include <sstream>
+#include "unrealsdk/pch.h"
 
-#include "unreal/classes/uclass.h"
-#include "unreal/classes/ufunction.h"
-#include "unreal/classes/uobject.h"
-#include "unreal/classes/ustruct_funcs.h"
-#include "unreal/prop_traits.h"
-#include "unreal/structs/fname.h"
-#include "unreal/wrappers/bound_function.h"
-#include "unrealsdk.h"
+
+#include "unrealsdk/unreal/classes/uclass.h"
+#include "unrealsdk/unreal/classes/ufunction.h"
+#include "unrealsdk/unreal/classes/uobject.h"
+#include "unrealsdk/unreal/classes/ustruct_funcs.h"
+#include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unreal/structs/fname.h"
+#include "unrealsdk/unreal/wrappers/bound_function.h"
+#include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
 

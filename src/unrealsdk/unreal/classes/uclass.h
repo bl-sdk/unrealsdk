@@ -1,9 +1,9 @@
-#ifndef UNREAL_CLASSES_UCLASS_H
-#define UNREAL_CLASSES_UCLASS_H
+#ifndef UNREALSDK_UNREAL_CLASSES_UCLASS_H
+#define UNREALSDK_UNREAL_CLASSES_UCLASS_H
 
-#include "unreal/classes/ustruct.h"
-#include "unreal/structs/fimplementedinterface.h"
-#include "unreal/structs/tarray.h"
+#include "unrealsdk/unreal/classes/ustruct.h"
+#include "unrealsdk/unreal/structs/fimplementedinterface.h"
+#include "unrealsdk/unreal/structs/tarray.h"
 
 namespace unrealsdk::unreal {
 
@@ -96,4 +96,4 @@ class UClass : public UStruct {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_CLASSES_UCLASS_H */
+#endif /* UNREALSDK_UNREAL_CLASSES_UCLASS_H */

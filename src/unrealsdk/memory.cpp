@@ -1,6 +1,6 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "memory.h"
+#include "unrealsdk/memory.h"
 
 namespace unrealsdk::memory {
 

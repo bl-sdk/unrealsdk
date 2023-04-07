@@ -1,10 +1,10 @@
-#ifndef UNREAL_CLASSES_PROPERTIES_COPYABLE_PROPERTY_H
-#define UNREAL_CLASSES_PROPERTIES_COPYABLE_PROPERTY_H
+#ifndef UNREALSDK_UNREAL_CLASSES_PROPERTIES_COPYABLE_PROPERTY_H
+#define UNREALSDK_UNREAL_CLASSES_PROPERTIES_COPYABLE_PROPERTY_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/classes/uproperty.h"
-#include "unreal/prop_traits.h"
+#include "unrealsdk/unreal/classes/uproperty.h"
+#include "unrealsdk/unreal/prop_traits.h"
 
 /*
 This file describes all properties which can be read/written by a simple copy, and whose classes
@@ -90,4 +90,4 @@ inline const wchar_t* const PropTraits<UNameProperty>::CLASS = L"NameProperty";
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_CLASSES_PROPERTIES_COPYABLE_PROPERTY_H */
+#endif /* UNREALSDK_UNREAL_CLASSES_PROPERTIES_COPYABLE_PROPERTY_H */

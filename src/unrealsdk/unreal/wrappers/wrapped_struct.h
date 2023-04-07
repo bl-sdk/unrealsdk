@@ -1,12 +1,12 @@
-#ifndef UNREAL_WRAPPERS_WRAPPED_STRUCT_H
-#define UNREAL_WRAPPERS_WRAPPED_STRUCT_H
+#ifndef UNREALSDK_UNREAL_WRAPPERS_WRAPPED_STRUCT_H
+#define UNREALSDK_UNREAL_WRAPPERS_WRAPPED_STRUCT_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/classes/ustruct.h"
-#include "unreal/classes/ustruct_funcs.h"
-#include "unreal/prop_traits.h"
-#include "unreal/structs/fname.h"
+#include "unrealsdk/unreal/classes/ustruct.h"
+#include "unrealsdk/unreal/classes/ustruct_funcs.h"
+#include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unreal/structs/fname.h"
 
 namespace unrealsdk::unreal {
 
@@ -112,4 +112,4 @@ void destroy_struct(const UStruct* type, uintptr_t addr);
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_WRAPPERS_WRAPPED_STRUCT_H */
+#endif /* UNREALSDK_UNREAL_WRAPPERS_WRAPPED_STRUCT_H */

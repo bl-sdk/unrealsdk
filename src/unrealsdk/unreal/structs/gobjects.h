@@ -1,5 +1,5 @@
-#ifndef UNREAL_STRUCTS_GOBJECTS_H
-#define UNREAL_STRUCTS_GOBJECTS_H
+#ifndef UNREALSDK_UNREAL_STRUCTS_GOBJECTS_H
+#define UNREALSDK_UNREAL_STRUCTS_GOBJECTS_H
 
 namespace unrealsdk::unreal {
 
@@ -75,4 +75,4 @@ struct FUObjectArray {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_STRUCTS_GOBJECTS_H */
+#endif /* UNREALSDK_UNREAL_STRUCTS_GOBJECTS_H */

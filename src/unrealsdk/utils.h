@@ -1,7 +1,7 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef UNREALSDK_UTILS_H
+#define UNREALSDK_UTILS_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
 namespace unrealsdk::utils {
 
@@ -59,4 +59,4 @@ struct unrealsdk::fmt::formatter<std::wstring> : unrealsdk::fmt::formatter<std::
     }
 };
 
-#endif /* UTILS_H */
+#endif /* UNREALSDK_UTILS_H */

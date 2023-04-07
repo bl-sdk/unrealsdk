@@ -1,6 +1,6 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "version.h"
+#include "unrealsdk/version.h"
 
 namespace unrealsdk {
 

@@ -1,9 +1,9 @@
-#ifndef HOOK_MANAGER_H
-#define HOOK_MANAGER_H
+#ifndef UNREALSDK_HOOK_MANAGER_H
+#define UNREALSDK_HOOK_MANAGER_H
 
-#include "pch.h"
-#include "unreal/wrappers/bound_function.h"
-#include "unreal/wrappers/property_proxy.h"
+#include "unrealsdk/pch.h"
+#include "unrealsdk/unreal/wrappers/bound_function.h"
+#include "unrealsdk/unreal/wrappers/property_proxy.h"
 
 namespace unrealsdk::unreal {
 
@@ -137,4 +137,4 @@ bool run_hook_group(const HookGroup& group, HookDetails& hook);
 
 }  // namespace unrealsdk::hook_manager
 
-#endif /* HOOK_MANAGER_H */
+#endif /* UNREALSDK_HOOK_MANAGER_H */

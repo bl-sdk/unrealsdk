@@ -1,11 +1,11 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/classes/properties/ustrproperty.h"
-#include "unreal/structs/fstring.h"
-#include "unreal/structs/tarray.h"
-#include "unreal/structs/tarray_funcs.h"
-#include "unreal/wrappers/wrapped_struct.h"
-#include "unrealsdk.h"
+#include "unrealsdk/unreal/classes/properties/ustrproperty.h"
+#include "unrealsdk/unreal/structs/fstring.h"
+#include "unrealsdk/unreal/structs/tarray.h"
+#include "unrealsdk/unreal/structs/tarray_funcs.h"
+#include "unrealsdk/unreal/wrappers/wrapped_struct.h"
+#include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
 

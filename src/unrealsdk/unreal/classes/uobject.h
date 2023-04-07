@@ -1,10 +1,10 @@
-#ifndef UNREAL_CLASSES_UOBJECT_H
-#define UNREAL_CLASSES_UOBJECT_H
+#ifndef UNREALSDK_UNREAL_CLASSES_UOBJECT_H
+#define UNREALSDK_UNREAL_CLASSES_UOBJECT_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/prop_traits.h"
-#include "unreal/structs/fname.h"
+#include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unreal/structs/fname.h"
 
 namespace unrealsdk::unreal {
 
@@ -149,4 +149,4 @@ class UObject {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_CLASSES_UOBJECT_H */
+#endif /* UNREALSDK_UNREAL_CLASSES_UOBJECT_H */

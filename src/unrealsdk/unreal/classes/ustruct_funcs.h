@@ -1,10 +1,10 @@
-#ifndef UNREAL_CLASSES_USTRUCT_FUNCS_H
-#define UNREAL_CLASSES_USTRUCT_FUNCS_H
+#ifndef UNREALSDK_UNREAL_CLASSES_USTRUCT_FUNCS_H
+#define UNREALSDK_UNREAL_CLASSES_USTRUCT_FUNCS_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/class_name.h"
-#include "unreal/classes/ustruct.h"
+#include "unrealsdk/unreal/class_name.h"
+#include "unrealsdk/unreal/classes/ustruct.h"
 
 namespace unrealsdk::unreal {
 
@@ -15,4 +15,4 @@ template <typename T>
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_CLASSES_USTRUCT_FUNCS_H */
+#endif /* UNREALSDK_UNREAL_CLASSES_USTRUCT_FUNCS_H */

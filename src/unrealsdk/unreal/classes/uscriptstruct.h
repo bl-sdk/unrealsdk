@@ -1,7 +1,7 @@
-#ifndef UNREAL_CLASSES_USCRIPTSTRUCT_H
-#define UNREAL_CLASSES_USCRIPTSTRUCT_H
+#ifndef UNREALSDK_UNREAL_CLASSES_USCRIPTSTRUCT_H
+#define UNREALSDK_UNREAL_CLASSES_USCRIPTSTRUCT_H
 
-#include "unreal/classes/ustruct.h"
+#include "unrealsdk/unreal/classes/ustruct.h"
 
 namespace unrealsdk::unreal {
 
@@ -28,4 +28,4 @@ class UScriptStruct : public UStruct {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_CLASSES_USCRIPTSTRUCT_H */
+#endif /* UNREALSDK_UNREAL_CLASSES_USCRIPTSTRUCT_H */

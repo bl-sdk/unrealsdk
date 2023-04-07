@@ -1,7 +1,7 @@
-#ifndef VERSION_H
-#define VERSION_H
+#ifndef UNREALSDK_VERSION_H
+#define UNREALSDK_VERSION_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
 namespace unrealsdk {
 
@@ -13,4 +13,4 @@ extern const std::string VERSION_STR;
 
 }  // namespace unrealsdk
 
-#endif /* VERSION_H */
+#endif /* UNREALSDK_VERSION_H */

@@ -1,6 +1,6 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/wrappers/wrapped_array.h"
+#include "unrealsdk/unreal/wrappers/wrapped_array.h"
 
 namespace unrealsdk::unreal {
 

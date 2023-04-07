@@ -1,10 +1,10 @@
-#ifndef UNREAL_CLASSES_PROPERTIES_UCLASSPROPERTY_H
-#define UNREAL_CLASSES_PROPERTIES_UCLASSPROPERTY_H
+#ifndef UNREALSDK_UNREAL_CLASSES_PROPERTIES_UCLASSPROPERTY_H
+#define UNREALSDK_UNREAL_CLASSES_PROPERTIES_UCLASSPROPERTY_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/classes/properties/uobjectproperty.h"
-#include "unreal/prop_traits.h"
+#include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
+#include "unrealsdk/unreal/prop_traits.h"
 
 namespace unrealsdk::unreal {
 
@@ -47,4 +47,4 @@ struct PropTraits<UClassProperty> : public AbstractPropTraits<UClassProperty> {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_CLASSES_PROPERTIES_UCLASSPROPERTY_H */
+#endif /* UNREALSDK_UNREAL_CLASSES_PROPERTIES_UCLASSPROPERTY_H */

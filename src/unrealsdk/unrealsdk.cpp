@@ -1,11 +1,11 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "game/abstract_hook.h"
-#include "hook_manager.h"
-#include "logging.h"
-#include "unreal/find_class.h"
-#include "unrealsdk.h"
-#include "version.h"
+#include "unrealsdk/game/abstract_hook.h"
+#include "unrealsdk/hook_manager.h"
+#include "unrealsdk/logging.h"
+#include "unrealsdk/unreal/find_class.h"
+#include "unrealsdk/unrealsdk.h"
+#include "unrealsdk/version.h"
 
 namespace unrealsdk {
 

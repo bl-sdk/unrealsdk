@@ -1,12 +1,12 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/class_name.h"
-#include "unreal/classes/ufield.h"
-#include "unreal/classes/ufunction.h"
-#include "unreal/classes/uproperty.h"
-#include "unreal/classes/ustruct.h"
-#include "unreal/wrappers/bound_function.h"
-#include "utils.h"
+#include "unrealsdk/unreal/class_name.h"
+#include "unrealsdk/unreal/classes/ufield.h"
+#include "unrealsdk/unreal/classes/ufunction.h"
+#include "unrealsdk/unreal/classes/uproperty.h"
+#include "unrealsdk/unreal/classes/ustruct.h"
+#include "unrealsdk/unreal/wrappers/bound_function.h"
+#include "unrealsdk/utils.h"
 
 namespace unrealsdk::unreal {
 

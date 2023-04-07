@@ -1,7 +1,7 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "env.h"
-#include "unreal/alignment.h"
+#include "unrealsdk/env.h"
+#include "unrealsdk/unreal/alignment.h"
 
 namespace unrealsdk::unreal {
 

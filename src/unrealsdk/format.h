@@ -1,5 +1,5 @@
-#ifndef FORMAT_H
-#define FORMAT_H
+#ifndef UNREALSDK_FORMAT_H
+#define UNREALSDK_FORMAT_H
 
 // Header to switch between std::format and fmtlib, and alias them under `unrealsdk::fmt`
 
@@ -36,4 +36,4 @@ using ::fmt::formatter;
 
 // NOLINTEND(misc-unused-using-decls)
 
-#endif /* FORMAT_H */
+#endif /* UNREALSDK_FORMAT_H */

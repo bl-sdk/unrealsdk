@@ -1,9 +1,9 @@
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/structs/fframe.h"
-#include "unreal/wrappers/wrapped_struct.h"
-#include "unrealsdk.h"
+#include "unrealsdk/unreal/structs/fframe.h"
+#include "unrealsdk/unreal/wrappers/wrapped_struct.h"
+#include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
 

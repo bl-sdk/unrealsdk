@@ -1,13 +1,13 @@
-#ifndef UNREAL_CLASSES_UOBJECT_FUNCS_H
-#define UNREAL_CLASSES_UOBJECT_FUNCS_H
+#ifndef UNREALSDK_UNREAL_CLASSES_UOBJECT_FUNCS_H
+#define UNREALSDK_UNREAL_CLASSES_UOBJECT_FUNCS_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/classes/uobject.h"
-#include "unreal/classes/ustruct.h"
-#include "unreal/classes/ustruct_funcs.h"
-#include "unreal/prop_traits.h"
-#include "unreal/wrappers/bound_function.h"
+#include "unrealsdk/unreal/classes/uobject.h"
+#include "unrealsdk/unreal/classes/ustruct.h"
+#include "unrealsdk/unreal/classes/ustruct_funcs.h"
+#include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unreal/wrappers/bound_function.h"
 
 namespace unrealsdk::unreal {
 
@@ -40,4 +40,4 @@ void UObject::set(const T* prop, size_t idx, const typename PropTraits<T>::Value
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_CLASSES_UOBJECT_FUNCS_H */
+#endif /* UNREALSDK_UNREAL_CLASSES_UOBJECT_FUNCS_H */

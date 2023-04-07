@@ -1,10 +1,10 @@
-#ifndef UNREAL_CLASSES_USTRUCT_H
-#define UNREAL_CLASSES_USTRUCT_H
+#ifndef UNREALSDK_UNREAL_CLASSES_USTRUCT_H
+#define UNREALSDK_UNREAL_CLASSES_USTRUCT_H
 
-#include "unreal/classes/ufield.h"
-#include "unreal/classes/uproperty.h"
-#include "unreal/structs/tarray.h"
-#include "utils.h"
+#include "unrealsdk/unreal/classes/ufield.h"
+#include "unrealsdk/unreal/classes/uproperty.h"
+#include "unrealsdk/unreal/structs/tarray.h"
+#include "unrealsdk/utils.h"
 
 namespace unrealsdk::unreal {
 
@@ -186,4 +186,4 @@ class UStruct : public UField {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_CLASSES_USTRUCT_H */
+#endif /* UNREALSDK_UNREAL_CLASSES_USTRUCT_H */

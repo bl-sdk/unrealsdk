@@ -1,9 +1,7 @@
-#ifdef UNREALSDK_STANDALONE
+#include <unrealsdk/pch.h>
 
-#include "pch.h"
-
-#include "game/selector.h"
-#include "unrealsdk.h"
+#include <unrealsdk/game/selector.h>
+#include <unrealsdk/unrealsdk.h>
 
 namespace {
 
@@ -49,5 +47,3 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD ul_reason_for_call, LPVOID /*unuse
     }
     return TRUE;
 }
-
-#endif

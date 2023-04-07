@@ -1,6 +1,6 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/structs/gnames.h"
+#include "unrealsdk/unreal/structs/gnames.h"
 
 namespace unrealsdk::unreal {
 

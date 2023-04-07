@@ -1,7 +1,7 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "game/tps/tps.h"
-#include "memory.h"
+#include "unrealsdk/game/tps/tps.h"
+#include "unrealsdk/memory.h"
 
 #if defined(UE3) && defined(ARCH_X86)
 

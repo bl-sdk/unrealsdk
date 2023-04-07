@@ -1,11 +1,11 @@
-#ifndef UNREAL_WRAPPERS_PROPERTY_PROXY_H
-#define UNREAL_WRAPPERS_PROPERTY_PROXY_H
+#ifndef UNREALSDK_UNREAL_WRAPPERS_PROPERTY_PROXY_H
+#define UNREALSDK_UNREAL_WRAPPERS_PROPERTY_PROXY_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/class_name.h"
-#include "unreal/prop_traits.h"
-#include "unrealsdk.h"
+#include "unrealsdk/unreal/class_name.h"
+#include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
 
@@ -117,4 +117,4 @@ class PropertyProxy {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_WRAPPERS_PROPERTY_PROXY_H */
+#endif /* UNREALSDK_UNREAL_WRAPPERS_PROPERTY_PROXY_H */

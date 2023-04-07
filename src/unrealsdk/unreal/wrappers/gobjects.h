@@ -1,12 +1,12 @@
-#ifndef UNREAL_WRAPPERS_GOBJECTS_H
-#define UNREAL_WRAPPERS_GOBJECTS_H
+#ifndef UNREALSDK_UNREAL_WRAPPERS_GOBJECTS_H
+#define UNREALSDK_UNREAL_WRAPPERS_GOBJECTS_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
 #ifdef UE4
-#include "unreal/structs/gobjects.h"
+#include "unrealsdk/unreal/structs/gobjects.h"
 #else
-#include "unreal/structs/tarray.h"
+#include "unrealsdk/unreal/structs/tarray.h"
 #endif
 
 namespace unrealsdk::unreal {
@@ -87,4 +87,4 @@ class GObjects {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREAL_WRAPPERS_GOBJECTS_H */
+#endif /* UNREALSDK_UNREAL_WRAPPERS_GOBJECTS_H */

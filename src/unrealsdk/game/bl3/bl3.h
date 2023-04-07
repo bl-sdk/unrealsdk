@@ -1,10 +1,10 @@
-#ifndef GAME_BL3_BL3_H
-#define GAME_BL3_BL3_H
+#ifndef UNREALSDK_GAME_BL3_BL3_H
+#define UNREALSDK_GAME_BL3_BL3_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "game/abstract_hook.h"
-#include "game/selector.h"
+#include "unrealsdk/game/abstract_hook.h"
+#include "unrealsdk/game/selector.h"
 
 #if defined(UE4) && defined(ARCH_X64)
 
@@ -103,4 +103,4 @@ struct GameTraits<BL3Hook> {
 
 #endif
 
-#endif /* GAME_BL3_BL3_H */
+#endif /* UNREALSDK_GAME_BL3_BL3_H */

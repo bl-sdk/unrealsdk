@@ -1,12 +1,12 @@
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
-#include "unreal/classes/uobject.h"
-#include "unreal/wrappers/gobjects.h"
+#include "unrealsdk/unreal/classes/uobject.h"
+#include "unrealsdk/unreal/wrappers/gobjects.h"
 
 #ifdef UE4
-#include "unreal/structs/gobjects.h"
+#include "unrealsdk/unreal/structs/gobjects.h"
 #else
-#include "unreal/structs/tarray.h"
+#include "unrealsdk/unreal/structs/tarray.h"
 #endif
 
 namespace unrealsdk::unreal {

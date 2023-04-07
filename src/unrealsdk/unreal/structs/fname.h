@@ -1,7 +1,7 @@
-#ifndef UNREAL_STRUCTS_FNAME_H
-#define UNREAL_STRUCTS_FNAME_H
+#ifndef UNREALSDK_UNREAL_STRUCTS_FNAME_H
+#define UNREALSDK_UNREAL_STRUCTS_FNAME_H
 
-#include "pch.h"
+#include "unrealsdk/pch.h"
 
 namespace unrealsdk::unreal {
 
@@ -88,4 +88,4 @@ struct hash<unrealsdk::unreal::FName> {
 
 }  // namespace std
 
-#endif /* UNREAL_STRUCTS_FNAME_H */
+#endif /* UNREALSDK_UNREAL_STRUCTS_FNAME_H */
