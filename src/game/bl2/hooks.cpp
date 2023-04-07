@@ -67,7 +67,7 @@ void __fastcall process_event_hook(UObject* obj,
                 return;
             }
 
-            if (!hook.ret.has_value() && !BLOCK_EXECUTION) {
+            if (hook.ret.prop != nullptr && !hook.ret.has_value() && !BLOCK_EXECUTION) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(params));
             }
 
@@ -142,7 +142,7 @@ void __fastcall call_function_hook(UObject* obj,
                 return;
             }
 
-            if (!hook.ret.has_value() && !BLOCK_EXECUTION) {
+            if (hook.ret.prop != nullptr && !hook.ret.has_value() && !BLOCK_EXECUTION) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(result));
             }
 

@@ -45,7 +45,7 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
                 return;
             }
 
-            if (!hook.ret.has_value() && !BLOCK_EXECUTION) {
+            if (hook.ret.prop != nullptr && !hook.ret.has_value() && !BLOCK_EXECUTION) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(params));
             }
 
@@ -131,7 +131,7 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
                 return;
             }
 
-            if (!hook.ret.has_value() && !BLOCK_EXECUTION) {
+            if (hook.ret.prop != nullptr && !hook.ret.has_value() && !BLOCK_EXECUTION) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(result));
             }
 
