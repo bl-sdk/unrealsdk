@@ -85,8 +85,10 @@ class WrappedArray {
     template <typename T>
     [[nodiscard]] typename PropTraits<T>::Value get_at(size_t idx) const {
         this->validate_access<T>(idx);
-        return get_property<T>(reinterpret_cast<const T*>(this->type), idx,
-                               reinterpret_cast<uintptr_t>(this->base->data), this->base);
+        return get_property<T>(
+            reinterpret_cast<const T*>(this->type), 0,
+            reinterpret_cast<uintptr_t>(this->base->data) + (this->type->ElementSize * idx),
+            this->base);
     }
 
     /**
@@ -99,8 +101,9 @@ class WrappedArray {
     template <typename T>
     void set_at(size_t idx, const typename PropTraits<T>::Value& value) {
         this->validate_access<T>(idx);
-        set_property<T>(reinterpret_cast<const T*>(this->type), idx,
-                        reinterpret_cast<uintptr_t>(this->base->data), value);
+        set_property<T>(
+            reinterpret_cast<const T*>(this->type), 0,
+            reinterpret_cast<uintptr_t>(this->base->data) + (this->type->ElementSize * idx), value);
     }
 
     /**
@@ -112,8 +115,9 @@ class WrappedArray {
     template <typename T>
     void destroy_at(size_t idx) {
         this->validate_access<T>(idx);
-        destroy_property<T>(reinterpret_cast<const T*>(this->type), idx,
-                            reinterpret_cast<uintptr_t>(this->base->data));
+        destroy_property<T>(
+            reinterpret_cast<const T*>(this->type), 0,
+            reinterpret_cast<uintptr_t>(this->base->data) + (this->type->ElementSize * idx));
     }
 };
 
