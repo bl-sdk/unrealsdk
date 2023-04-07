@@ -1,6 +1,4 @@
-#include <stdexcept>
 #include "unrealsdk/pch.h"
-
 
 #include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/hook_manager.h"

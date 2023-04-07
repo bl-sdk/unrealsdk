@@ -33,7 +33,23 @@ template <>
 }
 
 /**
- * @brief Validates that an object is of the expected type.
+ * @brief Thows an invalid argument exception if an object is not of the expected type
+ * @note Uses an exact type match, not if it's an instance.
+ *
+ * @tparam T Type type the object is expected to be.
+ * @param obj Pointer to the object.
+ */
+template <typename T>
+void throw_on_wrong_type(const UObject* obj) {
+    static const auto EXPECTED_CLS_NAME = cls_fname<T>();
+    auto cls_name = obj->Class->Name;
+    if (cls_name != EXPECTED_CLS_NAME) {
+        throw std::invalid_argument("Object was of unexpected type " + (std::string)cls_name);
+    }
+}
+
+/**
+ * @brief Validates that an object is of the expected type, and returns it cast to that type.
  * @note Uses an exact type match, not if it's an instance.
  *
  * @tparam T Type type the object is expected to be.
@@ -42,12 +58,13 @@ template <>
  */
 template <typename T>
 T* validate_type(UObject* obj) {
-    static const auto EXPECTED_CLS_NAME = cls_fname<T>();
-    auto cls_name = obj->Class->Name;
-    if (cls_name != EXPECTED_CLS_NAME) {
-        throw std::invalid_argument("Property was of invalid type " + (std::string)cls_name);
-    }
+    throw_on_wrong_type<T>(obj);
     return reinterpret_cast<T*>(obj);
+}
+template <typename T>
+const T* validate_type(const UObject* obj) {
+    throw_on_wrong_type<T>(obj);
+    return reinterpret_cast<const T*>(obj);
 }
 
 }  // namespace unrealsdk::unreal

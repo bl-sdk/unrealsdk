@@ -121,11 +121,11 @@ struct TArray {
         using reference = U;
 
        private:
-        TArray<U>* arr;
+        const TArray<U>* arr;
         size_t idx{};
 
        public:
-        Iterator(TArray<U>* arr) : arr(arr) {}
+        Iterator(const TArray<U>* arr) : arr(arr) {}
 
         reference operator*() const { return (*this->arr)[this->idx]; };
 
@@ -163,7 +163,7 @@ struct TArray {
      */
     template <typename U = T,
               typename = std::enable_if_t<std::is_same_v<U, T> && std::negation_v<std::is_void<U>>>>
-    [[nodiscard]] Iterator<U> begin(void) {
+    [[nodiscard]] Iterator<U> begin(void) const {
         return {this->count == 0 ? nullptr : this};
     }
 

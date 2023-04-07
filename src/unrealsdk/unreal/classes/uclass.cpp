@@ -19,7 +19,8 @@ bool UClass::inherits(const UClass* cls) const {
 
 bool UClass::implements(const UClass* iface, FImplementedInterface** impl_out) const {
     // For each class in the inheritance chain
-    for (auto cls = this->Class; cls != nullptr; cls = validate_type<UClass>(cls->SuperField)) {
+    for (const UStruct* str = this; str != nullptr; str = str->SuperField) {
+        auto cls = validate_type<UClass>(str);
         // For each interface on that class
         for (auto our_iface : cls->Interfaces) {
             // If the interface matches
