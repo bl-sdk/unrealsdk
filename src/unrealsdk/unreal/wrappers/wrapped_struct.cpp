@@ -14,15 +14,20 @@ namespace {
  * @brief Allocates a block of memory to hold a struct, with an appropriate deleter.
  *
  * @param type The type to allocate a struct of.
- * @return A shared pointer to the block of memory.
+ * @return A shared pointer to the block of memory, or nullptr if the struct is empty.
  */
 [[nodiscard]] std::shared_ptr<void> alloc_struct(const UStruct* type) {
+    auto size = type->get_struct_size();
+    if (size == 0) {
+        return {nullptr};
+    }
+
     auto deleter = [type](void* data) {
         destroy_struct(type, reinterpret_cast<uintptr_t>(data));
         unrealsdk::u_free(data);
     };
 
-    return {unrealsdk::u_malloc(type->get_struct_size()), deleter};
+    return {unrealsdk::u_malloc(size), deleter};
 }
 
 }  // namespace
@@ -54,7 +59,9 @@ WrappedStruct::WrappedStruct(const UStruct* type, void* base, const std::shared_
 
 WrappedStruct::WrappedStruct(const WrappedStruct& other)
     : type(other.type), base(alloc_struct(other.type)) {
-    copy_struct(reinterpret_cast<uintptr_t>(this->base.get()), other);
+    if (this->base != nullptr && other.base != nullptr) {
+        copy_struct(reinterpret_cast<uintptr_t>(this->base.get()), other);
+    }
 }
 
 WrappedStruct::WrappedStruct(WrappedStruct&& other) noexcept
@@ -64,7 +71,9 @@ WrappedStruct& WrappedStruct::operator=(const WrappedStruct& other) {
     if (other.type != this->type) {
         throw std::runtime_error("Struct is not an instance of " + (std::string)this->type->Name);
     }
-    copy_struct(reinterpret_cast<uintptr_t>(this->base.get()), other);
+    if (this->base != nullptr && other.base != nullptr) {
+        copy_struct(reinterpret_cast<uintptr_t>(this->base.get()), other);
+    }
     return *this;
 }
 WrappedStruct& WrappedStruct::operator=(WrappedStruct&& other) noexcept {

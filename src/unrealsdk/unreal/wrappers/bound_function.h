@@ -87,7 +87,7 @@ class BoundFunction {
     template <typename... Ts>
     static void write_params(WrappedStruct& params, const typename PropTraits<Ts>::Value&... args) {
         UProperty* prop = params.type->PropertyLink;
-        if ((prop->PropertyFlags & UProperty::PROP_FLAG_PARAM) == 0) {
+        if (prop != nullptr && (prop->PropertyFlags & UProperty::PROP_FLAG_PARAM) == 0) {
             prop = get_next_param(prop);
         }
 
