@@ -134,7 +134,8 @@ void __fastcall call_function_hook(UObject* obj,
             }
 
             if (hook.ret.has_value()) {
-                hook.ret.copy_to(reinterpret_cast<uintptr_t>(result));
+                // Result is a pointer directly to where the property should go, remove the offset
+                hook.ret.copy_to(reinterpret_cast<uintptr_t>(result) - hook.ret.prop->Offset_Internal);
             }
 
             if (list->post.empty()) {
@@ -142,7 +143,8 @@ void __fastcall call_function_hook(UObject* obj,
             }
 
             if (hook.ret.prop != nullptr && !hook.ret.has_value() && !BLOCK_EXECUTION) {
-                hook.ret.copy_from(reinterpret_cast<uintptr_t>(result));
+                hook.ret.copy_from(reinterpret_cast<uintptr_t>(result)
+                                   - hook.ret.prop->Offset_Internal);
             }
 
             hook_manager::run_hook_group(list->post, hook);
