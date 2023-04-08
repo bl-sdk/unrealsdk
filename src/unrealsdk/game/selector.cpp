@@ -2,6 +2,7 @@
 
 #include "unrealsdk/env.h"
 #include "unrealsdk/game/abstract_hook.h"
+#include "unrealsdk/game/aodk/aodk.h"
 #include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/game/bl3/bl3.h"
 #include "unrealsdk/game/tps/tps.h"
@@ -24,7 +25,7 @@ using all_known_games = std::tuple<BL3Hook>;
 #ifdef UE4
 #error No known games for UE4 x86
 #else
-using all_known_games = std::tuple<BL2Hook, TPSHook>;
+using all_known_games = std::tuple<BL2Hook, AoDKHook, TPSHook>;
 #endif
 #endif
 
