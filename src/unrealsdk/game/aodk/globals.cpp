@@ -1,7 +1,6 @@
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/game/bl2/bl2.h"
-#include "unrealsdk/game/tps/tps.h"
+#include "unrealsdk/game/aodk/aodk.h"
 #include "unrealsdk/memory.h"
 #include "unrealsdk/unreal/wrappers/gnames.h"
 
@@ -21,7 +20,7 @@ const Pattern GNAMES_SIG{"\x00\x00\x00\x00\x8B\x04\xB1\x5E\x5D\xC3\x8B\x15",
 
 }  // namespace
 
-void TPSHook::find_gnames(void) const {
+void AoDKHook::find_gnames(void) const {
     auto gnames_instr = sigscan(GNAMES_SIG);
     auto gnames_ptr = read_offset<GNames::internal_type>(gnames_instr);
     LOG(MISC, "GNames: {:p}", reinterpret_cast<void*>(gnames_ptr));
@@ -29,7 +28,7 @@ void TPSHook::find_gnames(void) const {
     gnames_wrapper = GNames(gnames_ptr);
 }
 
-const GNames& TPSHook::gnames(void) const {
+const GNames& AoDKHook::gnames(void) const {
     return gnames_wrapper;
 }
 
