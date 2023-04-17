@@ -11,22 +11,25 @@ namespace unrealsdk::game {
 
 namespace {
 
-const Pattern SET_COMMAND_SIG{"\x83\xC4\x0C\x85\xC0\x75\x1A\x6A\x01\x8D",
-                              "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF", 5};
+const Pattern SET_COMMAND_SIG{
+    "\x83\xC4\x0C\x85\xC0\x75\x1A\x6A\x01\x8D\x95\x00\x00\x00\x00\x68\x00\x00\x00\x00\x52\xE8\x00"
+    "\x00\x00\x00\x83\xc4\x0C\x85\xC0\x74\x00",
+    "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\x00\x00\x00\x00\xFF\xFF\x00"
+    "\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\x00",
+    5};
 
-const Pattern ARRAY_LIMIT_SIG{"\x7E\x05\xB9\x64\x00\x00\x00\x3B\xF9\x0F\x8D",
-                              "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+const Pattern ARRAY_LIMIT_SIG{"\x00\x00\xB9\x64\x00\x00\x00\x3B\xF9\x0F\x8D\x00\x00\x00\x00",
+                              "\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00"};
 
-const Pattern ARRAY_LIMIT_MESSAGE{
-    "\x0F\x8C\x7B\x00\x00\x00\x8B\x8D\x9C\xEE\xFF\xFF\x83\xC0\x9D\x50",
-    "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+const Pattern ARRAY_LIMIT_MESSAGE{"\x00\x00\x00\x00\x00\x00\x8B\x8D\x00\x00\x00\x00\x83\xC0\x9D",
+                                  "\x00\x00\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF"};
 
 }  // namespace
 
 void BL2Hook::hexedit_set_command(void) {
     auto set_command = sigscan<uint8_t*>(SET_COMMAND_SIG);
     if (set_command == nullptr) {
-        LOG(MISC, "Couldn't find set command signature, assuming already hex edited");
+        LOG(ERROR, "Couldn't find set command signature");
     } else {
         LOG(MISC, "Set Command: {:p}", reinterpret_cast<void*>(set_command));
 
@@ -41,7 +44,7 @@ void BL2Hook::hexedit_set_command(void) {
 void BL2Hook::hexedit_array_limit(void) {
     auto array_limit = sigscan<uint8_t*>(ARRAY_LIMIT_SIG);
     if (array_limit == nullptr) {
-        LOG(MISC, "Couldn't find array limit signature, assuming already hex edited");
+        LOG(ERROR, "Couldn't find array limit signature");
     } else {
         LOG(MISC, "Array Limit: {:p}", reinterpret_cast<void*>(array_limit));
 
@@ -55,13 +58,18 @@ void BL2Hook::hexedit_array_limit(void) {
 void BL2Hook::hexedit_array_limit_message(void) const {
     auto array_limit_msg = sigscan<uint8_t*>(ARRAY_LIMIT_MESSAGE);
     if (array_limit_msg == nullptr) {
-        LOG(MISC, "Couldn't find array limit message signature, assuming already hex edited");
+        LOG(ERROR, "Couldn't find array limit message signature");
     } else {
         LOG(MISC, "Array Limit Message: {:p}", reinterpret_cast<void*>(array_limit_msg));
 
         // NOLINTBEGIN(readability-magic-numbers)
-        unlock_range(array_limit_msg + 1, 1);
-        array_limit_msg[1] = 0x85;
+        unlock_range(array_limit_msg, 6);
+        array_limit_msg[0] = 0xEB;
+        array_limit_msg[1] = 0x7F;
+        array_limit_msg[2] = 0x90;
+        array_limit_msg[3] = 0x90;
+        array_limit_msg[4] = 0x90;
+        array_limit_msg[5] = 0x90;
         // NOLINTEND(readability-magic-numbers)
     }
 }
