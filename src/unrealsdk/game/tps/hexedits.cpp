@@ -11,21 +11,23 @@ namespace unrealsdk::game {
 
 namespace {
 
-const Pattern ARRAY_LIMIT_MESSAGE{"\x7C\x7B\x8B\x8D\x94\xEE\xFF\xFF",
-                                  "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+// This is actually the exact same sig as BL2 when we trim the leading any bytes, but the jump is
+// encoded differently
+const Pattern ARRAY_LIMIT_MESSAGE{"\x00\x00\x8B\x8D\x00\x00\x00\x00\x83\xC0\x9D",
+                                  "\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF"};
 
-}
+}  // namespace
 
 void TPSHook::hexedit_array_limit_message(void) const {
     auto array_limit_msg = sigscan<uint8_t*>(ARRAY_LIMIT_MESSAGE);
     if (array_limit_msg == nullptr) {
-        LOG(MISC, "Couldn't find array limit message signature, assuming already hex edited");
+        LOG(ERROR, "Couldn't find array limit message signature");
     } else {
         LOG(MISC, "Array Limit Message: {:p}", reinterpret_cast<void*>(array_limit_msg));
 
         // NOLINTBEGIN(readability-magic-numbers)
         unlock_range(array_limit_msg, 1);
-        array_limit_msg[0] = 0x75;
+        array_limit_msg[0] = 0xEB;
         // NOLINTEND(readability-magic-numbers)
     }
 }

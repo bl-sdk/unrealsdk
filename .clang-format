@@ -9,7 +9,7 @@ IndentWidth:                    4
 InsertBraces:                   true
 SortIncludes:                   CaseInsensitive
 IncludeCategories:
-  - Regex:                      '"pch.h"'
+  - Regex:                      '"unrealsdk/pch\.h"'
     Priority:                   -1
     CaseSensitive:              true
 ---

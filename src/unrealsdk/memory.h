@@ -1,7 +1,6 @@
 #ifndef UNREALSDK_SIGSCAN_H
 #define UNREALSDK_SIGSCAN_H
 
-#include <vadefs.h>
 #include "unrealsdk/pch.h"
 
 namespace unrealsdk::memory {
@@ -11,10 +10,14 @@ namespace unrealsdk::memory {
  */
 struct Pattern {
    public:
-    const uint8_t* bytes;
-    const uint8_t* mask;
-    const size_t offset;
+    // NOLINTBEGIN(cppcoreguidelines-avoid-const-or-ref-data-members)
+
+    const uint8_t* const bytes;
+    const uint8_t* const mask;
+    const ptrdiff_t offset;
     const size_t size;
+
+    // NOLINTEND(cppcoreguidelines-avoid-const-or-ref-data-members)
 
     /**
      * @brief Construct a pattern from strings.
@@ -26,7 +29,7 @@ struct Pattern {
      * @return A sigscan pattern.
      */
     template <size_t n>
-    Pattern(const char (&bytes)[n], const char (&mask)[n], size_t offset = 0)
+    Pattern(const char (&bytes)[n], const char (&mask)[n], ptrdiff_t offset = 0)
         : bytes(reinterpret_cast<const uint8_t*>(bytes)),
           mask(reinterpret_cast<const uint8_t*>(mask)),
           offset(offset),
