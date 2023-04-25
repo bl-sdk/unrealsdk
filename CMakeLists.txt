@@ -1,11 +1,17 @@
 ﻿cmake_minimum_required(VERSION 3.24)
 
 project(unrealsdk)
-add_library(unrealsdk OBJECT)
 
 set(UNREALSDK_UE_VERSION "UE4" CACHE STRING "The unreal engine version to build the SDK for. One of 'UE3' or 'UE4'.")
 set(UNREALSDK_ARCH "x64" CACHE STRING "The architecture to build the sdk for. One of 'x86' or 'x64'.")
-set(UNREALSDK_STANDALONE False CACHE BOOL "If set, compiles an extra standalone static library, which initializes the sdk but does nothing else.")
+set(UNREALSDK_SHARED False CACHE BOOL "If set, compiles as a shared library instead of as an object.")
+set(UNREALSDK_EXPORTING False CACHE BOOL "If set, compiles with dll exports. Useful to make a custom shared library with different initialization.")
+
+if (${UNREALSDK_SHARED})
+    add_library(unrealsdk SHARED)
+else()
+    add_library(unrealsdk OBJECT)
+endif()
 
 target_compile_features(unrealsdk PUBLIC cxx_std_20)
 set_target_properties(unrealsdk PROPERTIES
@@ -30,14 +36,17 @@ try_compile(supports_format
 )
 
 add_subdirectory(libs/minhook)
-if(NOT ${supports_format})
+if(NOT supports_format)
     add_subdirectory(libs/fmt)
 endif()
 
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/unrealsdk/*.cpp" "src/unrealsdk/*.h")
-list(REMOVE_ITEM sources ${standalone_sources})
-
 target_sources(unrealsdk PRIVATE ${sources})
+
+if (UNREALSDK_SHARED)
+    file(GLOB_RECURSE shared_sources CONFIGURE_DEPENDS "src/shared/*.cpp" "src/shared/*.h")
+    target_sources(unrealsdk PRIVATE ${shared_sources})
+endif()
 
 target_include_directories(unrealsdk PUBLIC "src")
 target_link_libraries(unrealsdk PUBLIC minhook)
@@ -48,7 +57,14 @@ endif()
 target_compile_definitions(unrealsdk PUBLIC
     "${UNREALSDK_UE_VERSION}"
     "ARCH_$<UPPER_CASE:${UNREALSDK_ARCH}>"
+    "$<$<BOOL:${UNREALSDK_SHARED}>:UNREALSDK_SHARED>"
+    "$<$<BOOL:${UNREALSDK_EXPORTING}>:UNREALSDK_EXPORTING>"
 )
+
+if(UNREALSDK_SHARED AND (NOT UNREALSDK_EXPORTING))
+    # Set as private, so anything linking will import instead
+    target_compile_definitions(unrealsdk PRIVATE "UNREALSDK_EXPORTING")
+endif()
 
 target_precompile_headers(unrealsdk PUBLIC "src/unrealsdk/pch.h")
 
@@ -66,28 +82,10 @@ if(MSVC)
     target_compile_options(unrealsdk PUBLIC "/utf-8")
 endif()
 
-if (UNREALSDK_STANDALONE)
-    file(GLOB_RECURSE standalone_sources CONFIGURE_DEPENDS "src/standalone/*.cpp" "src/standalone/*.h")
-    add_library(unrealsdk_standalone SHARED ${standalone_sources})
-
-    target_link_libraries(unrealsdk_standalone PRIVATE unrealsdk)
-
-    set_target_properties(unrealsdk_standalone PROPERTIES
-        EXPORT_COMPILE_COMMANDS True
-        COMPILE_WARNING_AS_ERROR True
-        PREFIX ""
-        OUTPUT_NAME "unrealsdk"
-    )
-
-    if(MSVC)
-        target_compile_options(unrealsdk_standalone PRIVATE /W4)
-    else()
-        target_compile_options(unrealsdk_standalone PRIVATE -Wall -Wextra -Wpedantic)
-    endif()
-
+if (UNREALSDK_SHARED)
     if (MINGW)
         # Want to link statically into a single file
-        target_link_options(unrealsdk_standalone PRIVATE "-static")
+        target_link_options(unrealsdk PRIVATE "-static")
     endif()
 
     # Postbuild
@@ -97,9 +95,9 @@ if (UNREALSDK_STANDALONE)
     endif()
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${POSTBUILD_SCRIPT}")
         add_custom_command(
-            TARGET unrealsdk_standalone
+            TARGET unrealsdk
             POST_BUILD
-            COMMAND ${POSTBUILD_SCRIPT} "\"$<SHELL_PATH:$<TARGET_FILE:unrealsdk_standalone>>\" \"${UNREALSDK_UE_VERSION}\" \"${UNREALSDK_ARCH}\" \"$<IF:$<CONFIG:DEBUG>,DEBUG,RELEASE>\""
+            COMMAND ${POSTBUILD_SCRIPT} "\"$<SHELL_PATH:$<TARGET_FILE:unrealsdk>>\" \"${UNREALSDK_UE_VERSION}\" \"${UNREALSDK_ARCH}\" \"$<IF:$<CONFIG:DEBUG>,DEBUG,RELEASE>\""
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         )
     endif()

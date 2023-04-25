@@ -14,6 +14,9 @@ unrealsdk::init(unrealsdk::game::select_based_on_executable());
 If this doesn't work correctly, you can always implement your own version (and then merge it back
 into this project).
 
+If you build the sdk as a shared library, it automatically does this for you. If you need custom
+initalization, you'll have to create your own target instead.
+
 After initializing, you probably want to setup some hooks. The sdk can run callbacks whenever an
 unreal function is hooked, allowing you to interact with it's args, and mess with it's execution.
 Exact hook semantics are better documented in the `hook_manager.h` header.
@@ -78,17 +81,20 @@ You can configure the sdk by setting a few variables before including it:
   These versions are different enough that supporting them from a single binary is difficult.
 - `UNREALSDK_ARCH` - The architecture to build the sdk for. One of `x86` or `x64`. Will be double
   checked at compile time.
-- `UNREALSDK_STANDALONE` - If defined, also creates an additional standalone target creating a
-  `unrealsdk.dll`. Generally useless if you're linking against it in your own project.
+- `UNREALSDK_SHARED` - If set, compiles as a shared library instead of as an object.
+- `UNREALSDK_EXPORTING` - If set, compiles with dll exports. Useful to make a custom shared library
+  with different initialization.
 
-# Standalone Builds
-As just mentioned, the sdk can be configured to create a small standalone dll. This just initializes
-itself when loaded, but does nothing else. All the CMake presets are set up to build this.
+# Running Builds
+As previously mentioned, the sdk can be configured to create a shared library. This is useful when
+developing for the sdk itself, it's the minimal configuration to get it running. The CMake presets
+are set up to build this.
 
-The standalone build is primarily useful when developing for the sdk itself, since it cuts out any
-extra fluff. It's also used for CI.
+Note that you will need to use some game specific plugin loader to get the dll loaded. It is not set
+up to alias any system dlls (since when actually using it as a library you don't want that), you
+can't just call it `d3d9.dll` and assume your game will load fine.
 
-To create a standalone build:
+To build:
 
 1. Clone the repo (including submodules).
    ```

@@ -7,7 +7,7 @@
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}",
       "cacheVariables": {
-        "UNREALSDK_STANDALONE": "True"
+        "UNREALSDK_SHARED": "True"
       }
     },
     {
