@@ -29,8 +29,19 @@ namespace unrealsdk {
  * @brief Initializes the sdk.
  *
  * @param game An instance of the hook type to use to hook the current game.
+ * @return True if the sdk was initialized with the given game, false if it was already initialized.
  */
-void init(std::unique_ptr<game::AbstractHook> game);
+bool init(std::unique_ptr<game::AbstractHook>&& game);
+
+/**
+ * @brief Checks if the SDK has been initialized.
+ * @note Thread safe, blocks if initialization is in progress.
+ *
+ * @return True if the SDK has been initialized.
+ */
+UNREALSDK_CAPI bool is_initialized(void);
+
+// ================ Remaining functions have undefined behaviour if not initialized ================
 
 /**
  * @brief Gets a reference to the GObjects wrapper.
@@ -53,8 +64,10 @@ void init(std::unique_ptr<game::AbstractHook> game);
  * @param str The string to initialize the name to.
  * @param number The number to initialize the name to.
  */
-void fname_init(FName* name, const std::wstring& str, int32_t number);
 UNREALSDK_CAPI void fname_init(FName* name, const wchar_t* str, int32_t number);
+inline void fname_init(FName* name, const std::wstring& str, int32_t number) {
+    fname_init(name, str.c_str(), number);
+}
 
 /**
  * @brief Calls FFrame::Step.
@@ -126,11 +139,16 @@ UNREALSDK_CAPI void process_event(UObject* object, UFunction* func, void* params
 
 /**
  * @brief Calls `UConsole::OutputText` to write to the UE console.
+ *
+ * @param str The string to write.
  */
 void uconsole_output_text(const std::wstring& str);
 
 /**
  * @brief Calls `UObject::PathName` on the given object.
+ *
+ * @param obj The object to get the name of.
+ * @return The object's name
  */
 [[nodiscard]] std::wstring uobject_path_name(const UObject* obj);
 

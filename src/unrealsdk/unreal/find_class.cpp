@@ -41,6 +41,14 @@ void initialize_cache(void) {
 
 }  // namespace
 
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI [[nodiscard]] UClass* find_class_fname(const FName* name);
+#endif
+#ifdef UNREALSDK_IMPORTING
+UClass* find_class(const FName& name) {
+    return find_class_fname(&name);
+}
+#else
 UClass* find_class(const FName& name) {
     if (cache.empty()) {
         initialize_cache();
@@ -52,7 +60,21 @@ UClass* find_class(const FName& name) {
 
     return cache[name];
 }
+#endif
+#ifdef UNREALSDK_SHARED
+UClass* find_class_fname(const FName* name) {
+    return find_class(*name);
+}
+#endif
 
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI [[nodiscard]] UClass* find_class_cstr(const wchar_t* name, size_t name_size);
+#endif
+#ifdef UNREALSDK_IMPORTING
+UClass* find_class(const std::wstring& name) {
+    return find_class_cstr(name.c_str(), name.size());
+}
+#else
 UClass* find_class(const std::wstring& name) {
     if (cache.empty()) {
         initialize_cache();
@@ -69,5 +91,12 @@ UClass* find_class(const std::wstring& name) {
 
     return cls;
 }
+#endif
+#ifdef UNREALSDK_SHARED
+UClass* find_class_cstr(const wchar_t* name, size_t name_size) {
+    std::wstring str{name, name_size};
+    return find_class(str);
+}
+#endif
 
 }  // namespace unrealsdk::unreal

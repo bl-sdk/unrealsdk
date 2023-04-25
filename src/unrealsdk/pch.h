@@ -19,6 +19,7 @@
 #include <charconv>
 #include <chrono>
 #include <cstdint>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -99,6 +100,8 @@ static_assert(sizeof(uintptr_t) == sizeof(uint32_t),
 #endif
 
 #else
+
+#define UNREALSDK_IMPORTING
 
 // If shared, but not exporting - i.e. when included by something liking against the shared library
 #if defined(__clang__) || defined(__MINGW32__)

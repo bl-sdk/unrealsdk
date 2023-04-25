@@ -15,7 +15,7 @@ If this doesn't work correctly, you can always implement your own version (and t
 into this project).
 
 If you build the sdk as a shared library, it automatically does this for you. If you need custom
-initalization, you'll have to create your own target instead.
+initialization, you'll have to create your own target instead.
 
 After initializing, you probably want to setup some hooks. The sdk can run callbacks whenever an
 unreal function is hooked, allowing you to interact with it's args, and mess with it's execution.
@@ -59,8 +59,7 @@ build configurations.
 | `UNREALSDK_CONSOLE_KEY`                   | Changes the default console key which is set when one is not already bound.                                                     |
 | `UNREALSDK_UCONSOLE_OUTPUT_TEXT_VF_INDEX` | Overrides the virtual function index used when calling `UConsole::OutputText`.                                                  |
 
-
-# Linking against the sdk
+# Linking Against the SDK
 The sdk requires at least C++20, primarily for templated lambdas. It also makes great use of
 `std::format`, though if this is not available it tries to fall back to using fmtlib. Linking
 against the sdk thus requires your own projects to use at least C++20 too.
@@ -84,6 +83,18 @@ You can configure the sdk by setting a few variables before including it:
 - `UNREALSDK_SHARED` - If set, compiles as a shared library instead of as an object.
 - `UNREALSDK_EXPORTING` - If set, compiles with dll exports. Useful to make a custom shared library
   with different initialization.
+
+# Shared Library Helpers
+The sdk contains a decent amount of internal state, meaning it's not possible to inject twice into
+the same process. At it's simplest, any detours on unreal functions will change their signatures, so
+a second instance won't be able to find them again. If two programs both want to use the sdk in the
+same game process, they will have to link against the shared library.
+
+In order to allow cross-compiler ABI compatibility, the exported functions use a pure C interface.
+Since the sdk heavily relies on C++ features (e.g. heavy template usage), it's impractical to export
+everything this way. Instead, it only exports the bare minimum functions which interact with
+internal state. Some of these rely on private wrapper functions, which do things like decompose
+strings into pointer + length, in which case the public functions are redirected as required.
 
 # Running Builds
 As previously mentioned, the sdk can be configured to create a shared library. This is useful when

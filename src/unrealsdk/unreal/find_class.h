@@ -15,10 +15,19 @@ class UClass;
  *       which is less efficient, but properly handles this case.
  *
  * @param name The class name.
+ * @param name_size The size of the class name string.
  * @return The class object.
  */
 [[nodiscard]] UClass* find_class(const FName& name);
 [[nodiscard]] UClass* find_class(const std::wstring& name);
+#ifdef UNREALSDK_IMPORTING
+inline UClass* find_class(const FName& name) {
+    return find_class(&name);
+}
+inline UClass* find_class(const std::wstring& name) {
+    return find_class_cstr(name.c_str(), name.size());
+}
+#endif
 
 }  // namespace unrealsdk::unreal
 
