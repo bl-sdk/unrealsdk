@@ -62,12 +62,16 @@ using remove_const_pointer_t = std::remove_const_t<std::remove_pointer<T>>;
  */
 template <typename F, int i = 0>
 void cast_prop(const UProperty* prop, const F& func) {
+    if (prop == nullptr) {
+        throw std::invalid_argument("Tried to cast null property!");
+    }
+
     if constexpr (i >= std::tuple_size_v<all_known_properties>) {
         throw std::runtime_error("Unknown property type " + (std::string)prop->Class->Name);
     } else {
         using prop_type = std::tuple_element_t<i, all_known_properties>;
-        static const auto PROP_CLS_NAME = cls_fname<prop_type>();
-        if (PROP_CLS_NAME == prop->Class->Name) {
+        static const auto prop_cls_name = cls_fname<prop_type>();
+        if (prop_cls_name == prop->Class->Name) {
             func.template operator()<prop_type>(reinterpret_cast<const prop_type*>(prop));
         } else {
             cast_prop<F, i + 1>(prop, func);

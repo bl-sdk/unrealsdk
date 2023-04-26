@@ -1,6 +1,8 @@
 #ifndef UNREALSDK_UNREAL_CLASS_NAME_H
 #define UNREALSDK_UNREAL_CLASS_NAME_H
 
+#include "unrealsdk/pch.h"
+
 #include "unrealsdk/unreal/classes/uclass.h"
 #include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/prop_traits.h"
@@ -41,9 +43,12 @@ template <>
  */
 template <typename T>
 void throw_on_wrong_type(const UObject* obj) {
-    static const auto EXPECTED_CLS_NAME = cls_fname<T>();
+    if (obj == nullptr) {
+        throw std::invalid_argument("Tried to validate type of null object!");
+    }
+    static const auto expected_cls_name = cls_fname<T>();
     auto cls_name = obj->Class->Name;
-    if (cls_name != EXPECTED_CLS_NAME) {
+    if (cls_name != expected_cls_name) {
         throw std::invalid_argument("Object was of unexpected type " + (std::string)cls_name);
     }
 }
