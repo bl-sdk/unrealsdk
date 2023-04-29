@@ -1,6 +1,39 @@
 #ifndef UNREALSDK_PCH_H
 #define UNREALSDK_PCH_H
 
+#if defined(UNREALSDK_SHARED) || defined(UNREALSDK_EXPORTING)
+#if defined(UNREALSDK_EXPORTING)
+
+// If exporting (which is set by cmake privately if building shared)
+#if defined(__clang__) || defined(__MINGW32__)
+#define UNREALSDK_CAPI extern "C" [[gnu::dllexport]]
+#elif defined(_MSVC_VER)
+#define UNREALSDK_CAPI extern "C" __declspec(dllexport)
+#else
+#error Unknown dllexport attribute
+#endif
+
+#else
+
+#define UNREALSDK_IMPORTING
+
+// If shared, but not exporting - i.e. when included by something liking against the shared library
+#if defined(__clang__) || defined(__MINGW32__)
+#define UNREALSDK_CAPI extern "C" [[gnu::dllimport]]
+#elif defined(_MSVC_VER)
+#define UNREALSDK_CAPI extern "C" __declspec(dllimport)
+#else
+#error Unknown dllimport attribute
+#endif
+
+#endif
+#else
+
+// If not shared nor exporting, just link staticlly
+#define UNREALSDK_CAPI
+
+#endif
+
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_NO_STATUS
 #define NOGDI
@@ -85,39 +118,6 @@ static_assert(sizeof(uintptr_t) == sizeof(uint32_t),
 #endif
 #if defined(ARCH_X64) == defined(ARCH_X86)
 #error Exactly one architecture must be defined
-#endif
-
-#if defined(UNREALSDK_SHARED) || defined(UNREALSDK_EXPORTING)
-#if defined(UNREALSDK_EXPORTING)
-
-// If exporting (which is set by cmake privately if building shared)
-#if defined(__clang__) || defined(__MINGW32__)
-#define UNREALSDK_CAPI extern "C" [[gnu::dllexport]]
-#elif defined(_MSVC_VER)
-#define UNREALSDK_CAPI extern "C" __declspec(dllexport)
-#else
-#error Unknown dllexport attribute
-#endif
-
-#else
-
-#define UNREALSDK_IMPORTING
-
-// If shared, but not exporting - i.e. when included by something liking against the shared library
-#if defined(__clang__) || defined(__MINGW32__)
-#define UNREALSDK_CAPI extern "C" [[gnu::dllimport]]
-#elif defined(_MSVC_VER)
-#define UNREALSDK_CAPI extern "C" __declspec(dllimport)
-#else
-#error Unknown dllimport attribute
-#endif
-
-#endif
-#else
-
-// If not shared nor exporting, just link staticlly
-#define UNREALSDK_CAPI
-
 #endif
 
 #endif /* UNREALSDK_PCH_H */

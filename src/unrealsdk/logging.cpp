@@ -1,4 +1,5 @@
 #include "unrealsdk/pch.h"
+#include <cctype>
 
 #include "unrealsdk/env.h"
 #include "unrealsdk/logging.h"
@@ -19,31 +20,28 @@ std::vector<log_callback> all_log_callbacks{};
 
 bool callbacks_only = false;
 
+/**
+ * @brief Gets the unix time milliseconds from a system clock time point.
+ *
+ * @param time The system clock time point.
+ * @return The unix time milliseconds.
+ */
+uint64_t unix_ms_from_time(std::chrono::system_clock::time_point time) {
+    return time.time_since_epoch().count();
+}
+
+/**
+ * @brief Gets a system clock time point from unix time milliseconds.
+ *
+ * @param unix_time_ms The unix time milliseconds.
+ * @return The system clock time point.
+ */
+std::chrono::sys_time<std::chrono::milliseconds> time_from_unix_ms(uint64_t unix_time_ms) {
+    return std::chrono::round<std::chrono::milliseconds>(
+        std::chrono::system_clock::time_point{std::chrono::milliseconds{unix_time_ms}});
+}
+
 }  // namespace
-
-LogMessage::LogMessage(Level level,
-                       std::string msg,
-                       const char* function,
-                       const char* file,
-                       int line)
-    : level(level),
-      msg(std::move(msg)),
-      time(std::chrono::system_clock::now()),
-      function(function),
-      file(file),
-      line(line) {}
-
-LogMessage::LogMessage(Level level,
-                       const std::wstring& msg,
-                       const char* function,
-                       const char* file,
-                       int line)
-    : level(level),
-      msg(utils::narrow(msg)),
-      time(std::chrono::system_clock::now()),
-      function(function),
-      file(file),
-      line(line) {}
 
 #pragma region Formatting
 
@@ -133,8 +131,8 @@ std::string format_message(const LogMessage& msg) {
 
     return unrealsdk::fmt::format(
         "{1:>{0}%F %T}Z {3:>{2}}@{5:<{4}d} {7:>{6}}| {8}\n", DATE_WIDTH + 1 + TIME_WIDTH + 1,
-        std::chrono::round<std::chrono::milliseconds>(msg.time), LOCATION_WIDTH, location,
-        LINE_WIDTH, msg.line, LEVEL_WIDTH, get_level_name(msg.level), msg.msg);
+        time_from_unix_ms(msg.unix_time_ms), LOCATION_WIDTH, location, LINE_WIDTH, msg.line,
+        LEVEL_WIDTH, get_level_name(msg.level), msg.msg);
 }
 
 /**
@@ -166,7 +164,7 @@ Level get_level_from_string(const std::string& str) {
     }
 
     // Start by matching first character
-    switch (str[0]) {
+    switch (std::toupper(str[0])) {
         case 'E':
             return Level::ERROR;
         case 'W':
@@ -233,7 +231,13 @@ void init(const std::string& filename, bool callbacks_only_arg) {
     *log_file_stream << get_header() << std::flush;
 }
 
-void log(const LogMessage&& msg) {
+namespace {
+
+UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) {
+    if (msg == nullptr) {
+        return;
+    }
+
     const std::lock_guard<std::mutex> lock(mutex);
 
     for (const auto& callback : all_log_callbacks) {
@@ -244,12 +248,12 @@ void log(const LogMessage&& msg) {
         return;
     }
 
-    if (unreal_console_level <= msg.level) {
-        unrealsdk::uconsole_output_text(utils::widen(msg.msg));
+    if (unreal_console_level <= msg->level) {
+        unrealsdk::uconsole_output_text(utils::widen(msg->msg));
     }
 
     if (external_console_handle != nullptr || log_file_stream) {
-        auto formatted = format_message(msg);
+        auto formatted = format_message(*msg);
 
         if (external_console_handle != nullptr) {
             WriteFile(external_console_handle, formatted.c_str(), (DWORD)formatted.size(), nullptr,
@@ -260,6 +264,30 @@ void log(const LogMessage&& msg) {
             *log_file_stream << formatted << std::flush;
         }
     }
+}
+}  // namespace
+
+void log(std::chrono::system_clock::time_point time,
+         Level level,
+         const std::string& msg,
+         const char* function,
+         const char* file,
+         int line) {
+    LogMessage log_msg{
+        unix_ms_from_time(time), level, msg.c_str(), msg.size(), function, file, line};
+    log_msg_internal(&log_msg);
+}
+
+void log(std::chrono::system_clock::time_point time,
+         Level level,
+         const std::wstring& msg,
+         const char* function,
+         const char* file,
+         int line) {
+    auto narrow = utils::narrow(msg);
+    LogMessage log_msg{
+        unix_ms_from_time(time), level, narrow.c_str(), narrow.size(), function, file, line};
+    log_msg_internal(&log_msg);
 }
 
 void set_console_level(Level level) {
