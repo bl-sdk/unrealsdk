@@ -41,7 +41,7 @@ bool init(std::unique_ptr<game::AbstractHook>&& game);
  *
  * @return True if the SDK has been initialized.
  */
-UNREALSDK_CAPI bool is_initialized(void);
+UNREALSDK_CAPI bool is_initialized(void) UNREALSDK_CAPI_SUFFIX;
 
 // ================ Remaining functions have undefined behaviour if not initialized ================
 
@@ -67,7 +67,7 @@ UNREALSDK_CAPI bool is_initialized(void);
  * @param number The number to initialize the name to.
  */
 UNREALSDK_CAPI void fname_init(FName* name, const wchar_t* str, int32_t number);
-inline void fname_init(FName* name, const std::wstring& str, int32_t number) {
+inline void fname_init(FName* name, const std::wstring& str, int32_t number) UNREALSDK_CAPI_SUFFIX {
     fname_init(name, str.c_str(), number);
 }
 
@@ -78,7 +78,7 @@ inline void fname_init(FName* name, const std::wstring& str, int32_t number) {
  * @param obj The object the frame is coming from.
  * @param param The parameter.
  */
-UNREALSDK_CAPI void fframe_step(FFrame* frame, UObject* obj, void* param);
+UNREALSDK_CAPI void fframe_step(FFrame* frame, UObject* obj, void* param) UNREALSDK_CAPI_SUFFIX;
 
 /**
  * @brief Calls unreal's malloc function.
@@ -87,7 +87,7 @@ UNREALSDK_CAPI void fframe_step(FFrame* frame, UObject* obj, void* param);
  * @param len The amount of bytes to allocate.
  * @return A pointer to the allocated memory.
  */
-UNREALSDK_CAPI [[nodiscard]] void* u_malloc(size_t len);
+UNREALSDK_CAPI [[nodiscard]] void* u_malloc(size_t len) UNREALSDK_CAPI_SUFFIX;
 template <typename T>
 [[nodiscard]] T* u_malloc(size_t len) {
     return reinterpret_cast<T*>(u_malloc(len));
@@ -101,7 +101,7 @@ template <typename T>
  * @param len The amount of bytes to allocate.
  * @return A pointer to the re-allocated memory.
  */
-UNREALSDK_CAPI [[nodiscard]] void* u_realloc(void* original, size_t len);
+UNREALSDK_CAPI [[nodiscard]] void* u_realloc(void* original, size_t len) UNREALSDK_CAPI_SUFFIX;
 template <typename T>
 [[nodiscard]] T* u_realloc(void* original, size_t len) {
     return reinterpret_cast<T*>(u_realloc(original, len));
@@ -112,7 +112,7 @@ template <typename T>
  *
  * @param data The memory to free.
  */
-UNREALSDK_CAPI void u_free(void* data);
+UNREALSDK_CAPI void u_free(void* data) UNREALSDK_CAPI_SUFFIX;
 
 /**
  * @brief Calls `UObject::ProcessEvent`.

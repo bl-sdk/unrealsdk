@@ -54,7 +54,7 @@ bool is_initialized(void) {
 #pragma region Wrappers
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] const GObjects* gobjects_ptr(void);
+UNREALSDK_CAPI [[nodiscard]] const GObjects* gobjects_ptr(void) UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
 const GObjects& gobjects(void) {
@@ -72,7 +72,7 @@ const GObjects* gobjects_ptr(void) {
 #endif
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] const GNames* gnames_ptr(void);
+UNREALSDK_CAPI [[nodiscard]] const GNames* gnames_ptr(void) UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
 const GNames& gnames(void) {
@@ -118,14 +118,15 @@ UNREALSDK_CAPI [[nodiscard]] UObject* construct_object(UClass* cls,
                                                        UObject* outer,
                                                        const FName* name = nullptr,
                                                        decltype(UObject::ObjectFlags) flags = 0,
-                                                       UObject* template_obj = nullptr);
+                                                       UObject* template_obj = nullptr)
+    UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
 UObject* construct_object(UClass* cls,
                           UObject* outer,
-                          const FName& name = {0, 0},
-                          decltype(UObject::ObjectFlags) flags = 0,
-                          UObject* template_obj = nullptr) {
+                          const FName& name,
+                          decltype(UObject::ObjectFlags) flags,
+                          UObject* template_obj) {
     return construct_object(cls, outer, &name, flags, template_obj);
 }
 #else
@@ -152,7 +153,7 @@ UObject* construct_object(UClass* cls,
 #endif
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI void uconsole_output_text(const wchar_t* str, size_t size);
+UNREALSDK_CAPI void uconsole_output_text(const wchar_t* str, size_t size) UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
 void uconsole_output_text(const std::wstring& str) {
@@ -174,7 +175,8 @@ void uconsole_output_text(const wchar_t* str, size_t size) {
 #endif
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] wchar_t* uobject_path_name_cstr(const UObject* obj);
+UNREALSDK_CAPI [[nodiscard]] wchar_t* uobject_path_name_cstr(const UObject* obj)
+    UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
 std::wstring uobject_path_name(const UObject* obj) {
@@ -204,7 +206,7 @@ wchar_t* uobject_path_name_cstr(const UObject* obj) {
 #ifdef UNREALSDK_SHARED
 UNREALSDK_CAPI [[nodiscard]] UObject* find_object(UClass* cls,
                                                   const wchar_t* name,
-                                                  size_t name_size);
+                                                  size_t name_size) UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
 UObject* find_object(UClass* cls, const std::wstring& name) {
@@ -230,7 +232,7 @@ UObject* find_object(const std::wstring& cls, const std::wstring& name) {
 #ifdef UNREALSDK_EXPORTING
 UNREALSDK_CAPI [[nodiscard]] UObject* find_object(UClass* cls,
                                                   const wchar_t* name,
-                                                  size_t name_size) {
+                                                  size_t name_size) UNREALSDK_CAPI_SUFFIX {
     return hook_instance->find_object(cls, {name, name_size});
 }
 #endif

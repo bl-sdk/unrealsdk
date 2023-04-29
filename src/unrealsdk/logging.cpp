@@ -240,10 +240,10 @@ void init(const std::string& filename, bool callbacks_only_arg) {
 
 namespace {
 
-UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg);
+UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) UNREALSDK_CAPI_SUFFIX;
 
 #ifndef UNREALSDK_IMPORTING
-UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) {
+UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) UNREALSDK_CAPI_SUFFIX {
     if (msg == nullptr) {
         return;
     }

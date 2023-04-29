@@ -7,11 +7,15 @@
 // If exporting (which is set by cmake privately if building shared)
 #if defined(__clang__) || defined(__MINGW32__)
 #define UNREALSDK_CAPI extern "C" [[gnu::dllexport]]
-#elif defined(_MSVC_VER)
+#elif defined(_MSC_VER)
 #define UNREALSDK_CAPI extern "C" __declspec(dllexport)
 #else
 #error Unknown dllexport attribute
 #endif
+
+// MSVC needs this to allow exceptions through the c interface
+// Since it's standard c++, might as well just add it to everything
+#define UNREALSDK_CAPI_SUFFIX noexcept(false)
 
 #else
 
@@ -20,17 +24,20 @@
 // If shared, but not exporting - i.e. when included by something liking against the shared library
 #if defined(__clang__) || defined(__MINGW32__)
 #define UNREALSDK_CAPI extern "C" [[gnu::dllimport]]
-#elif defined(_MSVC_VER)
+#elif defined(_MSC_VER)
 #define UNREALSDK_CAPI extern "C" __declspec(dllimport)
 #else
 #error Unknown dllimport attribute
 #endif
+
+#define UNREALSDK_CAPI_SUFFIX noexcept(false)
 
 #endif
 #else
 
 // If not shared nor exporting, just link staticlly
 #define UNREALSDK_CAPI
+#define UNREALSDK_CAPI_SUFFIX
 
 #endif
 

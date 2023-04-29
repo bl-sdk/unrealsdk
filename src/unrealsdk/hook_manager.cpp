@@ -72,7 +72,7 @@ UNREALSDK_CAPI bool add_hook(const wchar_t* func,
                              Type type,
                              const wchar_t* identifier,
                              size_t identifier_size,
-                             Callback* callback);
+                             Callback* callback) UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
 bool add_hook(const std::wstring& func,
@@ -111,7 +111,7 @@ UNREALSDK_CAPI bool has_hook(const wchar_t* func,
                              size_t func_size,
                              Type type,
                              const wchar_t* identifier,
-                             size_t identifier_size);
+                             size_t identifier_size) UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
 bool has_hook(const std::wstring& func, Type type, const std::wstring& identifier) {
@@ -140,7 +140,7 @@ UNREALSDK_CAPI bool remove_hook(const wchar_t* func,
                                 size_t func_size,
                                 Type type,
                                 const wchar_t* identifier,
-                                size_t identifier_size);
+                                size_t identifier_size) UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
 bool remove_hook(const std::wstring& func, Type type, const std::wstring& identifier) {

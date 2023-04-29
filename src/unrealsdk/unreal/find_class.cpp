@@ -44,7 +44,7 @@ void initialize_cache(void) {
 }  // namespace
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] UClass* find_class_fname(const FName* name);
+UNREALSDK_CAPI [[nodiscard]] UClass* find_class_fname(const FName* name) UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
 UClass* find_class(const FName& name) {
@@ -70,7 +70,8 @@ UClass* find_class_fname(const FName* name) {
 #endif
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] UClass* find_class_cstr(const wchar_t* name, size_t name_size);
+UNREALSDK_CAPI [[nodiscard]] UClass* find_class_cstr(const wchar_t* name,
+                                                     size_t name_size) UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
 UClass* find_class(const std::wstring& name) {
