@@ -36,9 +36,9 @@ struct List {
 
 }  // namespace impl
 
-std::unordered_map<std::wstring, impl::List> hooks{};
-
 namespace {
+
+std::unordered_map<std::wstring, impl::List> hooks{};
 
 /**
  * @brief Get the hook group for a certain type from it's list.
@@ -62,6 +62,23 @@ impl::Group& get_group_by_type(impl::List& list, Type type) {
 
 }  // namespace
 
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI bool add_hook(const wchar_t* func,
+                             size_t func_size,
+                             Type type,
+                             const wchar_t* identifier,
+                             size_t identifier_size,
+                             Callback* callback);
+#endif
+#ifdef UNREALSDK_IMPORTING
+bool add_hook(const std::wstring& func,
+              Type type,
+              const std::wstring& identifier,
+              Callback* callback) {
+    return add_hook(func.c_str(), func.size(), type, identifier.c_str(), identifier.size(),
+                    callback);
+}
+#else
 bool add_hook(const std::wstring& func,
               Type type,
               const std::wstring& identifier,
@@ -73,14 +90,59 @@ bool add_hook(const std::wstring& func,
     group[identifier] = callback;
     return true;
 }
+#endif
+#ifdef UNREALSDK_EXPORTING
+UNREALSDK_CAPI bool add_hook(const wchar_t* func,
+                             size_t func_size,
+                             Type type,
+                             const wchar_t* identifier,
+                             size_t identifier_size,
+                             Callback* callback) {
+    return add_hook({func, func_size}, type, {identifier, identifier_size}, callback);
+}
+#endif
 
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI bool has_hook(const wchar_t* func,
+                             size_t func_size,
+                             Type type,
+                             const wchar_t* identifier,
+                             size_t identifier_size);
+#endif
+#ifdef UNREALSDK_IMPORTING
+bool has_hook(const std::wstring& func, Type type, const std::wstring& identifier) {
+    return has_hook(func.c_str(), func.size(), type, identifier.c_str(), identifier.size());
+}
+#else
 bool has_hook(const std::wstring& func, Type type, const std::wstring& identifier) {
     if (!hooks.contains(func)) {
         return false;
     }
     return get_group_by_type(hooks[func], type).contains(identifier);
 }
+#endif
+#ifdef UNREALSDK_EXPORTING
+UNREALSDK_CAPI bool has_hook(const wchar_t* func,
+                             size_t func_size,
+                             Type type,
+                             const wchar_t* identifier,
+                             size_t identifier_size) {
+    return has_hook({func, func_size}, type, {identifier, identifier_size});
+}
+#endif
 
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI bool remove_hook(const wchar_t* func,
+                                size_t func_size,
+                                Type type,
+                                const wchar_t* identifier,
+                                size_t identifier_size);
+#endif
+#ifdef UNREALSDK_IMPORTING
+bool remove_hook(const std::wstring& func, Type type, const std::wstring& identifier) {
+    return remove_hook(func.c_str(), func.size(), type, identifier.c_str(), identifier.size());
+}
+#else
 bool remove_hook(const std::wstring& func, Type type, const std::wstring& identifier) {
     if (!hooks.contains(func)) {
         return false;
@@ -95,6 +157,16 @@ bool remove_hook(const std::wstring& func, Type type, const std::wstring& identi
     }
     return true;
 }
+#endif
+#ifdef UNREALSDK_EXPORTING
+UNREALSDK_CAPI bool remove_hook(const wchar_t* func,
+                                size_t func_size,
+                                Type type,
+                                const wchar_t* identifier,
+                                size_t identifier_size) {
+    return remove_hook({func, func_size}, type, {identifier, identifier_size});
+}
+#endif
 
 namespace impl {
 
