@@ -12,11 +12,6 @@ using namespace unrealsdk::unreal;
 
 namespace unrealsdk::hook_manager {
 
-#ifndef UNREALSDK_IMPORTING
-bool log_all_calls = false;
-bool inject_next_call = false;
-#endif
-
 namespace impl {
 
 using Group = std::unordered_map<std::wstring, std::function<Callback>>;
@@ -41,6 +36,9 @@ struct List {
 namespace {
 
 #ifndef UNREALSDK_IMPORTING
+bool should_log_all_calls = false;
+bool should_inject_next_call = false;
+
 std::unordered_map<std::wstring, impl::List> hooks{};
 
 /**
@@ -65,6 +63,16 @@ impl::Group& get_group_by_type(impl::List& list, Type type) {
 #endif
 
 }  // namespace
+
+#ifndef UNREALSDK_IMPORTING
+void log_all_calls(bool should_log) {
+    should_log_all_calls = should_log;
+}
+
+void inject_next_call(void) {
+    should_inject_next_call = true;
+}
+#endif
 
 #ifdef UNREALSDK_SHARED
 UNREALSDK_CAPI bool add_hook(const wchar_t* func,
@@ -97,11 +105,11 @@ bool add_hook(const std::wstring& func,
 #endif
 #ifdef UNREALSDK_EXPORTING
 bool add_hook(const wchar_t* func,
-                             size_t func_size,
-                             Type type,
-                             const wchar_t* identifier,
-                             size_t identifier_size,
-                             Callback* callback) {
+              size_t func_size,
+              Type type,
+              const wchar_t* identifier,
+              size_t identifier_size,
+              Callback* callback) {
     return add_hook({func, func_size}, type, {identifier, identifier_size}, callback);
 }
 #endif
@@ -127,10 +135,10 @@ bool has_hook(const std::wstring& func, Type type, const std::wstring& identifie
 #endif
 #ifdef UNREALSDK_EXPORTING
 bool has_hook(const wchar_t* func,
-                             size_t func_size,
-                             Type type,
-                             const wchar_t* identifier,
-                             size_t identifier_size) {
+              size_t func_size,
+              Type type,
+              const wchar_t* identifier,
+              size_t identifier_size) {
     return has_hook({func, func_size}, type, {identifier, identifier_size});
 }
 #endif
@@ -156,18 +164,26 @@ bool remove_hook(const std::wstring& func, Type type, const std::wstring& identi
         return false;
     }
     group.erase(identifier);
-    if (group.empty()) {
-        hooks.erase(func);
-    }
+
+    /*
+    Important Note: While it's tempting, we can't also erase the hook list here if it's empty,
+    because we may be being called from inside a hook .
+
+    If we are, we'd end up freeing the list which the native hook still has a reference to, and will
+    pass back to us to process further - i.e. it'll use after free, and probably crash.
+
+    Instead, we clean up hook lists during `preprocess_hook`
+    */
+
     return true;
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
 bool remove_hook(const wchar_t* func,
-                                size_t func_size,
-                                Type type,
-                                const wchar_t* identifier,
-                                size_t identifier_size) {
+                 size_t func_size,
+                 Type type,
+                 const wchar_t* identifier,
+                 size_t identifier_size) {
     return remove_hook({func, func_size}, type, {identifier, identifier_size});
 }
 #endif
@@ -176,14 +192,14 @@ namespace impl {
 
 #ifndef UNREALSDK_IMPORTING
 const List* preprocess_hook(const std::string& source, const UFunction* func, const UObject* obj) {
-    if (inject_next_call) {
-        inject_next_call = false;
+    if (should_inject_next_call) {
+        should_inject_next_call = false;
         return nullptr;
     }
 
     auto func_name = func->get_path_name();
 
-    if (log_all_calls) {
+    if (should_log_all_calls) {
         LOG(MISC, "===== {} called =====", source);
         LOG(MISC, L"Function: {}", func_name);
         LOG(MISC, L"Object: {}", obj->get_path_name());
@@ -193,7 +209,15 @@ const List* preprocess_hook(const std::string& source, const UFunction* func, co
         return nullptr;
     }
 
-    return &hooks[func_name];
+    auto list = &hooks[func_name];
+
+    // Cleanup the list if it's empty
+    if (list->empty()) {
+        hooks.erase(func_name);
+        return nullptr;
+    }
+
+    return list;
 }
 
 bool has_post_hooks(const List& list) {

@@ -54,11 +54,18 @@ struct Details {
 /// In post-hooks the return value is ignored.
 using Callback = bool(Details&);
 
-/// If true, every unreal function call will be logged. Best used in short bursts for debugging.
-UNREALSDK_CAPI bool log_all_calls;
-/// If true, hooks will completely ignore the next unreal function call. Automatically resets
-/// afterwards. Typically used to avoid recursion when re-calling the hooked function.
-UNREALSDK_CAPI bool inject_next_call;
+/**
+ * @brief Toggles logging all unreal function calls. Best used in short bursts for debugging.
+ *
+ * @param should_log True to turn on logging all calls, false to turn it off.
+ */
+UNREALSDK_CAPI void log_all_calls(bool should_log) UNREALSDK_CAPI_SUFFIX;
+
+/**
+ * @brief Makes the next unreal function call completely ignore hooks.
+ * @note Typically used to avoid recursion when re-calling the hooked function.
+ */
+UNREALSDK_CAPI void inject_next_call(void) UNREALSDK_CAPI_SUFFIX;
 
 /**
  * @brief Adds a hook.
