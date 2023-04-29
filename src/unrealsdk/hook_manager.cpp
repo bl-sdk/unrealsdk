@@ -12,17 +12,93 @@ using namespace unrealsdk::unreal;
 
 namespace unrealsdk::hook_manager {
 
-HookMap hooks{};
 bool log_all_calls = false;
 bool inject_next_call = false;
 
-bool HookList::empty(void) const {
-    return this->pre.empty() && this->post.empty();
+namespace impl {
+
+using Group = std::unordered_map<std::wstring, std::function<Callback>>;
+
+struct List {
+    Group pre;
+    Group post;
+    Group post_unconditional;
+
+    /**
+     * @brief Checks if all groups in the list are empty.
+     *
+     * @return True if all groups are empty
+     */
+    [[nodiscard]] bool empty(void) const {
+        return this->pre.empty() && this->post.empty() && this->post_unconditional.empty();
+    }
+};
+
+}  // namespace impl
+
+std::unordered_map<std::wstring, impl::List> hooks{};
+
+namespace {
+
+/**
+ * @brief Get the hook group for a certain type from it's list.
+ *
+ * @param list The hook list to get from.
+ * @param type The hook type to get.
+ * @return The selected hook group.
+ */
+impl::Group& get_group_by_type(impl::List& list, Type type) {
+    switch (type) {
+        case Type::PRE:
+            return list.pre;
+        case Type::POST:
+            return list.post;
+        case Type::POST_UNCONDITIONAL:
+            return list.post_unconditional;
+        default:
+            throw std::invalid_argument("Invalid hook type " + std::to_string((uint8_t)type));
+    }
 }
 
-const HookList* preprocess_hook(const std::string& source,
-                                const UFunction* func,
-                                const UObject* obj) {
+}  // namespace
+
+bool add_hook(const std::wstring& func,
+              Type type,
+              const std::wstring& identifier,
+              Callback* callback) {
+    auto& group = get_group_by_type(hooks[func], type);
+    if (group.contains(identifier)) {
+        return false;
+    }
+    group[identifier] = callback;
+    return true;
+}
+
+bool has_hook(const std::wstring& func, Type type, const std::wstring& identifier) {
+    if (!hooks.contains(func)) {
+        return false;
+    }
+    return get_group_by_type(hooks[func], type).contains(identifier);
+}
+
+bool remove_hook(const std::wstring& func, Type type, const std::wstring& identifier) {
+    if (!hooks.contains(func)) {
+        return false;
+    }
+    auto& group = get_group_by_type(hooks[func], type);
+    if (!group.contains(identifier)) {
+        return false;
+    }
+    group.erase(identifier);
+    if (group.empty()) {
+        hooks.erase(func);
+    }
+    return true;
+}
+
+namespace impl {
+
+const List* preprocess_hook(const std::string& source, const UFunction* func, const UObject* obj) {
     if (inject_next_call) {
         inject_next_call = false;
         return nullptr;
@@ -40,25 +116,37 @@ const HookList* preprocess_hook(const std::string& source,
         return nullptr;
     }
 
-    auto list = &hooks[func_name];
-
-    // If the list is empty, there are no hooks to run
-    // Remove it from the map so that next time the lookup is quicker
-    if (list->empty()) {
-        hooks.erase(func_name);
-        return nullptr;
-    }
-
-    return list;
+    return &hooks[func_name];
 }
 
-bool run_hook_group(const HookGroup& group, HookDetails& hook) {
-    // Grab a copy incase the hook removes itself from the group (which would invalidate the
-    // iterator)
-    auto hook_group_copy = group;
+bool has_post_hooks(const List& list) {
+    return !list.post.empty() || !list.post_unconditional.empty();
+}
+
+bool run_hooks_of_type(const List& list, Type type, Details& hook) {
+    // Grab a copy of the revelevant hook group, incase the hook removes itself (which would
+    // invalidate the iterator)
+    Group group{};
+
+    // Not using `get_group_by_type` because we don't want to throw on an invalid type (and
+    // const-ness messes with it).
+    switch (type) {
+        case Type::PRE:
+            group = list.pre;
+            break;
+        case Type::POST:
+            group = list.post;
+            break;
+        case Type::POST_UNCONDITIONAL:
+            group = list.post_unconditional;
+            break;
+        default:
+            LOG(ERROR, "Tried to run hooks of invalid type {}", (uint8_t)type);
+            return false;
+    }
 
     bool ret = false;
-    for (const auto& [_, hook_function] : hook_group_copy) {
+    for (const auto& [_, hook_function] : group) {
         try {
             ret |= hook_function(hook);
         } catch (const std::exception& ex) {
@@ -68,5 +156,7 @@ bool run_hook_group(const HookGroup& group, HookDetails& hook) {
 
     return ret;
 }
+
+}  // namespace impl
 
 }  // namespace unrealsdk::hook_manager

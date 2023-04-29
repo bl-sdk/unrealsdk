@@ -23,11 +23,13 @@ namespace unrealsdk::game {
 namespace {
 
 const std::wstring SAY_BYPASS_FUNC = L"Engine.Console:ShippingConsoleCommand";
+const constexpr auto SAY_BYPASS_TYPE = hook_manager::Type::PRE;
 const std::wstring SAY_BYPASS_ID = L"unrealsdk_bl2_say_bypass";
 const std::wstring INJECT_CONSOLE_FUNC = L"WillowGame.WillowGameViewportClient:PostRender";
+const constexpr auto INJECT_CONSOLE_TYPE = hook_manager::Type::PRE;
 const std::wstring INJECT_CONSOLE_ID = L"unrealsdk_bl2_inject_console";
 
-bool say_bypass_hook(hook_manager::HookDetails& hook) {
+bool say_bypass_hook(hook_manager::Details& hook) {
     static UFunction* console_command_func = nullptr;
     static UStrProperty* command_property = nullptr;
 
@@ -44,8 +46,8 @@ bool say_bypass_hook(hook_manager::HookDetails& hook) {
 
 BoundFunction console_output_text{};
 
-bool inject_console_hook(hook_manager::HookDetails& hook) {
-    hook_manager::hooks[INJECT_CONSOLE_FUNC].pre.erase(INJECT_CONSOLE_ID);
+bool inject_console_hook(hook_manager::Details& hook) {
+    hook_manager::remove_hook(INJECT_CONSOLE_FUNC, INJECT_CONSOLE_TYPE, INJECT_CONSOLE_ID);
 
     auto console = hook.obj->get<UObjectProperty>(L"ViewportConsole"_fn);
 
@@ -68,8 +70,9 @@ bool inject_console_hook(hook_manager::HookDetails& hook) {
 }  // namespace
 
 void BL2Hook::inject_console(void) {
-    hook_manager::hooks[SAY_BYPASS_FUNC].pre[SAY_BYPASS_ID] = &say_bypass_hook;
-    hook_manager::hooks[INJECT_CONSOLE_FUNC].pre[INJECT_CONSOLE_ID] = &inject_console_hook;
+    hook_manager::add_hook(SAY_BYPASS_FUNC, SAY_BYPASS_TYPE, SAY_BYPASS_ID, &say_bypass_hook);
+    hook_manager::add_hook(INJECT_CONSOLE_FUNC, INJECT_CONSOLE_TYPE, INJECT_CONSOLE_ID,
+                           &inject_console_hook);
 }
 
 void BL2Hook::uconsole_output_text(const std::wstring& str) const {

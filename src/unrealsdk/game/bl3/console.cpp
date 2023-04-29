@@ -26,14 +26,15 @@ namespace unrealsdk::game {
 namespace {
 
 const std::wstring INJECT_CONSOLE_FUNC = L"/Script/Engine.PlayerController:ClientSetHUD";
+const constexpr auto INJECT_CONSOLE_TYPE = hook_manager::Type::PRE;
 const std::wstring INJECT_CONSOLE_ID = L"unrealsdk_bl3_inject_console";
 
 constexpr auto DEFAULT_OUTPUT_TEXT_VF_INDEX = 83;
 
 UObject* console = nullptr;
 
-bool inject_console_hook(hook_manager::HookDetails& hook) {
-    hook_manager::hooks[INJECT_CONSOLE_FUNC].pre.erase(INJECT_CONSOLE_ID);
+bool inject_console_hook(hook_manager::Details& hook) {
+    hook_manager::remove_hook(INJECT_CONSOLE_FUNC, INJECT_CONSOLE_TYPE, INJECT_CONSOLE_ID);
 
     auto local_player = hook.obj->get<UObjectProperty>(L"Player"_fn);
     auto viewport = local_player->get<UObjectProperty>(L"ViewportClient"_fn);
@@ -89,7 +90,8 @@ bool inject_console_hook(hook_manager::HookDetails& hook) {
 }  // namespace
 
 void BL3Hook::inject_console(void) {
-    hook_manager::hooks[INJECT_CONSOLE_FUNC].pre[INJECT_CONSOLE_ID] = &inject_console_hook;
+    hook_manager::add_hook(INJECT_CONSOLE_FUNC, INJECT_CONSOLE_TYPE, INJECT_CONSOLE_ID,
+                           &inject_console_hook);
 }
 
 void BL3Hook::uconsole_output_text(const std::wstring& str) const {

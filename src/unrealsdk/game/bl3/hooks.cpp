@@ -28,14 +28,15 @@ const Pattern PROCESS_EVENT_SIG{
 
 void process_event_hook(UObject* obj, UFunction* func, void* params) {
     try {
-        auto list = hook_manager::preprocess_hook("ProcessEvent", func, obj);
-        if (list != nullptr) {
+        auto data = hook_manager::impl::preprocess_hook("ProcessEvent", func, obj);
+        if (data != nullptr) {
             // Copy args so that hooks can't modify them, for parity with call function
             const WrappedStruct args_base{func, params};
             WrappedStruct args(args_base);
-            hook_manager::HookDetails hook{obj, &args, {func->find_return_param()}, {func, obj}};
+            hook_manager::Details hook{obj, &args, {func->find_return_param()}, {func, obj}};
 
-            const bool block_execution = hook_manager::run_hook_group(list->pre, hook);
+            const bool block_execution =
+                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
 
             if (!block_execution) {
                 process_event_ptr(obj, func, params);
@@ -45,7 +46,7 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
                 hook.ret.copy_to(reinterpret_cast<uintptr_t>(params));
             }
 
-            if (list->post.empty()) {
+            if (!hook_manager::impl::has_post_hooks(*data)) {
                 return;
             }
 
@@ -53,7 +54,12 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(params));
             }
 
-            hook_manager::run_hook_group(list->post, hook);
+            if (!block_execution) {
+                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST, hook);
+            }
+
+            hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST_UNCONDITIONAL,
+                                                  hook);
 
             return;
         }
@@ -112,14 +118,15 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
         implementation simpler.
         */
 
-        auto list = hook_manager::preprocess_hook("ProcessEvent", func, obj);
-        if (list != nullptr) {
+        auto data = hook_manager::impl::preprocess_hook("ProcessEvent", func, obj);
+        if (data != nullptr) {
             WrappedStruct args{func};
             auto original_code = stack->extract_current_args(args);
 
-            hook_manager::HookDetails hook{obj, &args, {func->find_return_param()}, {func, obj}};
+            hook_manager::Details hook{obj, &args, {func->find_return_param()}, {func, obj}};
 
-            const bool block_execution = hook_manager::run_hook_group(list->pre, hook);
+            const bool block_execution =
+                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
 
             if (block_execution) {
                 stack->Code++;
@@ -134,7 +141,7 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
                                  - hook.ret.prop->Offset_Internal);
             }
 
-            if (list->post.empty()) {
+            if (!hook_manager::impl::has_post_hooks(*data)) {
                 return;
             }
 
@@ -143,7 +150,12 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
                                    - hook.ret.prop->Offset_Internal);
             }
 
-            hook_manager::run_hook_group(list->post, hook);
+            if (!block_execution) {
+                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST, hook);
+            }
+
+            hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST_UNCONDITIONAL,
+                                                  hook);
 
             return;
         }
