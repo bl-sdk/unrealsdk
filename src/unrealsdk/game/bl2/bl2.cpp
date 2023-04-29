@@ -14,7 +14,7 @@
 #include "unrealsdk/unreal/wrappers/gobjects.h"
 #include "unrealsdk/unrealsdk.h"
 
-#if defined(UE3) && defined(ARCH_X86)
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;

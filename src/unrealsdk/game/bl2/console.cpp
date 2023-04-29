@@ -14,7 +14,7 @@
 #include "unrealsdk/unreal/wrappers/bound_function.h"
 #include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 
-#if defined(UE3) && defined(ARCH_X86)
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::unreal;
 

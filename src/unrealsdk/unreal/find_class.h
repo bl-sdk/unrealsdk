@@ -20,14 +20,6 @@ class UClass;
  */
 [[nodiscard]] UClass* find_class(const FName& name);
 [[nodiscard]] UClass* find_class(const std::wstring& name);
-#ifdef UNREALSDK_IMPORTING
-inline UClass* find_class(const FName& name) {
-    return find_class(&name);
-}
-inline UClass* find_class(const std::wstring& name) {
-    return find_class_cstr(name.c_str(), name.size());
-}
-#endif
 
 }  // namespace unrealsdk::unreal
 

@@ -6,6 +6,8 @@
 #include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/structs/fname.h"
 
+#ifndef UNREALSDK_IMPORTING
+
 using namespace unrealsdk::unreal;
 
 namespace unrealsdk::unreal {
@@ -57,5 +59,7 @@ struct AbstractHook {
 #pragma endregion
 
 }  // namespace unrealsdk::game
+
+#endif
 
 #endif /* UNREALSDK_GAME_ABSTRACT_HOOK_H */

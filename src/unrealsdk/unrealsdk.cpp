@@ -11,17 +11,20 @@ namespace unrealsdk {
 
 namespace {
 
+#ifndef UNREALSDK_IMPORTING
 constexpr auto LOG_FILE_NAME = "unrealsdk.log";
 
 std::mutex mutex{};
 std::unique_ptr<game::AbstractHook> hook_instance;
+#endif
 
 }  // namespace
 
+#ifndef UNREALSDK_IMPORTING
 bool init(std::unique_ptr<game::AbstractHook>&& game) {
     const std::lock_guard<std::mutex> lock(mutex);
 
-    if (hook_instance == nullptr) {
+    if (hook_instance != nullptr) {
         return false;
     }
 
@@ -46,6 +49,7 @@ bool is_initialized(void) {
     const std::lock_guard<std::mutex> lock(mutex);
     return hook_instance != nullptr;
 }
+#endif
 
 #pragma region Wrappers
 
@@ -85,6 +89,7 @@ const GNames* gnames_ptr(void) {
 }
 #endif
 
+#ifndef UNREALSDK_IMPORTING
 void fname_init(FName* name, const wchar_t* str, int32_t number) {
     hook_instance->fname_init(name, str, number);
 }
@@ -106,6 +111,7 @@ void u_free(void* data) {
 void process_event(UObject* object, UFunction* function, void* params) {
     hook_instance->process_event(object, function, params);
 }
+#endif
 
 #ifdef UNREALSDK_SHARED
 UNREALSDK_CAPI [[nodiscard]] UObject* construct_object(UClass* cls,
@@ -205,10 +211,10 @@ UObject* find_object(UClass* cls, const std::wstring& name) {
     return find_object(cls, name.c_str(), name.size());
 }
 UObject* find_object(const FName& cls, const std::wstring& name) {
-    return find_object(find_class(&cls), name.c_str(), name.size());
+    return find_object(find_class(cls), name.c_str(), name.size());
 }
 UObject* find_object(const std::wstring& cls, const std::wstring& name) {
-    return find_object(find_class_cstr(cls.c_str(), cls.size()), name.c_str(), name.size());
+    return find_object(find_class(cls), name.c_str(), name.size());
 }
 #else
 UObject* find_object(UClass* cls, const std::wstring& name) {

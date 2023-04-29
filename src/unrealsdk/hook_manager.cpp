@@ -12,8 +12,10 @@ using namespace unrealsdk::unreal;
 
 namespace unrealsdk::hook_manager {
 
+#ifndef UNREALSDK_IMPORTING
 bool log_all_calls = false;
 bool inject_next_call = false;
+#endif
 
 namespace impl {
 
@@ -38,6 +40,7 @@ struct List {
 
 namespace {
 
+#ifndef UNREALSDK_IMPORTING
 std::unordered_map<std::wstring, impl::List> hooks{};
 
 /**
@@ -59,6 +62,7 @@ impl::Group& get_group_by_type(impl::List& list, Type type) {
             throw std::invalid_argument("Invalid hook type " + std::to_string((uint8_t)type));
     }
 }
+#endif
 
 }  // namespace
 
@@ -92,7 +96,7 @@ bool add_hook(const std::wstring& func,
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-UNREALSDK_CAPI bool add_hook(const wchar_t* func,
+bool add_hook(const wchar_t* func,
                              size_t func_size,
                              Type type,
                              const wchar_t* identifier,
@@ -122,7 +126,7 @@ bool has_hook(const std::wstring& func, Type type, const std::wstring& identifie
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-UNREALSDK_CAPI bool has_hook(const wchar_t* func,
+bool has_hook(const wchar_t* func,
                              size_t func_size,
                              Type type,
                              const wchar_t* identifier,
@@ -159,7 +163,7 @@ bool remove_hook(const std::wstring& func, Type type, const std::wstring& identi
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-UNREALSDK_CAPI bool remove_hook(const wchar_t* func,
+bool remove_hook(const wchar_t* func,
                                 size_t func_size,
                                 Type type,
                                 const wchar_t* identifier,
@@ -170,6 +174,7 @@ UNREALSDK_CAPI bool remove_hook(const wchar_t* func,
 
 namespace impl {
 
+#ifndef UNREALSDK_IMPORTING
 const List* preprocess_hook(const std::string& source, const UFunction* func, const UObject* obj) {
     if (inject_next_call) {
         inject_next_call = false;
@@ -228,6 +233,7 @@ bool run_hooks_of_type(const List& list, Type type, Details& hook) {
 
     return ret;
 }
+#endif
 
 }  // namespace impl
 

@@ -10,6 +10,7 @@ namespace unrealsdk::logging {
 
 namespace {
 
+#ifndef UNREALSDK_IMPORTING
 std::mutex mutex{};
 
 std::atomic<Level> unreal_console_level = Level::DEFAULT_CONSOLE_LEVEL;
@@ -19,6 +20,7 @@ std::unique_ptr<std::ostream> log_file_stream;
 std::vector<log_callback> all_log_callbacks{};
 
 bool callbacks_only = false;
+#endif
 
 /**
  * @brief Gets the unix time milliseconds from a system clock time point.
@@ -30,6 +32,7 @@ uint64_t unix_ms_from_time(std::chrono::system_clock::time_point time) {
     return time.time_since_epoch().count();
 }
 
+#ifndef UNREALSDK_IMPORTING
 /**
  * @brief Gets a system clock time point from unix time milliseconds.
  *
@@ -41,12 +44,15 @@ std::chrono::sys_time<std::chrono::milliseconds> time_from_unix_ms(uint64_t unix
         std::chrono::system_clock::time_point{std::chrono::milliseconds{unix_time_ms}});
 }
 
+#endif
+
 }  // namespace
 
 #pragma region Formatting
 
 namespace {
 
+#ifndef UNREALSDK_IMPORTING
 const std::string TRUNCATION_PREFIX = "~ ";
 
 /**
@@ -146,11 +152,7 @@ std::string get_header(void) {
                                   LINE_WIDTH, "line", LEVEL_WIDTH, "v");
 }
 
-}  // namespace
-
 #pragma endregion
-
-namespace {
 
 /**
  * @brief Gets a log level from it's string representation.
@@ -194,8 +196,11 @@ Level get_level_from_string(const std::string& str) {
     return Level::INVALID;
 }
 
+#endif
+
 }  // namespace
 
+#ifndef UNREALSDK_IMPORTING
 void init(const std::string& filename, bool callbacks_only_arg) {
     static bool initialized = false;
     if (initialized) {
@@ -231,8 +236,13 @@ void init(const std::string& filename, bool callbacks_only_arg) {
     *log_file_stream << get_header() << std::flush;
 }
 
+#endif
+
 namespace {
 
+UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg);
+
+#ifndef UNREALSDK_IMPORTING
 UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) {
     if (msg == nullptr) {
         return;
@@ -265,6 +275,8 @@ UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) {
         }
     }
 }
+#endif
+
 }  // namespace
 
 void log(std::chrono::system_clock::time_point time,
@@ -290,6 +302,7 @@ void log(std::chrono::system_clock::time_point time,
     log_msg_internal(&log_msg);
 }
 
+#ifndef UNREALSDK_IMPORTING
 void set_console_level(Level level) {
     if (Level::MIN > level || level > Level::MAX) {
         throw std::out_of_range("Log level out of range!");
@@ -310,5 +323,6 @@ void remove_callback(log_callback callback) {
         std::remove(all_log_callbacks.begin(), all_log_callbacks.end(), callback),
         all_log_callbacks.end());
 }
+#endif
 
 }  // namespace unrealsdk::logging

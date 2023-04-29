@@ -5,6 +5,8 @@
 
 #include "unrealsdk/game/abstract_hook.h"
 
+#ifndef UNREALSDK_IMPORTING
+
 namespace unrealsdk::game {
 
 /**
@@ -33,5 +35,7 @@ struct GameTraits {
 };
 
 }  // namespace unrealsdk::game
+
+#endif
 
 #endif /* UNREALSDK_GAME_SELECTOR_H */

@@ -10,6 +10,7 @@ namespace unrealsdk::unreal {
 
 namespace {
 
+#ifndef UNREALSDK_IMPORTING
 // Cache of all known classes by FName
 // We leave duplicate names undefined
 std::unordered_map<FName, UClass*> cache;
@@ -38,6 +39,7 @@ void initialize_cache(void) {
         cache[obj->Name] = reinterpret_cast<UClass*>(obj);
     }
 }
+#endif
 
 }  // namespace
 
@@ -61,7 +63,7 @@ UClass* find_class(const FName& name) {
     return cache[name];
 }
 #endif
-#ifdef UNREALSDK_SHARED
+#ifdef UNREALSDK_EXPORTING
 UClass* find_class_fname(const FName* name) {
     return find_class(*name);
 }
@@ -92,7 +94,7 @@ UClass* find_class(const std::wstring& name) {
     return cls;
 }
 #endif
-#ifdef UNREALSDK_SHARED
+#ifdef UNREALSDK_EXPORTING
 UClass* find_class_cstr(const wchar_t* name, size_t name_size) {
     std::wstring str{name, name_size};
     return find_class(str);

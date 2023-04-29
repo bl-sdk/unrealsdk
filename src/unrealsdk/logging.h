@@ -39,6 +39,7 @@ struct LogMessage {
     // NOLINTEND(cppcoreguidelines-avoid-const-or-ref-data-members)
 };
 
+#ifndef UNREALSDK_IMPORTING
 /**
  * @brief Initializes logging, creating the log files and external console as needed.
  * @note Only the first call is used. This means manually calling this before initializing the sdk
@@ -49,6 +50,7 @@ struct LogMessage {
  *                       the filename arg is ignored.
  */
 void init(const std::string& filename, bool callbacks_only = false);
+#endif
 
 /**
  * @brief Internal function to log a message.

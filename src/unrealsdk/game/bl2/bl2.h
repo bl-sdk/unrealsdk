@@ -6,7 +6,7 @@
 #include "unrealsdk/game/abstract_hook.h"
 #include "unrealsdk/game/selector.h"
 
-#if defined(UE3) && defined(ARCH_X86)
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::unreal;
 

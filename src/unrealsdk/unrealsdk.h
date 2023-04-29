@@ -25,6 +25,7 @@ struct FFrame;
 
 namespace unrealsdk {
 
+#ifndef UNREALSDK_IMPORTING
 /**
  * @brief Initializes the sdk.
  *
@@ -32,6 +33,7 @@ namespace unrealsdk {
  * @return True if the sdk was initialized with the given game, false if it was already initialized.
  */
 bool init(std::unique_ptr<game::AbstractHook>&& game);
+#endif
 
 /**
  * @brief Checks if the SDK has been initialized.

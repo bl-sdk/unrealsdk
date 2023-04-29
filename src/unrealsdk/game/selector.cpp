@@ -7,6 +7,8 @@
 #include "unrealsdk/game/bl3/bl3.h"
 #include "unrealsdk/game/tps/tps.h"
 
+#ifndef UNREALSDK_IMPORTING
+
 using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
@@ -65,6 +67,6 @@ std::unique_ptr<AbstractHook> select_based_on_executable(void) {
     return find_correct_hook(executable);
 }
 
-#pragma endregion
-
 }  // namespace unrealsdk::game
+
+#endif

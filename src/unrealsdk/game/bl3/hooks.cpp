@@ -8,7 +8,7 @@
 #include "unrealsdk/unreal/structs/fframe.h"
 #include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 
-#if defined(UE4) && defined(ARCH_X64)
+#if defined(UE4) && defined(ARCH_X64) && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::unreal;
 using namespace unrealsdk::memory;
