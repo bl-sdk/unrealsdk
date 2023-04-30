@@ -97,7 +97,7 @@ UClass* find_class(const std::wstring& name) noexcept {
 #endif
 #ifdef UNREALSDK_EXPORTING
 UClass* find_class_cstr(const wchar_t* name, size_t name_size) noexcept {
-    std::wstring str{name, name_size};
+    const std::wstring str{name, name_size};
     return find_class(str);
 }
 #endif

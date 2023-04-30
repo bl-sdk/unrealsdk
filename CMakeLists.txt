@@ -10,7 +10,6 @@ add_library(_unrealsdk_interface INTERFACE)
 
 target_compile_features(_unrealsdk_interface INTERFACE cxx_std_20)
 set_target_properties(_unrealsdk_interface PROPERTIES
-    EXPORT_COMPILE_COMMANDS True
     COMPILE_WARNING_AS_ERROR True
     INTERPROCEDURAL_OPTIMIZATION True
 )
@@ -70,10 +69,16 @@ endif()
 if(NOT UNREALSDK_SHARED)
     add_library(unrealsdk OBJECT)
     target_link_libraries(unrealsdk PUBLIC _unrealsdk_interface)
+    set_target_properties(unrealsdk PROPERTIES
+        EXPORT_COMPILE_COMMANDS True
+    )
 else()
     add_library(unrealsdk SHARED)
     target_link_libraries(unrealsdk PUBLIC _unrealsdk_interface)
-    set_target_properties(unrealsdk PROPERTIES PREFIX "")
+    set_target_properties(unrealsdk PROPERTIES
+        EXPORT_COMPILE_COMMANDS True
+        PREFIX ""
+    )
 
     file(GLOB_RECURSE shared_sources CONFIGURE_DEPENDS "src/shared/*.cpp" "src/shared/*.h")
     target_sources(unrealsdk PRIVATE ${shared_sources})

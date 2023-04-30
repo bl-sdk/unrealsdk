@@ -14,7 +14,7 @@ unrealsdk::init(unrealsdk::game::select_based_on_executable());
 If this doesn't work correctly, you can always implement your own version (and then merge it back
 into this project).
 
-If you link against the sdk as a shared library, it automatically initalizes like this for you.
+If you link against the sdk as a shared library, it automatically initializes like this for you.
 
 After initializing, you probably want to setup some hooks. The sdk can run callbacks whenever an
 unreal function is hooked, allowing you to interact with it's args, and mess with it's execution.
@@ -87,7 +87,7 @@ the same process. At it's simplest, any detours on unreal functions will change 
 a second instance won't be able to find them again. If two programs both want to use the sdk in the
 same game process, they will have to link against the shared library.
 
-The included shared library initalizes based on executable. If you need custom initialization, you
+The included shared library initializes based on executable. If you need custom initialization, you
 can create your own shared library by linking against the object library and defining the
 `UNREALSDK_SHARED` and `UNREALSDK_EXPORTING` macros.
 

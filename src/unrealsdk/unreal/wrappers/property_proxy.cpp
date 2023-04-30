@@ -20,7 +20,7 @@ also checking size doesn't even add any extra pointer accesses.
 
 PropertyProxy::PropertyProxy(UProperty* prop) : prop(prop), value(nullptr), been_set(false) {
     if (prop != nullptr) {
-        size_t size = this->prop->ElementSize * this->prop->ArrayDim;
+        const size_t size = this->prop->ElementSize * this->prop->ArrayDim;
         if (size > sizeof(void*)) {
             this->value = unrealsdk::u_malloc(size);
         }
@@ -74,7 +74,7 @@ PropertyProxy::~PropertyProxy() {
         }
     });
 
-    size_t size = this->prop->ElementSize * this->prop->ArrayDim;
+    const size_t size = this->prop->ElementSize * this->prop->ArrayDim;
     if (size > sizeof(void*)) {
         unrealsdk::u_free(this->value);
     }
@@ -84,7 +84,7 @@ uintptr_t PropertyProxy::get_value_addr(void) const {
     if (this->prop == nullptr) {
         throw std::runtime_error("Property does not exist!");
     }
-    size_t size = this->prop->ElementSize * this->prop->ArrayDim;
+    const size_t size = this->prop->ElementSize * this->prop->ArrayDim;
 
     return (size > sizeof(void*) ? reinterpret_cast<uintptr_t>(this->value)
                                  : reinterpret_cast<uintptr_t>(&this->value))

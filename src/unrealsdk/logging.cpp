@@ -285,7 +285,7 @@ void log(std::chrono::system_clock::time_point time,
          const char* function,
          const char* file,
          int line) {
-    LogMessage log_msg{
+    const LogMessage log_msg{
         unix_ms_from_time(time), level, msg.c_str(), msg.size(), function, file, line};
     log_msg_internal(&log_msg);
 }
@@ -297,7 +297,7 @@ void log(std::chrono::system_clock::time_point time,
          const char* file,
          int line) {
     auto narrow = utils::narrow(msg);
-    LogMessage log_msg{
+    const LogMessage log_msg{
         unix_ms_from_time(time), level, narrow.c_str(), narrow.size(), function, file, line};
     log_msg_internal(&log_msg);
 }
