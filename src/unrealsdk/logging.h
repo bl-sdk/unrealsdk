@@ -80,8 +80,9 @@ void log(std::chrono::system_clock::time_point time,
  * @note Does not affect the log file or external console, if enabled.
  *
  * @param level The new log level.
+ * @return True if console level changed, false if an invalid value was passed in.
  */
-UNREALSDK_CAPI void set_console_level(Level level) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI bool set_console_level(Level level) noexcept;
 
 using log_callback = void (*)(const LogMessage*);
 
@@ -90,14 +91,14 @@ using log_callback = void (*)(const LogMessage*);
  *
  * @param callback The callback to add.
  */
-UNREALSDK_CAPI void add_callback(log_callback callback) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI void add_callback(log_callback callback) noexcept;
 
 /**
  * @brief Removes a callback from being run on each log message.
  *
  * @param callback The callback to remove.
  */
-UNREALSDK_CAPI void remove_callback(log_callback callback) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI void remove_callback(log_callback callback) noexcept;
 
 }  // namespace unrealsdk::logging
 

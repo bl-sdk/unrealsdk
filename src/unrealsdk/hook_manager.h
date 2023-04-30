@@ -59,13 +59,13 @@ using Callback = bool(Details&);
  *
  * @param should_log True to turn on logging all calls, false to turn it off.
  */
-UNREALSDK_CAPI void log_all_calls(bool should_log) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI void log_all_calls(bool should_log) noexcept;
 
 /**
  * @brief Makes the next unreal function call completely ignore hooks.
  * @note Typically used to avoid recursion when re-calling the hooked function.
  */
-UNREALSDK_CAPI void inject_next_call(void) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI void inject_next_call(void) noexcept;
 
 /**
  * @brief Adds a hook.

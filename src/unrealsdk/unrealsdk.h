@@ -41,7 +41,7 @@ bool init(std::unique_ptr<game::AbstractHook>&& game);
  *
  * @return True if the SDK has been initialized.
  */
-UNREALSDK_CAPI bool is_initialized(void) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI bool is_initialized(void) noexcept;
 
 // ================ Remaining functions have undefined behaviour if not initialized ================
 
@@ -50,14 +50,14 @@ UNREALSDK_CAPI bool is_initialized(void) UNREALSDK_CAPI_SUFFIX;
  *
  * @return A reference to the GObjects wrapper.
  */
-[[nodiscard]] const GObjects& gobjects(void);
+[[nodiscard]] const GObjects& gobjects(void) noexcept;
 
 /**
  * @brief Gets a reference to the GNames wrapper.
  *
  * @return A reference to the GNames wrapper.
  */
-[[nodiscard]] const GNames& gnames(void);
+[[nodiscard]] const GNames& gnames(void) noexcept;
 
 /**
  * @brief Calls FName::Init, set to add new names and split numbers.
@@ -66,10 +66,8 @@ UNREALSDK_CAPI bool is_initialized(void) UNREALSDK_CAPI_SUFFIX;
  * @param str The string to initialize the name to.
  * @param number The number to initialize the name to.
  */
-UNREALSDK_CAPI void fname_init(FName* name, const wchar_t* str, int32_t number);
-inline void fname_init(FName* name, const std::wstring& str, int32_t number) UNREALSDK_CAPI_SUFFIX {
-    fname_init(name, str.c_str(), number);
-}
+UNREALSDK_CAPI void fname_init(FName* name, const wchar_t* str, int32_t number) noexcept;
+void fname_init(FName* name, const std::wstring& str, int32_t number) noexcept;
 
 /**
  * @brief Calls FFrame::Step.
@@ -78,7 +76,7 @@ inline void fname_init(FName* name, const std::wstring& str, int32_t number) UNR
  * @param obj The object the frame is coming from.
  * @param param The parameter.
  */
-UNREALSDK_CAPI void fframe_step(FFrame* frame, UObject* obj, void* param) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI void fframe_step(FFrame* frame, UObject* obj, void* param) noexcept;
 
 /**
  * @brief Calls unreal's malloc function.
@@ -87,9 +85,9 @@ UNREALSDK_CAPI void fframe_step(FFrame* frame, UObject* obj, void* param) UNREAL
  * @param len The amount of bytes to allocate.
  * @return A pointer to the allocated memory.
  */
-UNREALSDK_CAPI [[nodiscard]] void* u_malloc(size_t len) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI [[nodiscard]] void* u_malloc(size_t len) noexcept;
 template <typename T>
-[[nodiscard]] T* u_malloc(size_t len) {
+[[nodiscard]] T* u_malloc(size_t len) noexcept {
     return reinterpret_cast<T*>(u_malloc(len));
 }
 
@@ -101,9 +99,9 @@ template <typename T>
  * @param len The amount of bytes to allocate.
  * @return A pointer to the re-allocated memory.
  */
-UNREALSDK_CAPI [[nodiscard]] void* u_realloc(void* original, size_t len) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI [[nodiscard]] void* u_realloc(void* original, size_t len) noexcept;
 template <typename T>
-[[nodiscard]] T* u_realloc(void* original, size_t len) {
+[[nodiscard]] T* u_realloc(void* original, size_t len) noexcept {
     return reinterpret_cast<T*>(u_realloc(original, len));
 }
 
@@ -112,7 +110,7 @@ template <typename T>
  *
  * @param data The memory to free.
  */
-UNREALSDK_CAPI void u_free(void* data) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI void u_free(void* data) noexcept;
 
 /**
  * @brief Calls `UObject::ProcessEvent`.
@@ -121,7 +119,7 @@ UNREALSDK_CAPI void u_free(void* data) UNREALSDK_CAPI_SUFFIX;
  * @param func The function to call.
  * @param params The function's params
  */
-UNREALSDK_CAPI void process_event(UObject* object, UFunction* func, void* params);
+UNREALSDK_CAPI void process_event(UObject* object, UFunction* func, void* params) noexcept;
 
 /**
  * @brief Constructs a new object
@@ -137,14 +135,14 @@ UNREALSDK_CAPI void process_event(UObject* object, UFunction* func, void* params
                                         UObject* outer,
                                         const FName& name = {0, 0},
                                         decltype(UObject::ObjectFlags) flags = 0,
-                                        UObject* template_obj = nullptr);
+                                        UObject* template_obj = nullptr) noexcept;
 
 /**
  * @brief Calls `UConsole::OutputText` to write to the UE console.
  *
  * @param str The string to write.
  */
-void uconsole_output_text(const std::wstring& str);
+void uconsole_output_text(const std::wstring& str) noexcept;
 
 /**
  * @brief Calls `UObject::PathName` on the given object.
@@ -152,7 +150,7 @@ void uconsole_output_text(const std::wstring& str);
  * @param obj The object to get the name of.
  * @return The object's name
  */
-[[nodiscard]] std::wstring uobject_path_name(const UObject* obj);
+[[nodiscard]] std::wstring uobject_path_name(const UObject* obj) noexcept;
 
 /**
  * @brief Finds an object by name.
@@ -161,9 +159,9 @@ void uconsole_output_text(const std::wstring& str);
  * @param name The object's full path name.
  * @return The object, or nullptr if unable to find.
  */
-[[nodiscard]] UObject* find_object(UClass* cls, const std::wstring& name);
-[[nodiscard]] UObject* find_object(const FName& cls, const std::wstring& name);
-[[nodiscard]] UObject* find_object(const std::wstring& cls, const std::wstring& name);
+[[nodiscard]] UObject* find_object(UClass* cls, const std::wstring& name) noexcept;
+[[nodiscard]] UObject* find_object(const FName& cls, const std::wstring& name) noexcept;
+[[nodiscard]] UObject* find_object(const std::wstring& cls, const std::wstring& name) noexcept;
 
 }  // namespace unrealsdk
 

@@ -44,48 +44,48 @@ void initialize_cache(void) {
 }  // namespace
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] UClass* find_class_fname(const FName* name) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI [[nodiscard]] UClass* find_class_fname(const FName* name) noexcept;
 #endif
 #ifdef UNREALSDK_IMPORTING
-UClass* find_class(const FName& name) {
+UClass* find_class(const FName& name) noexcept {
     return find_class_fname(&name);
 }
 #else
-UClass* find_class(const FName& name) {
+UClass* find_class(const FName& name) noexcept {
     if (cache.empty()) {
         initialize_cache();
     }
 
     if (!cache.contains(name)) {
-        throw std::runtime_error("Unknown class name: " + (std::string)name);
+        return nullptr;
     }
 
     return cache[name];
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-UClass* find_class_fname(const FName* name) {
+UClass* find_class_fname(const FName* name) noexcept {
     return find_class(*name);
 }
 #endif
 
 #ifdef UNREALSDK_SHARED
 UNREALSDK_CAPI [[nodiscard]] UClass* find_class_cstr(const wchar_t* name,
-                                                     size_t name_size) UNREALSDK_CAPI_SUFFIX;
+                                                     size_t name_size) noexcept;
 #endif
 #ifdef UNREALSDK_IMPORTING
-UClass* find_class(const std::wstring& name) {
+UClass* find_class(const std::wstring& name) noexcept {
     return find_class_cstr(name.c_str(), name.size());
 }
 #else
-UClass* find_class(const std::wstring& name) {
+UClass* find_class(const std::wstring& name) noexcept {
     if (cache.empty()) {
         initialize_cache();
     }
 
     auto cls = validate_type<UClass>(unrealsdk::find_object(uclass_class, name));
     if (cls == nullptr) {
-        throw std::runtime_error("Could not find class: " + utils::narrow(name));
+        return nullptr;
     }
 
     if (!cache.contains(cls->Name)) {
@@ -96,7 +96,7 @@ UClass* find_class(const std::wstring& name) {
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-UClass* find_class_cstr(const wchar_t* name, size_t name_size) {
+UClass* find_class_cstr(const wchar_t* name, size_t name_size) noexcept {
     std::wstring str{name, name_size};
     return find_class(str);
 }

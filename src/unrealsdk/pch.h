@@ -13,10 +13,6 @@
 #error Unknown dllexport attribute
 #endif
 
-// MSVC needs this to allow exceptions through the c interface
-// Since it's standard c++, might as well just add it to everything
-#define UNREALSDK_CAPI_SUFFIX noexcept(false)
-
 #else
 
 #define UNREALSDK_IMPORTING
@@ -30,14 +26,11 @@
 #error Unknown dllimport attribute
 #endif
 
-#define UNREALSDK_CAPI_SUFFIX noexcept(false)
-
 #endif
 #else
 
 // If not shared nor exporting, just link staticlly
 #define UNREALSDK_CAPI
-#define UNREALSDK_CAPI_SUFFIX
 
 #endif
 
