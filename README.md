@@ -14,8 +14,7 @@ unrealsdk::init(unrealsdk::game::select_based_on_executable());
 If this doesn't work correctly, you can always implement your own version (and then merge it back
 into this project).
 
-If you build the sdk as a shared library, it automatically does this for you. If you need custom
-initialization, you'll have to create your own target instead.
+If you link against the sdk as a shared library, it automatically initalizes like this for you.
 
 After initializing, you probably want to setup some hooks. The sdk can run callbacks whenever an
 unreal function is hooked, allowing you to interact with it's args, and mess with it's execution.
@@ -81,20 +80,25 @@ You can configure the sdk by setting a few variables before including it:
 - `UNREALSDK_ARCH` - The architecture to build the sdk for. One of `x86` or `x64`. Will be double
   checked at compile time.
 - `UNREALSDK_SHARED` - If set, compiles as a shared library instead of as an object.
-- `UNREALSDK_EXPORTING` - If set, compiles with dll exports. Useful to make a custom shared library
-  with different initialization.
 
-# Shared Library Helpers
+## Shared Library
 The sdk contains a decent amount of internal state, meaning it's not possible to inject twice into
 the same process. At it's simplest, any detours on unreal functions will change their signatures, so
 a second instance won't be able to find them again. If two programs both want to use the sdk in the
 same game process, they will have to link against the shared library.
 
-In order to allow cross-compiler ABI compatibility, the exported functions use a pure C interface.
-Since the sdk heavily relies on C++ features (e.g. heavy template usage), it's impractical to export
-everything this way. Instead, it only exports the bare minimum functions which interact with
-internal state. Some of these rely on private wrapper functions, which do things like decompose
-strings into pointer + length, in which case the public functions are redirected as required.
+The included shared library initalizes based on executable. If you need custom initialization, you
+can create your own shared library by linking against the object library and defining the
+`UNREALSDK_SHARED` and `UNREALSDK_EXPORTING` macros.
+
+One of the goals of the shared library implementation is have a stable cross-compiler ABI - i.e.
+allowing developing one program while also running another which you downloaded a precompiled
+version of. In order to do this, the exported functions try to use a pure C interface. Since the sdk
+heavily relies on C++ features (e.g. all the templates), it's impractical to export everything this
+way. Instead, it only exports the bare minimum functions which interact with internal state. Some of
+these rely on private wrapper functions, which do things like decompose strings into pointer and
+length, in which case the public functions are redirected as required. The remaining functions will
+be linked statically.
 
 # Running Builds
 As previously mentioned, the sdk can be configured to create a shared library. This is useful when
