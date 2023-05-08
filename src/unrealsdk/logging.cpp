@@ -29,7 +29,7 @@ bool callbacks_only = false;
  * @return The unix time milliseconds.
  */
 uint64_t unix_ms_from_time(std::chrono::system_clock::time_point time) {
-    return time.time_since_epoch().count();
+    return std::chrono::round<std::chrono::milliseconds>(time.time_since_epoch()).count();
 }
 
 #ifndef UNREALSDK_IMPORTING
