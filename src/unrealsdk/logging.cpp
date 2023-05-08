@@ -64,7 +64,7 @@ const std::string TRUNCATION_PREFIX = "~ ";
  * @param max_width The maximum width of the string.
  * @return The truncated string.
  */
-std::string truncate_leading_chunks(const std::string& str,
+std::string truncate_leading_chunks(const std::string&& str,
                                     const std::string& separators,
                                     size_t max_width) {
     auto width = str.size();
@@ -90,7 +90,7 @@ std::string truncate_leading_chunks(const std::string& str,
     }
 
     if (start_pos == 0) {
-        return str;
+        return std::move(str);
     }
 
     return TRUNCATION_PREFIX + str.substr(start_pos);
@@ -138,7 +138,7 @@ std::string format_message(const LogMessage& msg) {
     return unrealsdk::fmt::format(
         "{1:>{0}%F %T}Z {3:>{2}}@{5:<{4}d} {7:>{6}}| {8}\n", DATE_WIDTH + 1 + TIME_WIDTH + 1,
         time_from_unix_ms(msg.unix_time_ms), LOCATION_WIDTH, location, LINE_WIDTH, msg.line,
-        LEVEL_WIDTH, get_level_name(msg.level), msg.msg);
+        LEVEL_WIDTH, get_level_name(msg.level), std::string{msg.msg, msg.msg_size});
 }
 
 /**
@@ -259,7 +259,7 @@ UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) noexcept {
     }
 
     if (unreal_console_level <= msg->level) {
-        unrealsdk::uconsole_output_text(utils::widen(msg->msg));
+        unrealsdk::uconsole_output_text(utils::widen({msg->msg, msg->msg_size}));
     }
 
     if (external_console_handle != nullptr || log_file_stream) {
