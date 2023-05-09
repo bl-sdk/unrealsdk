@@ -16,10 +16,10 @@ class UClass;
  *
  * @param name The class name.
  * @param name_size The size of the class name string.
- * @return The class object, or nullptr if unable to find.
+ * @return The class object.
  */
-[[nodiscard]] UClass* find_class(const FName& name) noexcept;
-[[nodiscard]] UClass* find_class(const std::wstring& name) noexcept;
+[[nodiscard]] UClass* find_class(const FName& name);
+[[nodiscard]] UClass* find_class(const std::wstring& name);
 
 }  // namespace unrealsdk::unreal
 

@@ -44,14 +44,14 @@ void initialize_cache(void) {
 }  // namespace
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] UClass* find_class_fname(const FName* name) noexcept;
+UNREALSDK_CAPI [[nodiscard]] UClass* find_class_fname(const FName* name) UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
-UClass* find_class(const FName& name) noexcept {
+UClass* find_class(const FName& name) {
     return find_class_fname(&name);
 }
 #else
-UClass* find_class(const FName& name) noexcept {
+UClass* find_class(const FName& name) {
     if (cache.empty()) {
         initialize_cache();
     }
@@ -64,21 +64,21 @@ UClass* find_class(const FName& name) noexcept {
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-UClass* find_class_fname(const FName* name) noexcept {
+UClass* find_class_fname(const FName* name) {
     return find_class(*name);
 }
 #endif
 
 #ifdef UNREALSDK_SHARED
 UNREALSDK_CAPI [[nodiscard]] UClass* find_class_cstr(const wchar_t* name,
-                                                     size_t name_size) noexcept;
+                                                     size_t name_size) UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
-UClass* find_class(const std::wstring& name) noexcept {
+UClass* find_class(const std::wstring& name) {
     return find_class_cstr(name.c_str(), name.size());
 }
 #else
-UClass* find_class(const std::wstring& name) noexcept {
+UClass* find_class(const std::wstring& name) {
     if (cache.empty()) {
         initialize_cache();
     }
@@ -96,7 +96,7 @@ UClass* find_class(const std::wstring& name) noexcept {
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-UClass* find_class_cstr(const wchar_t* name, size_t name_size) noexcept {
+UClass* find_class_cstr(const wchar_t* name, size_t name_size) {
     const std::wstring str{name, name_size};
     return find_class(str);
 }

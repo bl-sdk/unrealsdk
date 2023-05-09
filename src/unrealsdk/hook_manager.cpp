@@ -65,11 +65,11 @@ impl::Group& get_group_by_type(impl::List& list, Type type) {
 }  // namespace
 
 #ifndef UNREALSDK_IMPORTING
-void log_all_calls(bool should_log) noexcept {
+void log_all_calls(bool should_log) {
     should_log_all_calls = should_log;
 }
 
-void inject_next_call(void) noexcept {
+void inject_next_call(void) {
     should_inject_next_call = true;
 }
 #endif
@@ -80,7 +80,7 @@ UNREALSDK_CAPI bool add_hook(const wchar_t* func,
                              Type type,
                              const wchar_t* identifier,
                              size_t identifier_size,
-                             Callback* callback) noexcept;
+                             Callback* callback) UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
 bool add_hook(const std::wstring& func,
@@ -109,7 +109,7 @@ bool add_hook(const wchar_t* func,
               Type type,
               const wchar_t* identifier,
               size_t identifier_size,
-              Callback* callback) noexcept {
+              Callback* callback) {
     return add_hook({func, func_size}, type, {identifier, identifier_size}, callback);
 }
 #endif
@@ -119,7 +119,7 @@ UNREALSDK_CAPI bool has_hook(const wchar_t* func,
                              size_t func_size,
                              Type type,
                              const wchar_t* identifier,
-                             size_t identifier_size) noexcept;
+                             size_t identifier_size) UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
 bool has_hook(const std::wstring& func, Type type, const std::wstring& identifier) {
@@ -138,7 +138,7 @@ bool has_hook(const wchar_t* func,
               size_t func_size,
               Type type,
               const wchar_t* identifier,
-              size_t identifier_size) noexcept {
+              size_t identifier_size) {
     return has_hook({func, func_size}, type, {identifier, identifier_size});
 }
 #endif
@@ -148,7 +148,7 @@ UNREALSDK_CAPI bool remove_hook(const wchar_t* func,
                                 size_t func_size,
                                 Type type,
                                 const wchar_t* identifier,
-                                size_t identifier_size) noexcept;
+                                size_t identifier_size) UNREALSDK_CAPI_SUFFIX;
 #endif
 #ifdef UNREALSDK_IMPORTING
 bool remove_hook(const std::wstring& func, Type type, const std::wstring& identifier) {
@@ -183,7 +183,7 @@ bool remove_hook(const wchar_t* func,
                  size_t func_size,
                  Type type,
                  const wchar_t* identifier,
-                 size_t identifier_size) noexcept {
+                 size_t identifier_size) {
     return remove_hook({func, func_size}, type, {identifier, identifier_size});
 }
 #endif

@@ -240,10 +240,10 @@ void init(const std::string& filename, bool callbacks_only_arg) {
 
 namespace {
 
-UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) noexcept;
+UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) UNREALSDK_CAPI_SUFFIX;
 
 #ifndef UNREALSDK_IMPORTING
-UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) noexcept {
+UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) UNREALSDK_CAPI_SUFFIX {
     if (msg == nullptr) {
         return;
     }
@@ -303,7 +303,7 @@ void log(std::chrono::system_clock::time_point time,
 }
 
 #ifndef UNREALSDK_IMPORTING
-bool set_console_level(Level level) noexcept {
+bool set_console_level(Level level) {
     if (Level::MIN > level || level > Level::MAX) {
         LOG(ERROR, "Log level out of range: {}", (uint8_t)level);
         return false;
@@ -312,13 +312,13 @@ bool set_console_level(Level level) noexcept {
     return true;
 }
 
-void add_callback(log_callback callback) noexcept {
+void add_callback(log_callback callback) {
     const std::lock_guard<std::mutex> lock(mutex);
 
     all_log_callbacks.push_back(callback);
 }
 
-void remove_callback(log_callback callback) noexcept {
+void remove_callback(log_callback callback) {
     const std::lock_guard<std::mutex> lock(mutex);
 
     all_log_callbacks.erase(
