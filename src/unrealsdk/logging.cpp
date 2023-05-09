@@ -90,7 +90,7 @@ std::string truncate_leading_chunks(const std::string&& str,
     }
 
     if (start_pos == 0) {
-        return std::move(str);
+        return str;
     }
 
     return TRUNCATION_PREFIX + str.substr(start_pos);
