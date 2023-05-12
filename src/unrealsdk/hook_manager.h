@@ -52,7 +52,7 @@ struct Details {
 /// For pre-hooks, returns if to block execution - if any pre-hook returns true, the unreal function
 /// will not be run.
 /// In post-hooks the return value is ignored.
-using Callback = bool(Details&);
+using Callback = bool(Details&) UNREALSDK_CAPI_SUFFIX;
 
 /**
  * @brief Toggles logging all unreal function calls. Best used in short bursts for debugging.

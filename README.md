@@ -93,12 +93,23 @@ can create your own shared library by linking against the object library and def
 
 One of the goals of the shared library implementation is have a stable cross-compiler ABI - i.e.
 allowing developing one program while also running another which you downloaded a precompiled
-version of. In order to do this, the exported functions try to use a pure C interface. Since the sdk
-heavily relies on C++ features (e.g. all the templates), it's impractical to export everything this
-way. Instead, it only exports the bare minimum functions which interact with internal state. Some of
+version of.
+
+In order to do this, the exported functions try to use a pure C interface. Since the sdk heavily
+relies on C++ features (e.g. all the templates), it's impractical to export everything this way.
+Instead, it only exports the bare minimum functions which interact with internal state. Some of
 these rely on private wrapper functions, which do things like decompose strings into pointer and
 length, in which case the public functions are redirected as required. The remaining functions will
 be linked statically.
+
+While the function calls have a stable cross-compiler ABI, unfortuantly there's one other thing
+which we can't guarentee: exceptions. MSVC and GNU have different exception ABIs, so if one travels
+between two modules with different ABIs, the game will crash. While none of the shared functions
+intentionally throw exceptions, it's impossible to completely avoid an exception travelling between
+modules - we can't stop a client from throwing during a hook (which is called by the sdk). All
+shared functions are compiled to try to allow exceptions to pass through them, but this will only
+work properly if all modules share an exception ABI - though surely you write good code so it won't
+be a problem :).
 
 # Running Builds
 As previously mentioned, the sdk can be configured to create a shared library. This is useful when

@@ -102,7 +102,12 @@ else()
             add_custom_command(
                 TARGET unrealsdk
                 POST_BUILD
-                COMMAND ${POSTBUILD_SCRIPT} "\"$<SHELL_PATH:$<TARGET_FILE:unrealsdk>>\" \"${UNREALSDK_UE_VERSION}\" \"${UNREALSDK_ARCH}\" \"$<IF:$<CONFIG:DEBUG>,DEBUG,RELEASE>\""
+                COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/${POSTBUILD_SCRIPT}"
+                ARGS
+                    "$<SHELL_PATH:$<TARGET_FILE:unrealsdk>>"
+                    "${UNREALSDK_UE_VERSION}"
+                    "${UNREALSDK_ARCH}"
+                    "$<IF:$<CONFIG:DEBUG>,DEBUG,RELEASE>"
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             )
         endif()
