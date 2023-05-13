@@ -4,7 +4,7 @@
 #include "unrealsdk/memory.h"
 #include "unrealsdk/unreal/alignment.h"
 
-#if defined(UE4) && defined(ARCH_X64)
+#if defined(UE4) && defined(ARCH_X64) && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;

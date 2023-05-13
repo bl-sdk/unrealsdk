@@ -3,7 +3,7 @@
 #include "unrealsdk/game/tps/tps.h"
 #include "unrealsdk/unreal/structs/fname.h"
 
-#if defined(UE3) && defined(ARCH_X86)
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::unreal;
 

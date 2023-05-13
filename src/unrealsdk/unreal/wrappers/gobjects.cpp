@@ -13,16 +13,17 @@ namespace unrealsdk::unreal {
 
 #pragma region Iterator
 
-GObjects::Iterator::Iterator(const GObjects& gobjects, size_t idx) : gobjects(gobjects), idx(idx) {}
+GObjects::Iterator::Iterator(const GObjects& gobjects, size_t idx)
+    : gobjects(&gobjects), idx(idx) {}
 
 GObjects::Iterator::reference GObjects::Iterator::operator*() const {
-    return this->gobjects.obj_at(idx);
+    return this->gobjects->obj_at(idx);
 }
 
 GObjects::Iterator& GObjects::Iterator::operator++() {
     do {
         // If we're on the last object, increment to max index
-        if (this->idx >= (this->gobjects.size() - 1)) {
+        if (this->idx >= (this->gobjects->size() - 1)) {
             this->idx = std::numeric_limits<size_t>::max();
             break;
         }

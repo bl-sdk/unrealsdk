@@ -7,7 +7,7 @@
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}",
       "cacheVariables": {
-        "UNREALSDK_STANDALONE": "True"
+        "UNREALSDK_SHARED": "True"
       }
     },
     {
@@ -31,6 +31,26 @@
       },
       "generator": "Ninja",
       "toolchainFile": "cmake/clang-x64.cmake"
+    },
+    {
+      "name": "_clang_cross_x86",
+      "hidden": true,
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "toolchainFile": "cmake/clang-cross-x86.cmake"
+    },
+    {
+      "name": "_clang_cross_x64",
+      "hidden": true,
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "toolchainFile": "cmake/clang-cross-x64.cmake"
     },
     {
       "name": "_mingw_x86",
@@ -155,6 +175,50 @@
       "inherits": [
         "_base",
         "_clang_x64",
+        "_ue4",
+        "_x64",
+        "_release"
+      ]
+    },
+    {
+      "name": "clang-cross-ue3-x86-debug",
+      "displayName": "UE3 x86 Debug (Clang Cross Compiler)",
+      "inherits": [
+        "_base",
+        "_clang_cross_x86",
+        "_ue3",
+        "_x86",
+        "_debug"
+      ]
+    },
+    {
+      "name": "clang-cross-ue3-x86-release",
+      "displayName": "UE3 x86 Release (Clang Cross Compiler)",
+      "inherits": [
+        "_base",
+        "_clang_cross_x86",
+        "_ue3",
+        "_x86",
+        "_release"
+      ]
+    },
+    {
+      "name": "clang-cross-ue4-x64-debug",
+      "displayName": "UE4 x64 Debug (Clang Cross Compiler)",
+      "inherits": [
+        "_base",
+        "_clang_cross_x64",
+        "_ue4",
+        "_x64",
+        "_debug"
+      ]
+    },
+    {
+      "name": "clang-cross-ue4-x64-release",
+      "displayName": "UE4 x64 Release (Clang Cross Compiler)",
+      "inherits": [
+        "_base",
+        "_clang_cross_x64",
         "_ue4",
         "_x64",
         "_release"

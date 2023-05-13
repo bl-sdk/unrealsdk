@@ -14,7 +14,7 @@
 #include "unrealsdk/unreal/wrappers/gobjects.h"
 #include "unrealsdk/unrealsdk.h"
 
-#if defined(UE3) && defined(ARCH_X86)
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;
@@ -151,7 +151,7 @@ std::wstring BL2Hook::uobject_path_name(const UObject* obj) const {
 
     // The hook manager calls this function to work out if to run a hook, so we need to inject next
     // call to avoid recursion
-    hook_manager::inject_next_call = true;
+    hook_manager::inject_next_call();
     return BoundFunction{pathname_func, mutable_obj}.call<UStrProperty, UObjectProperty>(
         mutable_obj);
 }

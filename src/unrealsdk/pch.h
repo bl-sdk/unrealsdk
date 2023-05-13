@@ -1,6 +1,47 @@
 #ifndef UNREALSDK_PCH_H
 #define UNREALSDK_PCH_H
 
+#if defined(UNREALSDK_SHARED) || defined(UNREALSDK_EXPORTING)
+#if defined(UNREALSDK_EXPORTING)
+
+// If exporting (which is set by cmake privately if building shared)
+#if defined(__clang__) || defined(__MINGW32__)
+#define UNREALSDK_CAPI extern "C" [[gnu::dllexport]]
+#elif defined(_MSC_VER)
+#define UNREALSDK_CAPI extern "C" __declspec(dllexport)
+#else
+#error Unknown dllexport attribute
+#endif
+
+// MSVC needs this to allow exceptions through the c interface
+// Since it's standard c++, might as well just add it to everything
+#define UNREALSDK_CAPI_SUFFIX noexcept(false)
+
+#else
+
+#define UNREALSDK_IMPORTING
+
+// If shared, but not exporting - i.e. when included by something liking against the shared library
+#if defined(__clang__) || defined(__MINGW32__)
+#define UNREALSDK_CAPI extern "C" [[gnu::dllimport]]
+#elif defined(_MSC_VER)
+#define UNREALSDK_CAPI extern "C" __declspec(dllimport)
+#else
+#error Unknown dllimport attribute
+#endif
+
+#define UNREALSDK_CAPI_SUFFIX noexcept(false)
+
+#endif
+#else
+
+// If not shared nor exporting, just link statically
+#define UNREALSDK_CAPI
+// Don't need an exception suffix, let the compiler optimize what it wants
+#define UNREALSDK_CAPI_SUFFIX
+
+#endif
+
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_NO_STATUS
 #define NOGDI
@@ -19,6 +60,7 @@
 #include <charconv>
 #include <chrono>
 #include <cstdint>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <functional>

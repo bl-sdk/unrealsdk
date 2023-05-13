@@ -150,6 +150,7 @@ jobs:
     - name: Run clang-tidy
       shell: bash # To follow the shebang
       run: run-clang-tidy -j ${{ env.CLANG_TIDY_JOBS }} -p out/build/${{ matrix.preset }} -export-fixes clang-tidy-fixes.yml
+      continue-on-error: true
 
     - name: Process clang-tidy warnings
       uses: asarium/clang-tidy-action@v1

@@ -25,12 +25,25 @@ struct FFrame;
 
 namespace unrealsdk {
 
+#ifndef UNREALSDK_IMPORTING
 /**
  * @brief Initializes the sdk.
  *
  * @param game An instance of the hook type to use to hook the current game.
+ * @return True if the sdk was initialized with the given game, false if it was already initialized.
  */
-void init(std::unique_ptr<game::AbstractHook> game);
+bool init(std::unique_ptr<game::AbstractHook>&& game);
+#endif
+
+/**
+ * @brief Checks if the SDK has been initialized.
+ * @note Thread safe, blocks if initialization is in progress.
+ *
+ * @return True if the SDK has been initialized.
+ */
+UNREALSDK_CAPI bool is_initialized(void) UNREALSDK_CAPI_SUFFIX;
+
+// ================ Remaining functions have undefined behaviour if not initialized ================
 
 /**
  * @brief Gets a reference to the GObjects wrapper.
@@ -53,8 +66,10 @@ void init(std::unique_ptr<game::AbstractHook> game);
  * @param str The string to initialize the name to.
  * @param number The number to initialize the name to.
  */
+UNREALSDK_CAPI void fname_init(FName* name,
+                               const wchar_t* str,
+                               int32_t number) UNREALSDK_CAPI_SUFFIX;
 void fname_init(FName* name, const std::wstring& str, int32_t number);
-void fname_init(FName* name, const wchar_t* str, int32_t number);
 
 /**
  * @brief Calls FFrame::Step.
@@ -63,7 +78,7 @@ void fname_init(FName* name, const wchar_t* str, int32_t number);
  * @param obj The object the frame is coming from.
  * @param param The parameter.
  */
-void fframe_step(FFrame* frame, UObject* obj, void* param);
+UNREALSDK_CAPI void fframe_step(FFrame* frame, UObject* obj, void* param) UNREALSDK_CAPI_SUFFIX;
 
 /**
  * @brief Calls unreal's malloc function.
@@ -72,7 +87,7 @@ void fframe_step(FFrame* frame, UObject* obj, void* param);
  * @param len The amount of bytes to allocate.
  * @return A pointer to the allocated memory.
  */
-[[nodiscard]] void* u_malloc(size_t len);
+UNREALSDK_CAPI [[nodiscard]] void* u_malloc(size_t len) UNREALSDK_CAPI_SUFFIX;
 template <typename T>
 [[nodiscard]] T* u_malloc(size_t len) {
     return reinterpret_cast<T*>(u_malloc(len));
@@ -86,7 +101,7 @@ template <typename T>
  * @param len The amount of bytes to allocate.
  * @return A pointer to the re-allocated memory.
  */
-[[nodiscard]] void* u_realloc(void* original, size_t len);
+UNREALSDK_CAPI [[nodiscard]] void* u_realloc(void* original, size_t len) UNREALSDK_CAPI_SUFFIX;
 template <typename T>
 [[nodiscard]] T* u_realloc(void* original, size_t len) {
     return reinterpret_cast<T*>(u_realloc(original, len));
@@ -97,7 +112,7 @@ template <typename T>
  *
  * @param data The memory to free.
  */
-void u_free(void* data);
+UNREALSDK_CAPI void u_free(void* data) UNREALSDK_CAPI_SUFFIX;
 
 /**
  * @brief Calls `UObject::ProcessEvent`.
@@ -106,7 +121,7 @@ void u_free(void* data);
  * @param func The function to call.
  * @param params The function's params
  */
-void process_event(UObject* object, UFunction* func, void* params);
+UNREALSDK_CAPI void process_event(UObject* object, UFunction* func, void* params);
 
 /**
  * @brief Constructs a new object
@@ -126,11 +141,16 @@ void process_event(UObject* object, UFunction* func, void* params);
 
 /**
  * @brief Calls `UConsole::OutputText` to write to the UE console.
+ *
+ * @param str The string to write.
  */
 void uconsole_output_text(const std::wstring& str);
 
 /**
  * @brief Calls `UObject::PathName` on the given object.
+ *
+ * @param obj The object to get the name of.
+ * @return The object's name
  */
 [[nodiscard]] std::wstring uobject_path_name(const UObject* obj);
 

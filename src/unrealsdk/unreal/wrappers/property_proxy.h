@@ -16,25 +16,41 @@ class PropertyProxy {
     UProperty* prop;
 
    private:
-    std::shared_ptr<void> value;
+    void* value;
+    bool been_set;
 
     /**
      * @brief Get the address access to the value should use.
-     * @note Handle non-zero offsets correctly.
      *
-     * @param data The data address. Defaults to `value`'s address (must be allocated beforehand).
      * @return The address access to the value should use.
      */
     [[nodiscard]] uintptr_t get_value_addr(void) const;
-    [[nodiscard]] uintptr_t get_value_addr(void* data) const;
 
    public:
     /**
      * @brief Constructs a new property proxy.
      *
      * @param prop The property.
+     * @param other The other property proxy to construct this one from.
      */
     PropertyProxy(UProperty* prop);
+    PropertyProxy(const PropertyProxy& other);
+    PropertyProxy(PropertyProxy&& other) noexcept;
+
+    /**
+     * @brief Assigns to the property proxy.
+     * @note Only allowed if of the same type.
+     *
+     * @param other The other property proxy to assign this one from.
+     * @return A reference to this property proxy.
+     */
+    PropertyProxy& operator=(const PropertyProxy& other);
+    PropertyProxy& operator=(PropertyProxy&& other) noexcept;
+
+    /**
+     * @brief Destroy the property proxy.
+     */
+    ~PropertyProxy();
 
     /**
      * @brief Checks if we have a value stored.
@@ -52,13 +68,12 @@ class PropertyProxy {
      */
     template <typename T>
     [[nodiscard]] typename PropTraits<T>::Value get(size_t idx = 0) const {
-        if (!this->has_value()) {
+        if (!this->been_set) {
             throw std::runtime_error(
                 "Tried to get value of a property proxy which is yet to be set!");
         }
 
-        return get_property<T>(validate_type<T>(this->prop), idx, this->get_value_addr(),
-                               this->value);
+        return get_property<T>(validate_type<T>(this->prop), idx, this->get_value_addr());
     }
 
     /**
@@ -77,22 +92,9 @@ class PropertyProxy {
         if (this->prop == nullptr) {
             throw std::runtime_error("Property does not exist!");
         }
-        auto converted_prop = validate_type<T>(this->prop);
 
-        if (!this->has_value()) {
-            auto deleter = [this, converted_prop](void* data) {
-                for (size_t i = 0; i < (size_t)converted_prop->ArrayDim; i++) {
-                    destroy_property<T>(converted_prop, i, this->get_value_addr(data));
-                }
-                unrealsdk::u_free(data);
-            };
-
-            this->value = {
-                unrealsdk::u_malloc(converted_prop->ElementSize * converted_prop->ArrayDim),
-                deleter};
-        }
-
-        set_property<T>(converted_prop, idx, this->get_value_addr(), value);
+        set_property<T>(validate_type<T>(this->prop), idx, this->get_value_addr(), value);
+        this->been_set = true;
     }
 
     /**

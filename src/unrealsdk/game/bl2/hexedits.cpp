@@ -3,7 +3,7 @@
 #include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/memory.h"
 
-#if defined(UE3) && defined(ARCH_X86)
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::memory;
 

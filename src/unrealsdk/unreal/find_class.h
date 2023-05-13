@@ -15,6 +15,7 @@ class UClass;
  *       which is less efficient, but properly handles this case.
  *
  * @param name The class name.
+ * @param name_size The size of the class name string.
  * @return The class object.
  */
 [[nodiscard]] UClass* find_class(const FName& name);

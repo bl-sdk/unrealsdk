@@ -32,7 +32,7 @@ class GObjects {
         using reference = UObject*;
 
        private:
-        const GObjects& gobjects;
+        const GObjects* gobjects;
         size_t idx;
 
        public:

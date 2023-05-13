@@ -3,7 +3,7 @@
 
 #include "unrealsdk/pch.h"
 
-#if defined(UE3) && defined(ARCH_X86)
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
 #include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/game/selector.h"

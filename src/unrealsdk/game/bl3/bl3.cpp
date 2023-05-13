@@ -6,7 +6,7 @@
 #include "unrealsdk/unreal/structs/tarray.h"
 #include "unrealsdk/unrealsdk.h"
 
-#if defined(UE4) && defined(ARCH_X64)
+#if defined(UE4) && defined(ARCH_X64) && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::unreal;
 using namespace unrealsdk::memory;

@@ -3,8 +3,10 @@
 out
 
 # User scripts with templates
+postbuild
 postbuild.bat
-user-includes.cmake
+
+.gdbinit
 
 # CMake (from https://github.com/github/gitignore/blob/main/CMake.gitignore)
 CMakeLists.txt.user
