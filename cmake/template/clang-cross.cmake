@@ -21,7 +21,7 @@ endif()
 if(EXISTS ${MSVC_WINE_ENV_SCRIPT})
     # @brief Extract paths from the env script and pass them to another function
     #
-    # @param env_var The enviroment
+    # @param env_var The environment variable to extract
     # @param prefix A prefix to add to the start of each path (e.g. `-I`)
     # @param output_function The function to call with the list of extracted paths
     function(_extract_from_env env_var prefix output_function)

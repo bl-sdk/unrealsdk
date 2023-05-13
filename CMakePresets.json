@@ -18,6 +18,7 @@
         "lhs": "$env{VSINSTALLDIR}",
         "rhs": ""
       },
+      "generator": "Ninja",
       "toolchainFile": "cmake/clang-x86.cmake"
     },
     {
@@ -28,6 +29,7 @@
         "lhs": "$env{VSINSTALLDIR}",
         "rhs": ""
       },
+      "generator": "Ninja",
       "toolchainFile": "cmake/clang-x64.cmake"
     },
     {

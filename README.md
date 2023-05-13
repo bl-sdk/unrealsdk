@@ -103,7 +103,7 @@ length, in which case the public functions are redirected as required. The remai
 be linked statically.
 
 While the function calls have a stable cross-compiler ABI, unfortuantly there's one other thing
-which we can't guarentee: exceptions. MSVC and GNU have different exception ABIs, so if one travels
+which we can't guarantee: exceptions. MSVC and GNU have different exception ABIs, so if one travels
 between two modules with different ABIs, the game will crash. While none of the shared functions
 intentionally throw exceptions, it's impossible to completely avoid an exception travelling between
 modules - we can't stop a client from throwing during a hook (which is called by the sdk). All
