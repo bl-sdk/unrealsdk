@@ -1,5 +1,4 @@
 #include "unrealsdk/pch.h"
-#include <cctype>
 
 #include "unrealsdk/env.h"
 #include "unrealsdk/logging.h"

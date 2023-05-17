@@ -2,7 +2,6 @@
 #define UNREALSDK_HOOK_MANAGER_H
 
 #include "unrealsdk/pch.h"
-#include <string>
 #include "unrealsdk/unreal/wrappers/bound_function.h"
 #include "unrealsdk/unreal/wrappers/property_proxy.h"
 

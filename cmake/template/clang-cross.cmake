@@ -1,7 +1,5 @@
 set(CMAKE_SYSTEM_NAME Windows)
 
-set(triple x86_64-pc-windows-msvc)
-
 set(CMAKE_C_COMPILER clang)
 set(CMAKE_C_COMPILER_TARGET ${CLANG_TRIPLE})
 set(CMAKE_CXX_COMPILER clang++)
