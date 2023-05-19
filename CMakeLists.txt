@@ -35,6 +35,15 @@ if(NOT supports_format)
     add_subdirectory(libs/fmt)
 endif()
 
+# If using the clang windows cross compilation toolchain
+if((NOT CMAKE_HOST_WIN32)
+    AND (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    AND (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
+    # Disable minhook intrinsics - MSVC implicitly defines intrinsics, but Clang does not, so we get
+    # a linking error otherwise
+    target_compile_definitions(minhook PRIVATE MINHOOK_DISABLE_INTRINSICS)
+endif()
+
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/unrealsdk/*.cpp" "src/unrealsdk/*.h")
 target_sources(_unrealsdk_interface INTERFACE ${sources})
 

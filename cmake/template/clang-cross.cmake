@@ -1,11 +1,10 @@
 set(CMAKE_SYSTEM_NAME Windows)
 
-set(triple x86_64-pc-windows-msvc)
-
 set(CMAKE_C_COMPILER clang)
 set(CMAKE_C_COMPILER_TARGET ${CLANG_TRIPLE})
 set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_CXX_COMPILER_TARGET ${CLANG_TRIPLE})
+set(CMAKE_RC_COMPILER llvm-rc)
 
 # Problem: CMake runs toolchain files multiple times, but can't read cache variables on some runs.
 # Workaround: On first run (in which cache variables are always accessible), set an intermediary environment variable.
@@ -46,10 +45,19 @@ elseif(EXISTS ${XWIN_DIR})
         "-isystem${XWIN_DIR}/sdk/include/shared"
         "-isystem${XWIN_DIR}/crt/include"
     )
+
+    if(NOT DEFINED XWIN_ARCH)
+        if(${CLANG_TRIPLE} MATCHES 64)
+            set(XWIN_ARCH x86_64)
+        else()
+            set(XWIN_ARCH x86)
+        endif()
+    endif()
+
     add_link_options(
-        "-L${XWIN_DIR}/sdk/lib/um/x86_64"
-        "-L${XWIN_DIR}/crt/lib/x86_64"
-        "-L${XWIN_DIR}/sdk/lib/ucrt/x86_64"
+        "-L${XWIN_DIR}/sdk/lib/um/${XWIN_ARCH}"
+        "-L${XWIN_DIR}/crt/lib/${XWIN_ARCH}"
+        "-L${XWIN_DIR}/sdk/lib/ucrt/${XWIN_ARCH}"
     )
 else()
     message(FATAL_ERROR "One of 'MSVC_WINE_ENV_SCRIPT' or 'XWIN_DIR' must be defined, could not find windows headers/libs!")

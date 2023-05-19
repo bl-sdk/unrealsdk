@@ -11,9 +11,12 @@ env:
   CLANG_VERSION: 16
   CLANG_TIDY_JOBS: 4
   # Since we use rather new c++ features, we need a rather new version of MinGW
-  # LLVM MinGW seems to be the newest prebuild binaries around
+  # LLVM MinGW seems to be the newest prebuilt binaries around
   LLVM_MINGW_VERSION: llvm-mingw-20230320-msvcrt-ubuntu-18.04-x86_64
   LLVM_MINGW_DOWNLOAD: https://github.com/mstorsjo/llvm-mingw/releases/download/20230320/llvm-mingw-20230320-msvcrt-ubuntu-18.04-x86_64.tar.xz
+  # xwin settings
+  XWIN_VERSION: xwin-0.2.12-x86_64-unknown-linux-musl
+  XWIN_DOWNLOAD: https://github.com/Jake-Shadle/xwin/releases/download/0.2.12/xwin-0.2.12-x86_64-unknown-linux-musl.tar.gz
 
 jobs:
   cache-clang:
@@ -87,17 +90,70 @@ jobs:
         preset: [
           "mingw-ue3-x86-release",
           "mingw-ue4-x64-release",
+          "clang-cross-ue3-x86-release",
+          "clang-cross-ue4-x64-release",
         ]
 
     steps:
-    # It's not worth caching this because we lose the +x permission. It's recommended to tar the
-    # files to avoid that... which just brings us right back to where we started.
+    - name: Setup ninja
+      uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: ninja-build tree
+        version: ${{ runner.os }}-ninja
+
+    # Both Clang and MinGW install quick enough that it's not worth caching
+    # Caching would also lose the +x - so we'd have to tar before caching/untar after, making it
+    #  even slower
+    - name: Setup Clang
+      if: contains(matrix.preset, 'clang')
+      run: |
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh ${{ env.CLANG_VERSION }}
+
+        sudo update-alternatives --install              \
+          /usr/bin/clang                                \
+          clang                                         \
+          /usr/bin/clang-${{ env.CLANG_VERSION }}       \
+          200
+        sudo update-alternatives --install              \
+          /usr/bin/clang++                              \
+          clang++                                       \
+          /usr/bin/clang++-${{ env.CLANG_VERSION }}     \
+          200
+        sudo update-alternatives --install              \
+          /usr/bin/llvm-rc                              \
+          llvm-rc                                       \
+          /usr/bin/llvm-rc-${{ env.CLANG_VERSION }}     \
+          200
+
     - name: Setup MinGW
       if: contains(matrix.preset, 'mingw')
       run: |
         wget -nv ${{ env.LLVM_MINGW_DOWNLOAD }}
         tar -xf ${{ env.LLVM_MINGW_VERSION }}.tar.xz -C ~/
         echo $(readlink -f ~/${{ env.LLVM_MINGW_VERSION }}/bin) >> $GITHUB_PATH
+
+    # xwin does take long enough that caching's worth it
+    - name: Restore xwin cache
+      if: contains(matrix.preset, 'cross')
+      uses: actions/cache@v3
+      id: cache-xwin
+      with:
+        path: ~/xwin
+        key: ${{ runner.os }}-xwin
+
+    - name: Setup xwin
+      if: contains(matrix.preset, 'cross') && steps.cache-xwin.outputs.cache-hit != 'true'
+      run: |
+        wget -nv ${{ env.XWIN_DOWNLOAD }}
+        tar -xf ${{ env.XWIN_VERSION }}.tar.gz
+        ${{ env.XWIN_VERSION }}/xwin    \
+          --accept-license              \
+          --arch x86,x86_64             \
+          splat                         \
+          --include-debug-libs          \
+          --output ~/xwin
 
     - name: Checkout repository and submodules
       uses: actions/checkout@v3
@@ -106,7 +162,12 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{ env.GITHUB_WORKSPACE }}
-      run: cmake . --preset ${{ matrix.preset }}
+      # The extra xwin dir arg won't do anything if we're not cross compiling
+      run: >
+        cmake .
+        --preset ${{ matrix.preset }}
+        -G Ninja
+        -DXWIN_DIR=$(readlink -f ~)/xwin
 
     - name: Build
       working-directory: ${{ env.GITHUB_WORKSPACE }}
