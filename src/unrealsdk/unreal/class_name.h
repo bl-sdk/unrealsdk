@@ -35,7 +35,7 @@ template <>
 }
 
 /**
- * @brief Thows an invalid argument exception if an object is not of the expected type
+ * @brief Throws an invalid argument exception if an object is not of the expected type
  * @note Uses an exact type match, not if it's an instance.
  *
  * @tparam T Type type the object is expected to be.
