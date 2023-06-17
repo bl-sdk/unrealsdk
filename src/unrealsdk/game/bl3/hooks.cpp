@@ -20,9 +20,16 @@ namespace {
 using process_event_func = void(UObject* obj, UFunction* func, void* params);
 process_event_func* process_event_ptr;
 
-const Pattern PROCESS_EVENT_SIG{
-    "\x40\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x81\xEC\xF0\x00\x00\x00",
-    "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+const constinit Pattern<19> PROCESS_EVENT_SIG{
+    "40 55"              // push rbp
+    "56"                 // push rsi
+    "57"                 // push rdi
+    "41 54"              // push r12
+    "41 55"              // push r13
+    "41 56"              // push r14
+    "41 57"              // push r15
+    "48 81 EC F0000000"  // sub rsp, 000000F0
+};
 
 }  // namespace
 
@@ -73,7 +80,7 @@ static_assert(std::is_same_v<decltype(process_event_hook), process_event_func>,
               "process_event signature is incorrect");
 
 void BL3Hook::hook_process_event(void) {
-    sigscan_and_detour(PROCESS_EVENT_SIG, process_event_hook, &process_event_ptr, "ProcessEvent");
+    detour(PROCESS_EVENT_SIG.sigscan(), process_event_hook, &process_event_ptr, "ProcessEvent");
 }
 
 void BL3Hook::process_event(UObject* object, UFunction* func, void* params) const {
@@ -85,11 +92,18 @@ namespace {
 using call_function_func = void(UObject* obj, FFrame* stack, void* result, UFunction* func);
 call_function_func* call_function_ptr;
 
-const Pattern CALL_FUNCTION_SIG{
-    "\x40\x55\x53\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x81\xec\x28\x01\x00\x00\x48\x8d"
-    "\x6c\x24\x30",
-    "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
-    "\xFF\xFF\xFF"};
+const constinit Pattern<20> CALL_FUNCTION_SIG{
+    "40 55"              // push rbp
+    "53"                 // push rbx
+    "56"                 // push rsi
+    "57"                 // push rdi
+    "41 54"              // push r12
+    "41 55"              // push r13
+    "41 56"              // push r14
+    "41 57"              // push r15
+    "48 81 EC 28010000"  // sub rsp, 00000128
+
+};
 
 }  // namespace
 
@@ -169,7 +183,7 @@ static_assert(std::is_same_v<decltype(call_function_hook), call_function_func>,
               "call_function signature is incorrect");
 
 void BL3Hook::hook_call_function(void) {
-    sigscan_and_detour(CALL_FUNCTION_SIG, call_function_hook, &call_function_ptr, "CallFunction");
+    detour(CALL_FUNCTION_SIG.sigscan(), call_function_hook, &call_function_ptr, "CallFunction");
 }
 
 }  // namespace unrealsdk::game
