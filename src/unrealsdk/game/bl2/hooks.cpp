@@ -32,13 +32,25 @@ typedef void(__fastcall* process_event_func)(UObject* obj,
                                              void* /*null*/);
 process_event_func process_event_ptr;
 
-const Pattern PROCESS_EVENT_SIG{
-    "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x83\xEC\x50\xA1"
-    "\x00\x00\x00\x00\x33\xC5\x89\x45\xF0\x53\x56\x57\x50\x8D\x45\xF4\x64\xA3\x00\x00\x00"
-    "\x00\x8B\xF1\x89\x75\xEC",
-    "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF"
-    "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00"
-    "\x00\xFF\xFF\xFF\xFF\xFF"};
+const constinit Pattern<45> PROCESS_EVENT_SIG{
+    "55"              // push ebp
+    "8B EC"           // mov ebp, esp
+    "6A FF"           // push -01
+    "68 ????????"     // push Borderlands2.exe+11107D8
+    "64 A1 ????????"  // mov eax, fs:[00000000]
+    "50"              // push eax
+    "83 EC 50"        // sub esp, 50
+    "A1 ????????"     // mov eax, [Borderlands2.g_LEngineDefaultPoolId+B2DC]
+    "33 C5"           // xor eax,ebp
+    "89 45 ??"        // mov [ebp-10], eax
+    "53"              // push ebx
+    "56"              // push esi
+    "57"              // push edi
+    "50"              // push eax
+    "8D 45 ??"        // lea eax, [ebp-0C]
+    "64 A3 ????????"  // mov fs:[00000000], eax
+    "8B F1"           // mov esi, ecx
+};
 
 void __fastcall process_event_hook(UObject* obj,
                                    void* edx,
@@ -100,7 +112,7 @@ static_assert(std::is_same_v<decltype(&process_event_hook), process_event_func>,
 }  // namespace
 
 void BL2Hook::hook_process_event(void) {
-    sigscan_and_detour(PROCESS_EVENT_SIG, process_event_hook, &process_event_ptr, "ProcessEvent");
+    detour(PROCESS_EVENT_SIG.sigscan(), process_event_hook, &process_event_ptr, "ProcessEvent");
 }
 
 void BL2Hook::process_event(UObject* object, UFunction* func, void* params) const {
@@ -117,13 +129,15 @@ typedef void(__fastcall* call_function_func)(UObject* obj,
                                              UFunction* func);
 call_function_func call_function_ptr;
 
-const Pattern CALL_FUNCTION_SIG{
-    "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x81\xEC\x00\x00"
-    "\x00\x00\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\xF0\x53\x56\x57\x50\x8D\x45\xF4\x64\xA3"
-    "\x00\x00\x00\x00\x8B\x7D\x10\x8B\x45\x0C",
-    "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\x00\x00\x00"
-    "\x00\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00"
-    "\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
+const constinit Pattern<23> CALL_FUNCTION_SIG{
+    "55"              // push ebp
+    "8B EC"           // mov ebp, esp
+    "6A FF"           // push -01
+    "68 ????????"     // push Borderlands2.exe+1110791
+    "64 A1 ????????"  // mov eax, fs:[00000000]
+    "50"              // push eax
+    "81 EC 58040000"  // sub esp, 00000458
+};
 
 void __fastcall call_function_hook(UObject* obj,
                                    void* edx,
@@ -184,7 +198,7 @@ static_assert(std::is_same_v<decltype(&call_function_hook), call_function_func>,
 }  // namespace
 
 void BL2Hook::hook_call_function(void) {
-    sigscan_and_detour(CALL_FUNCTION_SIG, call_function_hook, &call_function_ptr, "CallFunction");
+    detour(CALL_FUNCTION_SIG.sigscan(), call_function_hook, &call_function_ptr, "CallFunction");
 }
 
 }  // namespace unrealsdk::game
