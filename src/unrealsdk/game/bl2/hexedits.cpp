@@ -30,7 +30,7 @@ const constinit Pattern<9> ARRAY_LIMIT_SIG{
 };
 
 const constinit Pattern<15> ARRAY_LIMIT_MESSAGE{
-    // Explictly match the jump offset, since to overwrite this with an unconditional jump we need
+    // Explicitly match the jump offset, since to overwrite this with an unconditional jump we need
     // to move where it takes place, hardcoding our own offset
     "0F 8C 7B000000"  // jl Borderlands2.exe+C9BF0
     "8B 8D ????????"  // mov ecx, [ebp-00001164]
