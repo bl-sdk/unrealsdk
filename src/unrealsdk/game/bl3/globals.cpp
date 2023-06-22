@@ -16,15 +16,18 @@ namespace {
 
 GObjects gobjects_wrapper{};
 
-const Pattern GOBJECTS_SIG{
-    "\x48\x8D\x0D\x00\x00\x00\x00\xC6\x05\x00\x00\x00\x00\x01\xE8\x00\x00\x00\x00\xC6\x05",
-    "\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF", 3};
+const constinit Pattern<26> GOBJECTS_SIG{
+    "48 8D 0D ????????"  // lea rcx, [Borderlands3.exe+69EBDA0]
+    "C6 05 ???????? 01"  // mov byte ptr [Borderlands3.exe+69EA290], 01
+    "E8 ????????"        // call Borderlands3.exe+17854D0
+    "C6 05 ???????? 01"  // mov byte ptr [Borderlands3.exe+64B78E0], 01
+    ,
+    3};
 
 }  // namespace
 
 void BL3Hook::find_gobjects(void) {
-    auto gobjects_instr = sigscan(GOBJECTS_SIG);
-    auto gobjects_ptr = read_offset<GObjects::internal_type>(gobjects_instr);
+    auto gobjects_ptr = read_offset<GObjects::internal_type>(GOBJECTS_SIG.sigscan());
     LOG(MISC, "GObjects: {:p}", reinterpret_cast<void*>(gobjects_ptr));
 
     gobjects_wrapper = GObjects(gobjects_ptr);
@@ -38,19 +41,21 @@ namespace {
 
 GNames gnames_wrapper{};
 
-const Pattern GNAMES_SIG{
-    "\xE8\x00\x00\x00\x00\x48\x00\x00\x48\x89\x1D\x00\x00\x00\x00\x48\x8B\x5C\x24\x00\x48\x83"
-    "\xC4\x28\xC3\x00\xDB\x48\x89\x1D\x00\x00\x00\x00\x00\x00\x48\x8B\x5C\x24\x00\x48\x83\xC4"
-    "\x00\xC3",
-    "\xFF\x00\x00\x00\x00\xFF\x00\x00\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\x00\xFF\xFF"
-    "\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF"
-    "\x00\xFF",
-    0xB};
+const constinit Pattern<27> GNAMES_SIG{
+    "E8 ????????"        // call Borderlands3.exe+3DDBB7C
+    "48 8B C3"           // mov rax, rbx
+    "48 89 1D ????????"  // mov [Borderlands3.exe+69E71E8], rbx
+    "48 8B 5C 24 ??"     // mov rbx, [rsp+20]
+    "48 83 C4 28"        // add rsp, 28
+    "C3"                 // ret
+    "33 DB"              // xor ebx, ebx
+    ,
+    11};
+
 }  // namespace
 
 void BL3Hook::find_gnames(void) {
-    auto gnames_instr = sigscan(GNAMES_SIG);
-    auto gnames_ptr = *read_offset<GNames::internal_type*>(gnames_instr);
+    auto gnames_ptr = *read_offset<GNames::internal_type*>(GNAMES_SIG.sigscan());
     LOG(MISC, "GNames: {:p}", reinterpret_cast<void*>(gnames_ptr));
 
     gnames_wrapper = GNames(gnames_ptr);

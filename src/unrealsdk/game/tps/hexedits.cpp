@@ -11,15 +11,16 @@ namespace unrealsdk::game {
 
 namespace {
 
-// This is actually the exact same sig as BL2 when we trim the leading any bytes, but the jump is
-// encoded differently
-const Pattern ARRAY_LIMIT_MESSAGE{"\x00\x00\x8B\x8D\x00\x00\x00\x00\x83\xC0\x9D",
-                                  "\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF"};
+const constinit Pattern<11> ARRAY_LIMIT_MESSAGE{
+    "7C ??"           // jl BorderlandsPreSequel.exe+C3826
+    "8B 8D ????????"  // mov ecx, [ebp-0000116C]
+    "83 C0 9D"        // add eax, -63
+};
 
 }  // namespace
 
 void TPSHook::hexedit_array_limit_message(void) const {
-    auto array_limit_msg = sigscan<uint8_t*>(ARRAY_LIMIT_MESSAGE);
+    auto array_limit_msg = ARRAY_LIMIT_MESSAGE.sigscan<uint8_t*>();
     if (array_limit_msg == nullptr) {
         LOG(ERROR, "Couldn't find array limit message signature");
     } else {

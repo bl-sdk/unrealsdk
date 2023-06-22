@@ -40,60 +40,45 @@ std::tuple<uintptr_t, size_t> get_exe_range(void) {
 
 }  // namespace
 
-uintptr_t sigscan(const Pattern& pattern) {
+uintptr_t sigscan(const uint8_t* bytes, const uint8_t* mask, size_t pattern_size) {
     auto [start, size] = get_exe_range();
-    return sigscan(pattern, start, size);
+    return sigscan(bytes, mask, pattern_size, start, size);
 }
-uintptr_t sigscan(const Pattern& pattern, uintptr_t start, size_t size) {
+uintptr_t sigscan(const uint8_t* bytes,
+                  const uint8_t* mask,
+                  size_t pattern_size,
+                  uintptr_t start,
+                  size_t size) {
     auto start_ptr = reinterpret_cast<uint8_t*>(start);
 
     // The naive O(nm) search works well enough, even repeating it for each different pattern
-    for (size_t i = 0; i < (size - pattern.size); i++) {
+    for (size_t i = 0; i < (size - pattern_size); i++) {
         bool found = true;
-        for (size_t j = 0; j < pattern.size; j++) {
+        for (size_t j = 0; j < pattern_size; j++) {
             auto val = start_ptr[i + j];
-            if ((val & pattern.mask[j]) != pattern.bytes[j]) {
+            if ((val & mask[j]) != bytes[j]) {
                 found = false;
                 break;
             }
         }
         if (found) {
-            return reinterpret_cast<uintptr_t>(&start_ptr[i + pattern.offset]);
+            return reinterpret_cast<uintptr_t>(&start_ptr[i]);
         }
     }
 
     return 0;
 }
 
-bool sigscan_and_detour(const Pattern& pattern,
-                        void* detour,
-                        void** original,
-                        const std::string& name) {
-    auto [start, size] = get_exe_range();
-    return sigscan_and_detour(pattern, detour, original, name, start, size);
-}
-bool sigscan_and_detour(const Pattern& pattern,
-                        void* detour,
-                        void** original,
-                        const std::string& name,
-                        uintptr_t start,
-                        size_t size) {
-    auto addr = sigscan<LPVOID>(pattern, start, size);
-    LOG(MISC, "{}: {:p}", name, addr);
-
-    if (addr == nullptr) {
-        LOG(ERROR, "Sigscan failed for {}", name);
-        return false;
-    }
-
+bool detour(uintptr_t addr, void* detour_func, void** original_func, const std::string& name) {
     MH_STATUS status = MH_OK;
-    status = MH_CreateHook(addr, detour, original);
+
+    status = MH_CreateHook(reinterpret_cast<LPVOID>(addr), detour_func, original_func);
     if (status != MH_OK) {
         LOG(ERROR, "Failed to create hook for {}", name);
         return false;
     }
 
-    status = MH_EnableHook(addr);
+    status = MH_EnableHook(reinterpret_cast<LPVOID>(addr));
     if (status != MH_OK) {
         LOG(ERROR, "Failed to enable hook for {}", name);
         return false;

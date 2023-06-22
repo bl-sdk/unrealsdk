@@ -16,14 +16,18 @@ namespace {
 
 GObjects gobjects_wrapper{};
 
-const Pattern GOBJECTS_SIG{"\x00\x00\x00\x00\x8B\x04\xB1\x8B\x40\x08",
-                           "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
+const constinit Pattern<17> GOBJECTS_SIG{
+    "8B 0D ????????"  // mov ecx, [Borderlands2.exe+1682BD0]
+    "8B 04 ??"        // mov eax, [ecx+esi*4]
+    "8B 40 ??"        // mov eax, [eax+08]
+    "25 00020000"     // and eax, 00000200
+    ,
+    2};
 
 }  // namespace
 
 void BL2Hook::find_gobjects(void) {
-    auto gobjects_instr = sigscan(GOBJECTS_SIG);
-    auto gobjects_ptr = read_offset<GObjects::internal_type>(gobjects_instr);
+    auto gobjects_ptr = read_offset<GObjects::internal_type>(GOBJECTS_SIG.sigscan());
     LOG(MISC, "GObjects: {:p}", reinterpret_cast<void*>(gobjects_ptr));
 
     gobjects_wrapper = GObjects(gobjects_ptr);
@@ -37,14 +41,17 @@ namespace {
 
 GNames gnames_wrapper{};
 
-const Pattern GNAMES_SIG{"\x00\x00\x00\x00\x83\x3C\x81\x00\x74\x5C",
-                         "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"};
+const constinit Pattern<10> GNAMES_SIG{
+    "A3 ????????"  // mov [BorderlandsPreSequel.exe+1520214], eax
+    "8B 45 ??"     // mov eax, [ebp+10]
+    "89 03"        // mov [ebx], eax
+    ,
+    1};
 
 }  // namespace
 
-void BL2Hook::find_gnames(void) const {
-    auto gnames_instr = sigscan(GNAMES_SIG);
-    auto gnames_ptr = read_offset<GNames::internal_type>(gnames_instr);
+void BL2Hook::find_gnames(void) {
+    auto gnames_ptr = read_offset<GNames::internal_type>(GNAMES_SIG.sigscan());
     LOG(MISC, "GNames: {:p}", reinterpret_cast<void*>(gnames_ptr));
 
     gnames_wrapper = GNames(gnames_ptr);

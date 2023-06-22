@@ -11,23 +11,36 @@ namespace unrealsdk::game {
 
 namespace {
 
-const Pattern SET_COMMAND_SIG{
-    "\x83\xC4\x0C\x85\xC0\x75\x1A\x6A\x01\x8D\x95\x00\x00\x00\x00\x68\x00\x00\x00\x00\x52\xE8\x00"
-    "\x00\x00\x00\x83\xc4\x0C\x85\xC0\x74\x00",
-    "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\x00\x00\x00\x00\xFF\xFF\x00"
-    "\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\x00",
-    5};
+const constinit Pattern<28> SET_COMMAND_SIG{
+    "75 ??"           // jne Borderlands2.exe+43019D
+    "6A 01"           // push 01
+    "8D 95 ????????"  // lea edx, [ebp-00000888]
+    "68 ????????"     // push Borderlands2.exe+1265EE0
+    "52"              // push edx
+    "E8 ????????"     // call Borderlands2.exe+99350
+    "83 C4 0C"        // add esp, 0C
+    "85 C0"           // test eax, eax
+    "74 ??"           // je Borderlands2.exe+4301C6
+};
 
-const Pattern ARRAY_LIMIT_SIG{"\x00\x00\xB9\x64\x00\x00\x00\x3B\xF9\x0F\x8D\x00\x00\x00\x00",
-                              "\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00"};
+const constinit Pattern<9> ARRAY_LIMIT_SIG{
+    "7E ??"        // jle Borderlands2.exe+C9ABB
+    "B9 64000000"  // mov ecx, 00000064
+    "3B F9"        // cmp edi, ecx
+};
 
-const Pattern ARRAY_LIMIT_MESSAGE{"\x00\x00\x00\x00\x00\x00\x8B\x8D\x00\x00\x00\x00\x83\xC0\x9D",
-                                  "\x00\x00\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF"};
+const constinit Pattern<15> ARRAY_LIMIT_MESSAGE{
+    // Explicitly match the jump offset, since to overwrite this with an unconditional jump we need
+    // to move where it takes place, hardcoding our own offset
+    "0F 8C 7B000000"  // jl Borderlands2.exe+C9BF0
+    "8B 8D ????????"  // mov ecx, [ebp-00001164]
+    "83 C0 9D"        // add eax, -63
+};
 
 }  // namespace
 
 void BL2Hook::hexedit_set_command(void) {
-    auto set_command = sigscan<uint8_t*>(SET_COMMAND_SIG);
+    auto set_command = SET_COMMAND_SIG.sigscan<uint8_t*>();
     if (set_command == nullptr) {
         LOG(ERROR, "Couldn't find set command signature");
     } else {
@@ -42,7 +55,7 @@ void BL2Hook::hexedit_set_command(void) {
 }
 
 void BL2Hook::hexedit_array_limit(void) {
-    auto array_limit = sigscan<uint8_t*>(ARRAY_LIMIT_SIG);
+    auto array_limit = ARRAY_LIMIT_SIG.sigscan<uint8_t*>();
     if (array_limit == nullptr) {
         LOG(ERROR, "Couldn't find array limit signature");
     } else {
@@ -56,7 +69,7 @@ void BL2Hook::hexedit_array_limit(void) {
 }
 
 void BL2Hook::hexedit_array_limit_message(void) const {
-    auto array_limit_msg = sigscan<uint8_t*>(ARRAY_LIMIT_MESSAGE);
+    auto array_limit_msg = ARRAY_LIMIT_MESSAGE.sigscan<uint8_t*>();
     if (array_limit_msg == nullptr) {
         LOG(ERROR, "Couldn't find array limit message signature");
     } else {

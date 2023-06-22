@@ -20,28 +20,42 @@ fmemory_malloc_func fmemory_malloc_ptr;
 fmemory_realloc_func fmemory_realloc_ptr;
 fmemory_free_func fmemory_free_ptr;
 
-const Pattern MALLOC_PATTERN{
-    "\x48\x89\x5C\x24\x00\x57\x48\x83\xEC\x20\x48\x8B\xF9\x8B\xDA\x48\x8B\x0D\x00\x00\x00\x00"
-    "\x48\x85\xC9",
-    "\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00"
-    "\xFF\xFF\xFF"};
+const constinit Pattern<25> MALLOC_PATTERN{
+    "48 89 5C 24 ??"     // mov [rsp+08], rbx
+    "57"                 // push rdi
+    "48 83 EC 20"        // sub rsp, 20
+    "48 8B F9"           // mov rdi, rcx
+    "8B DA"              // mov ebx, edx
+    "48 8B 0D ????????"  // mov rcx, [Borderlands3.exe+68C4E08]
+    "48 85 C9"           // test rcx, rcx
+};
 
-const Pattern REALLOC_PATTERN{
-    "\x48\x89\x5C\x24\x00\x48\x89\x74\x24\x00\x57\x48\x83\xEC\x20\x48\x8B\xF1\x41\x8B\xD8\x48"
-    "\x8B\x0D\x00\x00\x00\x00\x48\x8B\xFA",
-    "\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
-    "\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF"};
+const constinit Pattern<31> REALLOC_PATTERN{
+    "48 89 5C 24 ??"     // mov [rsp+08], rbx
+    "48 89 74 24 ??"     // mov [rsp+10], rsi
+    "57"                 // push rdi
+    "48 83 EC 20"        // sub rsp, 20
+    "48 8B F1"           // mov rsi, rcx
+    "41 8B D8"           // mov ebx, r8d
+    "48 8B 0D ????????"  // mov rcx, [Borderlands3.exe+68C4E08]
+    "48 8B FA"           // mov rdi, rdx
+};
 
-const Pattern FREE_PATTERN{
-    "\x48\x85\xC9\x74\x00\x53\x48\x83\xEC\x20\x48\x8B\xD9\x48\x8B\x0D\x00\x00\x00\x00",
-    "\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00"};
+const constinit Pattern<20> FREE_PATTERN{
+    "48 85 C9"           // test rcx, rcx
+    "74 ??"              // je Borderlands3.exe+15D37E3
+    "53"                 // push rbx
+    "48 83 EC 20"        // sub rsp, 20
+    "48 8B D9"           // mov rbx, rcx
+    "48 8B 0D ????????"  // mov rcx, [Borderlands3.exe+68C4E08]
+};
 
 }  // namespace
 
 void BL3Hook::find_gmalloc(void) {
-    fmemory_malloc_ptr = sigscan<fmemory_malloc_func>(MALLOC_PATTERN);
-    fmemory_realloc_ptr = sigscan<fmemory_realloc_func>(REALLOC_PATTERN);
-    fmemory_free_ptr = sigscan<fmemory_free_func>(FREE_PATTERN);
+    fmemory_malloc_ptr = MALLOC_PATTERN.sigscan<fmemory_malloc_func>();
+    fmemory_realloc_ptr = REALLOC_PATTERN.sigscan<fmemory_realloc_func>();
+    fmemory_free_ptr = FREE_PATTERN.sigscan<fmemory_free_func>();
 
     LOG(MISC, "FMemory::Malloc: {:p}", reinterpret_cast<void*>(fmemory_malloc_ptr));
     LOG(MISC, "FMemory::Realloc: {:p}", reinterpret_cast<void*>(fmemory_realloc_ptr));

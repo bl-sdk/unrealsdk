@@ -20,17 +20,12 @@ class BL2Hook : public AbstractHook {
     virtual void hexedit_array_limit_message(void) const;
 
     /**
-     * @brief Finds GNames, and sets up such that `gnames` may be called.
-     */
-    virtual void find_gnames(void) const;
-
-    /**
      * @brief Finds `FName::Init`, and sets up such that `fname_init` may be called.
      */
     void find_fname_init(void);
 
     // Deliberately storing in a void pointer member, because the type changes in bl2/tps
-    void* fname_init_ptr;
+    void* fname_init_ptr = nullptr;
 
     /**
      * @brief Hooks the antidebug functions and disables them.
@@ -61,6 +56,11 @@ class BL2Hook : public AbstractHook {
      * @brief Finds GObjects, and populates the wrapper member.
      */
     static void find_gobjects(void);
+
+    /**
+     * @brief Finds GNames, and sets up such that `gnames` may be called.
+     */
+    static void find_gnames(void);
 
     /**
      * @brief Finds `FFrame::Step`, and sets up such that `fframe_step` may be called.
@@ -108,7 +108,7 @@ struct GameTraits<BL2Hook> {
     static constexpr auto NAME = "Borderlands 2";
 
     static bool matches_executable(const std::string& executable) {
-        return executable == "Borderlands2.exe";
+        return executable == "Borderlands2.exe" || executable == "TinyTina.exe";
     }
 };
 

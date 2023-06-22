@@ -26,14 +26,16 @@ struct FMalloc {
 
 FMalloc* gmalloc;
 
-const Pattern GMALLOC_PATTERN{"\x00\x00\x00\x00\xFF\xD7\x83\xC4\x04\x89\x45\xE4",
-                              "\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+const constinit Pattern<8> GMALLOC_PATTERN{
+    "89 35 ????????"  // mov [Borderlands2.GDebugger+A95C], esi
+    "FF D7"           // call edi
+    ,
+    2};
 
 }  // namespace
 
 void BL2Hook::find_gmalloc(void) {
-    auto sig_address = sigscan(GMALLOC_PATTERN);
-    gmalloc = *read_offset<FMalloc**>(sig_address);
+    gmalloc = *read_offset<FMalloc**>(GMALLOC_PATTERN.sigscan());
     LOG(MISC, "GMalloc: {:p}", reinterpret_cast<void*>(gmalloc));
 }
 void* BL2Hook::u_malloc(size_t len) const {

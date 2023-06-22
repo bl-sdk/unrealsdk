@@ -46,14 +46,20 @@ void BL2Hook::hook(void) {
 
 namespace {
 
-const Pattern FNAME_INIT_SIG{
-    "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x50\x81\xEC\x9C\x0C",
-    "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+const constinit Pattern<23> FNAME_INIT_SIG{
+    "55"              // push ebp
+    "8B EC"           // mov ebp, esp
+    "6A FF"           // push -01
+    "68 ????????"     // push Borderlands2.exe+110298B
+    "64 A1 ????????"  // mov eax, fs:[00000000]
+    "50"              // push eax
+    "81 EC 9C0C0000"  // sub esp, 00000C9C
+};
 
 }
 
 void BL2Hook::find_fname_init(void) {
-    this->fname_init_ptr = sigscan<void*>(FNAME_INIT_SIG);
+    this->fname_init_ptr = FNAME_INIT_SIG.sigscan<void*>();
     LOG(MISC, "FName::Init: {:p}", this->fname_init_ptr);
 }
 
@@ -75,13 +81,17 @@ namespace {
 typedef void(__thiscall* fframe_step_func)(FFrame* stack, UObject* obj, void* param);
 fframe_step_func fframe_step_ptr;
 
-const Pattern FFRAME_STEP_SIG{"\x55\x8B\xEC\x8B\x41\x18\x0F\xB6\x10",
-                              "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"};
+const constinit Pattern<9> FFRAME_STEP_SIG{
+    "55"        // push ebp
+    "8B EC"     // mov ebp, esp
+    "8B 41 ??"  // mov eax, [ecx+18]
+    "0FB6 10"   // movzx edx, byte ptr [eax]
+};
 
 }  // namespace
 
 void BL2Hook::find_fframe_step(void) {
-    fframe_step_ptr = sigscan<fframe_step_func>(FFRAME_STEP_SIG);
+    fframe_step_ptr = FFRAME_STEP_SIG.sigscan<fframe_step_func>();
     LOG(MISC, "FFrame::Step: {:p}", reinterpret_cast<void*>(fframe_step_ptr));
 }
 void BL2Hook::fframe_step(FFrame* frame, UObject* obj, void* param) const {
@@ -105,16 +115,30 @@ typedef UObject*(__cdecl* construct_obj_func)(UClass* cls,
                                               uint32_t assume_template_is_archetype);
 construct_obj_func construct_obj_ptr;
 
-const Pattern CONSTRUCT_OBJECT_PATTERN{
-    "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x83\xEC\x10\x53\x56\x57"
-    "\xA1\x00\x00\x00\x00\x33\xC5\x50\x8D\x45\xF4\x64\xA3\x00\x00\x00\x00\x8B\x7D\x08\x8A\x87",
-    "\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
-    "\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF"};
+const constinit Pattern<49> CONSTRUCT_OBJECT_PATTERN{
+    "55"              // push ebp
+    "8B EC"           // mov ebp, esp
+    "6A FF"           // push -01
+    "68 ????????"     // push Borderlands2.exe+1107DCB
+    "64 A1 ????????"  // mov eax, fs:[00000000]
+    "50"              // push eax
+    "83 EC 10"        // sub esp, 10
+    "53"              // push ebx
+    "56"              // push esi
+    "57"              // push edi
+    "A1 ????????"     // mov eax, [Borderlands2.g_LEngineDefaultPoolId+B2DC]
+    "33 C5"           // xor eax, ebp
+    "50"              // push eax
+    "8D 45 ??"        // lea eax, [ebp-0C]
+    "64 A3 ????????"  // mov fs:[00000000], eax
+    "8B 7D ??"        // mov edi, [ebp+08]
+    "8A 87 ????????"  // mov al, [edi+000001CC]
+};
 
 }  // namespace
 
 void BL2Hook::find_construct_object(void) {
-    construct_obj_ptr = sigscan<construct_obj_func>(CONSTRUCT_OBJECT_PATTERN);
+    construct_obj_ptr = CONSTRUCT_OBJECT_PATTERN.sigscan<construct_obj_func>();
     LOG(MISC, "StaticConstructObject: {:p}", reinterpret_cast<void*>(construct_obj_ptr));
 }
 

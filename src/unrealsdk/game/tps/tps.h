@@ -5,14 +5,14 @@
 
 #if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
-#include "unrealsdk/game/aodk/aodk.h"
+#include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/game/selector.h"
 
 using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
-class TPSHook : public AoDKHook {
+class TPSHook : public BL2Hook {
    protected:
     void hexedit_array_limit_message(void) const override;
 
