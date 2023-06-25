@@ -30,6 +30,11 @@ try_compile(supports_format
     CXX_STANDARD 20
 )
 
+set(PRE_CONFIGURE_FILE "src/unrealsdk/version.cpp.in")
+set(POST_CONFIGURE_FILE "${CMAKE_CURRENT_BINARY_DIR}/version.cpp")
+set(GIT_WORKING_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+include(libs/cmake-git-version-tracking/git_watcher.cmake)
+
 add_subdirectory(libs/minhook)
 if(NOT supports_format)
     add_subdirectory(libs/fmt)
@@ -78,6 +83,7 @@ endif()
 # How we include sources depends on what sort of library we're building as
 # Including this in the interface target would force them to be public
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/unrealsdk/*.cpp" "src/unrealsdk/*.h")
+list(APPEND sources ${POST_CONFIGURE_FILE})
 
 if(NOT UNREALSDK_SHARED)
     add_library(unrealsdk OBJECT)
