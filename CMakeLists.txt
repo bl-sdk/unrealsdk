@@ -44,9 +44,6 @@ if((NOT CMAKE_HOST_WIN32)
     target_compile_definitions(minhook PRIVATE MINHOOK_DISABLE_INTRINSICS)
 endif()
 
-file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/unrealsdk/*.cpp" "src/unrealsdk/*.h")
-target_sources(_unrealsdk_interface INTERFACE ${sources})
-
 target_include_directories(_unrealsdk_interface INTERFACE "src")
 target_link_libraries(_unrealsdk_interface INTERFACE minhook)
 if(NOT ${supports_format})
@@ -62,18 +59,25 @@ target_compile_definitions(_unrealsdk_interface INTERFACE
 target_precompile_headers(_unrealsdk_interface INTERFACE "src/unrealsdk/pch.h")
 
 if(MSVC)
-    # Enable Edit and Continue
+    # Enable Edit and Continue - replace /Zi with /ZI
     string(REPLACE "/Zi" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
     string(REPLACE "/Zi" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
-    string(REPLACE "/Zi" "" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
-    string(REPLACE "/Zi" "" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-
     target_compile_options(_unrealsdk_interface INTERFACE "$<$<CONFIG:DEBUG>:/ZI>")
+
     target_link_options(_unrealsdk_interface INTERFACE "/INCREMENTAL")
+
+    # Only enable /GL (which conflicts with /ZI) in release mode
+    string(REPLACE "/GL" "" CMAKE_C_COMPILE_OPTIONS_IPO "${CMAKE_C_COMPILE_OPTIONS_IPO}")
+    string(REPLACE "/GL" "" CMAKE_CXX_COMPILE_OPTIONS_IPO "${CMAKE_CXX_COMPILE_OPTIONS_IPO}")
+    target_compile_options(_unrealsdk_interface INTERFACE "$<$<CONFIG:RELEASE>:/GL>")
 
     # UTF-8 encoded source files
     target_compile_options(_unrealsdk_interface INTERFACE "/utf-8")
 endif()
+
+# How we include sources depends on what sort of library we're building as
+# Including this in the interface target would force them to be public
+file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/unrealsdk/*.cpp" "src/unrealsdk/*.h")
 
 if(NOT UNREALSDK_SHARED)
     add_library(unrealsdk OBJECT)
@@ -81,6 +85,9 @@ if(NOT UNREALSDK_SHARED)
     set_target_properties(unrealsdk PROPERTIES
         EXPORT_COMPILE_COMMANDS True
     )
+
+    # If a static library, we can keep sources private
+    target_sources(unrealsdk PRIVATE ${sources})
 else()
     add_library(unrealsdk SHARED)
     target_link_libraries(unrealsdk PUBLIC _unrealsdk_interface)
@@ -88,6 +95,14 @@ else()
         EXPORT_COMPILE_COMMANDS True
         PREFIX ""
     )
+
+    # If a shared library, make sources public
+    # Because we only expose the bare minimum functionality which relies on an internal state,
+    # anything linking against us needs to statically compile the rest - making the sources public
+    # is an easy way to accomplish that, without even needing another `unrealsdk_shared` target.
+    # This does mean they get compiled twice, but we can't easily avoid that, since the two passes
+    # use different values for `UNREALSDK_EXPORTING` anyway.
+    target_sources(unrealsdk PUBLIC ${sources})
 
     file(GLOB_RECURSE shared_sources CONFIGURE_DEPENDS "src/shared/*.cpp" "src/shared/*.h")
     target_sources(unrealsdk PRIVATE ${shared_sources})
