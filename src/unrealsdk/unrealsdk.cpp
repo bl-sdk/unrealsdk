@@ -30,9 +30,9 @@ bool init(std::unique_ptr<game::AbstractHook>&& game) {
 
     logging::init(LOG_FILE_NAME);
 
-    auto init_str = unrealsdk::fmt::format("unrealsdk {}", VERSION_STR);
-    LOG(INFO, "{}", init_str);
-    LOG(INFO, "{}", std::string(init_str.size(), '='));
+    auto version = unrealsdk::get_version_string();
+    LOG(INFO, "{}", version);
+    LOG(INFO, "{}", std::string(version.size(), '='));
 
     if (MH_Initialize() != MH_OK) {
         throw std::runtime_error("Minhook initialization failed!");

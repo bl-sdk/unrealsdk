@@ -16,6 +16,12 @@ If:
 Diagnostics:
     Suppress: '*'
 ---
+# Suppress "expected expression" errors caused by variable substitutions
+If:
+    PathMatch: src/.*\.in
+Diagnostics:
+    Suppress: expected_expression
+---
 # Make sure the highlighting acts as if we're exporting
 If:
     PathMatch: src/.*
