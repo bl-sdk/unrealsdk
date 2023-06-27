@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.24)
 
 project(unrealsdk)
 
@@ -33,7 +33,7 @@ try_compile(supports_format
 set(PRE_CONFIGURE_FILE "src/unrealsdk/version.cpp.in")
 set(POST_CONFIGURE_FILE "${CMAKE_CURRENT_BINARY_DIR}/version.cpp")
 set(GIT_WORKING_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
-include(libs/cmake-git-version-tracking/git_watcher.cmake)
+include(cmake/git_watcher.cmake)
 
 add_subdirectory(libs/minhook)
 if(NOT supports_format)
