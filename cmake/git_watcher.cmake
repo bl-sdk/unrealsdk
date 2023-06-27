@@ -9,11 +9,11 @@
 # If the state changes (e.g. a commit is made), then a file gets reconfigured.
 # Here are the primary variables that control script behavior:
 #
-#   PRE_CONFIGURE_FILE (REQUIRED)
+#   GIT_PRE_CONFIGURE_FILE (REQUIRED)
 #   -- The path to the file that'll be configured.
 #
-#   POST_CONFIGURE_FILE (REQUIRED)
-#   -- The path to the configured PRE_CONFIGURE_FILE.
+#   GIT_POST_CONFIGURE_FILE (REQUIRED)
+#   -- The path to the configured GIT_PRE_CONFIGURE_FILE.
 #
 #   GIT_STATE_FILE (OPTIONAL)
 #   -- The path to the file used to store the previous build's git state.
@@ -69,6 +69,7 @@ endmacro()
 macro(CHECK_OPTIONAL_VARIABLE_NOPATH var_name default_value)
     if(NOT DEFINED ${var_name})
         set(${var_name} ${default_value})
+        list(APPEND _defaulted_variables ${var_name})
     endif()
 endmacro()
 
@@ -79,10 +80,18 @@ macro(CHECK_OPTIONAL_VARIABLE var_name default_value)
     PATH_TO_ABSOLUTE(${var_name})
 endmacro()
 
-CHECK_REQUIRED_VARIABLE(PRE_CONFIGURE_FILE)
-CHECK_REQUIRED_VARIABLE(POST_CONFIGURE_FILE)
-CHECK_OPTIONAL_VARIABLE(GIT_STATE_FILE "${CMAKE_CURRENT_BINARY_DIR}/git-state-hash")
-CHECK_OPTIONAL_VARIABLE(GIT_WORKING_DIR "${CMAKE_SOURCE_DIR}")
+CHECK_REQUIRED_VARIABLE(GIT_PRE_CONFIGURE_FILE)
+CHECK_REQUIRED_VARIABLE(GIT_POST_CONFIGURE_FILE)
+
+CHECK_OPTIONAL_VARIABLE(GIT_WORKING_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
+if(NOT DEFINED GIT_SLUG)
+    string(MAKE_C_IDENTIFIER ${GIT_WORKING_DIR} GIT_SLUG)
+    list(APPEND _defaulted_variables GIT_SLUG)
+endif()
+
+CHECK_OPTIONAL_VARIABLE(GIT_STATE_FILE "${CMAKE_CURRENT_BINARY_DIR}/git-state-hash-${GIT_SLUG}")
+
 CHECK_OPTIONAL_VARIABLE_NOPATH(GIT_FAIL_IF_NONZERO_EXIT TRUE)
 CHECK_OPTIONAL_VARIABLE_NOPATH(GIT_IGNORE_UNTRACKED FALSE)
 
@@ -259,7 +268,7 @@ function(GitStateChangedAction)
     foreach(var_name ${_state_variable_names})
         set(${var_name} $ENV{${var_name}})
     endforeach()
-    configure_file("${PRE_CONFIGURE_FILE}" "${POST_CONFIGURE_FILE}" @ONLY)
+    configure_file("${GIT_PRE_CONFIGURE_FILE}" "${GIT_POST_CONFIGURE_FILE}" @ONLY)
 endfunction()
 
 
@@ -297,7 +306,7 @@ function(CheckGit _working_dir _state_changed)
     # Update the state to include the SHA256 for the pre-configure file.
     # This forces the post-configure file to be regenerated if the
     # pre-configure file has changed.
-    file(SHA256 ${PRE_CONFIGURE_FILE} preconfig_hash)
+    file(SHA256 ${GIT_PRE_CONFIGURE_FILE} preconfig_hash)
     string(SHA256 state "${preconfig_hash}${state}")
 
     # Check if the state has changed compared to the backup on disk.
@@ -324,11 +333,11 @@ endfunction()
 #              check the state of git before every build. If the state has
 #              changed, then a file is configured.
 function(SetupGitMonitoring)
-    add_custom_target(check_git
+    add_custom_target(check_git_${GIT_SLUG}
         ALL
-        DEPENDS ${PRE_CONFIGURE_FILE}
+        DEPENDS ${GIT_PRE_CONFIGURE_FILE}
         BYPRODUCTS
-            ${POST_CONFIGURE_FILE}
+            ${GIT_POST_CONFIGURE_FILE}
             ${GIT_STATE_FILE}
         COMMENT "Checking the git repository for changes..."
         COMMAND
@@ -337,8 +346,8 @@ function(SetupGitMonitoring)
             -DGIT_WORKING_DIR=${GIT_WORKING_DIR}
             -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
             -DGIT_STATE_FILE=${GIT_STATE_FILE}
-            -DPRE_CONFIGURE_FILE=${PRE_CONFIGURE_FILE}
-            -DPOST_CONFIGURE_FILE=${POST_CONFIGURE_FILE}
+            -DGIT_PRE_CONFIGURE_FILE=${GIT_PRE_CONFIGURE_FILE}
+            -DGIT_POST_CONFIGURE_FILE=${GIT_POST_CONFIGURE_FILE}
             -DGIT_FAIL_IF_NONZERO_EXIT=${GIT_FAIL_IF_NONZERO_EXIT}
             -DGIT_IGNORE_UNTRACKED=${GIT_IGNORE_UNTRACKED}
             -P "${CMAKE_CURRENT_LIST_FILE}")
@@ -354,7 +363,7 @@ function(Main)
         # Check if the repo has changed.
         # If so, run the change action.
         CheckGit("${GIT_WORKING_DIR}" changed)
-        if(changed OR NOT EXISTS "${POST_CONFIGURE_FILE}")
+        if(changed OR NOT EXISTS "${GIT_POST_CONFIGURE_FILE}")
             GitStateChangedAction()
         endif()
     else()
@@ -365,3 +374,9 @@ endfunction()
 
 # And off we go...
 Main()
+
+
+foreach(_var ${_defaulted_variables})
+    unset(${_var})
+endforeach()
+unset(_defaulted_variables)
