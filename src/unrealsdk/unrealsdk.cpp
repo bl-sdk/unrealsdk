@@ -1,5 +1,6 @@
 #include "unrealsdk/pch.h"
 
+#include "unrealsdk/env.h"
 #include "unrealsdk/game/abstract_hook.h"
 #include "unrealsdk/hook_manager.h"
 #include "unrealsdk/logging.h"
@@ -28,6 +29,7 @@ bool init(std::unique_ptr<game::AbstractHook>&& game) {
         return false;
     }
 
+    env::load_file();
     logging::init(LOG_FILE_NAME);
 
     auto version = unrealsdk::get_version_string();

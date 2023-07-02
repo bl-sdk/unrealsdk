@@ -29,8 +29,6 @@ const std::wstring INJECT_CONSOLE_FUNC = L"/Script/Engine.PlayerController:Clien
 const constexpr auto INJECT_CONSOLE_TYPE = hook_manager::Type::PRE;
 const std::wstring INJECT_CONSOLE_ID = L"unrealsdk_bl3_inject_console";
 
-constexpr auto DEFAULT_OUTPUT_TEXT_VF_INDEX = 83;
-
 UObject* console = nullptr;
 
 bool inject_console_hook(hook_manager::Details& hook) {
@@ -69,7 +67,7 @@ bool inject_console_hook(hook_manager::Details& hook) {
 
             console_key = existing_console_key;
         } else {
-            auto wanted_console_key = env::get(env::CONSOLE_KEY, env::CONSOLE_KEY_DEFAULT);
+            auto wanted_console_key = env::get(env::CONSOLE_KEY, env::defaults::CONSOLE_KEY);
             console_key = {wanted_console_key};
 
             inner_obj->get<UStructProperty>(L"ConsoleKey"_fn)
@@ -95,8 +93,8 @@ void BL3Hook::inject_console(void) {
 }
 
 void BL3Hook::uconsole_output_text(const std::wstring& str) const {
-    static auto idx =
-        env::get_numeric<size_t>(env::UCONSOLE_OUTPUT_TEXT_VF_INDEX, DEFAULT_OUTPUT_TEXT_VF_INDEX);
+    static auto idx = env::get_numeric<size_t>(env::UCONSOLE_OUTPUT_TEXT_VF_INDEX,
+                                               env::defaults::UCONSOLE_OUTPUT_TEXT_VF_INDEX);
 
     if (console == nullptr) {
         return;

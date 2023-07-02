@@ -21,27 +21,31 @@ unreal function is hooked, allowing you to interact with it's args, and mess wit
 Exact hook semantics are better documented in the `hook_manager.h` header.
 
 ```cpp
-bool on_main_menu(HookDetails& hook) {
-   LOG(INFO, "Reached main menu!");
+bool on_main_menu(unrealsdk::hook_manager::Details& hook) {
+    LOG(INFO, "Reached main menu!");
+    return false;
 }
 
-hook_manager::hooks[L"WillowGame.FrontendGFxMovie:Start"].pre[L"main_menu_hook"] = &on_main_menu;
+unrealsdk::hook_manager::add_hook(L"WillowGame.FrontendGFxMovie:Start",
+                                  unrealsdk::hook_manager::Type::PRE, L"main_menu_hook",
+                                  &on_main_menu);
 ```
 
 Once your hook runs, you start having access to unreal objects. You can generally interact with any
 unreal value (such as the properties on an object) through the templated `get` and `set` functions.
-These functions take the expected property type as a template arg (and will throw errors if it
-doesn't appear to line up).
+These functions take the expected property type as a template arg (and will throw exceptions if it
+doesn't appear to line up). All property accesses are evaluated at runtime, meaning you don't need
+to generate an sdk specific to your game.
 
 ```cpp
 auto paused = hook.args->get<UBoolProperty>(L"StartPaused"_fn);
 
 auto idx = hook.obj->get<UIntProperty>(L"MessageOfTheDayIdx"_fn);
 auto motd_array = hook.obj->get<UArrayProperty>(L"MessagesOfTheDay"_fn);
-motd_array->get_at<UStructProperty>(idx)->set<UStrProperty>(L"Body"_fn, L"No MOTD today");
+motd_array.get_at<UStructProperty>(idx).set<UStrProperty>(L"Body"_fn, L"No MOTD today");
 
-auto op_string = hook.obj->get<UFunction, BoundFunction>(L"BuildOverpowerPromptString")
-                     .call<UStrProperty, UIntProperty, UIntProperty>(1, 10);
+auto op_string = hook.obj->get<UFunction, BoundFunction>(L"BuildOverpowerPromptString"_fn)
+                    .call<UStrProperty, UIntProperty, UIntProperty>(1, 10);
 ```
 
 # Environment Variables
@@ -50,6 +54,7 @@ build configurations.
 
 | Environment Variable                      | Usage                                                                                                                           |
 | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| `UNREALSDK_ENV_FILE`                      | A file containing enviroment variables to load. Defaults to `unrealsdk.env`. More below.                                        |
 | `UNREALSDK_EXTERNAL_CONSOLE`              | If defined, creates an external console window mirroring what is written to the game's console. Always enabled in debug builds. |
 | `UNREALSDK_LOG_LEVEL`                     | Changes the default logging level used in the unreal console. May use either the level names or their numerical values.         |
 | `UNREALSDK_GAME_OVERRIDE`                 | Override the executable name used for game detection.                                                                           |
@@ -57,6 +62,20 @@ build configurations.
 | `UNREALSDK_ALLOC_ALIGNMENT`               | Changes the alignment used when calling the unreal memory allocation functions.                                                 |
 | `UNREALSDK_CONSOLE_KEY`                   | Changes the default console key which is set when one is not already bound.                                                     |
 | `UNREALSDK_UCONSOLE_OUTPUT_TEXT_VF_INDEX` | Overrides the virtual function index used when calling `UConsole::OutputText`.                                                  |
+
+You can also define any of these in an env file, which will automatically be loaded when the sdk
+starts (excluding `UNREALSDK_ENV_FILE` of course). This file should contain lines of equals
+seperated key-value pairs, noting that whitespace is *not* stripped (outside of the trailing
+newline). A line is ignored if it does not contain an equals sign, or if it defines a variable which
+already exists.
+
+```ini
+UNREALSDK_LOG_LEVEL=MISC
+UNREALSDK_CONSOLE_KEY=Quote
+```
+
+You can also use this file to load enviroment variables for other plugins (assuming they don't check
+them too early), it's not limited to just those used by the sdk.
 
 # Linking Against the SDK
 The sdk requires at least C++20, primarily for templated lambdas. It also makes great use of
