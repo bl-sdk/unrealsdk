@@ -32,8 +32,7 @@ struct LogMessage {
     const Level level{};
     const char* msg{};
     const size_t msg_size{};
-    const char* function{};
-    const char* file{};
+    const char* location{};
     const int line{};
 
     // NOLINTEND(cppcoreguidelines-avoid-const-or-ref-data-members)
@@ -53,28 +52,18 @@ void init(const std::string& filename, bool callbacks_only = false);
 #endif
 
 /**
- * @brief Internal function to log a message.
- * @note Shouldn't call directly, use the `LOG()` macro instead.
+ * @brief Logs a message.
+ * @note Should generally use the `LOG()` macro over this.
  *
- * @param time The time this message was constructed at.
  * @param level The log level.
  * @param msg The message.
- * @param function The function the message was logged from.
- * @param file The file the message was logged from.
+ * @param location The location the message was logged from. Expected to be either a path, or a
+ *                 colon-namespaced function name.
  * @param line The line number the message was logged from.
  */
-void log(std::chrono::system_clock::time_point time,
-         Level level,
-         const std::string& msg,
-         const char* function,
-         const char* file,
-         int line);
-void log(std::chrono::system_clock::time_point time,
-         Level level,
-         const std::wstring& msg,
-         const char* function,
-         const char* file,
-         int line);
+void log(Level level, const std::string& msg, const char* location, int line);
+void log(Level level, const std::wstring& msg, const char* location, int line);
+
 /**
  * @brief Sets the log level of the unreal console.
  * @note Does not affect the log file or external console, if enabled.
@@ -109,9 +98,9 @@ UNREALSDK_CAPI void remove_callback(log_callback callback) UNREALSDK_CAPI_SUFFIX
  * @param ... The format string + it's contents.
  */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG(level, ...)                                                                           \
-    unrealsdk::logging::log(std::chrono::system_clock::now(), (unrealsdk::logging::Level::level), \
-                            unrealsdk::fmt::format(__VA_ARGS__), (const char*)(__FUNCTION__),     \
-                            (const char*)"", (__LINE__))
+#define LOG(level, ...)                                                                       \
+    unrealsdk::logging::log((unrealsdk::logging::Level::level),                               \
+                            unrealsdk::fmt::format(__VA_ARGS__), (const char*)(__FUNCTION__), \
+                            (__LINE__))
 
 #endif /* UNREALSDK_LOGGING_H */
