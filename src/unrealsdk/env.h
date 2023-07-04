@@ -11,6 +11,8 @@ const constexpr env_var_key GAME_OVERRIDE = "UNREALSDK_GAME_OVERRIDE";
 const constexpr env_var_key UPROPERTY_SIZE = "UNREALSDK_UPROPERTY_SIZE";
 const constexpr env_var_key ALLOC_ALIGNMENT = "UNREALSDK_ALLOC_ALIGNMENT";
 const constexpr env_var_key CONSOLE_KEY = "UNREALSDK_CONSOLE_KEY";
+const constexpr env_var_key UCONSOLE_CONSOLE_COMMAND_VF_INDEX =
+    "UNREALSDK_CONSOLE_COMMAND_TEXT_VF_INDEX";
 const constexpr env_var_key UCONSOLE_OUTPUT_TEXT_VF_INDEX =
     "UNREALSDK_UCONSOLE_OUTPUT_TEXT_VF_INDEX";
 
@@ -25,6 +27,7 @@ const constexpr auto ENV_FILE = "unrealsdk.env";
 // UPROPERTY_SIZE - defaults to 0 (meaning auto)
 // ALLOC_ALIGNMENT - defaults to 0 (meaning auto)
 const constexpr auto CONSOLE_KEY = "Tilde";
+const constexpr auto UCONSOLE_CONSOLE_COMMAND_VF_INDEX = 81;
 const constexpr auto UCONSOLE_OUTPUT_TEXT_VF_INDEX = 83;
 
 }  // namespace defaults
