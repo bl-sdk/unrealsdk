@@ -2,6 +2,7 @@
 #define UNREALSDK_SRC_UNREALSDK_COMMANDS_H
 
 #include "unrealsdk/pch.h"
+#include "unrealsdk/utils.h"
 
 namespace unrealsdk::commands {
 
@@ -19,8 +20,8 @@ allow normal command processing to continue afterwards.
 
 /**
  * @brief A special value used to register a command which will always match the very next line.
- * @note Only one matchall command can be registered at a time.
- * @note The matchall command is automatically removed after it gets matched.
+ * @note Only one next line command can be registered at a time.
+ * @note The next line command is automatically removed after it gets matched.
  */
 extern const std::wstring NEXT_LINE;
 
@@ -33,7 +34,10 @@ extern const std::wstring NEXT_LINE;
  *                points to the first whitespace char after the command (or off the end of the
  *                string if there was none). 0 in the case of a `NEXT_LINE` match.
  */
-using Callback = void(const wchar_t* line, size_t size, size_t cmd_len) UNREALSDK_CAPI_SUFFIX;
+using SafeCallback = utils::SafeCallback<void, const wchar_t*, size_t, size_t>;
+
+using Callback = std::function<SafeCallback::Signature>;
+using AbstractSafeCallback = SafeCallback::AbstractBase;
 
 /**
  * @brief Adds a custom console command.
@@ -42,7 +46,7 @@ using Callback = void(const wchar_t* line, size_t size, size_t cmd_len) UNREALSD
  * @param callback The callback for when the command is run.
  * @return True if successfully added, false if an identical command already exists.
  */
-bool add_command(const std::wstring& cmd, Callback* callback);
+bool add_command(const std::wstring& cmd, const Callback& callback);
 
 /**
  * @brief Check if a custom console command is registered.
@@ -61,6 +65,7 @@ bool has_command(const std::wstring& cmd);
 bool remove_command(const std::wstring& cmd);
 
 namespace impl {  // These functions are only relevant when implementing a game hook
+
 #ifndef UNREALSDK_IMPORTING
 
 /**
@@ -70,7 +75,7 @@ namespace impl {  // These functions are only relevant when implementing a game 
  * @return A pair of the callback to run and the offset to pass to it, or of nullptr and 0 if there
  *         was no match.
  */
-std::pair<Callback*, size_t> find_matching_command(const std::wstring& line);
+std::pair<AbstractSafeCallback*, size_t> find_matching_command(const std::wstring& line);
 
 #endif
 }  // namespace impl

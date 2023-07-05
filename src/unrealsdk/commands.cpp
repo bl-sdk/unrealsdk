@@ -1,11 +1,16 @@
 #include "unrealsdk/pch.h"
 #include "unrealsdk/commands.h"
+#include "unrealsdk/utils.h"
 
 namespace unrealsdk::commands {
 
 namespace {
 
-std::unordered_map<std::wstring, Callback*> commands{};
+#ifndef UNREALSDK_IMPORTING
+
+std::unordered_map<std::wstring, AbstractSafeCallback*> commands{};
+
+#endif
 
 }  // namespace
 
@@ -15,15 +20,13 @@ const std::wstring NEXT_LINE{};
 #ifdef UNREALSDK_SHARED
 UNREALSDK_CAPI bool add_command(const wchar_t* cmd,
                                 size_t size,
-                                Callback* callback) UNREALSDK_CAPI_SUFFIX;
+                                AbstractSafeCallback* callback) UNREALSDK_CAPI_SUFFIX;
 #endif
-#ifdef UNREALSDK_IMPORTING
-bool add_command(const std::wstring& cmd, Callback* callback) {
-    return add_command(cmd.c_str(), cmd.size(), callback);
-}
-#else
-bool add_command(const std::wstring& cmd, Callback* callback) {
-    std::wstring lower_cmd = cmd;
+#ifdef UNREALSDK_EXPORTING
+UNREALSDK_CAPI bool add_command(const wchar_t* cmd,
+                                size_t size,
+                                AbstractSafeCallback* callback) UNREALSDK_CAPI_SUFFIX {
+    std::wstring lower_cmd{cmd, size};
     std::transform(lower_cmd.begin(), lower_cmd.end(), lower_cmd.begin(), &std::towlower);
 
     if (commands.contains(lower_cmd)) {
@@ -34,11 +37,11 @@ bool add_command(const std::wstring& cmd, Callback* callback) {
     return true;
 }
 #endif
-#ifdef UNREALSDK_EXPORTING
-bool add_command(const wchar_t* cmd, size_t size, Callback* callback) {
-    return add_command({cmd, size}, callback);
+
+bool add_command(const std::wstring& cmd, const Callback& callback) {
+    // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
+    return add_command(cmd.c_str(), cmd.size(), new SafeCallback(callback));
 }
-#endif
 
 #ifdef UNREALSDK_SHARED
 UNREALSDK_CAPI bool has_command(const wchar_t* func, size_t size) UNREALSDK_CAPI_SUFFIX;
@@ -67,7 +70,16 @@ bool remove_command(const std::wstring& cmd) {
 }
 #else
 bool remove_command(const std::wstring& cmd) {
-    return commands.erase(cmd) > 0;
+    if (!commands.contains(cmd)) {
+        return false;
+    }
+
+    auto callback = commands[cmd];
+    // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
+    delete callback;
+    commands.erase(cmd);
+
+    return true;
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
@@ -78,7 +90,9 @@ bool remove_command(const wchar_t* func, size_t size) {
 
 namespace impl {
 
-std::pair<Callback*, size_t> find_matching_command(const std::wstring& line) {
+#ifndef UNREALSDK_IMPORTING
+
+std::pair<AbstractSafeCallback*, size_t> find_matching_command(const std::wstring& line) {
     if (commands.contains(NEXT_LINE)) {
         auto callback = commands[NEXT_LINE];
         commands.erase(NEXT_LINE);
@@ -98,6 +112,8 @@ std::pair<Callback*, size_t> find_matching_command(const std::wstring& line) {
     return commands.contains(cmd) ? std::pair{commands[cmd], cmd_end - line.begin()}
                                   : std::pair{nullptr, 0};
 }
+
+#endif
 
 }  // namespace impl
 

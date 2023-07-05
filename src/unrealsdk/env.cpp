@@ -40,7 +40,7 @@ std::string get(env_var_key env_var, const std::string& default_value) {
 
     // NOLINTBEGIN(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory)
     auto buf = reinterpret_cast<char*>(malloc(size * sizeof(char)));
-    if (buf == 0) {
+    if (buf == nullptr) {
         return default_value;
     }
 

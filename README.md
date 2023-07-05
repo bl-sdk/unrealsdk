@@ -111,6 +111,7 @@ The included shared library initializes based on executable. If you need custom 
 can create your own shared library by linking against the object library and defining the
 `UNREALSDK_SHARED` and `UNREALSDK_EXPORTING` macros.
 
+## Cross-Compiler ABI
 One of the goals of the shared library implementation is have a stable cross-compiler ABI - i.e.
 allowing developing one program while also running another which you downloaded a precompiled
 version of.
@@ -119,17 +120,31 @@ In order to do this, the exported functions try to use a pure C interface. Since
 relies on C++ features (e.g. all the templates), it's impractical to export everything this way.
 Instead, it only exports the bare minimum functions which interact with internal state. Some of
 these rely on private wrapper functions, which do things like decompose strings into pointer and
-length, in which case the public functions are redirected as required. The remaining functions will
-be linked statically.
+length, not everything's exposed in the headers.
 
-While the function calls have a stable cross-compiler ABI, unfortuantly there's one other thing
-which we can't guarantee: exceptions. MSVC and GNU have different exception ABIs, so if one travels
-between two modules with different ABIs, the game will crash. While none of the shared functions
-intentionally throw exceptions, it's impossible to completely avoid an exception travelling between
-modules - we can't stop a client from throwing during a hook (which is called by the sdk). All
-shared functions are compiled to try to allow exceptions to pass through them, but this will only
-work properly if all modules share an exception ABI - though surely you write good code so it won't
-be a problem :).
+There are two assumptions we rely on for these exported functions to work properly, where we can't
+quite stick with pure C:
+
+1. Both dlls share the same "standard class layout". This doesn't quite mean "standard layout" in
+   the strict way the C++ standard defines it, rather it's refering to what the standard doesn't
+   require, but which have a pretty much agreed upon solution anyway, stuff like:
+    - There's a single virtual function table at the top of the object
+    - Virtual functions are placed in order of definition
+    - Members are placed after the virtual function table, with standard padding rules
+    - Members from a more derived class are placed after those from a less derived class
+
+2. Both dlls share the same exception ABI. While none of the exported functions intentionally throw,
+   it's impossible to completely avoid an exception travelling between modules - we can't stop a
+   client from throwing during a hook, meaning an exception would travel from the client dll through
+   to the sdk.
+
+#1 is not an issue, since all the big compilers do these things in the same way. Technically we rely
+on it when linking statically too, we assume the sdk's re-definitions of the unreal types will have
+the same layout as those in the executable.
+
+#2 may be a problem however - MSVC and GNU have different exception ABIs. Clang supports both.
+Practically, this means when cross compiling, you should either compile everything from scratch, or
+setup Clang to build with the MSVC ABI. [See this blog post for more info](https://apple1417.dev/posts/2023-05-18-debugging-proton).
 
 # Running Builds
 As previously mentioned, the sdk can be configured to create a shared library. This is useful when

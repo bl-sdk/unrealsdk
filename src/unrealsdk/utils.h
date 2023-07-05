@@ -49,6 +49,77 @@ struct IteratorProxy {
     Iterator end() { return this->it_end; }
 };
 
+/**
+ * @brief An abstract base class used to pass callbacks across dll boundaries safely.
+ * @note You should never have to use this directly, the wrappers should autoconvert for you.
+ *
+ * @tparam R The return type.
+ * @tparam As The argument types.
+ */
+template <typename R, typename... As>
+// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
+struct AbstractSafeCallback {
+    /// The signature functions matching this type should have.
+    using Signature = R(As...) UNREALSDK_CAPI_SUFFIX;
+
+    /**
+     * @brief Destroys the callback.
+     */
+    virtual ~AbstractSafeCallback() = default;
+
+    /**
+     * @brief Runs the callback.
+     *
+     * @param args The callback args.
+     * @return The return value of the callback
+     */
+    virtual R operator()(As... args) = 0;
+};
+
+/**
+ * @brief An implementation of a safe callback.
+ * @note This class itself cannot be passed across dlls safely, it may only cross as a pointer to
+ *       it's abstract base type.
+ *
+ * @tparam R The return type.
+ * @tparam As The argument types.
+ */
+template <typename R, typename... A>
+struct SafeCallback : AbstractSafeCallback<R, A...> {
+    /// The abstract base type this callback inherits from.
+    using AbstractBase = AbstractSafeCallback<R, A...>;
+
+   private:
+    std::function<typename SafeCallback::Signature> func;
+
+   public:
+    /**
+     * @brief Constructs a new safe callback from a function.
+     *
+     * @param func The function to wrap.
+     */
+    SafeCallback(decltype(func) func) : func(func) {}
+
+    /**
+     * @brief Destroys the callback.
+     */
+    ~SafeCallback() override = default;
+
+    /**
+     * @brief Runs the callback.
+     *
+     * @param args The callback args.
+     * @return The return value of the callback
+     */
+    R operator()(A... args) override {
+        if constexpr (std::is_void_v<R>) {
+            this->func(args...);
+        } else {
+            return this->func(args...);
+        }
+    }
+};
+
 }  // namespace unrealsdk::utils
 
 // Custom wstring formatter, which calls narrow

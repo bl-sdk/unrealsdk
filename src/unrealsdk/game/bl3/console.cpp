@@ -106,7 +106,7 @@ void console_command_hook(UObject* console_obj, UnmanagedFString* raw_line) {
             // Don't want to log this, just output to console by itself
             unrealsdk::uconsole_output_text(unrealsdk::fmt::format(L">>> {} <<<", line));
 
-            callback(line.c_str(), line.size(), cmd_len);
+            callback->operator()(line.c_str(), line.size(), cmd_len);
 
             return;
         }
