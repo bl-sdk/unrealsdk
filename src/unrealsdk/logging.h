@@ -103,4 +103,24 @@ UNREALSDK_CAPI void remove_callback(log_callback callback) UNREALSDK_CAPI_SUFFIX
                             unrealsdk::fmt::format(__VA_ARGS__), (const char*)(__FUNCTION__), \
                             (__LINE__))
 
+/**
+ * @brief Logs a possibly-multiline string retrieved from another source.
+ * @note Prefer multiple consecutive log statements if you're constructing a multiline string.
+ *
+ * @param level The log level name.
+ * @param str The string to log.
+ */
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LOG_MULTILINE(level, str)                                                               \
+    do {                                                                                        \
+        /* leading underscore then lowercase is allowed, as long as it's not in global scope */ \
+        std::istringstream _unrealsdk_log_multiline_stream{str};                                \
+        std::string _unrealsdk_log_multiline_line;                                              \
+        while (std::getline(_unrealsdk_log_multiline_stream, _unrealsdk_log_multiline_line)) {  \
+            unrealsdk::logging::log((unrealsdk::logging::Level::level),                         \
+                                    _unrealsdk_log_multiline_line, (const char*)(__FUNCTION__), \
+                                    (__LINE__));                                                \
+        }                                                                                       \
+    } while (0)
+
 #endif /* UNREALSDK_LOGGING_H */
