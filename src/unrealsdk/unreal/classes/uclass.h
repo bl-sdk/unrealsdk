@@ -66,15 +66,6 @@ class UClass : public UStruct {
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 
     /**
-     * @brief Checks if this class inherits from another.
-     * @note Also returns true if this class *is* the given class.
-     *
-     * @param cls The class to check if this inferits from.
-     * @return True if this class is the given class, or inherits from it.
-     */
-    [[nodiscard]] bool inherits(const UClass* cls) const;
-
-    /**
      * @brief Checks if this class implements an interface.
      *
      * @param iface The interface to check.

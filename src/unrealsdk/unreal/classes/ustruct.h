@@ -81,6 +81,8 @@ class UStruct : public UField {
     TArray<UObject*> ScriptObjectReferences;
 #endif
 
+    // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
+
    public:
 #pragma region Iterators
     struct FieldIterator {
@@ -173,7 +175,14 @@ class UStruct : public UField {
     [[nodiscard]] T* find_prop_and_validate(const FName& name) const;
     [[nodiscard]] UFunction* find_func_and_validate(const FName& name) const;
 
-    // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
+    /**
+     * @brief Checks if this structs inherits from another.
+     * @note Also returns true if this struct *is* the given struct.
+     *
+     * @param base_struct The base struct to check if this inherits from.
+     * @return True if this struct is the given struct, or inherits from it.
+     */
+    [[nodiscard]] bool inherits(const UStruct* base_struct) const;
 };
 
 #if defined(__clang__) || defined(__MINGW32__)
