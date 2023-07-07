@@ -8,8 +8,6 @@
 #include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/game/selector.h"
 
-using namespace unrealsdk::unreal;
-
 namespace unrealsdk::game {
 
 class TPSHook : public BL2Hook {
@@ -17,7 +15,7 @@ class TPSHook : public BL2Hook {
     void hexedit_array_limit_message(void) const override;
 
    public:
-    void fname_init(FName* name, const wchar_t* str, int32_t number) const override;
+    void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const override;
 };
 
 template <>

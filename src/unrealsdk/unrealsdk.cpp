@@ -15,6 +15,8 @@
 // where the allocations are coming from.
 #undef UNREALSDK_UNREAL_ALLOC_TRACKING
 
+using namespace unrealsdk::unreal;
+
 namespace unrealsdk {
 
 namespace {
