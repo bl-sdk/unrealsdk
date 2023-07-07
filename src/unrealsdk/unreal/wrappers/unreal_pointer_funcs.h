@@ -34,7 +34,7 @@ UnrealPointer<T>::UnrealPointer(size_t size) : control(nullptr), ptr(nullptr) {
     // If malloc throws, it should have handled freeing memory if required
     auto buf = unrealsdk::u_malloc(size + sizeof(impl::UnrealPointerControl));
 
-    // Otherwise, if we throw during initalization we need to free manually
+    // Otherwise, if we throw during initialization we need to free manually
     try {
         // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
         this->control = new (buf) impl::UnrealPointerControl();

@@ -18,7 +18,7 @@ const constexpr env_var_key UCONSOLE_OUTPUT_TEXT_VF_INDEX =
 
 namespace defaults {
 
-// Chosing to only define the defaults which are not default constructable
+// Choosing to only define the defaults which are not default constructable
 
 const constexpr auto ENV_FILE = "unrealsdk.env";
 // EXTERNAL_CONSOLE - defaults to empty string (only used in defined checks)

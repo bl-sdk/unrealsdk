@@ -54,7 +54,7 @@ build configurations.
 
 | Environment Variable                          | Usage                                                                                                                           |
 | :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
-| `UNREALSDK_ENV_FILE`                          | A file containing enviroment variables to load. Defaults to `unrealsdk.env`. More below.                                        |
+| `UNREALSDK_ENV_FILE`                          | A file containing environment variables to load. Defaults to `unrealsdk.env`. More below.                                       |
 | `UNREALSDK_EXTERNAL_CONSOLE`                  | If defined, creates an external console window mirroring what is written to the game's console. Always enabled in debug builds. |
 | `UNREALSDK_LOG_LEVEL`                         | Changes the default logging level used in the unreal console. May use either the level names or their numerical values.         |
 | `UNREALSDK_GAME_OVERRIDE`                     | Override the executable name used for game detection.                                                                           |
@@ -66,7 +66,7 @@ build configurations.
 
 You can also define any of these in an env file, which will automatically be loaded when the sdk
 starts (excluding `UNREALSDK_ENV_FILE` of course). This file should contain lines of equals
-seperated key-value pairs, noting that whitespace is *not* stripped (outside of the trailing
+separated key-value pairs, noting that whitespace is *not* stripped (outside of the trailing
 newline). A line is ignored if it does not contain an equals sign, or if it defines a variable which
 already exists.
 
@@ -75,8 +75,8 @@ UNREALSDK_LOG_LEVEL=MISC
 UNREALSDK_CONSOLE_KEY=Quote
 ```
 
-You can also use this file to load enviroment variables for other plugins (assuming they don't check
-them too early), it's not limited to just those used by the sdk.
+You can also use this file to load environment variables for other plugins (assuming they don't
+check them too early), it's not limited to just those used by the sdk.
 
 # Linking Against the SDK
 The sdk requires at least C++20, primarily for templated lambdas. It also makes great use of
@@ -126,7 +126,7 @@ There are two assumptions we rely on for these exported functions to work proper
 quite stick with pure C:
 
 1. Both dlls share the same "standard class layout". This doesn't quite mean "standard layout" in
-   the strict way the C++ standard defines it, rather it's refering to what the standard doesn't
+   the strict way the C++ standard defines it, rather it's referring to what the standard doesn't
    require, but which have a pretty much agreed upon solution anyway, stuff like:
     - There's a single virtual function table at the top of the object
     - Virtual functions are placed in order of definition

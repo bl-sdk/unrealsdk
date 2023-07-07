@@ -2,7 +2,6 @@
 #define UNREALSDK_UNREAL_WRAPPERS_UNREAL_POINTER_H
 
 #include "unrealsdk/pch.h"
-#include <type_traits>
 
 namespace unrealsdk::unreal {
 
@@ -144,7 +143,7 @@ class UnrealPointerControl {
     // because we put the control block at the start, our address *is* the base address
     std::atomic<size_t> refs;
 
-    // Strictly speaking, std::atomic is not guarenteed to be safe to cross dll boundaries
+    // Strictly speaking, std::atomic is not guaranteed to be safe to cross dll boundaries
     // However in practice, we expect it to be implemented entirely in hardware
     // To make sure it's safe, we:
     // - Make sure it's always lock free - i.e. it's implemented in hardware.

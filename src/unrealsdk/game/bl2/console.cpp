@@ -27,7 +27,7 @@ const std::wstring SAY_BYPASS_FUNC = L"Engine.Console:ShippingConsoleCommand";
 const constexpr auto SAY_BYPASS_TYPE = hook_manager::Type::PRE;
 const std::wstring SAY_BYPASS_ID = L"unrealsdk_bl2_say_bypass";
 
-// We could combine this with the above, but by keeping them seperate it'll let users disable one if
+// We could combine this with the above, but by keeping them separate it'll let users disable one if
 // they really want to
 const std::wstring CONSOLE_COMMAND_FUNC = L"Engine.Console:ConsoleCommand";
 const constexpr auto CONSOLE_COMMAND_TYPE = hook_manager::Type::PRE;
