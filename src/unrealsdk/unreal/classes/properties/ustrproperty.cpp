@@ -4,6 +4,7 @@
 #include "unrealsdk/unreal/structs/fstring.h"
 #include "unrealsdk/unreal/structs/tarray.h"
 #include "unrealsdk/unreal/structs/tarray_funcs.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 #include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 #include "unrealsdk/unrealsdk.h"
 
@@ -12,7 +13,7 @@ namespace unrealsdk::unreal {
 PropTraits<UStrProperty>::Value PropTraits<UStrProperty>::get(
     const UStrProperty* /*prop*/,
     uintptr_t addr,
-    const std::shared_ptr<void>& /*parent*/) {
+    const UnrealPointer<void>& /*parent*/) {
     return *reinterpret_cast<UnmanagedFString*>(addr);
 }
 

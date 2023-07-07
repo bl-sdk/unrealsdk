@@ -5,6 +5,7 @@
 
 #include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
 #include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 
 namespace unrealsdk::unreal {
 
@@ -35,9 +36,7 @@ struct PropTraits<UClassProperty> : public AbstractPropTraits<UClassProperty> {
     using Value = UClass*;
     static inline const wchar_t* const CLASS = L"ClassProperty";
 
-    static Value get(const UClassProperty* prop,
-                     uintptr_t addr,
-                     const std::shared_ptr<void>& parent);
+    static Value get(const UClassProperty* prop, uintptr_t addr, const UnrealPointer<void>& parent);
     static void set(const UClassProperty* prop, uintptr_t addr, const Value& value);
 };
 

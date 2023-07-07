@@ -7,6 +7,7 @@
 #include "unrealsdk/unreal/classes/ustruct_funcs.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/structs/fname.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 
 namespace unrealsdk::unreal {
 
@@ -15,7 +16,7 @@ class UStruct;
 class WrappedStruct {
    public:
     const UStruct* type;
-    std::shared_ptr<void> base;
+    UnrealPointer<void> base;
 
     /**
      * @brief Constructs a new wrapped struct.
@@ -29,7 +30,7 @@ class WrappedStruct {
      * @param other The other wrapped struct to copy/move from. Only allowed if of the same type.
      */
     WrappedStruct(const UStruct* type);
-    WrappedStruct(const UStruct* type, void* base, const std::shared_ptr<void>& parent = {nullptr});
+    WrappedStruct(const UStruct* type, void* base, const UnrealPointer<void>& parent = {nullptr});
     WrappedStruct(const WrappedStruct& other);
     WrappedStruct(WrappedStruct&& other) noexcept;
 

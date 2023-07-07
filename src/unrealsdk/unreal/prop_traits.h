@@ -2,6 +2,7 @@
 #define UNREALSDK_UNREAL_PROP_TRAITS_H
 
 #include "unrealsdk/pch.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 
 namespace unrealsdk::unreal {
 
@@ -28,7 +29,7 @@ struct AbstractPropTraits {
      */
     [[nodiscard]] static Value get(const T* prop,
                                    uintptr_t addr,
-                                   const std::shared_ptr<void>& parent) = delete;
+                                   const UnrealPointer<void>& parent) = delete;
 
     /**
      * @brief Sets the value of the described property type at the given address.
@@ -65,7 +66,7 @@ template <typename T>
 [[nodiscard]] typename PropTraits<T>::Value get_property(const T* prop,
                                                          size_t idx,
                                                          uintptr_t base_addr,
-                                                         const std::shared_ptr<void>& parent = {
+                                                         const UnrealPointer<void>& parent = {
                                                              nullptr}) {
     if (idx > (size_t)prop->ArrayDim) {
         throw std::out_of_range("Property index out of range");

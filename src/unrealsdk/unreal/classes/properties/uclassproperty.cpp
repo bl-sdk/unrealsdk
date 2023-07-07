@@ -2,13 +2,14 @@
 
 #include "unrealsdk/unreal/classes/properties/uclassproperty.h"
 #include "unrealsdk/unreal/classes/uclass.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 
 namespace unrealsdk::unreal {
 
 PropTraits<UClassProperty>::Value PropTraits<UClassProperty>::get(
     const UClassProperty* /*prop*/,
     uintptr_t addr,
-    const std::shared_ptr<void>& /*parent*/) {
+    const UnrealPointer<void>& /*parent*/) {
     return *reinterpret_cast<Value*>(addr);
 }
 

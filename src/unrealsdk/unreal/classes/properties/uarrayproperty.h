@@ -5,6 +5,7 @@
 
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 #include "unrealsdk/unreal/wrappers/wrapped_array.h"
 
 namespace unrealsdk::unreal {
@@ -34,9 +35,7 @@ struct PropTraits<UArrayProperty> : public AbstractPropTraits<UArrayProperty> {
     using Value = WrappedArray;
     static inline const wchar_t* const CLASS = L"ArrayProperty";
 
-    static Value get(const UArrayProperty* prop,
-                     uintptr_t addr,
-                     const std::shared_ptr<void>& parent);
+    static Value get(const UArrayProperty* prop, uintptr_t addr, const UnrealPointer<void>& parent);
     static void set(const UArrayProperty* prop, uintptr_t addr, const Value& value);
     static void destroy(const UArrayProperty* prop, uintptr_t addr);
 };

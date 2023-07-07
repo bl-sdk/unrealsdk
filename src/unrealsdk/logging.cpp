@@ -12,7 +12,7 @@ namespace {
 #ifndef UNREALSDK_IMPORTING
 std::mutex mutex{};
 
-std::atomic<Level> unreal_console_level = Level::DEFAULT_CONSOLE_LEVEL;
+Level unreal_console_level = Level::DEFAULT_CONSOLE_LEVEL;
 HANDLE external_console_handle = nullptr;
 std::unique_ptr<std::ostream> log_file_stream;
 

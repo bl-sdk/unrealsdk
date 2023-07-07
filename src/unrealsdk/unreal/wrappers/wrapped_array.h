@@ -9,6 +9,7 @@
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/structs/fname.h"
 #include "unrealsdk/unreal/structs/tarray.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 #include "unrealsdk/utils.h"
 
 namespace unrealsdk::unreal {
@@ -16,7 +17,7 @@ namespace unrealsdk::unreal {
 class WrappedArray {
    public:
     const UProperty* type;
-    std::shared_ptr<TArray<void>> base;
+    UnrealPointer<TArray<void>> base;
 
     /**
      * @brief Constructs a new wrapped array.
@@ -27,7 +28,7 @@ class WrappedArray {
      */
     WrappedArray(const UProperty* type,
                  TArray<void>* base,
-                 const std::shared_ptr<void>& parent = {nullptr});
+                 const UnrealPointer<void>& parent = {nullptr});
 
     /**
      * @brief Gets the size of the array.

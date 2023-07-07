@@ -8,6 +8,13 @@
 #include "unrealsdk/unrealsdk.h"
 #include "unrealsdk/version.h"
 
+// Define this if you're having memory leaks which go through the unreal allocator - which debuggers
+// normally won't be able to track.
+// With it defined, all allocations will be stored in a set `unrealsdk::unreal_allocations`.
+// Since this set uses the default allocator, debuggers should be able to hook onto it to tell you
+// where the allocations are coming from.
+#undef UNREALSDK_UNREAL_ALLOC_TRACKING
+
 namespace unrealsdk {
 
 namespace {
@@ -20,6 +27,10 @@ std::unique_ptr<game::AbstractHook> hook_instance;
 #endif
 
 }  // namespace
+
+#ifdef UNREALSDK_UNREAL_ALLOC_TRACKING
+std::unordered_set<void*> unreal_allocations{};
+#endif
 
 #ifndef UNREALSDK_IMPORTING
 bool init(std::unique_ptr<game::AbstractHook>&& game) {
@@ -106,13 +117,30 @@ void fframe_step(FFrame* frame, UObject* obj, void* param) {
 }
 
 void* u_malloc(size_t len) {
-    return hook_instance->u_malloc(len);
+    auto ptr = hook_instance->u_malloc(len);
+
+#ifdef UNREALSDK_UNREAL_ALLOC_TRACKING
+    unreal_allocations.insert(ptr);
+#endif
+
+    return ptr;
 }
 void* u_realloc(void* original, size_t len) {
-    return hook_instance->u_realloc(original, len);
+    auto ptr = hook_instance->u_realloc(original, len);
+
+#ifdef UNREALSDK_UNREAL_ALLOC_TRACKING
+    unreal_allocations.erase(original);
+    unreal_allocations.insert(ptr);
+#endif
+
+    return ptr;
 }
 void u_free(void* data) {
-    return hook_instance->u_free(data);
+#ifdef UNREALSDK_UNREAL_ALLOC_TRACKING
+    unreal_allocations.erase(data);
+#endif
+
+    hook_instance->u_free(data);
 }
 
 void process_event(UObject* object, UFunction* function, void* params) {

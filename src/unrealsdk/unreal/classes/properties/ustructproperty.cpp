@@ -4,6 +4,7 @@
 #include "unrealsdk/unreal/classes/properties/ustructproperty.h"
 #include "unrealsdk/unreal/classes/uscriptstruct.h"
 #include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 #include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 
 namespace unrealsdk::unreal {
@@ -11,7 +12,7 @@ namespace unrealsdk::unreal {
 PropTraits<UStructProperty>::Value PropTraits<UStructProperty>::get(
     const UStructProperty* prop,
     uintptr_t addr,
-    const std::shared_ptr<void>& parent) {
+    const UnrealPointer<void>& parent) {
     auto this_struct = prop->read_field(&UStructProperty::Struct);
     return {this_struct, reinterpret_cast<void*>(addr), parent};
 }

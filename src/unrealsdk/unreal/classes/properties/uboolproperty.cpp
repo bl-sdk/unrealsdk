@@ -1,13 +1,14 @@
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/unreal/classes/properties/uboolproperty.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 
 namespace unrealsdk::unreal {
 
 PropTraits<UBoolProperty>::Value PropTraits<UBoolProperty>::get(
     const UBoolProperty* prop,
     uintptr_t addr,
-    const std::shared_ptr<void>& /*parent*/) {
+    const UnrealPointer<void>& /*parent*/) {
     auto mask = prop->read_field(&UBoolProperty::FieldMask);
     auto* bitfield = reinterpret_cast<decltype(UBoolProperty::FieldMask)*>(addr);
 

@@ -4,6 +4,7 @@
 #include "unrealsdk/unreal/classes/uclass.h"
 #include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/structs/fimplementedinterface.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 
 namespace unrealsdk::unreal {
 
@@ -16,7 +17,7 @@ struct FScriptInterface {
 PropTraits<UInterfaceProperty>::Value PropTraits<UInterfaceProperty>::get(
     const UInterfaceProperty* /*prop*/,
     uintptr_t addr,
-    const std::shared_ptr<void>& /*parent*/) {
+    const UnrealPointer<void>& /*parent*/) {
     return reinterpret_cast<FScriptInterface*>(addr)->obj;
 }
 
