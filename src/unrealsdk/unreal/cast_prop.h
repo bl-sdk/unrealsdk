@@ -41,15 +41,6 @@ using all_known_properties = std::tuple<
     UStructProperty>;
 
 /**
- * @brief Helper which turns a const pointer type back into it's base type.
- *
- * @tparam T The const pointer type to convert.
- * @return The base type.
- */
-template <typename T>
-using remove_const_pointer_t = std::remove_const_t<std::remove_pointer<T>>;
-
-/**
  * @brief Works out what type a property is at runtime, and calls a templated callback function with
  *        it's correct type.
  * @note Callback should have the signature `template<typename T> void callback(const T* prop)`

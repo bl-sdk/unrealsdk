@@ -23,9 +23,14 @@ class UArrayProperty : public UProperty {
     UArrayProperty& operator=(UArrayProperty&&) = delete;
     ~UArrayProperty() = delete;
 
-   private:
-    friend PropTraits<UArrayProperty>;
+    /**
+     * @brief Get the inner property, which the array entries are instances of.
+     *
+     * @return This property's inner property.
+     */
+    [[nodiscard]] UProperty* get_inner(void) const;
 
+   private:
     // NOLINTNEXTLINE(readability-identifier-naming)
     UProperty* Inner;
 };

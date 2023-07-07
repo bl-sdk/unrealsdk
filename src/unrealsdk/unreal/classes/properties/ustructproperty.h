@@ -25,9 +25,14 @@ class UStructProperty : public UProperty {
     UStructProperty& operator=(UStructProperty&&) = delete;
     ~UStructProperty() = delete;
 
-   private:
-    friend PropTraits<UStructProperty>;
+    /**
+     * @brief Get the struct type of this property, which values must be an instance of.
+     *
+     * @return This property's struct type.
+     */
+    [[nodiscard]] UScriptStruct* get_inner_struct(void) const;
 
+   private:
     // NOLINTNEXTLINE(readability-identifier-naming)
     UScriptStruct* Struct;
 };

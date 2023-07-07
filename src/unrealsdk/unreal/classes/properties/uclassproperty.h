@@ -24,9 +24,14 @@ class UClassProperty : public UObjectProperty {
     UClassProperty& operator=(UClassProperty&&) = delete;
     ~UClassProperty() = delete;
 
-   private:
-    friend PropTraits<UClassProperty>;
+    /**
+     * @brief Get the meta class of this property, which values must be a subclass of.
+     *
+     * @return This property's meta class.
+     */
+    [[nodiscard]] UClass* get_meta_class(void) const;
 
+   private:
     // NOLINTNEXTLINE(readability-identifier-naming)
     UClass* MetaClass;
 };

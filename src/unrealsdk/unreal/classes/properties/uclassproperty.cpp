@@ -6,6 +6,10 @@
 
 namespace unrealsdk::unreal {
 
+UClass* UClassProperty::get_meta_class(void) const {
+    return this->read_field(&UClassProperty::MetaClass);
+}
+
 PropTraits<UClassProperty>::Value PropTraits<UClassProperty>::get(
     const UClassProperty* /*prop*/,
     uintptr_t addr,
@@ -22,7 +26,7 @@ void PropTraits<UClassProperty>::set(const UClassProperty* prop,
         if (!value->is_instance(prop_cls)) {
             throw std::runtime_error("Object is not instance of " + (std::string)prop_cls->Name);
         }
-        auto meta_cls = prop->read_field(&UClassProperty::MetaClass);
+        auto meta_cls = prop->get_meta_class();
         if (!value->inherits(meta_cls)) {
             throw std::runtime_error("Class does not inherit from " + (std::string)meta_cls->Name);
         }

@@ -14,6 +14,10 @@ struct FScriptInterface {
                       // referenced by ObjectPointer.
 };
 
+UClass* UInterfaceProperty::get_interface_class(void) const {
+    return this->read_field(&UInterfaceProperty::InterfaceClass);
+}
+
 PropTraits<UInterfaceProperty>::Value PropTraits<UInterfaceProperty>::get(
     const UInterfaceProperty* /*prop*/,
     uintptr_t addr,
@@ -24,7 +28,7 @@ PropTraits<UInterfaceProperty>::Value PropTraits<UInterfaceProperty>::get(
 void PropTraits<UInterfaceProperty>::set(const UInterfaceProperty* prop,
                                          uintptr_t addr,
                                          const Value& value) {
-    auto prop_iface = prop->read_field(&UInterfaceProperty::InterfaceClass);
+    auto prop_iface = prop->get_interface_class();
 
     size_t pointer_offset = 0;
 

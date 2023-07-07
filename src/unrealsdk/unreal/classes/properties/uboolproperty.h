@@ -28,8 +28,6 @@ class UBoolProperty : public UProperty {
     ~UBoolProperty() = delete;
 
    private:
-    friend PropTraits<UBoolProperty>;
-
     // NOLINTBEGIN(readability-identifier-naming)
 
 #ifdef UE4
@@ -42,6 +40,13 @@ class UBoolProperty : public UProperty {
 #endif
 
     // NOLINTEND(readability-identifier-naming)
+   public:
+    /**
+     * @brief Get the bool field mask of this property.
+     *
+     * @return The field mask.
+     */
+    [[nodiscard]] decltype(FieldMask) get_field_mask(void) const;
 };
 
 template <>

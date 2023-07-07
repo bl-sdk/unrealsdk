@@ -25,9 +25,14 @@ class UInterfaceProperty : public UProperty {
     UInterfaceProperty& operator=(UInterfaceProperty&&) = delete;
     ~UInterfaceProperty() = delete;
 
-   private:
-    friend PropTraits<UInterfaceProperty>;
+    /**
+     * @brief Get the interface class of this property, which values must be an implementation of.
+     *
+     * @return This property's interface class.
+     */
+    [[nodiscard]] UClass* get_interface_class(void) const;
 
+   private:
     // NOLINTNEXTLINE(readability-identifier-naming)
     UClass* InterfaceClass;
 };

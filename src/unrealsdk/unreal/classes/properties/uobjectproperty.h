@@ -26,15 +26,13 @@ class UObjectProperty : public UProperty {
     ~UObjectProperty() = delete;
 
     /**
-     * @brief Get the class of this property, which the values must be an instance of.
+     * @brief Get the class of this property, which values must be an instance of.
      *
      * @return This property's class.
      */
     [[nodiscard]] UClass* get_property_class(void) const;
 
    private:
-    friend PropTraits<UObjectProperty>;
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     UClass* PropertyClass;
 };
