@@ -78,6 +78,8 @@ void PropTraits<UArrayProperty>::destroy(const UArrayProperty* prop, uintptr_t a
 
     u_free(arr->data);
     arr->data = nullptr;
+    arr->count = 0;
+    arr->max = 0;
 }
 
 }  // namespace unrealsdk::unreal

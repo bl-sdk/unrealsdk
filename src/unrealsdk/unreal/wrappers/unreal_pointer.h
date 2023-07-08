@@ -9,7 +9,9 @@ namespace impl {
 
 class UnrealPointerControl;
 
-}
+}  // namespace impl
+
+class UStruct;
 
 /**
  * @brief A smart pointer to a block of unreal-allocated memory.
@@ -23,6 +25,8 @@ class UnrealPointer {
     template <typename U>
     friend class UnrealPointer;
 
+    // The control pointer may be null if not owned by the sdk - i.e. a pointer to a struct in the
+    // middle of an objet.
     impl::UnrealPointerControl* control;
     T* ptr;
 
@@ -57,11 +61,11 @@ class UnrealPointer {
     UnrealPointer(std::nullptr_t) : control(nullptr), ptr(nullptr) {}
 
     /**
-     * @brief Allocates a new block of memory and constructs a pointer looking at it.
+     * @brief Constructs a pointer to a new block of memory holding a specific struct.
      *
-     * @param size The size of the memory to allocate.
+     * @param struct_type The type of struct to construct.
      */
-    UnrealPointer(size_t size);
+    UnrealPointer(const UStruct* struct_type);
 
     /**
      * @brief Construct a new pointer pointing at memory owned by another pointer.
@@ -158,10 +162,18 @@ class UnrealPointerControl {
                   "atomic size_t may not be safe to cross dll boundaries");
 
    public:
+    // The only way get a pointer owned by the sdk (excluding calling u_malloc) is by making a new
+    // struct - we have a specific constructor on the just for it.
+    // Structs need to run custom deleter. Because all sdk-owned pointers are structs, the only
+    // deleter metadata we need is the struct type, we can get away with just storing that.
+    // If we add we add more ways to allocate new memory, this will have to turn into a more
+    // comprehensive custom deleter.
+    const UStruct* deleter_struct;
+
     /**
      * @brief Construct a new control block.
      */
-    UnrealPointerControl(void) = default;
+    UnrealPointerControl(const UStruct* deleter_struct) : refs(0), deleter_struct(deleter_struct) {}
 
     /**
      * @brief Destroys the control block.

@@ -10,24 +10,6 @@
 
 namespace unrealsdk::unreal {
 
-namespace {
-
-/**
- * @brief Allocates a block of memory to hold a struct, with an appropriate deleter.
- *
- * @param type The type to allocate a struct of.
- * @return A shared pointer to the block of memory, or nullptr if the struct is empty.
- */
-[[nodiscard]] UnrealPointer<void> alloc_struct(const UStruct* type) {
-    auto size = type->get_struct_size();
-    if (size == 0) {
-        return {nullptr};
-    }
-    return {size};
-}
-
-}  // namespace
-
 void copy_struct(uintptr_t dest, const WrappedStruct& src) {
     for (const auto& prop : src.type->properties()) {
         cast_prop(prop, [dest, &src]<typename T>(const T* prop) {
@@ -48,13 +30,12 @@ void destroy_struct(const UStruct* type, uintptr_t addr) {
     }
 }
 
-WrappedStruct::WrappedStruct(const UStruct* type) : type(type), base(alloc_struct(type)) {}
+WrappedStruct::WrappedStruct(const UStruct* type) : type(type), base(type) {}
 
 WrappedStruct::WrappedStruct(const UStruct* type, void* base, const UnrealPointer<void>& parent)
     : type(type), base(parent, base) {}
 
-WrappedStruct::WrappedStruct(const WrappedStruct& other)
-    : type(other.type), base(alloc_struct(other.type)) {
+WrappedStruct::WrappedStruct(const WrappedStruct& other) : type(other.type), base(other.type) {
     if (this->base != nullptr && other.base != nullptr) {
         copy_struct(reinterpret_cast<uintptr_t>(this->base.get()), other);
     }
