@@ -119,8 +119,8 @@ class UnrealPointer {
      *
      * @return The address the pointer points to.
      */
-    operator void*() const { return this->ptr; }
-    [[nodiscard]] void* get(void) const noexcept { return this->ptr; }
+    operator T*() const { return this->ptr; }
+    [[nodiscard]] T* get(void) const noexcept { return this->ptr; }
 
     /**
      * @brief Deferences this pointer.
