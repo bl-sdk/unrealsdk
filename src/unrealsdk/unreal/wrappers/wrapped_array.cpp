@@ -20,6 +20,10 @@ WrappedArray::WrappedArray(const UProperty* type,
     return this->base->size();
 }
 
+[[nodiscard]] size_t WrappedArray::capacity(void) const {
+    return this->base->capacity();
+}
+
 void WrappedArray::reserve(size_t new_cap) const {
     return this->base->reserve(new_cap, this->type->ElementSize);
 }

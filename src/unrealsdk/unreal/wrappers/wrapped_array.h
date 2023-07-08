@@ -38,6 +38,13 @@ class WrappedArray {
     [[nodiscard]] size_t size(void) const;
 
     /**
+     * @brief Gets the capacity of the array.
+     *
+     * @return The capacity of the array.
+     */
+    [[nodiscard]] size_t capacity(void) const;
+
+    /**
      * @brief Reserves memory to change the capacity of this array.
      * @note Can be used to shrink the capacity - caller must ensure any removed entries are already
      *       destroyed, so they don't leak.
