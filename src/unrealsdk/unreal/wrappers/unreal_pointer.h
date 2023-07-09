@@ -26,7 +26,7 @@ class UnrealPointer {
     friend class UnrealPointer;
 
     // The control pointer may be null if not owned by the sdk - i.e. a pointer to a struct in the
-    // middle of an objet.
+    // middle of an object.
     impl::UnrealPointerControl* control;
     T* ptr;
 

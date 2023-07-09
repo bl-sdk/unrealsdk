@@ -47,6 +47,13 @@ struct TArray {
     }
     void reserve(size_t new_cap, size_t element_size);
 
+   private:
+    static const constexpr auto MIN_GROW = 4;
+    static const constexpr auto GROW_MULTIPLIER = 3;
+    static const constexpr auto GROW_DIVIDER = 8;
+    static const constexpr auto GROW_CONST = 16;
+
+   public:
     /**
      * @brief Resizes the array.
      * @note Caller must ensure any removed entries are already destroyed, so they don't leak.
@@ -61,11 +68,6 @@ struct TArray {
     }
     void resize(size_t new_size, size_t element_size) {
         if ((size_t)this->max < new_size) {
-            constexpr auto MIN_GROW = 4;
-            constexpr auto GROW_MULTIPLIER = 3;
-            constexpr auto GROW_DIVIDER = 8;
-            constexpr auto GROW_CONST = 16;
-
             // Vaguely copying the standard UE grow with slack logic
             auto new_capacity =
                 (new_size <= MIN_GROW)

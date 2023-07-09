@@ -89,7 +89,7 @@ UNREALSDK_CAPI bool add_hook(const wchar_t* func,
                              const wchar_t* identifier,
                              size_t identifier_size,
                              AbstractSafeCallback* callback) UNREALSDK_CAPI_SUFFIX {
-    std::wstring identifier_str{identifier, identifier_size};
+    const std::wstring identifier_str{identifier, identifier_size};
 
     auto& group = get_group_by_type(hooks[{func, func_size}], type);
     if (group.contains(identifier_str)) {

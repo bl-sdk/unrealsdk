@@ -16,6 +16,8 @@
 #include "unrealsdk/unreal/structs/fname.h"
 #include "unrealsdk/unreal/structs/fstring.h"
 #include "unrealsdk/unreal/wrappers/gobjects.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer_funcs.h"
 #include "unrealsdk/unreal/wrappers/wrapped_array.h"
 #include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 #include "unrealsdk/unrealsdk.h"

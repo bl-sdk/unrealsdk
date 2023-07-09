@@ -6,6 +6,8 @@
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/structs/fframe.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer_funcs.h"
 #include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 
 #if defined(UE4) && defined(ARCH_X64) && !defined(UNREALSDK_IMPORTING)
