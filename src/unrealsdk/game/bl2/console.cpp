@@ -110,7 +110,11 @@ bool console_command_hook(hook_manager::Details& hook) {
     // Don't want to log this, just output to console by itself
     unrealsdk::uconsole_output_text(unrealsdk::fmt::format(L">>> {} <<<", line));
 
-    callback->operator()(line.c_str(), line.size(), cmd_len);
+    try {
+        callback->operator()(line.c_str(), line.size(), cmd_len);
+    } catch (const std::exception& ex) {
+        LOG(ERROR, "An exception occurred while running a console command: {}", ex.what());
+    }
 
     return true;
 }
