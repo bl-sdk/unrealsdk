@@ -30,7 +30,7 @@ PropertyProxy::PropertyProxy(UProperty* prop) : prop(prop), value(nullptr), been
 }
 PropertyProxy::PropertyProxy(const PropertyProxy& other) : PropertyProxy(other.prop) {
     if (other.been_set) {
-        cast_prop(this->prop, [this, other]<typename T>(const T* prop) {
+        cast_prop(this->prop, [this, &other]<typename T>(const T* prop) {
             for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
                 this->set<T>(i, other.get<T>(i));
             }
@@ -48,7 +48,7 @@ PropertyProxy& PropertyProxy::operator=(const PropertyProxy& other) {
                                  + (std::string)this->prop->Name);
     }
     if (this->prop != nullptr) {
-        cast_prop(this->prop, [this, other]<typename T>(const T* prop) {
+        cast_prop(this->prop, [this, &other]<typename T>(const T* prop) {
             for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
                 this->set<T>(i, other.get<T>(i));
             }
