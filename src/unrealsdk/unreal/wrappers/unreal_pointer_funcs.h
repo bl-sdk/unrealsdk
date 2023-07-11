@@ -27,8 +27,13 @@ void UnrealPointer<T>::release(void) {
 
             // Since we're using placement new, we need to manually call the destructor
             old_control->~UnrealPointerControl();
+        } catch (const std::exception& ex) {
+            unrealsdk::u_free(old_control);
+            LOG(ERROR, "Exception in unreal pointer destructor: {}", ex.what());
+            throw;
         } catch (...) {
             unrealsdk::u_free(old_control);
+            LOG(ERROR, "Unknown exception in unreal pointer destructor");
             throw;
         }
         unrealsdk::u_free(old_control);
@@ -47,8 +52,13 @@ UnrealPointer<T>::UnrealPointer(const UStruct* struct_type) : control(nullptr), 
         this->control = new (buf) impl::UnrealPointerControl(struct_type);
 
         this->ptr = reinterpret_cast<T*>(this->control + 1);
+    } catch (const std::exception& ex) {
+        unrealsdk::u_free(buf);
+        LOG(ERROR, "Exception in unreal pointer constructor: {}", ex.what());
+        throw;
     } catch (...) {
         unrealsdk::u_free(buf);
+        LOG(ERROR, "Unknown exception in unreal pointer constructor");
         throw;
     }
 
