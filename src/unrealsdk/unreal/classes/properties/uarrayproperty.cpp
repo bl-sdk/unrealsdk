@@ -50,13 +50,13 @@ void PropTraits<UArrayProperty>::set(const UArrayProperty* prop,
 
         // If the new size is smaller, destroy anything dropping off the end
         for (size_t i = new_size; i < current_size; i++) {
-            destroy_property<T>(inner, i, data_addr);
+            destroy_property<T>(inner, 0, data_addr + (inner->ElementSize * i));
         }
 
         arr->resize(new_size, prop->ElementSize);
 
         for (size_t i = 0; i < new_size; i++) {
-            set_property<T>(inner, i, data_addr, value.get_at<T>(i));
+            set_property<T>(inner, 0, data_addr + (inner->ElementSize * i), value.get_at<T>(i));
         }
     });
 }
@@ -72,11 +72,15 @@ void PropTraits<UArrayProperty>::destroy(const UArrayProperty* prop, uintptr_t a
 
     cast_prop(inner, [arr]<typename T>(const T* inner) {
         for (size_t i = 0; i < arr->size(); i++) {
-            destroy_property<T>(inner, i, reinterpret_cast<uintptr_t>(arr->data));
+            destroy_property<T>(inner, 0,
+                                reinterpret_cast<uintptr_t>(arr->data) + (inner->ElementSize * i));
         }
     });
 
-    u_free(arr->data);
+    if (arr->data != nullptr) {
+        u_free(arr->data);
+    }
+
     arr->data = nullptr;
     arr->count = 0;
     arr->max = 0;
