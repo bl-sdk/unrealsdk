@@ -197,7 +197,7 @@ Level get_level_from_string(const std::string& str) {
 }  // namespace
 
 #ifndef UNREALSDK_IMPORTING
-void init(const std::string& filename, bool callbacks_only_arg) {
+void init(const std::filesystem::path& file, bool callbacks_only_arg) {
     static bool initialized = false;
     if (initialized) {
         return;
@@ -228,7 +228,7 @@ void init(const std::string& filename, bool callbacks_only_arg) {
         }
     }
 
-    log_file_stream = std::make_unique<std::ofstream>(filename, std::ofstream::trunc);
+    log_file_stream = std::make_unique<std::ofstream>(file, std::ofstream::trunc);
     *log_file_stream << get_header() << std::flush;
 }
 #endif

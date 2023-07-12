@@ -11,7 +11,7 @@ namespace unrealsdk::utils {
  * @param str The input wstring.
  * @return The output string.
  */
-std::string narrow(const std::wstring& wstr);
+[[nodiscard]] std::string narrow(const std::wstring& wstr);
 
 /**
  * @brief Widens a utf-8 string to a utf-16 wstring.
@@ -19,7 +19,16 @@ std::string narrow(const std::wstring& wstr);
  * @param str The input string.
  * @return The output wstring.
  */
-std::wstring widen(const std::string& str);
+[[nodiscard]] std::wstring widen(const std::string& str);
+
+/**
+ * @brief Get the directory this dll is in.
+ * @note Since this is not exported, calls from dlls linking against the shared library return their
+ *       own dir, since this function will be linked statically.
+ *
+ * @return The path of the dll this function is compiled into.
+ */
+[[nodiscard]] std::filesystem::path get_this_dll_dir(void);
 
 /**
  * @brief Proxy class for an iterator, used to allow multiple range iterators on the same class.
@@ -39,14 +48,14 @@ struct IteratorProxy {
      *
      * @return The iterator
      */
-    Iterator begin() { return this->it_begin; }
+    [[nodiscard]] Iterator begin() const { return this->it_begin; }
 
     /**
      * @brief Gets the internal iterator at it's end.
      *
      * @return The iterator
      */
-    Iterator end() { return this->it_end; }
+    [[nodiscard]] Iterator end() const { return this->it_end; }
 };
 
 /**

@@ -6,6 +6,7 @@ using env_var_key = const char*;
 
 const constexpr env_var_key ENV_FILE = "UNREALSDK_ENV_FILE";
 const constexpr env_var_key EXTERNAL_CONSOLE = "UNREALSDK_EXTERNAL_CONSOLE";
+const constexpr env_var_key LOG_FILE = "UNREALSDK_LOG_FILE";
 const constexpr env_var_key LOG_LEVEL = "UNREALSDK_LOG_LEVEL";
 const constexpr env_var_key GAME_OVERRIDE = "UNREALSDK_GAME_OVERRIDE";
 const constexpr env_var_key UPROPERTY_SIZE = "UNREALSDK_UPROPERTY_SIZE";
@@ -21,6 +22,7 @@ namespace defaults {
 // Choosing to only define the defaults which are not default constructable
 
 const constexpr auto ENV_FILE = "unrealsdk.env";
+const constexpr auto LOG_FILE = "unrealsdk.log";
 // EXTERNAL_CONSOLE - defaults to empty string (only used in defined checks)
 // LOG_LEVEL - defaults to empty string
 // GAME_OVERRIDE - defaults to executable filename - not constant so treat it as an empty string

@@ -44,11 +44,11 @@ struct LogMessage {
  * @note Only the first call is used. This means manually calling this before initializing the sdk
  *       overrides the defaults.
  *
- * @param filename The filename to write logs to.
+ * @param file The file to write logs to.
  * @param callbacks_only If true, disables all output, and only runs the logging callbacks. Means
  *                       the filename arg is ignored.
  */
-void init(const std::string& filename, bool callbacks_only = false);
+void init(const std::filesystem::path& file, bool callbacks_only = false);
 #endif
 
 /**

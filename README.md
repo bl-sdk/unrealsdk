@@ -54,8 +54,9 @@ build configurations.
 
 | Environment Variable                          | Usage                                                                                                                           |
 | :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
-| `UNREALSDK_ENV_FILE`                          | A file containing environment variables to load. Defaults to `unrealsdk.env`. More below.                                       |
+| `UNREALSDK_ENV_FILE`                          | A file containing environment variables to load, relative to the dll. Defaults to `unrealsdk.env`. More below.                  |
 | `UNREALSDK_EXTERNAL_CONSOLE`                  | If defined, creates an external console window mirroring what is written to the game's console. Always enabled in debug builds. |
+| `UNREALSDK_LOG_FILE`                          | The file to write log messages to, relative to the dll. Defaults to `unrealsdk.log`.                                            |
 | `UNREALSDK_LOG_LEVEL`                         | Changes the default logging level used in the unreal console. May use either the level names or their numerical values.         |
 | `UNREALSDK_GAME_OVERRIDE`                     | Override the executable name used for game detection.                                                                           |
 | `UNREALSDK_UPROPERTY_SIZE`                    | Changes the size the `UProperty` class is assumed to have.                                                                      |
