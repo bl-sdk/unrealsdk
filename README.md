@@ -21,42 +21,63 @@ unreal function is hooked, allowing you to interact with it's args, and mess wit
 Exact hook semantics are better documented in the `hook_manager.h` header.
 
 ```cpp
-bool on_main_menu(HookDetails& hook) {
-   LOG(INFO, "Reached main menu!");
+bool on_main_menu(unrealsdk::hook_manager::Details& hook) {
+    LOG(INFO, "Reached main menu!");
+    return false;
 }
 
-hook_manager::hooks[L"WillowGame.FrontendGFxMovie:Start"].pre[L"main_menu_hook"] = &on_main_menu;
+unrealsdk::hook_manager::add_hook(L"WillowGame.FrontendGFxMovie:Start",
+                                  unrealsdk::hook_manager::Type::PRE, L"main_menu_hook",
+                                  &on_main_menu);
 ```
 
 Once your hook runs, you start having access to unreal objects. You can generally interact with any
 unreal value (such as the properties on an object) through the templated `get` and `set` functions.
-These functions take the expected property type as a template arg (and will throw errors if it
-doesn't appear to line up).
+These functions take the expected property type as a template arg (and will throw exceptions if it
+doesn't appear to line up). All property accesses are evaluated at runtime, meaning you don't need
+to generate an sdk specific to your game.
 
 ```cpp
 auto paused = hook.args->get<UBoolProperty>(L"StartPaused"_fn);
 
 auto idx = hook.obj->get<UIntProperty>(L"MessageOfTheDayIdx"_fn);
 auto motd_array = hook.obj->get<UArrayProperty>(L"MessagesOfTheDay"_fn);
-motd_array->get_at<UStructProperty>(idx)->set<UStrProperty>(L"Body"_fn, L"No MOTD today");
+motd_array.get_at<UStructProperty>(idx).set<UStrProperty>(L"Body"_fn, L"No MOTD today");
 
-auto op_string = hook.obj->get<UFunction, BoundFunction>(L"BuildOverpowerPromptString")
-                     .call<UStrProperty, UIntProperty, UIntProperty>(1, 10);
+auto op_string = hook.obj->get<UFunction, BoundFunction>(L"BuildOverpowerPromptString"_fn)
+                    .call<UStrProperty, UIntProperty, UIntProperty>(1, 10);
 ```
 
 # Environment Variables
 A few environment variables adjust the sdk's behaviour. Note that not all variables are used in all
 build configurations.
 
-| Environment Variable                      | Usage                                                                                                                           |
-| :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
-| `UNREALSDK_EXTERNAL_CONSOLE`              | If defined, creates an external console window mirroring what is written to the game's console. Always enabled in debug builds. |
-| `UNREALSDK_LOG_LEVEL`                     | Changes the default logging level used in the unreal console. May use either the level names or their numerical values.         |
-| `UNREALSDK_GAME_OVERRIDE`                 | Override the executable name used for game detection.                                                                           |
-| `UNREALSDK_UPROPERTY_SIZE`                | Changes the size the `UProperty` class is assumed to have.                                                                      |
-| `UNREALSDK_ALLOC_ALIGNMENT`               | Changes the alignment used when calling the unreal memory allocation functions.                                                 |
-| `UNREALSDK_CONSOLE_KEY`                   | Changes the default console key which is set when one is not already bound.                                                     |
-| `UNREALSDK_UCONSOLE_OUTPUT_TEXT_VF_INDEX` | Overrides the virtual function index used when calling `UConsole::OutputText`.                                                  |
+| Environment Variable                          | Usage                                                                                                                           |
+| :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| `UNREALSDK_ENV_FILE`                          | A file containing environment variables to load, relative to the dll. Defaults to `unrealsdk.env`. More below.                  |
+| `UNREALSDK_EXTERNAL_CONSOLE`                  | If defined, creates an external console window mirroring what is written to the game's console. Always enabled in debug builds. |
+| `UNREALSDK_LOG_FILE`                          | The file to write log messages to, relative to the dll. Defaults to `unrealsdk.log`.                                            |
+| `UNREALSDK_LOG_LEVEL`                         | Changes the default logging level used in the unreal console. May use either the level names or their numerical values.         |
+| `UNREALSDK_GAME_OVERRIDE`                     | Override the executable name used for game detection.                                                                           |
+| `UNREALSDK_UPROPERTY_SIZE`                    | Changes the size the `UProperty` class is assumed to have.                                                                      |
+| `UNREALSDK_ALLOC_ALIGNMENT`                   | Changes the alignment used when calling the unreal memory allocation functions.                                                 |
+| `UNREALSDK_CONSOLE_KEY`                       | Changes the default console key which is set when one is not already bound.                                                     |
+| `UNREALSDK_UCONSOLE_CONSOLE_COMMAND_VF_INDEX` | Overrides the virtual function index used when hooking `UConsole::ConsoleCommand`.                                              |
+| `UNREALSDK_UCONSOLE_OUTPUT_TEXT_VF_INDEX`     | Overrides the virtual function index used when calling `UConsole::OutputText`.                                                  |
+
+You can also define any of these in an env file, which will automatically be loaded when the sdk
+starts (excluding `UNREALSDK_ENV_FILE` of course). This file should contain lines of equals
+separated key-value pairs, noting that whitespace is *not* stripped (outside of the trailing
+newline). A line is ignored if it does not contain an equals sign, or if it defines a variable which
+already exists.
+
+```ini
+UNREALSDK_LOG_LEVEL=MISC
+UNREALSDK_CONSOLE_KEY=Quote
+```
+
+You can also use this file to load environment variables for other plugins (assuming they don't
+check them too early), it's not limited to just those used by the sdk.
 
 # Linking Against the SDK
 The sdk requires at least C++20, primarily for templated lambdas. It also makes great use of
@@ -91,6 +112,7 @@ The included shared library initializes based on executable. If you need custom 
 can create your own shared library by linking against the object library and defining the
 `UNREALSDK_SHARED` and `UNREALSDK_EXPORTING` macros.
 
+## Cross-Compiler ABI
 One of the goals of the shared library implementation is have a stable cross-compiler ABI - i.e.
 allowing developing one program while also running another which you downloaded a precompiled
 version of.
@@ -99,17 +121,31 @@ In order to do this, the exported functions try to use a pure C interface. Since
 relies on C++ features (e.g. all the templates), it's impractical to export everything this way.
 Instead, it only exports the bare minimum functions which interact with internal state. Some of
 these rely on private wrapper functions, which do things like decompose strings into pointer and
-length, in which case the public functions are redirected as required. The remaining functions will
-be linked statically.
+length, not everything's exposed in the headers.
 
-While the function calls have a stable cross-compiler ABI, unfortuantly there's one other thing
-which we can't guarantee: exceptions. MSVC and GNU have different exception ABIs, so if one travels
-between two modules with different ABIs, the game will crash. While none of the shared functions
-intentionally throw exceptions, it's impossible to completely avoid an exception travelling between
-modules - we can't stop a client from throwing during a hook (which is called by the sdk). All
-shared functions are compiled to try to allow exceptions to pass through them, but this will only
-work properly if all modules share an exception ABI - though surely you write good code so it won't
-be a problem :).
+There are two assumptions we rely on for these exported functions to work properly, where we can't
+quite stick with pure C:
+
+1. Both dlls share the same "standard class layout". This doesn't quite mean "standard layout" in
+   the strict way the C++ standard defines it, rather it's referring to what the standard doesn't
+   require, but which have a pretty much agreed upon solution anyway, stuff like:
+    - There's a single virtual function table at the top of the object
+    - Virtual functions are placed in order of definition
+    - Members are placed after the virtual function table, with standard padding rules
+    - Members from a more derived class are placed after those from a less derived class
+
+2. Both dlls share the same exception ABI. While none of the exported functions intentionally throw,
+   it's impossible to completely avoid an exception travelling between modules - we can't stop a
+   client from throwing during a hook, meaning an exception would travel from the client dll through
+   to the sdk.
+
+#1 is not an issue, since all the big compilers do these things in the same way. Technically we rely
+on it when linking statically too, we assume the sdk's re-definitions of the unreal types will have
+the same layout as those in the executable.
+
+#2 may be a problem however - MSVC and GNU have different exception ABIs. Clang supports both.
+Practically, this means when cross compiling, you should either compile everything from scratch, or
+setup Clang to build with the MSVC ABI. [See this blog post for more info](https://apple1417.dev/posts/2023-05-18-debugging-proton).
 
 # Running Builds
 As previously mentioned, the sdk can be configured to create a shared library. This is useful when

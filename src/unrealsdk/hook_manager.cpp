@@ -14,7 +14,7 @@ namespace unrealsdk::hook_manager {
 
 namespace impl {
 
-using Group = std::unordered_map<std::wstring, std::function<Callback>>;
+using Group = std::unordered_map<std::wstring, AbstractSafeCallback*>;
 
 struct List {
     Group pre;
@@ -80,39 +80,36 @@ UNREALSDK_CAPI bool add_hook(const wchar_t* func,
                              Type type,
                              const wchar_t* identifier,
                              size_t identifier_size,
-                             Callback* callback) UNREALSDK_CAPI_SUFFIX;
+                             AbstractSafeCallback* callback) UNREALSDK_CAPI_SUFFIX;
 #endif
-#ifdef UNREALSDK_IMPORTING
-bool add_hook(const std::wstring& func,
-              Type type,
-              const std::wstring& identifier,
-              Callback* callback) {
-    return add_hook(func.c_str(), func.size(), type, identifier.c_str(), identifier.size(),
-                    callback);
-}
-#else
-bool add_hook(const std::wstring& func,
-              Type type,
-              const std::wstring& identifier,
-              Callback* callback) {
-    auto& group = get_group_by_type(hooks[func], type);
-    if (group.contains(identifier)) {
+#ifdef UNREALSDK_EXPORTING
+UNREALSDK_CAPI bool add_hook(const wchar_t* func,
+                             size_t func_size,
+                             Type type,
+                             const wchar_t* identifier,
+                             size_t identifier_size,
+                             AbstractSafeCallback* callback) UNREALSDK_CAPI_SUFFIX {
+    const std::wstring identifier_str{identifier, identifier_size};
+
+    auto& group = get_group_by_type(hooks[{func, func_size}], type);
+    if (group.contains(identifier_str)) {
         return false;
     }
-    group[identifier] = callback;
+
+    group[identifier_str] = callback;
     return true;
 }
 #endif
-#ifdef UNREALSDK_EXPORTING
-bool add_hook(const wchar_t* func,
-              size_t func_size,
+
+bool add_hook(const std::wstring& func,
               Type type,
-              const wchar_t* identifier,
-              size_t identifier_size,
-              Callback* callback) {
-    return add_hook({func, func_size}, type, {identifier, identifier_size}, callback);
+              const std::wstring& identifier,
+              const Callback& callback) {
+    // NOLINTBEGIN(cppcoreguidelines-owning-memory)
+    return add_hook(func.c_str(), func.size(), type, identifier.c_str(), identifier.size(),
+                    new SafeCallback(callback));
+    // NOLINTEND(cppcoreguidelines-owning-memory)
 }
-#endif
 
 #ifdef UNREALSDK_SHARED
 UNREALSDK_CAPI bool has_hook(const wchar_t* func,
@@ -159,10 +156,15 @@ bool remove_hook(const std::wstring& func, Type type, const std::wstring& identi
     if (!hooks.contains(func)) {
         return false;
     }
+
     auto& group = get_group_by_type(hooks[func], type);
     if (!group.contains(identifier)) {
         return false;
     }
+
+    auto callback = group[identifier];
+    // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
+    delete callback;
     group.erase(identifier);
 
     /*
@@ -249,7 +251,7 @@ bool run_hooks_of_type(const List& list, Type type, Details& hook) {
     bool ret = false;
     for (const auto& [_, hook_function] : group) {
         try {
-            ret |= hook_function(hook);
+            ret |= hook_function->operator()(hook);
         } catch (const std::exception& ex) {
             LOG(ERROR, "An exception occurred during hook processing: {}", ex.what());
         }

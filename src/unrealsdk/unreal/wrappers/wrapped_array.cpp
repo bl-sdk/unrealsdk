@@ -1,12 +1,14 @@
 #include "unrealsdk/pch.h"
 
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer_funcs.h"
 #include "unrealsdk/unreal/wrappers/wrapped_array.h"
 
 namespace unrealsdk::unreal {
 
 WrappedArray::WrappedArray(const UProperty* type,
                            TArray<void>* base,
-                           const std::shared_ptr<void>& parent)
+                           const UnrealPointer<void>& parent)
     : type(type), base(parent, base) {
     if (type->ArrayDim > 1) {
         throw std::runtime_error(
@@ -16,6 +18,10 @@ WrappedArray::WrappedArray(const UProperty* type,
 
 [[nodiscard]] size_t WrappedArray::size(void) const {
     return this->base->size();
+}
+
+[[nodiscard]] size_t WrappedArray::capacity(void) const {
+    return this->base->capacity();
 }
 
 void WrappedArray::reserve(size_t new_cap) const {

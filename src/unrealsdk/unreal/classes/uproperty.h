@@ -41,6 +41,7 @@ class UProperty : public UField {
     static constexpr auto PROP_FLAG_OPTIONAL = 0x10;
 #endif
     static constexpr auto PROP_FLAG_PARAM = 0x80;
+    static constexpr auto PROP_FLAG_OUT = 0x100;
     static constexpr auto PROP_FLAG_RETURN = 0x400;
 
     UProperty() = delete;

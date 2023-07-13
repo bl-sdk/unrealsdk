@@ -2,6 +2,7 @@
 
 #include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
 #include "unrealsdk/unreal/classes/uclass.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 
 namespace unrealsdk::unreal {
 
@@ -12,7 +13,7 @@ UClass* UObjectProperty::get_property_class(void) const {
 PropTraits<UObjectProperty>::Value PropTraits<UObjectProperty>::get(
     const UObjectProperty* /*prop*/,
     uintptr_t addr,
-    const std::shared_ptr<void>& /*parent*/) {
+    const UnrealPointer<void>& /*parent*/) {
     return *reinterpret_cast<Value*>(addr);
 }
 

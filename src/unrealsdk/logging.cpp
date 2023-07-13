@@ -12,7 +12,7 @@ namespace {
 #ifndef UNREALSDK_IMPORTING
 std::mutex mutex{};
 
-std::atomic<Level> unreal_console_level = Level::DEFAULT_CONSOLE_LEVEL;
+Level unreal_console_level = Level::DEFAULT_CONSOLE_LEVEL;
 HANDLE external_console_handle = nullptr;
 std::unique_ptr<std::ostream> log_file_stream;
 
@@ -22,12 +22,12 @@ bool callbacks_only = false;
 #endif
 
 /**
- * @brief Gets the unix time milliseconds from a system clock time point.
+ * @brief Gets the current unix time in milliseconds.
  *
- * @param time The system clock time point.
  * @return The unix time milliseconds.
  */
-uint64_t unix_ms_from_time(std::chrono::system_clock::time_point time) {
+uint64_t unix_ms_now(void) {
+    auto time = std::chrono::system_clock::now();
     return std::chrono::round<std::chrono::milliseconds>(time.time_since_epoch()).count();
 }
 
@@ -78,7 +78,7 @@ std::string truncate_leading_chunks(const std::string&& str,
             break;
         }
 
-        // The first time we truncate something, we know we noew need to add the prefix on, so
+        // The first time we truncate something, we know we now need to add the prefix on, so
         // subtract it from max width
         if (start_pos == 0) {
             max_width -= TRUNCATION_PREFIX.size();
@@ -130,13 +130,10 @@ constexpr auto LEVEL_WIDTH = 4;
  * @return The formatted message
  */
 std::string format_message(const LogMessage& msg) {
-    auto location = (msg.function != nullptr && msg.function[0] != '\0')
-                        ? truncate_leading_chunks(msg.function, ":", LOCATION_WIDTH)
-                        : truncate_leading_chunks(msg.file, "\\/", LOCATION_WIDTH);
-
     return unrealsdk::fmt::format(
         "{1:>{0}%F %T}Z {3:>{2}}@{5:<{4}d} {7:>{6}}| {8}\n", DATE_WIDTH + 1 + TIME_WIDTH + 1,
-        time_from_unix_ms(msg.unix_time_ms), LOCATION_WIDTH, location, LINE_WIDTH, msg.line,
+        time_from_unix_ms(msg.unix_time_ms), LOCATION_WIDTH,
+        truncate_leading_chunks(msg.location, "\\/:", LOCATION_WIDTH), LINE_WIDTH, msg.line,
         LEVEL_WIDTH, get_level_name(msg.level), std::string{msg.msg, msg.msg_size});
 }
 
@@ -200,7 +197,7 @@ Level get_level_from_string(const std::string& str) {
 }  // namespace
 
 #ifndef UNREALSDK_IMPORTING
-void init(const std::string& filename, bool callbacks_only_arg) {
+void init(const std::filesystem::path& file, bool callbacks_only_arg) {
     static bool initialized = false;
     if (initialized) {
         return;
@@ -231,10 +228,9 @@ void init(const std::string& filename, bool callbacks_only_arg) {
         }
     }
 
-    log_file_stream = std::make_unique<std::ofstream>(filename, std::ofstream::trunc);
+    log_file_stream = std::make_unique<std::ofstream>(file, std::ofstream::trunc);
     *log_file_stream << get_header() << std::flush;
 }
-
 #endif
 
 namespace {
@@ -278,26 +274,14 @@ UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) UNREALSDK_CAPI_SUFFI
 
 }  // namespace
 
-void log(std::chrono::system_clock::time_point time,
-         Level level,
-         const std::string& msg,
-         const char* function,
-         const char* file,
-         int line) {
-    const LogMessage log_msg{
-        unix_ms_from_time(time), level, msg.c_str(), msg.size(), function, file, line};
+void log(Level level, const std::string& msg, const char* location, int line) {
+    const LogMessage log_msg{unix_ms_now(), level, msg.c_str(), msg.size(), location, line};
     log_msg_internal(&log_msg);
 }
 
-void log(std::chrono::system_clock::time_point time,
-         Level level,
-         const std::wstring& msg,
-         const char* function,
-         const char* file,
-         int line) {
+void log(Level level, const std::wstring& msg, const char* location, int line) {
     auto narrow = utils::narrow(msg);
-    const LogMessage log_msg{
-        unix_ms_from_time(time), level, narrow.c_str(), narrow.size(), function, file, line};
+    const LogMessage log_msg{unix_ms_now(), level, narrow.c_str(), narrow.size(), location, line};
     log_msg_internal(&log_msg);
 }
 

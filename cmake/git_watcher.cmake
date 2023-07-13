@@ -369,6 +369,10 @@ function(Main)
     else()
         # >> Executes at configure time.
         SetupGitMonitoring()
+
+        # Initial Copy
+        CheckGit("${GIT_WORKING_DIR}" changed)
+        GitStateChangedAction()
     endif()
 endfunction()
 

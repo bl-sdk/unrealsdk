@@ -5,6 +5,7 @@
 
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 
 namespace unrealsdk::unreal {
 
@@ -25,15 +26,13 @@ class UObjectProperty : public UProperty {
     ~UObjectProperty() = delete;
 
     /**
-     * @brief Get the class of this property, which the values must be an instance of.
+     * @brief Get the class of this property, which values must be an instance of.
      *
      * @return This property's class.
      */
     [[nodiscard]] UClass* get_property_class(void) const;
 
    private:
-    friend PropTraits<UObjectProperty>;
-
     // NOLINTNEXTLINE(readability-identifier-naming)
     UClass* PropertyClass;
 };
@@ -45,7 +44,7 @@ struct PropTraits<UObjectProperty> : public AbstractPropTraits<UObjectProperty> 
 
     static Value get(const UObjectProperty* prop,
                      uintptr_t addr,
-                     const std::shared_ptr<void>& parent);
+                     const UnrealPointer<void>& parent);
     static void set(const UObjectProperty* prop, uintptr_t addr, const Value& value);
 };
 

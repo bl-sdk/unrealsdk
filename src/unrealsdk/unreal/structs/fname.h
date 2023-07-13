@@ -11,8 +11,8 @@ namespace unrealsdk::unreal {
 
 struct FName {
    private:
-    int32_t index;
-    int32_t number;
+    int32_t index{0};
+    int32_t number{0};
 
    public:
     /**
@@ -23,6 +23,7 @@ struct FName {
      * @param name A string to lookup/create the name index of.
      * @param number The name number to use.
      */
+    FName(void) = default;
     FName(int32_t index, int32_t number);
     FName(const std::string& name, int32_t number = 0);
     FName(const std::wstring& name, int32_t number = 0);

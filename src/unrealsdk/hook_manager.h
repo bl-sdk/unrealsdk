@@ -47,11 +47,18 @@ struct Details {
     unreal::BoundFunction func{};
 };
 
-/// The signature of hook callbacks.
-/// For pre-hooks, returns if to block execution - if any pre-hook returns true, the unreal function
-/// will not be run.
-/// In post-hooks the return value is ignored.
-using Callback = bool(Details&) UNREALSDK_CAPI_SUFFIX;
+/**
+ * @brief A callback for a hook.
+ *
+ * @param hook The hook details.
+ * @return In pre-hooks: If to block execution - if any pre-hook returns true, the unreal function
+ *                       will not be run.
+ *         In post-hooks: ignored.
+ */
+using SafeCallback = utils::SafeCallback<bool, Details&>;
+
+using Callback = std::function<SafeCallback::Signature>;
+using AbstractSafeCallback = SafeCallback::AbstractBase;
 
 /**
  * @brief Toggles logging all unreal function calls. Best used in short bursts for debugging.
@@ -78,7 +85,7 @@ UNREALSDK_CAPI void inject_next_call(void) UNREALSDK_CAPI_SUFFIX;
 bool add_hook(const std::wstring& func,
               Type type,
               const std::wstring& identifier,
-              Callback* callback);
+              const Callback& callback);
 
 /**
  * @brief Checks if a hook exists.

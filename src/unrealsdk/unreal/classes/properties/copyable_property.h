@@ -5,6 +5,7 @@
 
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 
 /*
 This file describes all properties which can be read/written by a simple copy, and whose classes
@@ -35,7 +36,7 @@ struct PropTraits<CopyableProperty<T>> : public AbstractPropTraits<CopyablePrope
 
     static Value get(const CopyableProperty<T>* /*prop*/,
                      uintptr_t addr,
-                     const std::shared_ptr<void>& /*parent*/) {
+                     const UnrealPointer<void>& /*parent*/) {
         return *reinterpret_cast<Value*>(addr);
     }
     static void set(const CopyableProperty<T>* /*prop*/, uintptr_t addr, const Value& value) {

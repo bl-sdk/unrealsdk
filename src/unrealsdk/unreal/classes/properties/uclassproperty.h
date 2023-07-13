@@ -5,6 +5,7 @@
 
 #include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
 #include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 
 namespace unrealsdk::unreal {
 
@@ -23,9 +24,14 @@ class UClassProperty : public UObjectProperty {
     UClassProperty& operator=(UClassProperty&&) = delete;
     ~UClassProperty() = delete;
 
-   private:
-    friend PropTraits<UClassProperty>;
+    /**
+     * @brief Get the meta class of this property, which values must be a subclass of.
+     *
+     * @return This property's meta class.
+     */
+    [[nodiscard]] UClass* get_meta_class(void) const;
 
+   private:
     // NOLINTNEXTLINE(readability-identifier-naming)
     UClass* MetaClass;
 };
@@ -35,9 +41,7 @@ struct PropTraits<UClassProperty> : public AbstractPropTraits<UClassProperty> {
     using Value = UClass*;
     static inline const wchar_t* const CLASS = L"ClassProperty";
 
-    static Value get(const UClassProperty* prop,
-                     uintptr_t addr,
-                     const std::shared_ptr<void>& parent);
+    static Value get(const UClassProperty* prop, uintptr_t addr, const UnrealPointer<void>& parent);
     static void set(const UClassProperty* prop, uintptr_t addr, const Value& value);
 };
 

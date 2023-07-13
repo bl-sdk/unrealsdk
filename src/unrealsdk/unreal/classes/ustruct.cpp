@@ -123,4 +123,17 @@ UFunction* UStruct::find_func_and_validate(const FName& name) const {
     return validate_type<UFunction>(this->find(name));
 }
 
+bool UStruct::inherits(const UStruct* base_struct) const {
+    // For each struct in the inheritance chain
+    for (const UStruct* our_struct = this; our_struct != nullptr;
+         our_struct = our_struct->SuperField) {
+        // If it matches
+        if (our_struct == base_struct) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 }  // namespace unrealsdk::unreal

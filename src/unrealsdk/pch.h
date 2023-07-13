@@ -55,12 +55,15 @@
 #include <MinHook.h>
 
 #ifdef __cplusplus
+#include <algorithm>
 #include <array>
 #include <atomic>
+#include <cctype>
 #include <charconv>
 #include <chrono>
 #include <cstdint>
 #include <cstring>
+#include <cwctype>
 #include <filesystem>
 #include <fstream>
 #include <functional>

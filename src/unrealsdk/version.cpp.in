@@ -41,6 +41,7 @@ UNREALSDK_CAPI [[nodiscard]] const char* get_version_cstr(void) UNREALSDK_CAPI_S
 #endif
 #ifdef UNREALSDK_IMPORTING
 const std::string& get_version_string(void) {
+    // NOLINTNEXTLINE(readability-identifier-naming)
     static const std::string VERSION_STR = get_version_cstr();
     return VERSION_STR;
 }

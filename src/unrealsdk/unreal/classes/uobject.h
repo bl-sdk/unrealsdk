@@ -25,7 +25,7 @@ class UObject {
     UObject& operator=(UObject&&) = delete;
     ~UObject() = delete;
 
-    void** vftable;
+    uintptr_t* vftable;
 
     // NOLINTBEGIN(readability-identifier-naming)
 

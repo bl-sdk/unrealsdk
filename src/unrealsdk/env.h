@@ -4,15 +4,44 @@
 namespace unrealsdk::env {
 using env_var_key = const char*;
 
-constexpr env_var_key EXTERNAL_CONSOLE = "UNREALSDK_EXTERNAL_CONSOLE";
-constexpr env_var_key LOG_LEVEL = "UNREALSDK_LOG_LEVEL";
-constexpr env_var_key GAME_OVERRIDE = "UNREALSDK_GAME_OVERRIDE";
-constexpr env_var_key UPROPERTY_SIZE = "UNREALSDK_UPROPERTY_SIZE";
-constexpr env_var_key ALLOC_ALIGNMENT = "UNREALSDK_ALLOC_ALIGNMENT";
-constexpr env_var_key CONSOLE_KEY = "UNREALSDK_CONSOLE_KEY";
-constexpr env_var_key UCONSOLE_OUTPUT_TEXT_VF_INDEX = "UNREALSDK_UCONSOLE_OUTPUT_TEXT_VF_INDEX";
+const constexpr env_var_key ENV_FILE = "UNREALSDK_ENV_FILE";
+const constexpr env_var_key EXTERNAL_CONSOLE = "UNREALSDK_EXTERNAL_CONSOLE";
+const constexpr env_var_key LOG_FILE = "UNREALSDK_LOG_FILE";
+const constexpr env_var_key LOG_LEVEL = "UNREALSDK_LOG_LEVEL";
+const constexpr env_var_key GAME_OVERRIDE = "UNREALSDK_GAME_OVERRIDE";
+const constexpr env_var_key UPROPERTY_SIZE = "UNREALSDK_UPROPERTY_SIZE";
+const constexpr env_var_key ALLOC_ALIGNMENT = "UNREALSDK_ALLOC_ALIGNMENT";
+const constexpr env_var_key CONSOLE_KEY = "UNREALSDK_CONSOLE_KEY";
+const constexpr env_var_key UCONSOLE_CONSOLE_COMMAND_VF_INDEX =
+    "UNREALSDK_CONSOLE_COMMAND_TEXT_VF_INDEX";
+const constexpr env_var_key UCONSOLE_OUTPUT_TEXT_VF_INDEX =
+    "UNREALSDK_UCONSOLE_OUTPUT_TEXT_VF_INDEX";
 
-constexpr auto CONSOLE_KEY_DEFAULT = "Tilde";
+namespace defaults {
+
+// Choosing to only define the defaults which are not default constructable
+
+const constexpr auto ENV_FILE = "unrealsdk.env";
+const constexpr auto LOG_FILE = "unrealsdk.log";
+// EXTERNAL_CONSOLE - defaults to empty string (only used in defined checks)
+// LOG_LEVEL - defaults to empty string
+// GAME_OVERRIDE - defaults to executable filename - not constant so treat it as an empty string
+// UPROPERTY_SIZE - defaults to 0 (meaning auto)
+// ALLOC_ALIGNMENT - defaults to 0 (meaning auto)
+const constexpr auto CONSOLE_KEY = "Tilde";
+const constexpr auto UCONSOLE_CONSOLE_COMMAND_VF_INDEX = 81;
+const constexpr auto UCONSOLE_OUTPUT_TEXT_VF_INDEX = 83;
+
+}  // namespace defaults
+
+#ifndef UNREALSDK_IMPORTING
+
+/**
+ * @brief Loads the env var file.
+ */
+void load_file(void);
+
+#endif
 
 /**
  * @brief Checks if an environment variable is defined.

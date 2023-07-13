@@ -1,41 +1,62 @@
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/env.h"
+#include "unrealsdk/utils.h"
 
 namespace unrealsdk::env {
 
-// `getenv` is considered deprecated, suppress that warning
-// There isn't cross platform alternative that's as easy, and we use it safely, immediately turning
-// the buffer into a `std::string`
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4996)
-#endif
+#ifndef UNREALSDK_IMPORTING
 
-#if defined(__clang__) || defined(__MINGW32__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+void load_file(void) {
+    std::ifstream stream{utils::get_this_dll_dir() / get(ENV_FILE, defaults::ENV_FILE)};
+
+    std::string line;
+    while (std::getline(stream, line)) {
+        auto equals = line.find_first_of('=');
+        if (equals == std::string::npos) {
+            continue;
+        }
+
+        auto key = line.substr(0, equals);
+        if (defined(key.c_str())) {
+            continue;
+        }
+
+        auto value = line.substr(equals + 1);
+        SetEnvironmentVariableA(key.c_str(), value.c_str());
+    }
+}
+
 #endif
 
 bool defined(env_var_key env_var) {
-    return std::getenv(env_var) != nullptr;
+    return GetEnvironmentVariableA(env_var, nullptr, 0) != 0;
 }
 
 std::string get(env_var_key env_var, const std::string& default_value) {
-    const char* buf = std::getenv(env_var);
+    auto size = GetEnvironmentVariableA(env_var, nullptr, 0);
+    if (size == 0) {
+        return default_value;
+    }
+
+    // NOLINTBEGIN(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory)
+    auto buf = reinterpret_cast<char*>(malloc(size * sizeof(char)));
     if (buf == nullptr) {
         return default_value;
     }
 
-    return std::string{buf};
+    if (GetEnvironmentVariableA(env_var, buf, size) == 0) {
+        free(buf);
+        return default_value;
+    }
+
+    // Size includes the null terminator
+    std::string ret{buf, size - 1};
+
+    free(buf);
+    // NOLINTEND(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory)
+
+    return ret;
 }
-
-#if defined(__clang__) || defined(__MINGW32__)
-#pragma GCC diagnostic pop
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 }  // namespace unrealsdk::env

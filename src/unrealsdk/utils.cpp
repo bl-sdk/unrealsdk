@@ -53,6 +53,26 @@ std::wstring widen(const std::string& str) {
     return ret;
 }
 
+std::filesystem::path get_this_dll_dir(void) {
+    HMODULE this_module = nullptr;
+    if (GetModuleHandleExA(
+            GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+            reinterpret_cast<LPCSTR>(&get_this_dll_dir), &this_module)
+        == 0) {
+        // On error, better to return an empty path, i.e. the cwd
+        // This is called to get the path of the log file, so if we threw we wouldn't have anything
+        // to log the error to
+        return {};
+    }
+
+    char buf[MAX_PATH];
+    if (GetModuleFileNameA(this_module, &buf[0], sizeof(buf)) == 0) {
+        return {};
+    }
+
+    return std::filesystem::path{buf}.parent_path();
+}
+
 // NOLINTEND(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory)
 
 }  // namespace unrealsdk::utils

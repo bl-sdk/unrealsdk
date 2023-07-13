@@ -5,18 +5,6 @@
 
 namespace unrealsdk::unreal {
 
-bool UClass::inherits(const UClass* cls) const {
-    // For each class in the inheritance chain
-    for (const UStruct* our_cls = this; our_cls != nullptr; our_cls = our_cls->SuperField) {
-        // If it matches
-        if (our_cls == cls) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 bool UClass::implements(const UClass* iface, FImplementedInterface** impl_out) const {
     // For each class in the inheritance chain
     for (const UStruct* str = this; str != nullptr; str = str->SuperField) {
