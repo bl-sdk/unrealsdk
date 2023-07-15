@@ -10,6 +10,10 @@
 
 namespace unrealsdk::unreal {
 
+class UFunction;
+class UScriptStruct;
+class UProperty;
+
 /**
  * @brief Gets the unreal class name of the templated type.
  *
@@ -18,21 +22,24 @@ namespace unrealsdk::unreal {
  */
 template <typename T>
 [[nodiscard]] FName cls_fname(void) {
-    static FName name{0, 0};
-    static bool initialized = false;
-
-    if (!initialized) {
-        name = FName{PropTraits<T>::CLASS};
-        initialized = true;
-    }
-
+    static FName name{PropTraits<T>::CLASS};
     return name;
 }
 
 template <>
-[[nodiscard]] inline FName cls_fname<UClass>(void) {
-    return L"Class"_fn;
-}
+[[nodiscard]] FName cls_fname<UObject>(void);
+template <>
+[[nodiscard]] FName cls_fname<UField>(void);
+template <>
+[[nodiscard]] FName cls_fname<UStruct>(void);
+template <>
+[[nodiscard]] FName cls_fname<UClass>(void);
+template <>
+[[nodiscard]] FName cls_fname<UFunction>(void);
+template <>
+[[nodiscard]] FName cls_fname<UScriptStruct>(void);
+template <>
+[[nodiscard]] FName cls_fname<UProperty>(void);
 
 /**
  * @brief Throws an invalid argument exception if an object is not of the expected type

@@ -169,10 +169,6 @@ class BoundFunction {
 
 // Instead, we explicitly instantiate `UObject->get<UFunction>` as the only getter.
 
-// Still define the class name though, so we can use it during lookups.
-template <>
-[[nodiscard]] FName cls_fname<UFunction>(void);
-
 }  // namespace unrealsdk::unreal
 
 #endif /* UNREALSDK_UNREAL_WRAPPERS_BOUND_FUNCTION_H */
