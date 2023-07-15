@@ -11,7 +11,6 @@ namespace unrealsdk::unreal {
 template <typename T>
 void UnrealPointer<T>::release(void) {
     auto old_control = this->control;
-    auto old_ptr = this->ptr;
     this->control = nullptr;
     this->ptr = nullptr;
 
@@ -23,7 +22,13 @@ void UnrealPointer<T>::release(void) {
         try {
             // Destroy the struct first, since we know it's less catastrophic to miss the control
             // block destructor
-            destroy_struct(old_control->deleter_struct, reinterpret_cast<uintptr_t>(old_ptr));
+            if (old_control->deleter_struct != nullptr) {
+                // Need to reconstruct the struct base, since our pointer may be somewhere else
+                auto struct_base =
+                    reinterpret_cast<uintptr_t>(old_control) + sizeof(impl::UnrealPointerControl);
+
+                destroy_struct(old_control->deleter_struct, struct_base);
+            }
 
             // Since we're using placement new, we need to manually call the destructor
             old_control->~UnrealPointerControl();

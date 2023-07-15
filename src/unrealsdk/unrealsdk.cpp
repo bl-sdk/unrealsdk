@@ -209,6 +209,12 @@ void uconsole_output_text(const wchar_t* str, size_t size) {
 }
 #endif
 
+#ifndef UNREALSDK_IMPORTING
+UNREALSDK_CAPI bool is_console_ready(void) UNREALSDK_CAPI_SUFFIX {
+    return hook_instance && hook_instance->is_console_ready();
+}
+#endif
+
 #ifdef UNREALSDK_SHARED
 UNREALSDK_CAPI [[nodiscard]] wchar_t* uobject_path_name_cstr(const UObject* obj)
     UNREALSDK_CAPI_SUFFIX;

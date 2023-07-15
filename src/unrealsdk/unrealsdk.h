@@ -37,10 +37,12 @@ bool init(std::unique_ptr<game::AbstractHook>&& game);
 /**
  * @brief Checks if the SDK has been initialized.
  * @note Thread safe, blocks if initialization is in progress.
+ * @note The console hooks are setup during initialization, but console may not immediately be
+ *       available - also see `is_console_ready`.
  *
  * @return True if the SDK has been initialized.
  */
-UNREALSDK_CAPI bool is_initialized(void) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI [[nodiscard]] bool is_initialized(void) UNREALSDK_CAPI_SUFFIX;
 
 // ================ Remaining functions have undefined behaviour if not initialized ================
 
@@ -142,10 +144,18 @@ UNREALSDK_CAPI void process_event(unreal::UObject* object, unreal::UFunction* fu
 
 /**
  * @brief Calls `UConsole::OutputText` to write to the UE console.
+ * @note Calls to this before the console hook is ready are silently dropped.
  *
  * @param str The string to write.
  */
 void uconsole_output_text(const std::wstring& str);
+
+/**
+ * @brief Checks if the sdk's console hook is ready to output text.
+ *
+ * @return True if the console hook is ready, false otherwise.
+ */
+UNREALSDK_CAPI [[nodiscard]] bool is_console_ready(void) UNREALSDK_CAPI_SUFFIX;
 
 /**
  * @brief Calls `UObject::PathName` on the given object.

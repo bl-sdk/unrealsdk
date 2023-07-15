@@ -43,9 +43,4 @@ void BoundFunction::validate_no_more_params(UProperty* prop) {
     }
 }
 
-template <>
-FName cls_fname<UFunction>(void) {
-    return L"Function"_fn;
-}
-
 }  // namespace unrealsdk::unreal

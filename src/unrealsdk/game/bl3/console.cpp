@@ -202,6 +202,10 @@ void BL3Hook::uconsole_output_text(const std::wstring& str) const {
     console->call_virtual_function<void, TemporaryFString*>(idx, &fstr);
 }
 
+bool BL3Hook::is_console_ready(void) const {
+    return console != nullptr;
+}
+
 }  // namespace unrealsdk::game
 
 #endif
