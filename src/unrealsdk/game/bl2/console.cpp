@@ -160,6 +160,10 @@ void BL2Hook::uconsole_output_text(const std::wstring& str) const {
     console_output_text.call<void, UStrProperty>(str);
 }
 
+bool BL2Hook::is_console_ready(void) const {
+    return console_output_text.func != nullptr;
+}
+
 }  // namespace unrealsdk::game
 
 #endif

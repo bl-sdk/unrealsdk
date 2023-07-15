@@ -53,6 +53,7 @@ struct AbstractHook {
         decltype(unreal::UObject::ObjectFlags) flags,
         unreal::UObject* template_obj) const = 0;
     virtual void uconsole_output_text(const std::wstring& str) const = 0;
+    [[nodiscard]] virtual bool is_console_ready(void) const = 0;
     [[nodiscard]] virtual std::wstring uobject_path_name(const unreal::UObject* obj) const = 0;
     [[nodiscard]] virtual unreal::UObject* find_object(unreal::UClass* cls,
                                                        const std::wstring& name) const = 0;

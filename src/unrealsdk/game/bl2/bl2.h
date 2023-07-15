@@ -99,6 +99,7 @@ class BL2Hook : public AbstractHook {
                                                     decltype(unreal::UObject::ObjectFlags) flags,
                                                     unreal::UObject* template_obj) const override;
     void uconsole_output_text(const std::wstring& str) const override;
+    [[nodiscard]] bool is_console_ready(void) const override;
     [[nodiscard]] std::wstring uobject_path_name(const unreal::UObject* obj) const override;
     [[nodiscard]] unreal::UObject* find_object(unreal::UClass* cls,
                                                const std::wstring& name) const override;
