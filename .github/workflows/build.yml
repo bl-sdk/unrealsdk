@@ -195,6 +195,10 @@ jobs:
         key: ${{ runner.os }}-clang-${{ env.CLANG_VERSION }}
         fail-on-cache-miss: true
 
+    # Needed for clang tidy to enable `-export-fixes`
+    - name: Install pyyaml
+      run: pip install pyyaml
+
     - name: Checkout repository and submodules
       uses: actions/checkout@v3
       with:
@@ -206,7 +210,12 @@ jobs:
 
     - name: Run clang-tidy
       shell: bash # To follow the shebang
-      run: run-clang-tidy -j ${{ env.CLANG_TIDY_JOBS }} -p out/build/${{ matrix.preset }}
+      run: run-clang-tidy -j ${{ env.CLANG_TIDY_JOBS }} -p out/build/${{ matrix.preset }} -export-fixes clang-tidy-fixes.yml
+
+    - name: Process clang-tidy warnings
+      uses: asarium/clang-tidy-action@v1
+      with:
+        fixesFile: clang-tidy-fixes.yml
 
   clang-format:
     runs-on: windows-latest
