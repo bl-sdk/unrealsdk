@@ -41,7 +41,7 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
         if (data != nullptr) {
             // Copy args so that hooks can't modify them, for parity with call function
             const WrappedStruct args_base{func, params};
-            WrappedStruct args(args_base);
+            WrappedStruct args = args_base.copy_params_only();
             hook_manager::Details hook{obj, &args, {func->find_return_param()}, {func, obj}};
 
             const bool block_execution =
