@@ -93,6 +93,15 @@ class WrappedStruct {
     void set(const T* prop, size_t idx, const typename PropTraits<T>::Value& value) {
         set_property<T>(prop, idx, reinterpret_cast<uintptr_t>(this->base.get()), value);
     }
+
+    /**
+     * @brief Creates a copy of this struct, but only initialize properties marked as parameters.
+     * @note Only really useful in the context of our internal pre-hook processing, you probably
+     *       want to use the normal copy constructor.
+     *
+     * @return A new wrapped struct.
+     */
+    [[nodiscard]] WrappedStruct copy_params_only(void) const;
 };
 
 /**

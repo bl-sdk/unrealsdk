@@ -1,6 +1,7 @@
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/unreal/cast_prop.h"
+#include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/classes/ustruct.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
@@ -57,6 +58,28 @@ WrappedStruct& WrappedStruct::operator=(WrappedStruct&& other) noexcept {
     std::swap(this->type, other.type);
     std::swap(this->base, other.base);
     return *this;
+}
+
+WrappedStruct WrappedStruct::copy_params_only(void) const {
+    WrappedStruct new_struct{this->type};
+    if (this->base == nullptr || new_struct.base == nullptr) {
+        return new_struct;
+    }
+
+    auto dest = reinterpret_cast<uintptr_t>(new_struct.base.get());
+    for (const auto& prop : this->type->properties()) {
+        if ((prop->PropertyFlags & UProperty::PROP_FLAG_PARAM) == 0) {
+            continue;
+        }
+
+        cast_prop(prop, [dest, this]<typename T>(const T* prop) {
+            for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
+                set_property<T>(prop, i, dest, this->get<T>(prop, i));
+            }
+        });
+    }
+
+    return new_struct;
 }
 
 }  // namespace unrealsdk::unreal

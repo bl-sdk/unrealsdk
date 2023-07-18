@@ -72,4 +72,4 @@ UnrealPointer<T>::UnrealPointer(const UStruct* struct_type) : control(nullptr), 
 }
 
 }  // namespace unrealsdk::unreal
-#endif /* UNREALSDK_SRC_UNREALSDK_UNREAL_WRAPPERS_UNREAL_POINTER_FUNCS_H */
+#endif /* UNREALSDK_UNREAL_WRAPPERS_UNREAL_POINTER_FUNCS_H */
