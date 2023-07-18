@@ -1,5 +1,5 @@
-#ifndef UNREALSDK_SRC_UNREALSDK_COMMANDS_H
-#define UNREALSDK_SRC_UNREALSDK_COMMANDS_H
+#ifndef UNREALSDK_COMMANDS_H
+#define UNREALSDK_COMMANDS_H
 
 #include "unrealsdk/pch.h"
 #include "unrealsdk/utils.h"
@@ -82,4 +82,4 @@ std::pair<AbstractSafeCallback*, size_t> find_matching_command(const std::wstrin
 
 }  // namespace unrealsdk::commands
 
-#endif /* UNREALSDK_SRC_UNREALSDK_COMMANDS_H */
+#endif /* UNREALSDK_COMMANDS_H */
