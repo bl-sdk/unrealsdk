@@ -25,6 +25,11 @@ template <>
     return name;
 }
 template <>
+[[nodiscard]] FName cls_fname<UBlueprintGeneratedClass>(void) {
+    static auto name = L"BlueprintGeneratedClass"_fn;
+    return name;
+}
+template <>
 [[nodiscard]] FName cls_fname<UFunction>(void) {
     static auto name = L"Function"_fn;
     return name;

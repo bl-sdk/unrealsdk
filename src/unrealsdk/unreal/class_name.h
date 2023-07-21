@@ -10,6 +10,7 @@
 
 namespace unrealsdk::unreal {
 
+class UBlueprintGeneratedClass;
 class UFunction;
 class UScriptStruct;
 class UProperty;
@@ -34,6 +35,8 @@ template <>
 [[nodiscard]] FName cls_fname<UStruct>(void);
 template <>
 [[nodiscard]] FName cls_fname<UClass>(void);
+template <>
+[[nodiscard]] FName cls_fname<UBlueprintGeneratedClass>(void);
 template <>
 [[nodiscard]] FName cls_fname<UFunction>(void);
 template <>
