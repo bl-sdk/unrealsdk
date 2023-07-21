@@ -3,6 +3,7 @@
 
 #include "unrealsdk/pch.h"
 
+#include "unrealsdk/unreal/class_traits.h"
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
@@ -40,13 +41,17 @@ class UStructProperty : public UProperty {
 template <>
 struct PropTraits<UStructProperty> : public AbstractPropTraits<UStructProperty> {
     using Value = WrappedStruct;
-    static inline const wchar_t* const CLASS = L"StructProperty";
 
     static Value get(const UStructProperty* prop,
                      uintptr_t addr,
                      const UnrealPointer<void>& parent);
     static void set(const UStructProperty* prop, uintptr_t addr, const Value& value);
     static void destroy(const UStructProperty* prop, uintptr_t addr);
+};
+
+template <>
+struct ClassTraits<UStructProperty> {
+    static inline const wchar_t* const NAME = L"StructProperty";
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

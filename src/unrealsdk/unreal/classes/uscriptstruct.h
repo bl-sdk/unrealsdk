@@ -1,6 +1,7 @@
 #ifndef UNREALSDK_UNREAL_CLASSES_USCRIPTSTRUCT_H
 #define UNREALSDK_UNREAL_CLASSES_USCRIPTSTRUCT_H
 
+#include "unrealsdk/unreal/class_traits.h"
 #include "unrealsdk/unreal/classes/ustruct.h"
 
 namespace unrealsdk::unreal {
@@ -20,6 +21,11 @@ class UScriptStruct : public UStruct {
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     uint32_t StructFlags;
+};
+
+template <>
+struct ClassTraits<UScriptStruct> {
+    static inline const wchar_t* const NAME = L"ScriptStruct";
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

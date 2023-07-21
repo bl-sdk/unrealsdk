@@ -3,6 +3,7 @@
 
 #include "unrealsdk/pch.h"
 
+#include "unrealsdk/unreal/class_traits.h"
 #include "unrealsdk/unreal/classes/ufield.h"
 #include "unrealsdk/unreal/structs/fname.h"
 
@@ -129,6 +130,11 @@ class UProperty : public UField {
     }
 
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
+};
+
+template <>
+struct ClassTraits<UProperty> {
+    static inline const wchar_t* const NAME = L"Property";
 };
 
 #if defined(__clang__) || defined(__MINGW32__)

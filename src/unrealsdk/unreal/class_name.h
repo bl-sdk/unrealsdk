@@ -3,17 +3,12 @@
 
 #include "unrealsdk/pch.h"
 
+#include "unrealsdk/unreal/class_traits.h"
 #include "unrealsdk/unreal/classes/uclass.h"
 #include "unrealsdk/unreal/classes/uobject.h"
-#include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/structs/fname.h"
 
 namespace unrealsdk::unreal {
-
-class UBlueprintGeneratedClass;
-class UFunction;
-class UScriptStruct;
-class UProperty;
 
 /**
  * @brief Gets the unreal class name of the templated type.
@@ -23,26 +18,11 @@ class UProperty;
  */
 template <typename T>
 [[nodiscard]] FName cls_fname(void) {
-    static FName name{PropTraits<T>::CLASS};
+    // This static will only be initalized during the first call, which should be after we have the
+    // hook to actually be able to initalize FNames.
+    static FName name{ClassTraits<T>::NAME};
     return name;
 }
-
-template <>
-[[nodiscard]] FName cls_fname<UObject>(void);
-template <>
-[[nodiscard]] FName cls_fname<UField>(void);
-template <>
-[[nodiscard]] FName cls_fname<UStruct>(void);
-template <>
-[[nodiscard]] FName cls_fname<UClass>(void);
-template <>
-[[nodiscard]] FName cls_fname<UBlueprintGeneratedClass>(void);
-template <>
-[[nodiscard]] FName cls_fname<UFunction>(void);
-template <>
-[[nodiscard]] FName cls_fname<UScriptStruct>(void);
-template <>
-[[nodiscard]] FName cls_fname<UProperty>(void);
 
 /**
  * @brief Throws an invalid argument exception if an object is not of the expected type

@@ -6,6 +6,8 @@
 
 namespace unrealsdk::unreal {
 
+class UProperty;
+
 /**
  * @brief Traits class describing a UProperty.
  *
@@ -15,9 +17,6 @@ template <typename T>
 struct AbstractPropTraits {
     /// The value type used by the described property
     using Value = void*;
-
-    /// The unreal class name of the described property.
-    static const wchar_t* const CLASS;
 
     /**
      * @brief Gets the value of the described property type from the given address.

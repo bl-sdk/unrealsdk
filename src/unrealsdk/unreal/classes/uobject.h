@@ -3,6 +3,7 @@
 
 #include "unrealsdk/pch.h"
 
+#include "unrealsdk/unreal/class_traits.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/structs/fname.h"
 
@@ -141,6 +142,11 @@ class UObject {
      */
     [[nodiscard]] bool is_implementation(const UClass* iface,
                                          FImplementedInterface** impl_out = nullptr) const;
+};
+
+template <>
+struct ClassTraits<UObject> {
+    static inline const wchar_t* const NAME = L"Object";
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

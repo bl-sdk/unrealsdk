@@ -1,6 +1,7 @@
 #ifndef UNREALSDK_UNREAL_CLASSES_UCLASS_H
 #define UNREALSDK_UNREAL_CLASSES_UCLASS_H
 
+#include "unrealsdk/unreal/class_traits.h"
 #include "unrealsdk/unreal/classes/ustruct.h"
 #include "unrealsdk/unreal/structs/fimplementedinterface.h"
 #include "unrealsdk/unreal/structs/tarray.h"
@@ -75,6 +76,11 @@ class UClass : public UStruct {
      */
     [[nodiscard]] bool implements(const UClass* iface,
                                   FImplementedInterface** impl_out = nullptr) const;
+};
+
+template <>
+struct ClassTraits<UClass> {
+    static inline const wchar_t* const NAME = L"Class";
 };
 
 #if defined(__clang__) || defined(__MINGW32__)
