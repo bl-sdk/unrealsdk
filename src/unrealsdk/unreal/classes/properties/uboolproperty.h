@@ -3,6 +3,7 @@
 
 #include "unrealsdk/pch.h"
 
+#include "unrealsdk/unreal/class_traits.h"
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
@@ -52,10 +53,14 @@ class UBoolProperty : public UProperty {
 template <>
 struct PropTraits<UBoolProperty> : public AbstractPropTraits<UBoolProperty> {
     using Value = bool;
-    static inline const wchar_t* const CLASS = L"BoolProperty";
 
     static Value get(const UBoolProperty* prop, uintptr_t addr, const UnrealPointer<void>& parent);
     static void set(const UBoolProperty* prop, uintptr_t addr, const Value& value);
+};
+
+template <>
+struct ClassTraits<UBoolProperty> {
+    static inline const wchar_t* const NAME = L"BoolProperty";
 };
 
 #if defined(__clang__) || defined(__MINGW32__)

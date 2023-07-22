@@ -1,6 +1,7 @@
 #ifndef UNREALSDK_UNREAL_CLASSES_UFIELD_H
 #define UNREALSDK_UNREAL_CLASSES_UFIELD_H
 
+#include "unrealsdk/unreal/class_traits.h"
 #include "unrealsdk/unreal/classes/uobject.h"
 
 namespace unrealsdk::unreal {
@@ -20,6 +21,11 @@ class UField : public UObject {
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     UField* Next;
+};
+
+template <>
+struct ClassTraits<UField> {
+    static inline const wchar_t* const NAME = L"Field";
 };
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

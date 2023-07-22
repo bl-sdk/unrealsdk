@@ -1,6 +1,7 @@
 #ifndef UNREALSDK_UNREAL_CLASSES_USTRUCT_H
 #define UNREALSDK_UNREAL_CLASSES_USTRUCT_H
 
+#include "unrealsdk/unreal/class_traits.h"
 #include "unrealsdk/unreal/classes/ufield.h"
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/structs/tarray.h"
@@ -183,6 +184,11 @@ class UStruct : public UField {
      * @return True if this struct is the given struct, or inherits from it.
      */
     [[nodiscard]] bool inherits(const UStruct* base_struct) const;
+};
+
+template <>
+struct ClassTraits<UStruct> {
+    static inline const wchar_t* const NAME = L"Struct";
 };
 
 #if defined(__clang__) || defined(__MINGW32__)

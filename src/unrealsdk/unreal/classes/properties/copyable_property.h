@@ -3,6 +3,7 @@
 
 #include "unrealsdk/pch.h"
 
+#include "unrealsdk/unreal/class_traits.h"
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
@@ -32,7 +33,6 @@ class CopyableProperty : public UProperty {
 template <typename T>
 struct PropTraits<CopyableProperty<T>> : public AbstractPropTraits<CopyableProperty<T>> {
     using Value = T;
-    static const wchar_t* const CLASS;
 
     static Value get(const CopyableProperty<T>* /*prop*/,
                      uintptr_t addr,
@@ -60,30 +60,30 @@ using UDoubleProperty = CopyableProperty<float64_t>;
 using UNameProperty = CopyableProperty<FName>;
 
 template <>
-inline const wchar_t* const PropTraits<UInt8Property>::CLASS = L"Int8Property";
+inline const wchar_t* const ClassTraits<UInt8Property>::NAME = L"Int8Property";
 template <>
-inline const wchar_t* const PropTraits<UInt16Property>::CLASS = L"Int16Property";
+inline const wchar_t* const ClassTraits<UInt16Property>::NAME = L"Int16Property";
 template <>
-inline const wchar_t* const PropTraits<UIntProperty>::CLASS = L"IntProperty";
+inline const wchar_t* const ClassTraits<UIntProperty>::NAME = L"IntProperty";
 template <>
-inline const wchar_t* const PropTraits<UInt64Property>::CLASS = L"Int64Property";
+inline const wchar_t* const ClassTraits<UInt64Property>::NAME = L"Int64Property";
 
 template <>
-inline const wchar_t* const PropTraits<UByteProperty>::CLASS = L"ByteProperty";
+inline const wchar_t* const ClassTraits<UByteProperty>::NAME = L"ByteProperty";
 template <>
-inline const wchar_t* const PropTraits<UUInt16Property>::CLASS = L"UInt16Property";
+inline const wchar_t* const ClassTraits<UUInt16Property>::NAME = L"UInt16Property";
 template <>
-inline const wchar_t* const PropTraits<UUInt32Property>::CLASS = L"UInt32Property";
+inline const wchar_t* const ClassTraits<UUInt32Property>::NAME = L"UInt32Property";
 template <>
-inline const wchar_t* const PropTraits<UUInt64Property>::CLASS = L"UInt64Property";
+inline const wchar_t* const ClassTraits<UUInt64Property>::NAME = L"UInt64Property";
 
 template <>
-inline const wchar_t* const PropTraits<UFloatProperty>::CLASS = L"FloatProperty";
+inline const wchar_t* const ClassTraits<UFloatProperty>::NAME = L"FloatProperty";
 template <>
-inline const wchar_t* const PropTraits<UDoubleProperty>::CLASS = L"DoubleProperty";
+inline const wchar_t* const ClassTraits<UDoubleProperty>::NAME = L"DoubleProperty";
 
 template <>
-inline const wchar_t* const PropTraits<UNameProperty>::CLASS = L"NameProperty";
+inline const wchar_t* const ClassTraits<UNameProperty>::NAME = L"NameProperty";
 
 #if defined(_MSC_VER) && defined(ARCH_X86)
 #pragma pack(pop)

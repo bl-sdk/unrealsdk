@@ -1,6 +1,5 @@
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/unreal/cast_prop.h"
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/structs/fname.h"

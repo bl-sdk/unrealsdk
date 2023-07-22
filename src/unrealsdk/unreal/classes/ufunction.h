@@ -1,6 +1,7 @@
 #ifndef UNREALSDK_UNREAL_CLASSES_UFUNCTION_H
 #define UNREALSDK_UNREAL_CLASSES_UFUNCTION_H
 
+#include "unrealsdk/unreal/class_traits.h"
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/classes/ustruct.h"
 
@@ -69,6 +70,11 @@ class UFunction : public UStruct {
     [[nodiscard]] UProperty* find_return_param(void) const;
 
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
+};
+
+template <>
+struct ClassTraits<UFunction> {
+    static inline const wchar_t* const NAME = L"Function";
 };
 
 #if defined(__clang__) || defined(__MINGW32__)
