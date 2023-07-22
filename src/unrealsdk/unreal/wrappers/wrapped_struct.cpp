@@ -1,12 +1,11 @@
 #include "unrealsdk/pch.h"
-
+#include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 #include "unrealsdk/unreal/cast.h"
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/classes/ustruct.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer_funcs.h"
-#include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 #include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
@@ -23,11 +22,19 @@ void copy_struct(uintptr_t dest, const WrappedStruct& src) {
 
 void destroy_struct(const UStruct* type, uintptr_t addr) {
     for (const auto& prop : type->properties()) {
-        cast(prop, [addr]<typename T>(const T* prop) {
-            for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
-                destroy_property<T>(prop, i, addr);
-            }
-        });
+        try {
+            cast(prop, [addr]<typename T>(const T* prop) {
+                for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
+                    destroy_property<T>(prop, i, addr);
+                }
+            });
+        } catch (const std::exception& ex) {
+            // It's important not to throw, this is called during destructors, just continue, keep
+            // on trying to destroy the rest
+            // Log it to dev warning - don't want to use error to not freak out casusal users, this
+            // should only really happen if a dev is messing with unsupported property types.
+            LOG(DEV_WARNING, "Error while destroying '{}' struct: {}", type->Name, ex.what());
+        }
     }
 }
 
