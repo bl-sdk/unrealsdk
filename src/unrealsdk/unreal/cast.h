@@ -10,12 +10,15 @@
 #include "unrealsdk/unreal/classes/properties/uarrayproperty.h"
 #include "unrealsdk/unreal/classes/properties/uboolproperty.h"
 #include "unrealsdk/unreal/classes/properties/uclassproperty.h"
+#include "unrealsdk/unreal/classes/properties/uenumproperty.h"
 #include "unrealsdk/unreal/classes/properties/uinterfaceproperty.h"
 #include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
 #include "unrealsdk/unreal/classes/properties/ustrproperty.h"
 #include "unrealsdk/unreal/classes/properties/ustructproperty.h"
 #include "unrealsdk/unreal/classes/ublueprintgeneratedclass.h"
 #include "unrealsdk/unreal/classes/uclass.h"
+#include "unrealsdk/unreal/classes/uconst.h"
+#include "unrealsdk/unreal/classes/uenum.h"
 #include "unrealsdk/unreal/classes/ufield.h"
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/classes/uobject.h"
@@ -36,7 +39,10 @@ using all_unreal_classes = std::tuple<  //
     UByteProperty,
     UClass,
     UClassProperty,
+    UConst,
     UDoubleProperty,
+    UEnum,
+    UEnumProperty,
     UField,
     UFloatProperty,
     UFunction,
@@ -113,9 +119,9 @@ void cast(const InputType* obj,
           const Function& func,
           const Fallback& fallback = default_cast_fallback) {
     if constexpr (i == 0) {
-    if (obj == nullptr) {
-        throw std::invalid_argument("Tried to cast null object!");
-    }
+        if (obj == nullptr) {
+            throw std::invalid_argument("Tried to cast null object!");
+        }
     }
 
     if constexpr (i >= std::tuple_size_v<ClassTuple>) {
