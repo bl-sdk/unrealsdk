@@ -15,7 +15,7 @@ class UObject;
 template <typename T>
 struct ClassTraits {
     /// The name of the described unreal class.
-    /// Has to be a string literal as we can't initalize FNames immediately.
+    /// Has to be a string literal as we can't initialize FNames immediately.
     static const wchar_t* const NAME;
 };
 

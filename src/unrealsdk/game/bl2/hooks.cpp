@@ -3,7 +3,6 @@
 #include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/hook_manager.h"
 #include "unrealsdk/memory.h"
-#include "unrealsdk/unreal/cast_prop.h"
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/classes/uproperty.h"

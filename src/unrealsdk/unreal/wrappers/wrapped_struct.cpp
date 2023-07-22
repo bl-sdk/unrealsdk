@@ -1,6 +1,6 @@
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/unreal/cast_prop.h"
+#include "unrealsdk/unreal/cast.h"
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/classes/ustruct.h"
 #include "unrealsdk/unreal/prop_traits.h"
@@ -13,7 +13,7 @@ namespace unrealsdk::unreal {
 
 void copy_struct(uintptr_t dest, const WrappedStruct& src) {
     for (const auto& prop : src.type->properties()) {
-        cast_prop(prop, [dest, &src]<typename T>(const T* prop) {
+        cast(prop, [dest, &src]<typename T>(const T* prop) {
             for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
                 set_property<T>(prop, i, dest, src.get<T>(prop, i));
             }
@@ -23,7 +23,7 @@ void copy_struct(uintptr_t dest, const WrappedStruct& src) {
 
 void destroy_struct(const UStruct* type, uintptr_t addr) {
     for (const auto& prop : type->properties()) {
-        cast_prop(prop, [addr]<typename T>(const T* prop) {
+        cast(prop, [addr]<typename T>(const T* prop) {
             for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
                 destroy_property<T>(prop, i, addr);
             }
@@ -72,7 +72,7 @@ WrappedStruct WrappedStruct::copy_params_only(void) const {
             continue;
         }
 
-        cast_prop(prop, [dest, this]<typename T>(const T* prop) {
+        cast(prop, [dest, this]<typename T>(const T* prop) {
             for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
                 set_property<T>(prop, i, dest, this->get<T>(prop, i));
             }

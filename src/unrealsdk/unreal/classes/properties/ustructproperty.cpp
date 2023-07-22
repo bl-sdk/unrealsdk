@@ -1,6 +1,5 @@
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/unreal/cast_prop.h"
 #include "unrealsdk/unreal/classes/properties/ustructproperty.h"
 #include "unrealsdk/unreal/classes/uscriptstruct.h"
 #include "unrealsdk/unreal/prop_traits.h"

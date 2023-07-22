@@ -1,6 +1,6 @@
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/unreal/cast_prop.h"
+#include "unrealsdk/unreal/cast.h"
 #include "unrealsdk/unreal/classes/properties/uarrayproperty.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/structs/tarray.h"
@@ -41,7 +41,7 @@ void PropTraits<UArrayProperty>::set(const UArrayProperty* prop,
                                  + (std::string)inner->Name);
     }
 
-    cast_prop(inner, [prop, addr, &value]<typename T>(const T* inner) {
+    cast(inner, [prop, addr, &value]<typename T>(const T* inner) {
         auto arr = reinterpret_cast<TArray<void>*>(addr);
 
         auto new_size = value.size();
@@ -72,7 +72,7 @@ void PropTraits<UArrayProperty>::destroy(const UArrayProperty* prop, uintptr_t a
 
     auto arr = reinterpret_cast<TArray<void>*>(addr);
 
-    cast_prop(inner, [arr]<typename T>(const T* inner) {
+    cast(inner, [arr]<typename T>(const T* inner) {
         for (size_t i = 0; i < arr->size(); i++) {
             destroy_property<T>(inner, 0,
                                 reinterpret_cast<uintptr_t>(arr->data) + (inner->ElementSize * i));

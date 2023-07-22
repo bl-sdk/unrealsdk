@@ -18,8 +18,8 @@ namespace unrealsdk::unreal {
  */
 template <typename T>
 [[nodiscard]] FName cls_fname(void) {
-    // This static will only be initalized during the first call, which should be after we have the
-    // hook to actually be able to initalize FNames.
+    // This static will only be initialized during the first call, which should be after we have the
+    // hook to actually be able to initialize FNames.
     static FName name{ClassTraits<T>::NAME};
     return name;
 }

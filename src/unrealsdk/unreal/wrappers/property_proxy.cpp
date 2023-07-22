@@ -1,6 +1,6 @@
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/unreal/cast_prop.h"
+#include "unrealsdk/unreal/cast.h"
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/wrappers/property_proxy.h"
@@ -30,7 +30,7 @@ PropertyProxy::PropertyProxy(UProperty* prop) : prop(prop), value(nullptr), been
 }
 PropertyProxy::PropertyProxy(const PropertyProxy& other) : PropertyProxy(other.prop) {
     if (other.been_set) {
-        cast_prop(this->prop, [this, &other]<typename T>(const T* prop) {
+        cast(this->prop, [this, &other]<typename T>(const T* prop) {
             for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
                 this->set<T>(i, other.get<T>(i));
             }
@@ -48,7 +48,7 @@ PropertyProxy& PropertyProxy::operator=(const PropertyProxy& other) {
                                  + (std::string)this->prop->Name);
     }
     if (this->prop != nullptr) {
-        cast_prop(this->prop, [this, &other]<typename T>(const T* prop) {
+        cast(this->prop, [this, &other]<typename T>(const T* prop) {
             for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
                 this->set<T>(i, other.get<T>(i));
             }
@@ -70,7 +70,7 @@ PropertyProxy::~PropertyProxy() {
     }
 
     auto addr = this->get_value_addr();
-    cast_prop(this->prop, [addr]<typename T>(const T* prop) {
+    cast(this->prop, [addr]<typename T>(const T* prop) {
         for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
             destroy_property<T>(prop, i, addr);
         }
@@ -109,7 +109,7 @@ void PropertyProxy::copy_to(uintptr_t addr) {
     if (!this->been_set) {
         throw std::runtime_error("Cannot copy empty property!");
     }
-    cast_prop(this->prop, [this, addr]<typename T>(const T* prop) {
+    cast(this->prop, [this, addr]<typename T>(const T* prop) {
         for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
             set_property<T>(prop, i, addr, this->get<T>(i));
         }
@@ -121,7 +121,7 @@ void PropertyProxy::copy_from(uintptr_t addr) {
         throw std::runtime_error("Property does not exist!");
     }
 
-    cast_prop(this->prop, [this, addr]<typename T>(const T* prop) {
+    cast(this->prop, [this, addr]<typename T>(const T* prop) {
         for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
             this->set<T>(i, get_property(prop, i, addr));
         }
