@@ -2,13 +2,19 @@
 
 #include "unrealsdk/unreal/class_name.h"
 #include "unrealsdk/unreal/classes/uclass.h"
+#include "unrealsdk/unreal/find_class.h"
 
 namespace unrealsdk::unreal {
 
 bool UClass::implements(const UClass* iface, FImplementedInterface** impl_out) const {
     // For each class in the inheritance chain
     for (const UStruct* str = this; str != nullptr; str = str->SuperField) {
-        auto cls = validate_type<UClass>(str);
+        // Make sure it's a class
+        if (!str->inherits(find_class<UClass>())) {
+            continue;
+        }
+        auto cls = reinterpret_cast<const UClass*>(str);
+
         // For each interface on that class
         for (auto our_iface : cls->Interfaces) {
             // If the interface matches

@@ -278,4 +278,11 @@ UNREALSDK_CAPI [[nodiscard]] UObject* find_object(UClass* cls,
 }
 #endif
 
+#if !defined(UNREALSDK_IMPORTING) && defined(UE4)
+UNREALSDK_CAPI void ftext_as_culture_invariant(unreal::FText* text, unreal::TemporaryFString&& str)
+    UNREALSDK_CAPI_SUFFIX {
+    hook_instance->ftext_as_culture_invariant(text, std::move(str));
+}
+#endif
+
 }  // namespace unrealsdk

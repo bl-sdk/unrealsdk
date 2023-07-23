@@ -35,7 +35,7 @@ PropTraits<UEnumProperty>::Value PropTraits<UEnumProperty>::get(const UEnumPrope
                                                                 const UnrealPointer<void>& parent) {
     PropTraits<UEnumProperty>::Value value{};
 
-    cast<include_input_class, UProperty, valid_underlying_types>(
+    cast<cast_options<>::with_classes<valid_underlying_types>>(
         prop->get_underlying_prop(), [addr, parent, &value]<typename T>(const T* underlying) {
             static_assert(std::is_integral_v<typename PropTraits<T>::Value>);
 
@@ -51,7 +51,7 @@ PropTraits<UEnumProperty>::Value PropTraits<UEnumProperty>::get(const UEnumPrope
 }
 
 void PropTraits<UEnumProperty>::set(const UEnumProperty* prop, uintptr_t addr, const Value& value) {
-    cast<include_input_class, UProperty, valid_underlying_types>(
+    cast<cast_options<>::with_classes<valid_underlying_types>>(
         prop->get_underlying_prop(), [addr, value]<typename T>(const T* underlying) {
             static_assert(std::is_integral_v<typename PropTraits<T>::Value>);
 

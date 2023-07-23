@@ -63,6 +63,12 @@ class BL3Hook : public AbstractHook {
     static void find_static_find_object(void);
 
     /**
+     * @brief Finds `FText::AsCultureInvariant`, and sets up such that `ftext_as_culture_invariant`
+     *        may be called.
+     */
+    static void find_ftext_as_culture_invariant(void);
+
+    /**
      * @brief Creates a console and sets the bind (if required), and hooks logging onto it.
      */
     static void inject_console(void);
@@ -90,6 +96,8 @@ class BL3Hook : public AbstractHook {
     [[nodiscard]] std::wstring uobject_path_name(const unreal::UObject* obj) const override;
     [[nodiscard]] unreal::UObject* find_object(unreal::UClass* cls,
                                                const std::wstring& name) const override;
+    void ftext_as_culture_invariant(unreal::FText* text,
+                                    unreal::TemporaryFString&& str) const override;
 };
 
 template <>
