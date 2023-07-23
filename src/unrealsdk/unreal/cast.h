@@ -15,6 +15,7 @@
 #include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
 #include "unrealsdk/unreal/classes/properties/ustrproperty.h"
 #include "unrealsdk/unreal/classes/properties/ustructproperty.h"
+#include "unrealsdk/unreal/classes/properties/utextproperty.h"
 #include "unrealsdk/unreal/classes/ublueprintgeneratedclass.h"
 #include "unrealsdk/unreal/classes/uclass.h"
 #include "unrealsdk/unreal/classes/uconst.h"
@@ -33,6 +34,9 @@ namespace unrealsdk::unreal {
  * @note Intended for to be used to iterate over all types using recursive templates.
  */
 using all_unreal_classes = std::tuple<  //
+#ifdef UE4
+    UTextProperty,
+#endif
     UArrayProperty,
     UBlueprintGeneratedClass,
     UBoolProperty,

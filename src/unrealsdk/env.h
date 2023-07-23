@@ -16,6 +16,12 @@ const constexpr env_var_key UCONSOLE_CONSOLE_COMMAND_VF_INDEX =
     "UNREALSDK_CONSOLE_COMMAND_TEXT_VF_INDEX";
 const constexpr env_var_key UCONSOLE_OUTPUT_TEXT_VF_INDEX =
     "UNREALSDK_UCONSOLE_OUTPUT_TEXT_VF_INDEX";
+const constexpr env_var_key TREFERENCE_CONTROLLER_DESTROY_OBJ_VF_INDEX =
+    "UNREALSDK_TREFERENCE_CONTROLLER_DESTROY_OBJ_VF_INDEX";
+const constexpr env_var_key TREFERENCE_CONTROLLER_DESTUCTOR_VF_INDEX =
+    "UNREALSDK_TREFERENCE_CONTROLLER_DESTUCTOR_VF_INDEX";
+const constexpr env_var_key FTEXT_GET_DISPLAY_STRING_VF_INDEX =
+    "UNREALSDK_FTEXT_GET_DISPLAY_STRING_VF_INDEX";
 
 namespace defaults {
 
@@ -31,6 +37,9 @@ const constexpr auto LOG_FILE = "unrealsdk.log";
 const constexpr auto CONSOLE_KEY = "Tilde";
 const constexpr auto UCONSOLE_CONSOLE_COMMAND_VF_INDEX = 81;
 const constexpr auto UCONSOLE_OUTPUT_TEXT_VF_INDEX = 83;
+const constexpr auto TREFERENCE_CONTROLLER_DESTROY_OBJ_VF_INDEX = 0;
+const constexpr auto TREFERENCE_CONTROLLER_DESTUCTOR_VF_INDEX = 1;
+const constexpr auto FTEXT_GET_DISPLAY_STRING_VF_INDEX = 2;
 
 }  // namespace defaults
 

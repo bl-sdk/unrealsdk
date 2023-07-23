@@ -19,6 +19,8 @@ class GObjects;
 class UClass;
 class UFunction;
 struct FFrame;
+struct FText;
+struct TemporaryFString;
 
 }  // namespace unrealsdk::unreal
 
@@ -175,6 +177,19 @@ UNREALSDK_CAPI [[nodiscard]] bool is_console_ready(void) UNREALSDK_CAPI_SUFFIX;
 [[nodiscard]] unreal::UObject* find_object(unreal::UClass* cls, const std::wstring& name);
 [[nodiscard]] unreal::UObject* find_object(const unreal::FName& cls, const std::wstring& name);
 [[nodiscard]] unreal::UObject* find_object(const std::wstring& cls, const std::wstring& name);
+
+#ifdef UE4
+
+/**
+ * @brief Calls `FText::AsCultureInvariant`.
+ *
+ * @param name Pointer to the text to initialize.
+ * @param str The string to initialize the text to.
+ */
+UNREALSDK_CAPI void ftext_as_culture_invariant(unreal::FText* text, unreal::TemporaryFString&& str)
+    UNREALSDK_CAPI_SUFFIX;
+
+#endif
 
 }  // namespace unrealsdk
 
