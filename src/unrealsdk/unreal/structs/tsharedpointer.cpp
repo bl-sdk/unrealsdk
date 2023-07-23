@@ -10,8 +10,8 @@ bool TReferenceController::remove_weak_ref(void) {
     }
 
     static auto idx =
-        env::get_numeric<size_t>(env::TREFERENCE_CONTROLLER_DESTUCTOR_VF_INDEX,
-                                 env::defaults::TREFERENCE_CONTROLLER_DESTUCTOR_VF_INDEX);
+        env::get_numeric<size_t>(env::TREFERENCE_CONTROLLER_DESTRUCTOR_VF_INDEX,
+                                 env::defaults::TREFERENCE_CONTROLLER_DESTRUCTOR_VF_INDEX);
     reinterpret_cast<void (*)(TReferenceController* self, uint32_t should_delete)>(
         this->vftable[idx])(this, 1);
     return true;
