@@ -46,8 +46,8 @@ class WrappedArray {
 
     /**
      * @brief Reserves memory to change the capacity of this array.
-     * @note Can be used to shrink the capacity - caller must ensure any removed entries are already
-     *       destroyed, so they don't leak.
+     * @note Can be used to shrink the capacity, but not below the current size.
+     * @note Does not initialize newly allocated elements.
      *
      * @param new_cap The new capacity, in number of elements.
      */
@@ -55,12 +55,11 @@ class WrappedArray {
 
     /**
      * @brief Resizes the array.
-     * @note Does not necessarily impact reserved capacity, just current amount of elements.
-     * @note Caller must ensure any removed entries are already destroyed, so they don't leak.
+     * @note Handles destruction of existing elements, and 0-initialization of new elements.
      *
      * @param new_size The new size, in number of elements.
      */
-    void resize(size_t new_size) const;
+    void resize(size_t new_size);
 
    private:
     /**

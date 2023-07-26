@@ -45,14 +45,6 @@ void PropTraits<UArrayProperty>::set(const UArrayProperty* prop,
         auto arr = reinterpret_cast<TArray<void>*>(addr);
 
         auto new_size = value.size();
-        auto current_size = arr->size();
-
-        // If the new size is smaller, destroy anything dropping off the end
-        for (size_t i = new_size; i < current_size; i++) {
-            destroy_property<T>(inner, 0,
-                                reinterpret_cast<uintptr_t>(arr->data) + (inner->ElementSize * i));
-        }
-
         arr->resize(new_size, prop->ElementSize);
 
         for (size_t i = 0; i < new_size; i++) {

@@ -13,6 +13,9 @@ void TArray<T>::reserve(size_t new_cap, size_t element_size) {
     if (new_cap > MAX_CAPACITY) {
         throw std::length_error("Tried to increase TArray beyond max capacity!");
     }
+    if (new_cap == this->capacity()) {
+        return;
+    }
 
     size_t new_size = new_cap * element_size;
 
