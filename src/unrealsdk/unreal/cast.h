@@ -2,8 +2,6 @@
 #define UNREALSDK_UNREAL_CAST_H
 
 #include "unrealsdk/pch.h"
-#include <type_traits>
-#include <utility>
 #include "unrealsdk/unreal/class_name.h"
 
 // Note: this header needs to pull in all unreal classes
@@ -71,6 +69,12 @@ using all_unreal_classes = std::tuple<  //
 
 namespace {
 
+#ifdef __clang__
+// Clangd doesn't seem to realize we use this below
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunneeded-internal-declaration"
+#endif
+
 /**
  * @brief Default fallback used when casting fails, throws a runtime error.
  *
@@ -79,6 +83,10 @@ namespace {
 inline void default_cast_fallback(const UObject* obj) {
     throw std::runtime_error("Unknown object type " + (std::string)obj->Class->Name);
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 /**
  * @brief Implementation of cast - kept private as it has less friendly args + template args.

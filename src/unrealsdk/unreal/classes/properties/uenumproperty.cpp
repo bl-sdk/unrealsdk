@@ -64,7 +64,7 @@ void PropTraits<UEnumProperty>::set(const UEnumProperty* prop, uintptr_t addr, c
                 throw std::invalid_argument("Enum value out of range!");
             }
 
-            PropTraits<T>::set(underlying, addr, static_cast<PropTraits<T>::Value>(value));
+            PropTraits<T>::set(underlying, addr, static_cast<typename PropTraits<T>::Value>(value));
         });
 }
 
