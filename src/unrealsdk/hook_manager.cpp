@@ -82,7 +82,7 @@ UNREALSDK_CAPI bool add_hook(const wchar_t* func,
                              size_t identifier_size,
                              AbstractSafeCallback* callback) UNREALSDK_CAPI_SUFFIX;
 #endif
-#ifdef UNREALSDK_EXPORTING
+#ifndef UNREALSDK_IMPORTING
 UNREALSDK_CAPI bool add_hook(const wchar_t* func,
                              size_t func_size,
                              Type type,
