@@ -69,6 +69,18 @@ uintptr_t sigscan(const uint8_t* bytes,
     return 0;
 }
 
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI bool detour(uintptr_t addr,
+                           void* detour_func,
+                           void** original_func,
+                           const char* name,
+                           size_t name_size) UNREALSDK_CAPI_SUFFIX;
+#endif
+#ifdef UNREALSDK_IMPORTING
+bool detour(uintptr_t addr, void* detour_func, void** original_func, const std::string& name) {
+    return detour(addr, detour_func, original_func, name.c_str(), name.size());
+}
+#else
 bool detour(uintptr_t addr, void* detour_func, void** original_func, const std::string& name) {
     MH_STATUS status = MH_OK;
 
@@ -86,6 +98,16 @@ bool detour(uintptr_t addr, void* detour_func, void** original_func, const std::
 
     return true;
 }
+#endif
+#ifdef UNREALSDK_EXPORTING
+UNREALSDK_CAPI bool detour(uintptr_t addr,
+                           void* detour_func,
+                           void** original_func,
+                           const char* name,
+                           size_t name_size) UNREALSDK_CAPI_SUFFIX {
+    return detour(addr, detour_func, original_func, {name, name_size});
+}
+#endif
 
 uintptr_t read_offset(uintptr_t address) {
 #ifdef ARCH_X64
