@@ -22,7 +22,7 @@ UNREALSDK_CAPI bool add_command(const wchar_t* cmd,
                                 size_t size,
                                 AbstractSafeCallback* callback) UNREALSDK_CAPI_SUFFIX;
 #endif
-#ifdef UNREALSDK_EXPORTING
+#ifndef UNREALSDK_IMPORTING
 UNREALSDK_CAPI bool add_command(const wchar_t* cmd,
                                 size_t size,
                                 AbstractSafeCallback* callback) UNREALSDK_CAPI_SUFFIX {

@@ -4,3 +4,6 @@
 [submodule "libs/fmt"]
 	path = libs/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "common_cmake"]
+	path = common_cmake
+	url = git@github.com:bl-sdk/common_cmake.git

@@ -32,7 +32,7 @@ try_compile(supports_format
 
 set(GIT_PRE_CONFIGURE_FILE "src/unrealsdk/version.cpp.in")
 set(GIT_POST_CONFIGURE_FILE "${CMAKE_CURRENT_BINARY_DIR}/version.cpp")
-include(cmake/git_watcher.cmake)
+include(common_cmake/git_watcher.cmake)
 
 add_subdirectory(libs/minhook)
 if(NOT supports_format)
