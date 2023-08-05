@@ -235,10 +235,10 @@ void init(const std::filesystem::path& file, bool callbacks_only_arg) {
 
 namespace {
 
-UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI(void, log_msg_internal, const LogMessage* msg);
 
 #ifndef UNREALSDK_IMPORTING
-UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) UNREALSDK_CAPI_SUFFIX {
+UNREALSDK_CAPI(void, log_msg_internal, const LogMessage* msg) {
     if (msg == nullptr) {
         return;
     }
@@ -276,17 +276,20 @@ UNREALSDK_CAPI void log_msg_internal(const LogMessage* msg) UNREALSDK_CAPI_SUFFI
 
 void log(Level level, const std::string& msg, const char* location, int line) {
     const LogMessage log_msg{unix_ms_now(), level, msg.c_str(), msg.size(), location, line};
-    log_msg_internal(&log_msg);
+    UNREALSDK_MANGLE(log_msg_internal)(&log_msg);
 }
 
 void log(Level level, const std::wstring& msg, const char* location, int line) {
     auto narrow = utils::narrow(msg);
     const LogMessage log_msg{unix_ms_now(), level, narrow.c_str(), narrow.size(), location, line};
-    log_msg_internal(&log_msg);
+    UNREALSDK_MANGLE(log_msg_internal)(&log_msg);
 }
 
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI(bool, set_console_level, Level level);
+#endif
 #ifndef UNREALSDK_IMPORTING
-bool set_console_level(Level level) {
+UNREALSDK_CAPI(bool, set_console_level, Level level) {
     if (Level::MIN > level || level > Level::MAX) {
         LOG(ERROR, "Log level out of range: {}", (uint8_t)level);
         return false;
@@ -294,14 +297,30 @@ bool set_console_level(Level level) {
     unreal_console_level = level;
     return true;
 }
+#endif
+bool set_console_level(Level level) {
+    return UNREALSDK_MANGLE(set_console_level)(level);
+}
 
-void add_callback(log_callback callback) {
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI(void, add_callback, log_callback callback);
+#endif
+#ifndef UNREALSDK_IMPORTING
+UNREALSDK_CAPI(void, add_callback, log_callback callback) {
     const std::lock_guard<std::mutex> lock(mutex);
 
     all_log_callbacks.push_back(callback);
 }
+#endif
+void add_callback(log_callback callback) {
+    UNREALSDK_MANGLE(add_callback)(callback);
+}
 
-void remove_callback(log_callback callback) {
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI(void, remove_callback, log_callback callback);
+#endif
+#ifndef UNREALSDK_IMPORTING
+UNREALSDK_CAPI(void, remove_callback, log_callback callback) {
     const std::lock_guard<std::mutex> lock(mutex);
 
     all_log_callbacks.erase(
@@ -309,5 +328,8 @@ void remove_callback(log_callback callback) {
         all_log_callbacks.end());
 }
 #endif
+void remove_callback(log_callback callback) {
+    UNREALSDK_MANGLE(remove_callback)(callback);
+}
 
 }  // namespace unrealsdk::logging

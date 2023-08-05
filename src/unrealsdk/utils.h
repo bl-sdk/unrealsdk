@@ -69,7 +69,8 @@ template <typename R, typename... As>
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
 struct AbstractSafeCallback {
     /// The signature functions matching this type should have.
-    using Signature = R(As...) UNREALSDK_CAPI_SUFFIX;
+    using Signature = R(As...) noexcept(false);
+    // MSVC needs noexpect(false) to allow exceptions through the C interface
 
     /**
      * @brief Destroys the callback.

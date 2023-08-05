@@ -44,7 +44,14 @@ bool init(std::unique_ptr<game::AbstractHook>&& game);
  *
  * @return True if the SDK has been initialized.
  */
-UNREALSDK_CAPI [[nodiscard]] bool is_initialized(void) UNREALSDK_CAPI_SUFFIX;
+[[nodiscard]] bool is_initialized(void);
+
+/**
+ * @brief Checks if the sdk's console hook is ready to output text.
+ *
+ * @return True if the console hook is ready, false otherwise.
+ */
+[[nodiscard]] bool is_console_ready(void);
 
 // ================ Remaining functions have undefined behaviour if not initialized ================
 
@@ -69,9 +76,7 @@ UNREALSDK_CAPI [[nodiscard]] bool is_initialized(void) UNREALSDK_CAPI_SUFFIX;
  * @param str The string to initialize the name to.
  * @param number The number to initialize the name to.
  */
-UNREALSDK_CAPI void fname_init(unreal::FName* name,
-                               const wchar_t* str,
-                               int32_t number) UNREALSDK_CAPI_SUFFIX;
+void fname_init(unreal::FName* name, const wchar_t* str, int32_t number);
 void fname_init(unreal::FName* name, const std::wstring& str, int32_t number);
 
 /**
@@ -81,9 +86,7 @@ void fname_init(unreal::FName* name, const std::wstring& str, int32_t number);
  * @param obj The object the frame is coming from.
  * @param param The parameter.
  */
-UNREALSDK_CAPI void fframe_step(unreal::FFrame* frame,
-                                unreal::UObject* obj,
-                                void* param) UNREALSDK_CAPI_SUFFIX;
+void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param);
 
 /**
  * @brief Calls unreal's malloc function.
@@ -92,7 +95,7 @@ UNREALSDK_CAPI void fframe_step(unreal::FFrame* frame,
  * @param len The amount of bytes to allocate.
  * @return A pointer to the allocated memory.
  */
-UNREALSDK_CAPI [[nodiscard]] void* u_malloc(size_t len) UNREALSDK_CAPI_SUFFIX;
+[[nodiscard]] void* u_malloc(size_t len);
 template <typename T>
 [[nodiscard]] T* u_malloc(size_t len) {
     return reinterpret_cast<T*>(u_malloc(len));
@@ -106,7 +109,7 @@ template <typename T>
  * @param len The amount of bytes to allocate.
  * @return A pointer to the re-allocated memory.
  */
-UNREALSDK_CAPI [[nodiscard]] void* u_realloc(void* original, size_t len) UNREALSDK_CAPI_SUFFIX;
+[[nodiscard]] void* u_realloc(void* original, size_t len);
 template <typename T>
 [[nodiscard]] T* u_realloc(void* original, size_t len) {
     return reinterpret_cast<T*>(u_realloc(original, len));
@@ -117,7 +120,7 @@ template <typename T>
  *
  * @param data The memory to free.
  */
-UNREALSDK_CAPI void u_free(void* data) UNREALSDK_CAPI_SUFFIX;
+void u_free(void* data);
 
 /**
  * @brief Calls `UObject::ProcessEvent`.
@@ -126,7 +129,7 @@ UNREALSDK_CAPI void u_free(void* data) UNREALSDK_CAPI_SUFFIX;
  * @param func The function to call.
  * @param params The function's params
  */
-UNREALSDK_CAPI void process_event(unreal::UObject* object, unreal::UFunction* func, void* params);
+void process_event(unreal::UObject* object, unreal::UFunction* func, void* params);
 
 /**
  * @brief Constructs a new object
@@ -151,13 +154,6 @@ UNREALSDK_CAPI void process_event(unreal::UObject* object, unreal::UFunction* fu
  * @param str The string to write.
  */
 void uconsole_output_text(const std::wstring& str);
-
-/**
- * @brief Checks if the sdk's console hook is ready to output text.
- *
- * @return True if the console hook is ready, false otherwise.
- */
-UNREALSDK_CAPI [[nodiscard]] bool is_console_ready(void) UNREALSDK_CAPI_SUFFIX;
 
 /**
  * @brief Calls `UObject::PathName` on the given object.
@@ -186,8 +182,7 @@ UNREALSDK_CAPI [[nodiscard]] bool is_console_ready(void) UNREALSDK_CAPI_SUFFIX;
  * @param name Pointer to the text to initialize.
  * @param str The string to initialize the text to.
  */
-UNREALSDK_CAPI void ftext_as_culture_invariant(unreal::FText* text, unreal::TemporaryFString&& str)
-    UNREALSDK_CAPI_SUFFIX;
+void ftext_as_culture_invariant(unreal::FText* text, unreal::TemporaryFString&& str);
 
 #endif
 

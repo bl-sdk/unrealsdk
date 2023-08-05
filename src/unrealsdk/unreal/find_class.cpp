@@ -24,41 +24,38 @@ NamedClassCache cache;
 }  // namespace
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] UClass* find_class_fname(const FName* name) UNREALSDK_CAPI_SUFFIX;
-#ifdef UNREALSDK_EXPORTING
-UClass* find_class_fname(const FName* name) {
-    return find_class(*name);
-}
+UNREALSDK_CAPI([[nodiscard]] UClass*, find_class_fname, const FName* name);
 #endif
-#endif
-
 #ifdef UNREALSDK_IMPORTING
 UClass* find_class(const FName& name) {
-    return find_class_fname(&name);
+    return UNREALSDK_MANGLE(find_class_fname)(&name);
 }
 #else
 UClass* find_class(const FName& name) {
     return cache.find(name);
+}
+#endif
+#ifdef UNREALSDK_EXPORTING
+UNREALSDK_CAPI([[nodiscard]] UClass*, find_class_fname, const FName* name) {
+    return find_class(*name);
 }
 #endif
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] UClass* find_class_cstr(const wchar_t* name,
-                                                     size_t name_size) UNREALSDK_CAPI_SUFFIX;
-#ifdef UNREALSDK_EXPORTING
-UClass* find_class_cstr(const wchar_t* name, size_t name_size) {
-    return find_class(std::wstring{name, name_size});
-}
+UNREALSDK_CAPI([[nodiscard]] UClass*, find_class_cstr, const wchar_t* name, size_t name_size);
 #endif
-#endif
-
 #ifdef UNREALSDK_IMPORTING
 UClass* find_class(const std::wstring& name) {
-    return find_class_cstr(name.c_str(), name.size());
+    return UNREALSDK_MANGLE(find_class_cstr)(name.c_str(), name.size());
 }
 #else
 UClass* find_class(const std::wstring& name) {
     return cache.find(name);
+}
+#endif
+#ifdef UNREALSDK_EXPORTING
+UNREALSDK_CAPI([[nodiscard]] UClass*, find_class_cstr, const wchar_t* name, size_t name_size) {
+    return find_class(std::wstring{name, name_size});
 }
 #endif
 

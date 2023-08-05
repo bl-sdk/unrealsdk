@@ -65,13 +65,13 @@ using AbstractSafeCallback = SafeCallback::AbstractBase;
  *
  * @param should_log True to turn on logging all calls, false to turn it off.
  */
-UNREALSDK_CAPI void log_all_calls(bool should_log) UNREALSDK_CAPI_SUFFIX;
+void log_all_calls(bool should_log);
 
 /**
  * @brief Makes the next unreal function call completely ignore hooks.
  * @note Typically used to avoid recursion when re-calling the hooked function.
  */
-UNREALSDK_CAPI void inject_next_call(void) UNREALSDK_CAPI_SUFFIX;
+void inject_next_call(void);
 
 /**
  * @brief Adds a hook.

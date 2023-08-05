@@ -58,20 +58,29 @@ bool init(std::unique_ptr<game::AbstractHook>&& game) {
     return true;
 }
 
-bool is_initialized(void) {
+#endif
+
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI(bool, is_initialized);
+#endif
+#ifndef UNREALSDK_IMPORTING
+UNREALSDK_CAPI(bool, is_initialized) {
     const std::lock_guard<std::mutex> lock(mutex);
     return hook_instance != nullptr;
 }
 #endif
+bool is_initialized(void) {
+    return UNREALSDK_MANGLE(is_initialized)();
+}
 
 #pragma region Wrappers
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] const GObjects* gobjects_ptr(void) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI([[nodiscard]] const GObjects*, gobjects);
 #endif
 #ifdef UNREALSDK_IMPORTING
 const GObjects& gobjects(void) {
-    return *gobjects_ptr();
+    return *UNREALSDK_MANGLE(gobjects)();
 }
 #else
 const GObjects& gobjects(void) {
@@ -79,17 +88,17 @@ const GObjects& gobjects(void) {
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-const GObjects* gobjects_ptr(void) {
+UNREALSDK_CAPI([[nodiscard]] const GObjects*, gobjects) {
     return &hook_instance->gobjects();
 }
 #endif
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] const GNames* gnames_ptr(void) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI([[nodiscard]] const GNames*, gnames);
 #endif
 #ifdef UNREALSDK_IMPORTING
 const GNames& gnames(void) {
-    return *gnames_ptr();
+    return *UNREALSDK_MANGLE(gnames)();
 }
 #else
 const GNames& gnames(void) {
@@ -97,26 +106,45 @@ const GNames& gnames(void) {
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-const GNames* gnames_ptr(void) {
+UNREALSDK_CAPI([[nodiscard]] const GNames*, gnames) {
     return &hook_instance->gnames();
 }
 #endif
 
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI(void, fname_init, FName* name, const wchar_t* str, int32_t number);
+#endif
 #ifndef UNREALSDK_IMPORTING
-void fname_init(FName* name, const wchar_t* str, int32_t number) {
+UNREALSDK_CAPI(void, fname_init, FName* name, const wchar_t* str, int32_t number) {
     hook_instance->fname_init(name, str, number);
 }
 #endif
+void fname_init(FName* name, const wchar_t* str, int32_t number) {
+    UNREALSDK_MANGLE(fname_init)(name, str, number);
+}
 void fname_init(FName* name, const std::wstring& str, int32_t number) {
-    fname_init(name, str.c_str(), number);
+    UNREALSDK_MANGLE(fname_init)(name, str.c_str(), number);
 }
 
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI(void, fframe_step, FFrame* frame, UObject* obj, void* param);
+#endif
 #ifndef UNREALSDK_IMPORTING
-void fframe_step(FFrame* frame, UObject* obj, void* param) {
+UNREALSDK_CAPI(void, fframe_step, FFrame* frame, UObject* obj, void* param) {
     hook_instance->fframe_step(frame, obj, param);
 }
+#endif
+void fframe_step(FFrame* frame, UObject* obj, void* param) {
+    UNREALSDK_MANGLE(fframe_step(frame, obj, param));
+}
 
-void* u_malloc(size_t len) {
+#if UNREALSDK_SHARED
+UNREALSDK_CAPI(void*, u_malloc, size_t len);
+UNREALSDK_CAPI(void*, u_realloc, void* original, size_t len);
+UNREALSDK_CAPI(void, u_free, void* data);
+#endif
+#ifndef UNREALSDK_IMPORTING
+UNREALSDK_CAPI(void*, u_malloc, size_t len) {
     auto ptr = hook_instance->u_malloc(len);
 
 #ifdef UNREALSDK_UNREAL_ALLOC_TRACKING
@@ -125,7 +153,7 @@ void* u_malloc(size_t len) {
 
     return ptr;
 }
-void* u_realloc(void* original, size_t len) {
+UNREALSDK_CAPI(void*, u_realloc, void* original, size_t len) {
     auto ptr = hook_instance->u_realloc(original, len);
 
 #ifdef UNREALSDK_UNREAL_ALLOC_TRACKING
@@ -135,26 +163,43 @@ void* u_realloc(void* original, size_t len) {
 
     return ptr;
 }
-void u_free(void* data) {
+UNREALSDK_CAPI(void, u_free, void* data) {
 #ifdef UNREALSDK_UNREAL_ALLOC_TRACKING
     unreal_allocations.erase(data);
 #endif
 
     hook_instance->u_free(data);
 }
-
-void process_event(UObject* object, UFunction* function, void* params) {
+#endif
+void* u_malloc(size_t len) {
+    return UNREALSDK_MANGLE(u_malloc)(len);
+}
+void* u_realloc(void* original, size_t len) {
+    return UNREALSDK_MANGLE(u_realloc)(original, len);
+}
+void u_free(void* data) {
+    UNREALSDK_MANGLE(u_free)(data);
+}
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI(void, process_event, UObject* object, UFunction* function, void* params);
+#endif
+#ifndef UNREALSDK_IMPORTING
+UNREALSDK_CAPI(void, process_event, UObject* object, UFunction* function, void* params) {
     hook_instance->process_event(object, function, params);
 }
 #endif
+void process_event(UObject* object, UFunction* function, void* params) {
+    UNREALSDK_MANGLE(process_event)(object, function, params);
+}
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] UObject* construct_object(UClass* cls,
-                                                       UObject* outer,
-                                                       const FName* name = nullptr,
-                                                       decltype(UObject::ObjectFlags) flags = 0,
-                                                       UObject* template_obj = nullptr)
-    UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI([[nodiscard]] UObject*,
+               construct_object,
+               UClass* cls,
+               UObject* outer,
+               const FName* name = nullptr,
+               decltype(UObject::ObjectFlags) flags = 0,
+               UObject* template_obj = nullptr);
 #endif
 #ifdef UNREALSDK_IMPORTING
 UObject* construct_object(UClass* cls,
@@ -162,7 +207,7 @@ UObject* construct_object(UClass* cls,
                           const FName& name,
                           decltype(UObject::ObjectFlags) flags,
                           UObject* template_obj) {
-    return construct_object(cls, outer, &name, flags, template_obj);
+    return UNREALSDK_MANGLE(construct_object)(cls, outer, &name, flags, template_obj);
 }
 #else
 UObject* construct_object(UClass* cls,
@@ -174,11 +219,13 @@ UObject* construct_object(UClass* cls,
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-UObject* construct_object(UClass* cls,
-                          UObject* outer,
-                          const FName* name,
-                          decltype(UObject::ObjectFlags) flags,
-                          UObject* template_obj) {
+UNREALSDK_CAPI([[nodiscard]] UObject*,
+               construct_object,
+               UClass* cls,
+               UObject* outer,
+               const FName* name,
+               decltype(UObject::ObjectFlags) flags,
+               UObject* template_obj) {
     FName local_name{0, 0};
     if (name != nullptr) {
         local_name = *name;
@@ -188,11 +235,11 @@ UObject* construct_object(UClass* cls,
 #endif
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI void uconsole_output_text(const wchar_t* str, size_t size) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI(void, uconsole_output_text, const wchar_t* str, size_t size);
 #endif
 #ifdef UNREALSDK_IMPORTING
 void uconsole_output_text(const std::wstring& str) {
-    uconsole_output_text(str.c_str(), str.size());
+    UNREALSDK_MANGLE(uconsole_output_text)(str.c_str(), str.size());
 }
 #else
 void uconsole_output_text(const std::wstring& str) {
@@ -204,24 +251,29 @@ void uconsole_output_text(const std::wstring& str) {
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-void uconsole_output_text(const wchar_t* str, size_t size) {
+UNREALSDK_CAPI(void, uconsole_output_text, const wchar_t* str, size_t size) {
     uconsole_output_text({str, size});
 }
 #endif
 
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI([[nodiscard]] bool, is_console_ready);
+#endif
 #ifndef UNREALSDK_IMPORTING
-UNREALSDK_CAPI bool is_console_ready(void) UNREALSDK_CAPI_SUFFIX {
+UNREALSDK_CAPI([[nodiscard]] bool, is_console_ready) {
     return hook_instance && hook_instance->is_console_ready();
 }
 #endif
+[[nodiscard]] bool is_console_ready(void) {
+    return UNREALSDK_MANGLE(is_console_ready);
+}
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] wchar_t* uobject_path_name_cstr(const UObject* obj)
-    UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI([[nodiscard]] wchar_t*, uobject_path_name, const UObject* obj);
 #endif
 #ifdef UNREALSDK_IMPORTING
 std::wstring uobject_path_name(const UObject* obj) {
-    auto ptr = uobject_path_name_cstr(obj);
+    auto ptr = UNREALSDK_MANGLE(uobject_path_name)(obj);
     std::wstring str{ptr};
     u_free(ptr);
     return str;
@@ -232,7 +284,7 @@ std::wstring uobject_path_name(const UObject* obj) {
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-wchar_t* uobject_path_name_cstr(const UObject* obj) {
+UNREALSDK_CAPI([[nodiscard]] wchar_t*, uobject_path_name, const UObject* obj) {
     auto name = hook_instance->uobject_path_name(obj);
     auto size = name.size();
 
@@ -245,19 +297,21 @@ wchar_t* uobject_path_name_cstr(const UObject* obj) {
 #endif
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] UObject* find_object(UClass* cls,
-                                                  const wchar_t* name,
-                                                  size_t name_size) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI([[nodiscard]] UObject*,
+               find_object,
+               UClass* cls,
+               const wchar_t* name,
+               size_t name_size);
 #endif
 #ifdef UNREALSDK_IMPORTING
 UObject* find_object(UClass* cls, const std::wstring& name) {
-    return find_object(cls, name.c_str(), name.size());
+    return UNREALSDK_MANGLE(find_object)(cls, name.c_str(), name.size());
 }
 UObject* find_object(const FName& cls, const std::wstring& name) {
-    return find_object(find_class(cls), name.c_str(), name.size());
+    return UNREALSDK_MANGLE(find_object)(find_class(cls), name.c_str(), name.size());
 }
 UObject* find_object(const std::wstring& cls, const std::wstring& name) {
-    return find_object(find_class(cls), name.c_str(), name.size());
+    return UNREALSDK_MANGLE(find_object)(find_class(cls), name.c_str(), name.size());
 }
 #else
 UObject* find_object(UClass* cls, const std::wstring& name) {
@@ -271,18 +325,35 @@ UObject* find_object(const std::wstring& cls, const std::wstring& name) {
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-UNREALSDK_CAPI [[nodiscard]] UObject* find_object(UClass* cls,
-                                                  const wchar_t* name,
-                                                  size_t name_size) UNREALSDK_CAPI_SUFFIX {
+UNREALSDK_CAPI([[nodiscard]] UObject*,
+               find_object,
+               UClass* cls,
+               const wchar_t* name,
+               size_t name_size) {
     return hook_instance->find_object(cls, {name, name_size});
 }
 #endif
 
-#if !defined(UNREALSDK_IMPORTING) && defined(UE4)
-UNREALSDK_CAPI void ftext_as_culture_invariant(unreal::FText* text, unreal::TemporaryFString&& str)
-    UNREALSDK_CAPI_SUFFIX {
+#ifdef UE4
+
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI(void,
+               ftext_as_culture_invariant,
+               unreal::FText* text,
+               unreal::TemporaryFString&& str);
+#endif
+#ifndef UNREALSDK_IMPORTING
+UNREALSDK_CAPI(void,
+               ftext_as_culture_invariant,
+               unreal::FText* text,
+               unreal::TemporaryFString&& str) {
     hook_instance->ftext_as_culture_invariant(text, std::move(str));
 }
+#endif
+void ftext_as_culture_invariant(unreal::FText* text, unreal::TemporaryFString&& str) {
+    UNREALSDK_MANGLE(ftext_as_culture_invariant)(text, std::move(str));
+}
+
 #endif
 
 }  // namespace unrealsdk

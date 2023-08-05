@@ -18,14 +18,10 @@ std::unordered_map<std::wstring, AbstractSafeCallback*> commands{};
 const std::wstring NEXT_LINE{};
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI bool add_command(const wchar_t* cmd,
-                                size_t size,
-                                AbstractSafeCallback* callback) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI(bool, add_command, const wchar_t* cmd, size_t size, AbstractSafeCallback* callback);
 #endif
 #ifndef UNREALSDK_IMPORTING
-UNREALSDK_CAPI bool add_command(const wchar_t* cmd,
-                                size_t size,
-                                AbstractSafeCallback* callback) UNREALSDK_CAPI_SUFFIX {
+UNREALSDK_CAPI(bool, add_command, const wchar_t* cmd, size_t size, AbstractSafeCallback* callback) {
     std::wstring lower_cmd{cmd, size};
     std::transform(lower_cmd.begin(), lower_cmd.end(), lower_cmd.begin(), &std::towlower);
 
@@ -40,15 +36,15 @@ UNREALSDK_CAPI bool add_command(const wchar_t* cmd,
 
 bool add_command(const std::wstring& cmd, const Callback& callback) {
     // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
-    return add_command(cmd.c_str(), cmd.size(), new SafeCallback(callback));
+    return UNREALSDK_MANGLE(add_command)(cmd.c_str(), cmd.size(), new SafeCallback(callback));
 }
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI bool has_command(const wchar_t* func, size_t size) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI(bool, has_command, const wchar_t* func, size_t size);
 #endif
 #ifdef UNREALSDK_IMPORTING
 bool has_command(const std::wstring& cmd) {
-    return has_command(cmd.c_str(), cmd.size());
+    return UNREALSDK_MANGLE(has_command)(cmd.c_str(), cmd.size());
 }
 #else
 bool has_command(const std::wstring& cmd) {
@@ -56,17 +52,17 @@ bool has_command(const std::wstring& cmd) {
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-bool has_command(const wchar_t* func, size_t size) {
+UNREALSDK_CAPI(bool, has_command, const wchar_t* func, size_t size) {
     return has_command({func, size});
 }
 #endif
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI bool remove_command(const wchar_t* func, size_t size) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI(bool, remove_command, const wchar_t* func, size_t size);
 #endif
 #ifdef UNREALSDK_IMPORTING
 bool remove_command(const std::wstring& cmd) {
-    return remove_command(cmd.c_str(), cmd.size());
+    return UNREALSDK_MANGLE(remove_command)(cmd.c_str(), cmd.size());
 }
 #else
 bool remove_command(const std::wstring& cmd) {
@@ -83,7 +79,7 @@ bool remove_command(const std::wstring& cmd) {
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-bool remove_command(const wchar_t* func, size_t size) {
+UNREALSDK_CAPI(bool, remove_command, const wchar_t* func, size_t size) {
     return remove_command({func, size});
 }
 #endif
