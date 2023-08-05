@@ -140,7 +140,8 @@ UNREALSDK_CAPI([[nodiscard]] UObject*,
 }
 
 UNREALSDK_CAPI(void, uconsole_output_text, const wchar_t* str, size_t size) {
-    // Since we know this will be called a lot before it's ready, even from our own code, do nothing if we don't have a hook yet
+    // Since we know this will be called a lot before it's ready, even from our own code, do nothing
+    // if we don't have a hook yet
     if (hook_instance) {
         hook_instance->uconsole_output_text({str, size});
     }
