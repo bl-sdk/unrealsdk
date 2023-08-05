@@ -5,9 +5,13 @@
 
 namespace unrealsdk {
 
+#ifndef UNREALSDK_IMPORTING
+
 inline constexpr auto VERSION_MAJOR = 1;
 inline constexpr auto VERSION_MINOR = 0;
 inline constexpr auto VERSION_PATCH = 0;
+
+#endif
 
 #ifdef UNREALSDK_SHARED
 /**
@@ -16,7 +20,7 @@ inline constexpr auto VERSION_PATCH = 0;
  *
  * @return The packed version number the sdk was compiled with.
  */
-UNREALSDK_CAPI uint32_t get_version(void);
+uint32_t get_version(void);
 #endif
 
 /**

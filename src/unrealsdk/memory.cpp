@@ -70,15 +70,17 @@ uintptr_t sigscan(const uint8_t* bytes,
 }
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI bool detour(uintptr_t addr,
-                           void* detour_func,
-                           void** original_func,
-                           const char* name,
-                           size_t name_size) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI(bool,
+               detour,
+               uintptr_t addr,
+               void* detour_func,
+               void** original_func,
+               const char* name,
+               size_t name_size);
 #endif
 #ifdef UNREALSDK_IMPORTING
 bool detour(uintptr_t addr, void* detour_func, void** original_func, const std::string& name) {
-    return detour(addr, detour_func, original_func, name.c_str(), name.size());
+    return UNREALSDK_MANGLE(detour)(addr, detour_func, original_func, name.c_str(), name.size());
 }
 #else
 bool detour(uintptr_t addr, void* detour_func, void** original_func, const std::string& name) {
@@ -100,11 +102,13 @@ bool detour(uintptr_t addr, void* detour_func, void** original_func, const std::
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-UNREALSDK_CAPI bool detour(uintptr_t addr,
-                           void* detour_func,
-                           void** original_func,
-                           const char* name,
-                           size_t name_size) UNREALSDK_CAPI_SUFFIX {
+UNREALSDK_CAPI(bool,
+               detour,
+               uintptr_t addr,
+               void* detour_func,
+               void** original_func,
+               const char* name,
+               size_t name_size) {
     return detour(addr, detour_func, original_func, {name, name_size});
 }
 #endif

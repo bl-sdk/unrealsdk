@@ -16,12 +16,18 @@ namespace {
 
 }  // namespace
 
-#ifdef UNREALSDK_EXPORTING
-uint32_t get_version(void) {
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI(uint32_t, get_version);
+#endif
+#ifndef UNREALSDK_IMPORTING
+UNREALSDK_CAPI(uint32_t, get_version) {
     // NOLINTNEXTLINE(readability-magic-numbers)
     return (VERSION_MAJOR & 0xFF) << 16 | (VERSION_MINOR & 0xFF) << 8 | (VERSION_PATCH & 0xFF);
 }
 #endif
+uint32_t get_version(void) {
+    return UNREALSDK_MANGLE(get_version)();
+}
 
 namespace {
 
@@ -37,12 +43,12 @@ const std::string VERSION_STR = unrealsdk::fmt::format("unrealsdk v{}.{}.{} ({}{
 }  // namespace
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI [[nodiscard]] const char* get_version_cstr(void) UNREALSDK_CAPI_SUFFIX;
+UNREALSDK_CAPI([[nodiscard]] const char*, get_version_str);
 #endif
 #ifdef UNREALSDK_IMPORTING
 const std::string& get_version_string(void) {
     // NOLINTNEXTLINE(readability-identifier-naming)
-    static const std::string VERSION_STR = get_version_cstr();
+    static const std::string VERSION_STR = UNREALSDK_MANGLE(get_version_str)();
     return VERSION_STR;
 }
 #else
@@ -51,7 +57,7 @@ const std::string& get_version_string(void) {
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
-UNREALSDK_CAPI [[nodiscard]] const char* get_version_cstr(void) UNREALSDK_CAPI_SUFFIX {
+UNREALSDK_CAPI([[nodiscard]] const char*, get_version_str) {
     return VERSION_STR.data();
 }
 #endif
