@@ -62,23 +62,6 @@ target_compile_definitions(_unrealsdk_interface INTERFACE
 
 target_precompile_headers(_unrealsdk_interface INTERFACE "src/unrealsdk/pch.h")
 
-if(MSVC)
-    # Enable Edit and Continue - replace /Zi with /ZI
-    string(REPLACE "/Zi" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
-    string(REPLACE "/Zi" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
-    target_compile_options(_unrealsdk_interface INTERFACE "$<$<CONFIG:DEBUG>:/ZI>")
-
-    target_link_options(_unrealsdk_interface INTERFACE "/INCREMENTAL")
-
-    # Only enable /GL (which conflicts with /ZI) in release mode
-    string(REPLACE "/GL" "" CMAKE_C_COMPILE_OPTIONS_IPO "${CMAKE_C_COMPILE_OPTIONS_IPO}")
-    string(REPLACE "/GL" "" CMAKE_CXX_COMPILE_OPTIONS_IPO "${CMAKE_CXX_COMPILE_OPTIONS_IPO}")
-    target_compile_options(_unrealsdk_interface INTERFACE "$<$<CONFIG:RELEASE>:/GL>")
-
-    # UTF-8 encoded source files
-    target_compile_options(_unrealsdk_interface INTERFACE "/utf-8")
-endif()
-
 # How we include sources depends on what sort of library we're building as
 # Including this in the interface target would force them to be public
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/unrealsdk/*.cpp" "src/unrealsdk/*.h")
@@ -115,11 +98,6 @@ else()
     # Unconditionally add the exporting flag
     # Add it privately, so it doesn't appear in anything linking against this
     target_compile_definitions(unrealsdk PRIVATE "UNREALSDK_EXPORTING")
-
-    if(MINGW)
-        # Link `libc++.dll` and `libunwind.dll` statically
-        target_link_options(unrealsdk PRIVATE "-static-libstdc++" "-Wl,-Bstatic" "-lunwind")
-    endif()
 
     # Postbuild
     if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
