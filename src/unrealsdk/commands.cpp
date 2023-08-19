@@ -8,7 +8,7 @@ namespace {
 
 #ifndef UNREALSDK_IMPORTING
 
-std::unordered_map<std::wstring, AbstractSafeCallback*> commands{};
+std::unordered_map<std::wstring, DLLSafeCallback*> commands{};
 
 #endif
 
@@ -18,10 +18,10 @@ std::unordered_map<std::wstring, AbstractSafeCallback*> commands{};
 const std::wstring NEXT_LINE{};
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI(bool, add_command, const wchar_t* cmd, size_t size, AbstractSafeCallback* callback);
+UNREALSDK_CAPI(bool, add_command, const wchar_t* cmd, size_t size, DLLSafeCallback* callback);
 #endif
 #ifndef UNREALSDK_IMPORTING
-UNREALSDK_CAPI(bool, add_command, const wchar_t* cmd, size_t size, AbstractSafeCallback* callback) {
+UNREALSDK_CAPI(bool, add_command, const wchar_t* cmd, size_t size, DLLSafeCallback* callback) {
     std::wstring lower_cmd{cmd, size};
     std::transform(lower_cmd.begin(), lower_cmd.end(), lower_cmd.begin(), &std::towlower);
 
@@ -36,7 +36,7 @@ UNREALSDK_CAPI(bool, add_command, const wchar_t* cmd, size_t size, AbstractSafeC
 
 bool add_command(const std::wstring& cmd, const Callback& callback) {
     // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
-    return UNREALSDK_MANGLE(add_command)(cmd.c_str(), cmd.size(), new SafeCallback(callback));
+    return UNREALSDK_MANGLE(add_command)(cmd.c_str(), cmd.size(), new DLLSafeCallback(callback));
 }
 
 #ifdef UNREALSDK_SHARED
@@ -70,9 +70,7 @@ bool remove_command(const std::wstring& cmd) {
         return false;
     }
 
-    auto callback = commands[cmd];
-    // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
-    delete callback;
+    commands[cmd]->destroy();
     commands.erase(cmd);
 
     return true;
@@ -88,7 +86,7 @@ namespace impl {
 
 #ifndef UNREALSDK_IMPORTING
 
-std::pair<AbstractSafeCallback*, size_t> find_matching_command(const std::wstring& line) {
+std::pair<DLLSafeCallback*, size_t> find_matching_command(const std::wstring& line) {
     if (commands.contains(NEXT_LINE)) {
         auto callback = commands[NEXT_LINE];
         commands.erase(NEXT_LINE);

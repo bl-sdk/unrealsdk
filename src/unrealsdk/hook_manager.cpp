@@ -14,7 +14,7 @@ namespace unrealsdk::hook_manager {
 
 namespace impl {
 
-using Group = std::unordered_map<std::wstring, AbstractSafeCallback*>;
+using Group = std::unordered_map<std::wstring, DLLSafeCallback*>;
 
 struct List {
     Group pre;
@@ -96,7 +96,7 @@ UNREALSDK_CAPI(bool,
                Type type,
                const wchar_t* identifier,
                size_t identifier_size,
-               AbstractSafeCallback* callback);
+               DLLSafeCallback* callback);
 #endif
 #ifndef UNREALSDK_IMPORTING
 UNREALSDK_CAPI(bool,
@@ -106,7 +106,7 @@ UNREALSDK_CAPI(bool,
                Type type,
                const wchar_t* identifier,
                size_t identifier_size,
-               AbstractSafeCallback* callback) {
+               DLLSafeCallback* callback) {
     const std::wstring identifier_str{identifier, identifier_size};
 
     auto& group = get_group_by_type(hooks[{func, func_size}], type);
@@ -125,7 +125,7 @@ bool add_hook(const std::wstring& func,
               const Callback& callback) {
     // NOLINTBEGIN(cppcoreguidelines-owning-memory)
     return UNREALSDK_MANGLE(add_hook)(func.c_str(), func.size(), type, identifier.c_str(),
-                                      identifier.size(), new SafeCallback(callback));
+                                      identifier.size(), new DLLSafeCallback(callback));
     // NOLINTEND(cppcoreguidelines-owning-memory)
 }
 
@@ -188,9 +188,7 @@ bool remove_hook(const std::wstring& func, Type type, const std::wstring& identi
         return false;
     }
 
-    auto callback = group[identifier];
-    // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
-    delete callback;
+    group[identifier]->destroy();
     group.erase(identifier);
 
     /*
