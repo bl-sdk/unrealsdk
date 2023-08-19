@@ -15,35 +15,19 @@ PropTraits<UTextProperty>::Value PropTraits<UTextProperty>::get(
     const UTextProperty* /*prop*/,
     uintptr_t addr,
     const UnrealPointer<void>& /*parent*/) {
-    auto text_data = reinterpret_cast<FText*>(addr)->data.obj;
-
-    static auto idx = env::get_numeric<size_t>(env::FTEXT_GET_DISPLAY_STRING_VF_INDEX,
-                                               env::defaults::FTEXT_GET_DISPLAY_STRING_VF_INDEX);
-    return *reinterpret_cast<UnmanagedFString* (*)(FTextData*)>(text_data->vftable[idx])(text_data);
+    return *reinterpret_cast<FText*>(addr);
 }
 
 void PropTraits<UTextProperty>::set(const UTextProperty* /*prop*/,
                                     uintptr_t addr,
                                     const Value& value) {
-    auto text = reinterpret_cast<FText*>(addr);
-
-    // Modifying in place is going to be a pain
-    // Instead, create a new FText, and swap it
-    FText local_text{};
-    unrealsdk::ftext_as_culture_invariant(&local_text, value);
-    std::swap(*text, local_text);
-
-    // Destroy the old text, which is now swapped into our local var
-    if (local_text.data.controller != nullptr) {
-        local_text.data.controller->remove_strong_ref();
-    }
+    *reinterpret_cast<FText*>(addr) = value;
 }
 
 void PropTraits<UTextProperty>::destroy(const UTextProperty* /*prop*/, uintptr_t addr) {
-    auto text = reinterpret_cast<FText*>(addr);
-    if (text->data.controller != nullptr) {
-        text->data.controller->remove_strong_ref();
-    }
+    // Only call the destructor, don't delete, since we probably don't own this memory
+    // If we do, the higher levels will deal with it
+    reinterpret_cast<FText*>(addr)->~FText();
 }
 
 }  // namespace unrealsdk::unreal
