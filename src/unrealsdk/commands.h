@@ -34,10 +34,8 @@ extern const std::wstring NEXT_LINE;
  *                points to the first whitespace char after the command (or off the end of the
  *                string if there was none). 0 in the case of a `NEXT_LINE` match.
  */
-using SafeCallback = utils::SafeCallback<void, const wchar_t*, size_t, size_t>;
-
-using Callback = std::function<SafeCallback::Signature>;
-using AbstractSafeCallback = SafeCallback::AbstractBase;
+using DLLSafeCallback = utils::DLLSafeCallback<void, const wchar_t*, size_t, size_t>;
+using Callback = DLLSafeCallback::InnerFunc;
 
 /**
  * @brief Adds a custom console command.
@@ -75,7 +73,7 @@ namespace impl {  // These functions are only relevant when implementing a game 
  * @return A pair of the callback to run and the offset to pass to it, or of nullptr and 0 if there
  *         was no match.
  */
-std::pair<AbstractSafeCallback*, size_t> find_matching_command(const std::wstring& line);
+std::pair<DLLSafeCallback*, size_t> find_matching_command(const std::wstring& line);
 
 #endif
 }  // namespace impl

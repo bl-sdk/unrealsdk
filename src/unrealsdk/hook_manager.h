@@ -55,10 +55,8 @@ struct Details {
  *                       will not be run.
  *         In post-hooks: ignored.
  */
-using SafeCallback = utils::SafeCallback<bool, Details&>;
-
-using Callback = std::function<SafeCallback::Signature>;
-using AbstractSafeCallback = SafeCallback::AbstractBase;
+using DLLSafeCallback = utils::DLLSafeCallback<bool, Details&>;
+using Callback = DLLSafeCallback::InnerFunc;
 
 /**
  * @brief Toggles logging all unreal function calls. Best used in short bursts for debugging.
