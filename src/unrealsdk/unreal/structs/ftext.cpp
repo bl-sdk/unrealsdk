@@ -30,14 +30,18 @@ FText& FText::operator=(const std::wstring& str) noexcept {
 }
 
 FText::operator std::string() const {
+    return utils::narrow(this->operator std::wstring());
+}
+FText::operator std::wstring() const {
     static auto idx = env::get_numeric<size_t>(env::FTEXT_GET_DISPLAY_STRING_VF_INDEX,
                                                env::defaults::FTEXT_GET_DISPLAY_STRING_VF_INDEX);
 
     auto text_data = this->data.obj;
+    if (text_data == nullptr) {
+        return L"";
+    }
+
     return *reinterpret_cast<UnmanagedFString* (*)(FTextData*)>(text_data->vftable[idx])(text_data);
-}
-FText::operator std::wstring() const {
-    return utils::widen(this->operator std::string());
 }
 
 FText::~FText() {
