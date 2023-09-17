@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required(VERSION 3.24)
 
-project(unrealsdk)
+project(unrealsdk VERSION 1.0.0)
 
 set(UNREALSDK_UE_VERSION "UE4" CACHE STRING "The unreal engine version to build the SDK for. One of 'UE3' or 'UE4'.")
 set(UNREALSDK_ARCH "x64" CACHE STRING "The architecture to build the sdk for. One of 'x86' or 'x64'.")
@@ -30,8 +30,15 @@ try_compile(supports_format
     CXX_STANDARD 20
 )
 
-set(GIT_PRE_CONFIGURE_FILE "src/unrealsdk/version.cpp.in")
-set(GIT_POST_CONFIGURE_FILE "${CMAKE_CURRENT_BINARY_DIR}/version.cpp")
+set(CONFIGURE_FILES_DIR "${CMAKE_CURRENT_BINARY_DIR}/configure")
+
+configure_file(
+    "src/unrealsdk/version.inl.in"
+    "${CONFIGURE_FILES_DIR}/unrealsdk/version.inl"
+)
+
+set(GIT_PRE_CONFIGURE_FILE "src/unrealsdk/git.inl.in")
+set(GIT_POST_CONFIGURE_FILE "${CONFIGURE_FILES_DIR}/unrealsdk/git.inl")
 include(common_cmake/git_watcher.cmake)
 
 add_subdirectory(libs/minhook)
@@ -48,7 +55,7 @@ if((NOT CMAKE_HOST_WIN32)
     target_compile_definitions(minhook PRIVATE MINHOOK_DISABLE_INTRINSICS)
 endif()
 
-target_include_directories(_unrealsdk_interface INTERFACE "src")
+target_include_directories(_unrealsdk_interface INTERFACE "src" ${CONFIGURE_FILES_DIR})
 target_link_libraries(_unrealsdk_interface INTERFACE minhook)
 if(NOT ${supports_format})
     target_link_libraries(_unrealsdk_interface INTERFACE fmt)
@@ -93,7 +100,10 @@ else()
     target_sources(unrealsdk PUBLIC ${sources})
 
     file(GLOB_RECURSE shared_sources CONFIGURE_DEPENDS "src/shared/*.cpp" "src/shared/*.h")
-    target_sources(unrealsdk PRIVATE ${shared_sources})
+    target_sources(unrealsdk PRIVATE
+        ${shared_sources}
+        "src/shared/versioninfo.rc"
+    )
 
     # Unconditionally add the exporting flag
     # Add it privately, so it doesn't appear in anything linking against this

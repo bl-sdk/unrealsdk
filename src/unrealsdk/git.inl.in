@@ -1,0 +1,6 @@
+// Clang format likes to insert a space before the second '@' in each line, hence turning it off
+
+// clang-format off
+#define GIT_HEAD_SHA1 "@GIT_HEAD_SHA1@"
+#define GIT_IS_DIRTY @GIT_IS_DIRTY@
+// clang-format on
