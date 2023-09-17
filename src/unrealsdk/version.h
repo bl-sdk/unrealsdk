@@ -7,9 +7,14 @@ namespace unrealsdk {
 
 #ifndef UNREALSDK_IMPORTING
 
-inline constexpr auto VERSION_MAJOR = 1;
-inline constexpr auto VERSION_MINOR = 0;
-inline constexpr auto VERSION_PATCH = 0;
+#include "unrealsdk/version.inl"
+inline constexpr auto VERSION_MAJOR = PROJECT_VERSION_MAJOR;
+inline constexpr auto VERSION_MINOR = PROJECT_VERSION_MINOR;
+inline constexpr auto VERSION_PATCH = PROJECT_VERSION_PATCH;
+
+#undef PROJECT_VERSION_MAJOR
+#undef PROJECT_VERSION_MINOR
+#undef PROJECT_VERSION_PATCH
 
 #endif
 

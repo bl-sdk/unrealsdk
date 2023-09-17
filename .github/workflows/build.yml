@@ -209,8 +209,13 @@ jobs:
       run: cmake . --preset ${{ matrix.preset }} -DCMAKE_DISABLE_PRECOMPILE_HEADERS=On
 
     - name: Run clang-tidy
-      shell: bash # To follow the shebang
-      run: run-clang-tidy -j ${{ env.CLANG_TIDY_JOBS }} -p out/build/${{ matrix.preset }} -export-fixes clang-tidy-fixes.yml
+      working-directory: ${{ env.GITHUB_WORKSPACE }}
+      run: |
+        python (Get-Command run-clang-tidy).Source                              `
+          -j ${{ env.CLANG_TIDY_JOBS }}                                         `
+          -p "out\build\${{ matrix.preset }}"                                   `
+          -export-fixes clang-tidy-fixes.yml                                    `
+          $([Regex]::Escape("$pwd\src") + ".+\.(c|cpp|h|hpp)$")
 
     - name: Process clang-tidy warnings
       uses: asarium/clang-tidy-action@v1
@@ -233,8 +238,15 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Run clang-format
-      shell: bash # for find / command substitution
-      run: clang-format -n -Werror $(find src -type f)
+      run: |
+        clang-format                                                            `
+          -n -Werror                                                            `
+          $(Get-ChildItem                                                       `
+              src                                                               `
+              -File                                                             `
+              -Recurse                                                          `
+              -Include ("*.c", "*.cpp", "*.h", "*.hpp")                         `
+            | % FullName)
 
   spelling:
     runs-on: ubuntu-latest

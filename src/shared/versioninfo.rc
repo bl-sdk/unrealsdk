@@ -1,0 +1,47 @@
+1 TYPELIB "versioninfo.rc"
+
+#include <winver.h>
+#include <stdbool.h>
+
+#include "unrealsdk/git.inl"
+#include "unrealsdk/version.inl"
+
+#ifdef NDEBUG
+    #define DEBUG_FILE_FLAG 0
+#else
+    #define DEBUG_FILE_FLAG VS_FF_DEBUG
+#endif
+
+#define _STR(x) #x
+#define STR(x) _STR(x)
+
+#if GIT_IS_DIRTY
+    #define GIT_DIRTY_PREFIX "Dirty: "
+#else
+    #define GIT_DIRTY_PREFIX
+#endif
+
+1 VERSIONINFO
+FILEVERSION     PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH, 0
+PRODUCTVERSION  PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH, 0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEFLAGS       DEBUG_FILE_FLAG
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_DLL
+FILESUBTYPE     0
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "FileVersion", STR(PROJECT_VERSION_MAJOR) ", " STR(PROJECT_VERSION_MINOR) ", " STR(PROJECT_VERSION_PATCH) ", 0"
+            VALUE "InternalName", "unrealsdk"
+            VALUE "ProductName", "unrealsdk"
+            VALUE "ProductVersion", GIT_DIRTY_PREFIX GIT_HEAD_SHA1
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END

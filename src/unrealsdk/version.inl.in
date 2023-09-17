@@ -1,0 +1,7 @@
+// Clang format likes to insert a space before the second '@' in each line, hence turning it off
+
+// clang-format off
+#define PROJECT_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define PROJECT_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define PROJECT_VERSION_PATCH @PROJECT_VERSION_PATCH@
+// clang-format on
