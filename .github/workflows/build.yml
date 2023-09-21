@@ -8,15 +8,15 @@ on: [
 
 env:
   # Important to pin the clang version, cause we also use it for linting
-  CLANG_VERSION: 16
+  CLANG_VERSION: 17
   CLANG_TIDY_JOBS: 4
   # Since we use rather new c++ features, we need a rather new version of MinGW
   # LLVM MinGW seems to be the newest prebuilt binaries around
-  LLVM_MINGW_VERSION: llvm-mingw-20230320-msvcrt-ubuntu-18.04-x86_64
-  LLVM_MINGW_DOWNLOAD: https://github.com/mstorsjo/llvm-mingw/releases/download/20230320/llvm-mingw-20230320-msvcrt-ubuntu-18.04-x86_64.tar.xz
+  LLVM_MINGW_VERSION: llvm-mingw-20230919-msvcrt-ubuntu-20.04-x86_64
+  LLVM_MINGW_DOWNLOAD: https://github.com/mstorsjo/llvm-mingw/releases/download/20230919/llvm-mingw-20230919-msvcrt-ubuntu-20.04-x86_64.tar.xz
   # xwin settings
-  XWIN_VERSION: xwin-0.2.12-x86_64-unknown-linux-musl
-  XWIN_DOWNLOAD: https://github.com/Jake-Shadle/xwin/releases/download/0.2.12/xwin-0.2.12-x86_64-unknown-linux-musl.tar.gz
+  XWIN_VERSION: xwin-0.3.1-x86_64-unknown-linux-musl
+  XWIN_DOWNLOAD: https://github.com/Jake-Shadle/xwin/releases/download/0.3.1/xwin-0.3.1-x86_64-unknown-linux-musl.tar.gz
 
 jobs:
   cache-clang:
@@ -68,6 +68,9 @@ jobs:
       with:
         arch: ${{ fromJSON('["x86", "x64"]')[contains(matrix.preset, 'x64')] }}
 
+    - name: Setup CMake and Ninja
+      uses: lukka/get-cmake@latest
+
     - name: Checkout repository and submodules
       uses: actions/checkout@v3
       with:
@@ -95,11 +98,8 @@ jobs:
         ]
 
     steps:
-    - name: Setup ninja
-      uses: awalsh128/cache-apt-pkgs-action@latest
-      with:
-        packages: ninja-build tree
-        version: ${{ runner.os }}-ninja
+    - name: Setup CMake and Ninja
+      uses: lukka/get-cmake@latest
 
     # Both Clang and MinGW install quick enough that it's not worth caching
     # Caching would also lose the +x - so we'd have to tar before caching/untar after, making it
@@ -194,6 +194,9 @@ jobs:
         path: C:\Program Files\LLVM
         key: ${{ runner.os }}-clang-${{ env.CLANG_VERSION }}
         fail-on-cache-miss: true
+
+    - name: Setup CMake and Ninja
+      uses: lukka/get-cmake@latest
 
     # Needed for clang tidy to enable `-export-fixes`
     - name: Install pyyaml
