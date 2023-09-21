@@ -11,7 +11,8 @@ FUObjectItem* FChunkedFixedUObjectArray::at(size_t idx) const {
         throw std::out_of_range("FChunkedFixedUObjectArray index out of range");
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    return &this->Objects[idx / this->NumElementsPerChunk][idx % this->NumElementsPerChunk];
+    return &this->Objects[idx / FChunkedFixedUObjectArray::NumElementsPerChunk]
+                         [idx % FChunkedFixedUObjectArray::NumElementsPerChunk];
 };
 
 #endif
