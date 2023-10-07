@@ -3,23 +3,40 @@
 
 namespace unrealsdk::unreal {
 
+class UObject;
+
 #if defined(_MSC_VER) && defined(ARCH_X86)
 #pragma pack(push, 0x4)
 #endif
 
+#if defined(__clang__) || defined(__MINGW32__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-private-field"
+#endif
+
 #if defined(UE4)
+
+// There are a few fields we need to modify to deal with weak pointers. To be thread safe we need
+// them to be atomic fields - as unreal itself does. The fields are all aligned as normal, we expect
+// it to all be done in hardware.
+
+// std::atomic isn't strictly guaranteed to be implemented like this, make sure it is.
+static_assert(std::atomic<int32_t>::is_always_lock_free
+                  && sizeof(std::atomic<int32_t>) == sizeof(int32_t)
+                  && alignof(std::atomic<int32_t>) == alignof(int32_t),
+              "atomic int32_t may not be implemented in hardware");
 
 struct FUObjectItem {
     // NOLINTBEGIN(readability-identifier-naming)
 
     /// Pointer to the allocated object
-    class UObject* Object;
+    UObject* Object;
     /// Internal flags
-    uint32_t Flags;
+    int32_t Flags;
     /// UObject Owner Cluster Index
-    uint32_t ClusterRootIndex;
+    int32_t ClusterRootIndex;
     /// Weak Object Pointer Serial number associated with the object
-    uint32_t SerialNumber;
+    std::atomic<int32_t> SerialNumber;
 
     // NOLINTEND(readability-identifier-naming)
 };
@@ -56,7 +73,7 @@ struct FChunkedFixedUObjectArray {
 };
 
 struct FUObjectArray {
-    // NOLINTBEGIN(readability-identifier-naming)
+    // NOLINTBEGIN(readability-identifier-naming, readability-magic-numbers)
 
     int32_t ObjFirstGCIndex;
     int32_t ObjLastNonGCIndex;
@@ -64,9 +81,18 @@ struct FUObjectArray {
     bool OpenForDisregardForGC;
     FChunkedFixedUObjectArray ObjObjects;
 
-    // NOLINTEND(readability-identifier-naming)
+   private:
+    uint8_t UnknownData00[0x178];
+
+   public:
+    std::atomic<int32_t> MasterSerialNumber;
+    // NOLINTEND(readability-identifier-naming, readability-magic-numbers)
 };
 
+#endif
+
+#if defined(__clang__) || defined(__MINGW32__)
+#pragma GCC diagnostic pop
 #endif
 
 #if defined(_MSC_VER) && defined(ARCH_X86)

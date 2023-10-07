@@ -1,6 +1,7 @@
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/unreal/classes/uobject.h"
+#include "unrealsdk/unreal/structs/fweakobjectptr.h"
 #include "unrealsdk/unreal/wrappers/gobjects.h"
 
 #ifdef UE4
@@ -77,6 +78,49 @@ UObject* GObjects::obj_at(size_t idx) const {
     return this->internal->ObjObjects.at(idx)->Object;
 }
 
+UObject* GObjects::get_weak_object(const FWeakObjectPtr* ptr) const {
+    if (ptr->object_serial_number == 0) {
+        return nullptr;
+    }
+    if (ptr->object_index < 0) {
+        return nullptr;
+    }
+
+    auto obj_item = this->internal->ObjObjects.at(ptr->object_index);
+    if (ptr->object_serial_number != obj_item->SerialNumber) {
+        return nullptr;
+    }
+
+    return obj_item->Object;
+}
+
+void GObjects::set_weak_object(FWeakObjectPtr* ptr, const UObject* obj) const {
+    if (obj == nullptr) {
+        ptr->object_index = -1;
+        ptr->object_serial_number = 0;
+    } else {
+        ptr->object_index = obj->InternalIndex;
+
+        auto obj_item = this->internal->ObjObjects.at(ptr->object_index);
+        auto serial_number = obj_item->SerialNumber.load();
+
+        // If we don't have a serial number
+        if (serial_number == 0) {
+            // Get a new one
+            serial_number = ++this->internal->MasterSerialNumber;
+
+            // Try write it
+            // Another thread may have done so before we finish, need a compare exchange
+            int32_t old_serial_number = 0;
+            if (!obj_item->SerialNumber.compare_exchange_strong(old_serial_number, serial_number)) {
+                serial_number = old_serial_number;
+            }
+        }
+
+        ptr->object_serial_number = serial_number;
+    }
+}
+
 #elif defined(UE3)
 
 size_t GObjects::size(void) const {
@@ -85,6 +129,16 @@ size_t GObjects::size(void) const {
 
 UObject* GObjects::obj_at(size_t idx) const {
     return this->internal->at(idx);
+}
+
+UObject* GObjects::get_weak_object(const FWeakObjectPtr* /* ptr */) const {
+    (void)this;
+    throw std::runtime_error("Weak object pointers are not implemented in UE3");
+}
+
+void GObjects::set_weak_object(FWeakObjectPtr* /* ptr */, const UObject* /* obj */) const {
+    (void)this;
+    throw std::runtime_error("Weak object pointers are not implemented in UE3");
 }
 
 #else
