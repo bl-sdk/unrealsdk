@@ -11,6 +11,7 @@
 
 namespace unrealsdk::unreal {
 
+struct FWeakObjectPtr;
 class UObject;
 
 class GObjects {
@@ -83,6 +84,22 @@ class GObjects {
      * @return The iterator.
      */
     [[nodiscard]] Iterator end(void) const;
+
+    /**
+     * @brief Get the object behind a weak object pointer (or null if it's invalid).
+     *
+     * @param ptr The weak object pointer.
+     * @return The object behind the pointer.
+     */
+    [[nodiscard]] UObject* get_weak_object(const FWeakObjectPtr* ptr) const;
+
+    /**
+     * @brief Sets the object behind a weak object pointer.
+     *
+     * @param ptr The weak object pointer.
+     * @param obj The object to set.
+     */
+    void set_weak_object(FWeakObjectPtr* ptr, const UObject* obj) const;
 };
 
 }  // namespace unrealsdk::unreal
