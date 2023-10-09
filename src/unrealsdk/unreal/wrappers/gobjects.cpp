@@ -8,6 +8,7 @@
 #include "unrealsdk/unreal/structs/gobjects.h"
 #else
 #include "unrealsdk/unreal/structs/tarray.h"
+#include "unrealsdk/version_error.h"
 #endif
 
 namespace unrealsdk::unreal {
@@ -133,12 +134,13 @@ UObject* GObjects::obj_at(size_t idx) const {
 
 UObject* GObjects::get_weak_object(const FWeakObjectPtr* /* ptr */) const {
     (void)this;
-    throw std::runtime_error("Weak object pointers are not implemented in UE3");
+    throw_version_error("Weak object pointers are not implemented in UE3");
+    return nullptr;
 }
 
 void GObjects::set_weak_object(FWeakObjectPtr* /* ptr */, const UObject* /* obj */) const {
     (void)this;
-    throw std::runtime_error("Weak object pointers are not implemented in UE3");
+    throw_version_error("Weak object pointers are not implemented in UE3");
 }
 
 #else
