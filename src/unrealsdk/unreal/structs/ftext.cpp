@@ -5,20 +5,21 @@
 #include "unrealsdk/unreal/structs/ftext.h"
 #include "unrealsdk/unrealsdk.h"
 #include "unrealsdk/utils.h"
-
-#ifdef UE4
+#include "unrealsdk/version_error.h"
 
 namespace unrealsdk::unreal {
+
+#ifdef UE4
 
 FText::FText(const std::string& str) : FText(utils::widen(str)) {}
 FText::FText(const std::wstring& str) : data(), flags() {
     unrealsdk::ftext_as_culture_invariant(this, str);
 }
 
-FText& FText::operator=(const std::string& str) noexcept {
+FText& FText::operator=(const std::string& str) {
     return *this = utils::widen(str);
 }
-FText& FText::operator=(const std::wstring& str) noexcept {
+FText& FText::operator=(const std::wstring& str) {
     // Modifying in place is a pain, instead create a new FText and swap it in
     FText local_text{str};
     std::swap(this->data, local_text.data);
@@ -50,6 +51,43 @@ FText::~FText() {
     }
 }
 
-}  // namespace unrealsdk::unreal
+#else
+
+FText::FText(const std::string& /* str */) : data(), flags() {
+    (void)this;
+    (void)this->data;
+    (void)this->flags;
+    throw_version_error("FTexts are not implemented in UE3");
+}
+FText::FText(const std::wstring& /* str */) : data(), flags() {
+    (void)this;
+    throw_version_error("FTexts are not implemented in UE3");
+}
+FText& FText::operator=(const std::string& /* str */) {
+    (void)this;
+    throw_version_error("FTexts are not implemented in UE3");
+    return *this;
+}
+FText& FText::operator=(const std::wstring& /* str */) {
+    (void)this;
+    throw_version_error("FTexts are not implemented in UE3");
+    return *this;
+}
+FText::operator std::string() const {
+    (void)this;
+    throw_version_error("FTexts are not implemented in UE3");
+    return {};
+}
+FText::operator std::wstring() const {
+    (void)this;
+    throw_version_error("FTexts are not implemented in UE3");
+    return {};
+}
+// Rather not throw from a destructor, since it will crash the whole game
+FText::~FText() {
+    (void)this;
+}
 
 #endif
+
+}  // namespace unrealsdk::unreal

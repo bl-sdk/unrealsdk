@@ -7,8 +7,6 @@
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 #include "unrealsdk/unrealsdk.h"
 
-#ifdef UE4
-
 namespace unrealsdk::unreal {
 
 PropTraits<UTextProperty>::Value PropTraits<UTextProperty>::get(
@@ -31,5 +29,3 @@ void PropTraits<UTextProperty>::destroy(const UTextProperty* /*prop*/, uintptr_t
 }
 
 }  // namespace unrealsdk::unreal
-
-#endif

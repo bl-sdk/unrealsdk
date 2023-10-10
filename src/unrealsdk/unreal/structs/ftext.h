@@ -41,8 +41,8 @@ struct FText {
      * @param str The string to assign.
      * @return A reference to this FText.
      */
-    FText& operator=(const std::string& str) noexcept;
-    FText& operator=(const std::wstring& str) noexcept;
+    FText& operator=(const std::string& str);
+    FText& operator=(const std::wstring& str);
 
     /**
      * @brief Convert the FText to it's string representation.

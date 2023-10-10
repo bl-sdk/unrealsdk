@@ -35,9 +35,6 @@ namespace unrealsdk::unreal {
  * @note Intended for to be used to iterate over all types using recursive templates.
  */
 using all_unreal_classes = std::tuple<  //
-#ifdef UE4
-    UTextProperty,
-#endif
     UArrayProperty,
     UBlueprintGeneratedClass,
     UBoolProperty,
@@ -64,6 +61,7 @@ using all_unreal_classes = std::tuple<  //
     UStrProperty,
     UStruct,
     UStructProperty,
+    UTextProperty,
     UUInt16Property,
     UUInt32Property,
     UUInt64Property,

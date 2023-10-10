@@ -8,10 +8,6 @@
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 
-// Unlike other properties, which we can define on engine versions which don't support them, text
-// properties call into a game-specific hook, which means we can only define them in UE4
-#if defined(UE4)
-
 namespace unrealsdk::unreal {
 
 #if defined(_MSC_VER) && defined(ARCH_X86)
@@ -47,7 +43,5 @@ struct ClassTraits<UTextProperty> {
 #endif
 
 }  // namespace unrealsdk::unreal
-
-#endif
 
 #endif /* UNREALSDK_UNREAL_CLASSES_PROPERTIES_UTEXTPROPERTY_H */
