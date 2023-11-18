@@ -23,12 +23,19 @@ namespace unrealsdk::utils {
 
 /**
  * @brief Get the directory this dll is in.
- * @note Since this is not exported, calls from dlls linking against the shared library return their
- *       own dir, since this function will be linked statically.
+ * @note This function is linked statically, calls from dlls linking against the shared library will
+ *       return their own path.
  *
  * @return The path of the dll this function is compiled into.
  */
-[[nodiscard]] std::filesystem::path get_this_dll_dir(void);
+[[nodiscard]] std::filesystem::path get_this_dll(void);
+
+/**
+ * @brief Get the main executable we're running within.
+ *
+ * @return The path of the main executable.
+ */
+[[nodiscard]] std::filesystem::path get_executable(void);
 
 /**
  * @brief Proxy class for an iterator, used to allow multiple range iterators on the same class.

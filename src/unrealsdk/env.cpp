@@ -8,7 +8,7 @@ namespace unrealsdk::env {
 #ifndef UNREALSDK_IMPORTING
 
 void load_file(void) {
-    std::ifstream stream{utils::get_this_dll_dir() / get(ENV_FILE, defaults::ENV_FILE)};
+    std::ifstream stream{utils::get_this_dll().parent_path() / get(ENV_FILE, defaults::ENV_FILE)};
 
     std::string line;
     while (std::getline(stream, line)) {

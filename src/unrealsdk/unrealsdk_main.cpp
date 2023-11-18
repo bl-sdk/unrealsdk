@@ -52,7 +52,8 @@ bool init(std::unique_ptr<game::AbstractHook>&& game) {
     }
 
     env::load_file();
-    logging::init(utils::get_this_dll_dir() / env::get(env::LOG_FILE, env::defaults::LOG_FILE));
+    logging::init(utils::get_this_dll().parent_path()
+                  / env::get(env::LOG_FILE, env::defaults::LOG_FILE));
 
     auto version = unrealsdk::get_version_string();
     LOG(INFO, "{}", version);
