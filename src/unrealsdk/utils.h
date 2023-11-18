@@ -11,7 +11,7 @@ namespace unrealsdk::utils {
  * @param str The input wstring.
  * @return The output string.
  */
-[[nodiscard]] std::string narrow(const std::wstring& wstr);
+[[nodiscard]] std::string narrow(std::wstring_view wstr);
 
 /**
  * @brief Widens a utf-8 string to a utf-16 wstring.
@@ -19,7 +19,7 @@ namespace unrealsdk::utils {
  * @param str The input string.
  * @return The output wstring.
  */
-[[nodiscard]] std::wstring widen(const std::string& str);
+[[nodiscard]] std::wstring widen(std::string_view str);
 
 /**
  * @brief Get the directory this dll is in.

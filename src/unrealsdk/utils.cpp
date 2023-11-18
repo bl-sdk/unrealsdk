@@ -8,47 +8,37 @@ namespace unrealsdk::utils {
 
 static_assert(sizeof(wchar_t) == sizeof(char16_t), "wchar_t is different size to char16_t");
 
-std::string narrow(const std::wstring& wstr) {
+std::string narrow(std::wstring_view wstr) {
     if (wstr.empty()) {
         return {};
     }
 
-    auto num_chars =
-        WideCharToMultiByte(CP_UTF8, 0, reinterpret_cast<const wchar_t*>(wstr.c_str()),
-                            static_cast<int>(wstr.size()), nullptr, 0, nullptr, nullptr);
-
-    char* str = reinterpret_cast<char*>(malloc(num_chars * sizeof(char)));
-    if (str == nullptr) {
+    auto num_chars = WideCharToMultiByte(CP_UTF8, 0, wstr.data(), static_cast<int>(wstr.size()),
+                                         nullptr, 0, nullptr, nullptr);
+    std::string ret(num_chars, '\0');
+    if (WideCharToMultiByte(CP_UTF8, 0, wstr.data(), static_cast<int>(wstr.size()), ret.data(),
+                            num_chars, nullptr, nullptr)
+        != num_chars) {
         throw std::runtime_error("Failed to convert utf16 string!");
     }
-
-    WideCharToMultiByte(CP_UTF8, 0, reinterpret_cast<const wchar_t*>(wstr.c_str()),
-                        static_cast<int>(wstr.size()), str, num_chars, nullptr, nullptr);
-
-    std::string ret{str, static_cast<size_t>(num_chars)};
-    free(str);
 
     return ret;
 }
 
-std::wstring widen(const std::string& str) {
+std::wstring widen(std::string_view str) {
     if (str.empty()) {
         return {};
     }
 
     auto num_chars =
-        MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), nullptr, 0);
-    auto wstr = reinterpret_cast<wchar_t*>(malloc(num_chars * sizeof(wchar_t)));
-    if (wstr == nullptr) {
+        MultiByteToWideChar(CP_UTF8, 0, str.data(), static_cast<int>(str.size()), nullptr, 0);
+    std::wstring ret(num_chars, '\0');
+
+    if (MultiByteToWideChar(CP_UTF8, 0, str.data(), static_cast<int>(str.size()), ret.data(),
+                            num_chars)
+        != num_chars) {
         throw std::runtime_error("Failed to convert utf8 string!");
     }
-
-    // NOLINTNEXTLINE(cppcoreguidelines-narrowing-conversions)
-    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (DWORD)str.size(),
-                        reinterpret_cast<wchar_t*>(wstr), num_chars);
-
-    std::wstring ret{wstr, static_cast<size_t>(num_chars)};
-    free(wstr);
 
     return ret;
 }
