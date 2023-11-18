@@ -31,7 +31,7 @@ struct GameTraits {
      * @param executable The executable name to match.
      * @return True if the hook matches it.
      */
-    static bool matches_executable(const std::string& executable);
+    static bool matches_executable(std::string_view executable);
 };
 
 }  // namespace unrealsdk::game
