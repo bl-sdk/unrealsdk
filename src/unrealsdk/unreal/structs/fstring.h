@@ -30,7 +30,7 @@ struct TemporaryFString : public TArray<const wchar_t> {
      *
      * @param str The string this FString should contain.
      */
-    TemporaryFString(const std::wstring& str);
+    TemporaryFString(std::wstring_view str);
 
     /**
      * @brief Destroys the string.
@@ -58,8 +58,8 @@ struct UnmanagedFString : public TArray<wchar_t> {
     UnmanagedFString(decltype(data) data = nullptr,
                      decltype(count) count = 0,
                      decltype(max) max = 0);
-    UnmanagedFString(const std::string& str);
-    UnmanagedFString(const std::wstring& str);
+    UnmanagedFString(std::string_view str);
+    UnmanagedFString(std::wstring_view str);
     UnmanagedFString(UnmanagedFString&& other) noexcept;
 
     /**
@@ -75,8 +75,8 @@ struct UnmanagedFString : public TArray<wchar_t> {
      * @param other The other FString to assign this one from.
      * @return A reference to this FString.
      */
-    UnmanagedFString& operator=(const std::string& str);
-    UnmanagedFString& operator=(const std::wstring& str);
+    UnmanagedFString& operator=(std::string_view str);
+    UnmanagedFString& operator=(std::wstring_view str);
     UnmanagedFString& operator=(UnmanagedFString&& other) noexcept;
 
     /**
@@ -87,6 +87,7 @@ struct UnmanagedFString : public TArray<wchar_t> {
      */
     operator std::string() const;
     operator std::wstring() const;
+    operator std::wstring_view() const;
 
     // Delete copy construction/assignment since it's easy to leak memory with them.
     UnmanagedFString(const UnmanagedFString& other) = delete;

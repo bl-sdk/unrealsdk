@@ -77,7 +77,7 @@ bool init(std::unique_ptr<game::AbstractHook>&& game);
  * @param number The number to initialize the name to.
  */
 void fname_init(unreal::FName* name, const wchar_t* str, int32_t number);
-void fname_init(unreal::FName* name, const std::wstring& str, int32_t number);
+void fname_init(unreal::FName* name, std::wstring_view str, int32_t number);
 
 /**
  * @brief Calls FFrame::Step.

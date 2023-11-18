@@ -33,8 +33,8 @@ const GNames& gnames(void) {
 void fname_init(FName* name, const wchar_t* str, int32_t number) {
     UNREALSDK_MANGLE(fname_init)(name, str, number);
 }
-void fname_init(FName* name, const std::wstring& str, int32_t number) {
-    UNREALSDK_MANGLE(fname_init)(name, str.c_str(), number);
+void fname_init(FName* name, std::wstring_view str, int32_t number) {
+    UNREALSDK_MANGLE(fname_init)(name, str.data(), number);
 }
 
 void fframe_step(FFrame* frame, UObject* obj, void* param) {

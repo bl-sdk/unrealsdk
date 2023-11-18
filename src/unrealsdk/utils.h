@@ -136,7 +136,7 @@ struct DLLSafeCallback {
 // Custom wstring formatter, which calls narrow
 template <>
 struct unrealsdk::fmt::formatter<std::wstring> : unrealsdk::fmt::formatter<std::string> {
-    auto format(const std::wstring& str, unrealsdk::fmt::format_context& ctx) {
+    auto format(const std::wstring& str, unrealsdk::fmt::format_context& ctx) const {
         return formatter<std::string>::format(unrealsdk::utils::narrow(str), ctx);
     }
 };

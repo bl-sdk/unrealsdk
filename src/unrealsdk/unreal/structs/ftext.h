@@ -31,8 +31,8 @@ struct FText {
      * @param str The string to set it to. Always uses invariant culture.
      */
     FText() = default;
-    FText(const std::string& str);
-    FText(const std::wstring& str);
+    FText(std::string_view str);
+    FText(std::wstring_view str);
 
     /**
      * @brief Assigns a new value to the FText.
@@ -41,8 +41,8 @@ struct FText {
      * @param str The string to assign.
      * @return A reference to this FText.
      */
-    FText& operator=(const std::string& str);
-    FText& operator=(const std::wstring& str);
+    FText& operator=(std::string_view str);
+    FText& operator=(std::wstring_view str);
 
     /**
      * @brief Convert the FText to it's string representation.
@@ -52,6 +52,7 @@ struct FText {
      */
     operator std::string() const;
     operator std::wstring() const;
+    operator std::wstring_view() const;
 
     /**
      * @brief Destroys the FText.
@@ -75,7 +76,7 @@ struct FText {
 template <>
 struct unrealsdk::fmt::formatter<unrealsdk::unreal::FText>
     : unrealsdk::fmt::formatter<std::string> {
-    auto format(unrealsdk::unreal::FText text, unrealsdk::fmt::format_context& ctx) {
+    auto format(unrealsdk::unreal::FText text, unrealsdk::fmt::format_context& ctx) const {
         return formatter<std::string>::format((std::string)text, ctx);
     }
 };
