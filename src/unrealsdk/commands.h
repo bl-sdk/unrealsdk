@@ -44,7 +44,7 @@ using Callback = DLLSafeCallback::InnerFunc;
  * @param callback The callback for when the command is run.
  * @return True if successfully added, false if an identical command already exists.
  */
-bool add_command(const std::wstring& cmd, const Callback& callback);
+bool add_command(std::wstring_view cmd, const Callback& callback);
 
 /**
  * @brief Check if a custom console command is registered.
@@ -52,7 +52,7 @@ bool add_command(const std::wstring& cmd, const Callback& callback);
  * @param cmd The command to match.
  * @return True if the command is registered.
  */
-bool has_command(const std::wstring& cmd);
+bool has_command(std::wstring_view cmd);
 
 /**
  * @brief Removes a custom console command.
@@ -60,7 +60,7 @@ bool has_command(const std::wstring& cmd);
  * @param cmd The command to remove.
  * @return True if successfully removed, false if no such command exists.
  */
-bool remove_command(const std::wstring& cmd);
+bool remove_command(std::wstring_view cmd);
 
 namespace impl {  // These functions are only relevant when implementing a game hook
 
@@ -73,7 +73,7 @@ namespace impl {  // These functions are only relevant when implementing a game 
  * @return A pair of the callback to run and the offset to pass to it, or of nullptr and 0 if there
  *         was no match.
  */
-std::pair<DLLSafeCallback*, size_t> find_matching_command(const std::wstring& line);
+std::pair<DLLSafeCallback*, size_t> find_matching_command(std::wstring_view line);
 
 #endif
 }  // namespace impl

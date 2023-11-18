@@ -131,6 +131,31 @@ struct DLLSafeCallback {
     R operator()(As... args) { return this->vftable->call(this, args...); }
 };
 
+namespace {
+
+template <typename T>
+struct StringViewHash {
+    using is_transparent = void;
+
+    [[nodiscard]] size_t operator()(const T& str) const { return std::hash<T>{}(str); }
+    [[nodiscard]] size_t operator()(
+        std::basic_string_view<typename T::value_type, typename T::traits_type> str) const {
+        return std::hash<std::basic_string_view<typename T::value_type, typename T::traits_type>>{}(
+            str);
+    }
+};
+
+}  // namespace
+
+/**
+ * @brief A map where the key is a string, which may also be compared using a string view.
+ *
+ * @tparam Key The key string type to use.
+ * @tparam T The value type.
+ */
+template <typename Key, typename T, typename Allocator = std::allocator<std::pair<const Key, T>>>
+using StringViewMap = std::unordered_map<Key, T, StringViewHash<Key>, std::equal_to<>, Allocator>;
+
 }  // namespace unrealsdk::utils
 
 // Custom wstring formatter, which calls narrow
