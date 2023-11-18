@@ -80,9 +80,9 @@ void inject_next_call(void);
  * @param callback The callback to run when the hooked function is called.
  * @return True if successfully added, false if an identical hook already existed.
  */
-bool add_hook(const std::wstring& func,
+bool add_hook(std::wstring_view func,
               Type type,
-              const std::wstring& identifier,
+              std::wstring_view identifier,
               const Callback& callback);
 
 /**
@@ -93,7 +93,7 @@ bool add_hook(const std::wstring& func,
  * @param identifier The hook identifier.
  * @return True if a hook with the given details exists.
  */
-bool has_hook(const std::wstring& func, Type type, const std::wstring& identifier);
+bool has_hook(std::wstring_view func, Type type, std::wstring_view identifier);
 
 /**
  * @brief Removes a hook.
@@ -103,7 +103,7 @@ bool has_hook(const std::wstring& func, Type type, const std::wstring& identifie
  * @param identifier The hook identifier.
  * @return True if successfully removed, false if no hook with the given details exists.
  */
-bool remove_hook(const std::wstring& func, Type type, const std::wstring& identifier);
+bool remove_hook(std::wstring_view func, Type type, std::wstring_view identifier);
 
 namespace impl {  // These functions are only relevant when implementing a game hook
 
@@ -140,7 +140,7 @@ to work out if to early exit again. If it does, it can spend a bit longer extrac
  * @param obj The object which called the function.
  * @return A pointer to the relevant hook list, or nullptr if no hooks match.
  */
-const List* preprocess_hook(const std::string& source,
+const List* preprocess_hook(std::string_view source,
                             const unreal::UFunction* func,
                             const unreal::UObject* obj);
 
