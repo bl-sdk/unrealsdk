@@ -45,17 +45,17 @@ UNREALSDK_CAPI([[nodiscard]] UClass*, find_class_fname, const FName* name) {
 UNREALSDK_CAPI([[nodiscard]] UClass*, find_class_cstr, const wchar_t* name, size_t name_size);
 #endif
 #ifdef UNREALSDK_IMPORTING
-UClass* find_class(const std::wstring& name) {
-    return UNREALSDK_MANGLE(find_class_cstr)(name.c_str(), name.size());
+UClass* find_class(std::wstring_view name) {
+    return UNREALSDK_MANGLE(find_class_cstr)(name.data(), name.size());
 }
 #else
-UClass* find_class(const std::wstring& name) {
+UClass* find_class(std::wstring_view name) {
     return cache.find(name);
 }
 #endif
 #ifdef UNREALSDK_EXPORTING
 UNREALSDK_CAPI([[nodiscard]] UClass*, find_class_cstr, const wchar_t* name, size_t name_size) {
-    return find_class(std::wstring{name, name_size});
+    return find_class(std::wstring_view{name, name_size});
 }
 #endif
 

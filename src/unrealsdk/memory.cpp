@@ -79,11 +79,11 @@ UNREALSDK_CAPI(bool,
                size_t name_size);
 #endif
 #ifdef UNREALSDK_IMPORTING
-bool detour(uintptr_t addr, void* detour_func, void** original_func, const std::string& name) {
-    return UNREALSDK_MANGLE(detour)(addr, detour_func, original_func, name.c_str(), name.size());
+bool detour(uintptr_t addr, void* detour_func, void** original_func, std::string_view name) {
+    return UNREALSDK_MANGLE(detour)(addr, detour_func, original_func, name.data(), name.size());
 }
 #else
-bool detour(uintptr_t addr, void* detour_func, void** original_func, const std::string& name) {
+bool detour(uintptr_t addr, void* detour_func, void** original_func, std::string_view name) {
     MH_STATUS status = MH_OK;
 
     status = MH_CreateHook(reinterpret_cast<LPVOID>(addr), detour_func, original_func);

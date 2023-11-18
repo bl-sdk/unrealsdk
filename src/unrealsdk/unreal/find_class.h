@@ -24,7 +24,7 @@ template <typename T>
     return find_class(cls_fname<T>());
 }
 [[nodiscard]] UClass* find_class(const FName& name);
-[[nodiscard]] UClass* find_class(const std::wstring& name);
+[[nodiscard]] UClass* find_class(std::wstring_view name);
 
 }  // namespace unrealsdk::unreal
 

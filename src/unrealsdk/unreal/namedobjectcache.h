@@ -93,7 +93,7 @@ class NamedObjectCache {
 
         return this->cache[name];
     }
-    [[nodiscard]] CacheType find(const std::wstring& name) {
+    [[nodiscard]] CacheType find(std::wstring_view name) {
         this->ensure_initialized();
 
         auto obj = validate_type<ObjectType>(unrealsdk::find_object(this->uclass, name));

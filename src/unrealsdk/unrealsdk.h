@@ -153,7 +153,7 @@ void process_event(unreal::UObject* object, unreal::UFunction* func, void* param
  *
  * @param str The string to write.
  */
-void uconsole_output_text(const std::wstring& str);
+void uconsole_output_text(std::wstring_view str);
 
 /**
  * @brief Calls `UObject::PathName` on the given object.
@@ -170,9 +170,9 @@ void uconsole_output_text(const std::wstring& str);
  * @param name The object's full path name.
  * @return The object, or nullptr if unable to find.
  */
-[[nodiscard]] unreal::UObject* find_object(unreal::UClass* cls, const std::wstring& name);
-[[nodiscard]] unreal::UObject* find_object(const unreal::FName& cls, const std::wstring& name);
-[[nodiscard]] unreal::UObject* find_object(const std::wstring& cls, const std::wstring& name);
+[[nodiscard]] unreal::UObject* find_object(unreal::UClass* cls, std::wstring_view name);
+[[nodiscard]] unreal::UObject* find_object(const unreal::FName& cls, std::wstring_view name);
+[[nodiscard]] unreal::UObject* find_object(std::wstring_view cls, std::wstring_view name);
 
 #ifdef UE4
 
