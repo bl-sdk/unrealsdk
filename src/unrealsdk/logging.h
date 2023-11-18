@@ -61,8 +61,8 @@ void init(const std::filesystem::path& file, bool callbacks_only = false);
  *                 colon-namespaced function name.
  * @param line The line number the message was logged from.
  */
-void log(Level level, const std::string& msg, const char* location, int line);
-void log(Level level, const std::wstring& msg, const char* location, int line);
+void log(Level level, std::string_view msg, const char* location, int line);
+void log(Level level, std::wstring_view msg, const char* location, int line);
 
 /**
  * @brief Sets the log level of the unreal console.
