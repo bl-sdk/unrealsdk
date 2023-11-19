@@ -8,7 +8,7 @@ namespace unrealsdk::env {
 #ifndef UNREALSDK_IMPORTING
 
 void load_file(void) {
-    std::ifstream stream{utils::get_this_dll_dir() / get(ENV_FILE, defaults::ENV_FILE)};
+    std::ifstream stream{utils::get_this_dll().parent_path() / get(ENV_FILE, defaults::ENV_FILE)};
 
     std::string line;
     while (std::getline(stream, line)) {
@@ -33,28 +33,17 @@ bool defined(env_var_key env_var) {
     return GetEnvironmentVariableA(env_var, nullptr, 0) != 0;
 }
 
-std::string get(env_var_key env_var, const std::string& default_value) {
-    auto size = GetEnvironmentVariableA(env_var, nullptr, 0);
-    if (size == 0) {
-        return default_value;
+std::string get(env_var_key env_var, std::string_view default_value) {
+    auto num_chars = GetEnvironmentVariableA(env_var, nullptr, 0);
+    if (num_chars == 0) {
+        return std::string{default_value};
     }
 
-    // NOLINTBEGIN(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory)
-    auto buf = reinterpret_cast<char*>(malloc(size * sizeof(char)));
-    if (buf == nullptr) {
-        return default_value;
+    // The returned size on failure includes a null terminator, but on success does not.
+    std::string ret(num_chars - 1, '\0');
+    if (GetEnvironmentVariableA(env_var, ret.data(), num_chars) != (num_chars - 1)) {
+        return std::string{default_value};
     }
-
-    if (GetEnvironmentVariableA(env_var, buf, size) == 0) {
-        free(buf);
-        return default_value;
-    }
-
-    // Size includes the null terminator
-    std::string ret{buf, size - 1};
-
-    free(buf);
-    // NOLINTEND(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory)
 
     return ret;
 }

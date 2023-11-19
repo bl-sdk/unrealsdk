@@ -25,8 +25,8 @@ struct FName {
      */
     FName(void) = default;
     FName(int32_t index, int32_t number);
-    FName(const std::string& name, int32_t number = 0);
-    FName(const std::wstring& name, int32_t number = 0);
+    FName(std::string_view name, int32_t number = 0);
+    FName(std::wstring_view name, int32_t number = 0);
 
     bool operator==(const FName& other) const;
     bool operator!=(const FName& other) const;
@@ -70,7 +70,7 @@ FName operator"" _fn(const wchar_t* str, size_t len);
 template <>
 struct unrealsdk::fmt::formatter<unrealsdk::unreal::FName>
     : unrealsdk::fmt::formatter<std::string> {
-    auto format(unrealsdk::unreal::FName name, unrealsdk::fmt::format_context& ctx) {
+    auto format(unrealsdk::unreal::FName name, unrealsdk::fmt::format_context& ctx) const {
         return formatter<std::string>::format((std::string)name, ctx);
     }
 };

@@ -4,75 +4,90 @@
 
 namespace unrealsdk::utils {
 
-// NOLINTBEGIN(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory)
-
 static_assert(sizeof(wchar_t) == sizeof(char16_t), "wchar_t is different size to char16_t");
 
-std::string narrow(const std::wstring& wstr) {
+std::string narrow(std::wstring_view wstr) {
     if (wstr.empty()) {
         return {};
     }
 
-    auto num_chars =
-        WideCharToMultiByte(CP_UTF8, 0, reinterpret_cast<const wchar_t*>(wstr.c_str()),
-                            static_cast<int>(wstr.size()), nullptr, 0, nullptr, nullptr);
-
-    char* str = reinterpret_cast<char*>(malloc(num_chars * sizeof(char)));
-    if (str == nullptr) {
+    auto num_chars = WideCharToMultiByte(CP_UTF8, 0, wstr.data(), static_cast<int>(wstr.size()),
+                                         nullptr, 0, nullptr, nullptr);
+    std::string ret(num_chars, '\0');
+    if (WideCharToMultiByte(CP_UTF8, 0, wstr.data(), static_cast<int>(wstr.size()), ret.data(),
+                            num_chars, nullptr, nullptr)
+        != num_chars) {
         throw std::runtime_error("Failed to convert utf16 string!");
     }
-
-    WideCharToMultiByte(CP_UTF8, 0, reinterpret_cast<const wchar_t*>(wstr.c_str()),
-                        static_cast<int>(wstr.size()), str, num_chars, nullptr, nullptr);
-
-    std::string ret{str, static_cast<size_t>(num_chars)};
-    free(str);
 
     return ret;
 }
 
-std::wstring widen(const std::string& str) {
+std::wstring widen(std::string_view str) {
     if (str.empty()) {
         return {};
     }
 
     auto num_chars =
-        MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), nullptr, 0);
-    auto wstr = reinterpret_cast<wchar_t*>(malloc(num_chars * sizeof(wchar_t)));
-    if (wstr == nullptr) {
+        MultiByteToWideChar(CP_UTF8, 0, str.data(), static_cast<int>(str.size()), nullptr, 0);
+    std::wstring ret(num_chars, '\0');
+
+    if (MultiByteToWideChar(CP_UTF8, 0, str.data(), static_cast<int>(str.size()), ret.data(),
+                            num_chars)
+        != num_chars) {
         throw std::runtime_error("Failed to convert utf8 string!");
     }
-
-    // NOLINTNEXTLINE(cppcoreguidelines-narrowing-conversions)
-    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (DWORD)str.size(),
-                        reinterpret_cast<wchar_t*>(wstr), num_chars);
-
-    std::wstring ret{wstr, static_cast<size_t>(num_chars)};
-    free(wstr);
 
     return ret;
 }
 
-std::filesystem::path get_this_dll_dir(void) {
+namespace {
+
+/**
+ * @brief Gets the path of a module.
+ *
+ * @param module The module to get the path of.
+ * @return The module's path.
+ */
+std::filesystem::path get_module_path(HMODULE module) {
+    // Use wchars here since it's the native path type on Windows, so won't need a conversion
+    wchar_t buf[MAX_PATH];
+    auto num_chars = GetModuleFileNameW(module, &buf[0], ARRAYSIZE(buf));
+    if (num_chars == 0) {
+        throw std::runtime_error("Failed to get get module filename!");
+    }
+
+    auto begin = &buf[0];
+    return {begin, begin + num_chars};
+}
+
+/**
+ * @brief Get a handle to the module this function is compiled into.
+ * @note Does not increase the refcount.
+ *
+ * @return A handle to this module
+ */
+HMODULE get_this_module(void) {
     HMODULE this_module = nullptr;
     if (GetModuleHandleExA(
             GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-            reinterpret_cast<LPCSTR>(&get_this_dll_dir), &this_module)
+            reinterpret_cast<LPCSTR>(&get_this_module), &this_module)
         == 0) {
-        // On error, better to return an empty path, i.e. the cwd
-        // This is called to get the path of the log file, so if we threw we wouldn't have anything
-        // to log the error to
-        return {};
+        throw std::runtime_error("Failed to get this module's handle!");
     }
-
-    char buf[MAX_PATH];
-    if (GetModuleFileNameA(this_module, &buf[0], sizeof(buf)) == 0) {
-        return {};
-    }
-
-    return std::filesystem::path{buf}.parent_path();
+    return this_module;
 }
 
-// NOLINTEND(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory)
+}  // namespace
+
+std::filesystem::path get_this_dll(void) {
+    static const std::filesystem::path path = get_module_path(get_this_module());
+    return path;
+}
+
+std::filesystem::path get_executable(void) {
+    static const std::filesystem::path path = get_module_path(nullptr);
+    return path;
+}
 
 }  // namespace unrealsdk::utils

@@ -9,8 +9,8 @@ namespace unrealsdk::unreal {
 
 FName::FName(int32_t index, int32_t number) : index(index), number(number) {}
 
-FName::FName(const std::string& name, int32_t number) : FName(utils::widen(name), number){};
-FName::FName(const std::wstring& name, int32_t number) {
+FName::FName(std::string_view name, int32_t number) : FName(utils::widen(name), number){};
+FName::FName(std::wstring_view name, int32_t number) {
     unrealsdk::fname_init(this, name, number);
 }
 

@@ -18,7 +18,7 @@ using size_type = decltype(TArray<wchar_t>::count);
  * @param str The string to get the size of.
  * @return The size of the string.
  */
-size_type valid_size(const std::wstring& str) {
+size_type valid_size(std::wstring_view str) {
     const size_t size = str.size() + 1;  // Include the null terminator
     if (size > (size_t)std::numeric_limits<size_type>::max()) {
         throw std::length_error("Tried to allocate a string longer than TArray max capacity!");
@@ -30,8 +30,8 @@ size_type valid_size(const std::wstring& str) {
 
 #pragma region TemporaryFString
 
-TemporaryFString::TemporaryFString(const std::wstring& str)
-    : TArray{str.c_str(), valid_size(str), valid_size(str)} {}
+TemporaryFString::TemporaryFString(std::wstring_view str)
+    : TArray{str.data(), valid_size(str), valid_size(str)} {}
 
 #pragma endregion
 
@@ -39,21 +39,21 @@ TemporaryFString::TemporaryFString(const std::wstring& str)
 
 UnmanagedFString::UnmanagedFString(decltype(data) data, decltype(count) count, decltype(max) max)
     : TArray{data, count, max} {}
-UnmanagedFString::UnmanagedFString(const std::string& str)
+UnmanagedFString::UnmanagedFString(std::string_view str)
     : UnmanagedFString(unrealsdk::utils::widen(str)) {}
-UnmanagedFString::UnmanagedFString(const std::wstring& str) : TArray{nullptr, 0, 0} {
+UnmanagedFString::UnmanagedFString(std::wstring_view str) : TArray{nullptr, 0, 0} {
     auto size = valid_size(str);
     this->resize(size);
-    memcpy(this->data, str.c_str(), size * sizeof(*this->data));
+    memcpy(this->data, str.data(), size * sizeof(*this->data));
 }
 UnmanagedFString::UnmanagedFString(UnmanagedFString&& other) noexcept
     : TArray{std::exchange(other.data, nullptr), std::exchange(other.count, 0),
              std::exchange(other.max, 0)} {}
 
-UnmanagedFString& UnmanagedFString::operator=(const std::string& str) {
+UnmanagedFString& UnmanagedFString::operator=(std::string_view str) {
     return *this = UnmanagedFString{str};
 }
-UnmanagedFString& UnmanagedFString::operator=(const std::wstring& str) {
+UnmanagedFString& UnmanagedFString::operator=(std::wstring_view str) {
     return *this = UnmanagedFString{str};
 }
 UnmanagedFString& UnmanagedFString::operator=(UnmanagedFString&& other) noexcept {
@@ -64,9 +64,12 @@ UnmanagedFString& UnmanagedFString::operator=(UnmanagedFString&& other) noexcept
 }
 
 UnmanagedFString::operator std::string() const {
-    return unrealsdk::utils::narrow(this->operator std::wstring());
+    return unrealsdk::utils::narrow(this->operator std::wstring_view());
 }
 UnmanagedFString::operator std::wstring() const {
+    return std::wstring{this->operator std::wstring_view()};
+}
+UnmanagedFString::operator std::wstring_view() const {
     auto size = this->size();
     if (size == 0) {
         return L"";

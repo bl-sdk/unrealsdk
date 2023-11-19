@@ -104,7 +104,7 @@ template <>
 struct GameTraits<BL3Hook> {
     static constexpr auto NAME = "Borderlands 3";
 
-    static bool matches_executable(const std::string& executable) {
+    static bool matches_executable(std::string_view executable) {
         return executable == "Borderlands3.exe" || executable == "Wonderlands.exe";
     }
 };

@@ -22,7 +22,7 @@ template <>
 struct GameTraits<TPSHook> {
     static constexpr auto NAME = "TPS";
 
-    static bool matches_executable(const std::string& executable) {
+    static bool matches_executable(std::string_view executable) {
         return executable == "BorderlandsPreSequel.exe";
     }
 };

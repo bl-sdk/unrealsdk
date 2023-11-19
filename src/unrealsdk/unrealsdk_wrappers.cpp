@@ -33,8 +33,8 @@ const GNames& gnames(void) {
 void fname_init(FName* name, const wchar_t* str, int32_t number) {
     UNREALSDK_MANGLE(fname_init)(name, str, number);
 }
-void fname_init(FName* name, const std::wstring& str, int32_t number) {
-    UNREALSDK_MANGLE(fname_init)(name, str.c_str(), number);
+void fname_init(FName* name, std::wstring_view str, int32_t number) {
+    UNREALSDK_MANGLE(fname_init)(name, str.data(), number);
 }
 
 void fframe_step(FFrame* frame, UObject* obj, void* param) {
@@ -63,8 +63,8 @@ UObject* construct_object(UClass* cls,
     return UNREALSDK_MANGLE(construct_object)(cls, outer, &name, flags, template_obj);
 }
 
-void uconsole_output_text(const std::wstring& str) {
-    UNREALSDK_MANGLE(uconsole_output_text)(str.c_str(), str.size());
+void uconsole_output_text(std::wstring_view str) {
+    UNREALSDK_MANGLE(uconsole_output_text)(str.data(), str.size());
 }
 
 std::wstring uobject_path_name(const UObject* obj) {
@@ -76,14 +76,14 @@ std::wstring uobject_path_name(const UObject* obj) {
     return str;
 }
 
-UObject* find_object(UClass* cls, const std::wstring& name) {
-    return UNREALSDK_MANGLE(find_object)(cls, name.c_str(), name.size());
+UObject* find_object(UClass* cls, std::wstring_view name) {
+    return UNREALSDK_MANGLE(find_object)(cls, name.data(), name.size());
 }
-UObject* find_object(const FName& cls, const std::wstring& name) {
-    return UNREALSDK_MANGLE(find_object)(find_class(cls), name.c_str(), name.size());
+UObject* find_object(const FName& cls, std::wstring_view name) {
+    return UNREALSDK_MANGLE(find_object)(find_class(cls), name.data(), name.size());
 }
-UObject* find_object(const std::wstring& cls, const std::wstring& name) {
-    return UNREALSDK_MANGLE(find_object)(find_class(cls), name.c_str(), name.size());
+UObject* find_object(std::wstring_view cls, std::wstring_view name) {
+    return UNREALSDK_MANGLE(find_object)(find_class(cls), name.data(), name.size());
 }
 
 #ifdef UE4

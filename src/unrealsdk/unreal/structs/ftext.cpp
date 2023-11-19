@@ -11,15 +11,15 @@ namespace unrealsdk::unreal {
 
 #ifdef UE4
 
-FText::FText(const std::string& str) : FText(utils::widen(str)) {}
-FText::FText(const std::wstring& str) : data(), flags() {
+FText::FText(std::string_view str) : FText(utils::widen(str)) {}
+FText::FText(std::wstring_view str) : data(), flags() {
     unrealsdk::ftext_as_culture_invariant(this, str);
 }
 
-FText& FText::operator=(const std::string& str) {
+FText& FText::operator=(std::string_view str) {
     return *this = utils::widen(str);
 }
-FText& FText::operator=(const std::wstring& str) {
+FText& FText::operator=(std::wstring_view str) {
     // Modifying in place is a pain, instead create a new FText and swap it in
     FText local_text{str};
     std::swap(this->data, local_text.data);
@@ -31,9 +31,12 @@ FText& FText::operator=(const std::wstring& str) {
 }
 
 FText::operator std::string() const {
-    return utils::narrow(this->operator std::wstring());
+    return utils::narrow(this->operator std::wstring_view());
 }
 FText::operator std::wstring() const {
+    return std::wstring{this->operator std::wstring_view()};
+}
+FText::operator std::wstring_view() const {
     static auto idx = env::get_numeric<size_t>(env::FTEXT_GET_DISPLAY_STRING_VF_INDEX,
                                                env::defaults::FTEXT_GET_DISPLAY_STRING_VF_INDEX);
 
@@ -53,22 +56,22 @@ FText::~FText() {
 
 #else
 
-FText::FText(const std::string& /* str */) : data(), flags() {
+FText::FText(std::string_view /* str */) : data(), flags() {
     (void)this;
     (void)this->data;
     (void)this->flags;
     throw_version_error("FTexts are not implemented in UE3");
 }
-FText::FText(const std::wstring& /* str */) : data(), flags() {
+FText::FText(std::wstring_view /* str */) : data(), flags() {
     (void)this;
     throw_version_error("FTexts are not implemented in UE3");
 }
-FText& FText::operator=(const std::string& /* str */) {
+FText& FText::operator=(std::string_view /* str */) {
     (void)this;
     throw_version_error("FTexts are not implemented in UE3");
     return *this;
 }
-FText& FText::operator=(const std::wstring& /* str */) {
+FText& FText::operator=(std::wstring_view /* str */) {
     (void)this;
     throw_version_error("FTexts are not implemented in UE3");
     return *this;
@@ -79,6 +82,11 @@ FText::operator std::string() const {
     return {};
 }
 FText::operator std::wstring() const {
+    (void)this;
+    throw_version_error("FTexts are not implemented in UE3");
+    return {};
+}
+FText::operator std::wstring_view() const {
     (void)this;
     throw_version_error("FTexts are not implemented in UE3");
     return {};

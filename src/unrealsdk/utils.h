@@ -11,7 +11,7 @@ namespace unrealsdk::utils {
  * @param str The input wstring.
  * @return The output string.
  */
-[[nodiscard]] std::string narrow(const std::wstring& wstr);
+[[nodiscard]] std::string narrow(std::wstring_view wstr);
 
 /**
  * @brief Widens a utf-8 string to a utf-16 wstring.
@@ -19,16 +19,23 @@ namespace unrealsdk::utils {
  * @param str The input string.
  * @return The output wstring.
  */
-[[nodiscard]] std::wstring widen(const std::string& str);
+[[nodiscard]] std::wstring widen(std::string_view str);
 
 /**
  * @brief Get the directory this dll is in.
- * @note Since this is not exported, calls from dlls linking against the shared library return their
- *       own dir, since this function will be linked statically.
+ * @note This function is linked statically, calls from dlls linking against the shared library will
+ *       return their own path.
  *
  * @return The path of the dll this function is compiled into.
  */
-[[nodiscard]] std::filesystem::path get_this_dll_dir(void);
+[[nodiscard]] std::filesystem::path get_this_dll(void);
+
+/**
+ * @brief Get the main executable we're running within.
+ *
+ * @return The path of the main executable.
+ */
+[[nodiscard]] std::filesystem::path get_executable(void);
 
 /**
  * @brief Proxy class for an iterator, used to allow multiple range iterators on the same class.
@@ -124,12 +131,37 @@ struct DLLSafeCallback {
     R operator()(As... args) { return this->vftable->call(this, args...); }
 };
 
+namespace {
+
+template <typename T>
+struct StringViewHash {
+    using is_transparent = void;
+
+    [[nodiscard]] size_t operator()(const T& str) const { return std::hash<T>{}(str); }
+    [[nodiscard]] size_t operator()(
+        std::basic_string_view<typename T::value_type, typename T::traits_type> str) const {
+        return std::hash<std::basic_string_view<typename T::value_type, typename T::traits_type>>{}(
+            str);
+    }
+};
+
+}  // namespace
+
+/**
+ * @brief A map where the key is a string, which may also be compared using a string view.
+ *
+ * @tparam Key The key string type to use.
+ * @tparam T The value type.
+ */
+template <typename Key, typename T, typename Allocator = std::allocator<std::pair<const Key, T>>>
+using StringViewMap = std::unordered_map<Key, T, StringViewHash<Key>, std::equal_to<>, Allocator>;
+
 }  // namespace unrealsdk::utils
 
 // Custom wstring formatter, which calls narrow
 template <>
 struct unrealsdk::fmt::formatter<std::wstring> : unrealsdk::fmt::formatter<std::string> {
-    auto format(const std::wstring& str, unrealsdk::fmt::format_context& ctx) {
+    auto format(const std::wstring& str, unrealsdk::fmt::format_context& ctx) const {
         return formatter<std::string>::format(unrealsdk::utils::narrow(str), ctx);
     }
 };

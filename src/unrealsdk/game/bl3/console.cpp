@@ -166,7 +166,7 @@ bool inject_console_hook(hook_manager::Details& hook) {
             console_key = existing_console_key;
         } else {
             auto wanted_console_key = env::get(env::CONSOLE_KEY, env::defaults::CONSOLE_KEY);
-            console_key = {wanted_console_key};
+            console_key = FName{wanted_console_key};
 
             inner_obj->get<UStructProperty>(L"ConsoleKey"_fn)
                 .set<UNameProperty>(L"KeyName"_fn, console_key);

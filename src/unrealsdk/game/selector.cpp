@@ -5,6 +5,7 @@
 #include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/game/bl3/bl3.h"
 #include "unrealsdk/game/tps/tps.h"
+#include "unrealsdk/utils.h"
 
 #ifndef UNREALSDK_IMPORTING
 
@@ -37,7 +38,7 @@ using all_known_games = std::tuple<BL2Hook, TPSHook>;
  * @param executable The executable name to match against.
  */
 template <int i = 0>
-std::unique_ptr<AbstractHook> find_correct_hook(const std::string& executable) {
+std::unique_ptr<AbstractHook> find_correct_hook(std::string_view executable) {
     if constexpr (i >= std::tuple_size_v<all_known_games>) {
         throw std::runtime_error("Failed to find compatible game hook!");
     } else {
@@ -53,16 +54,7 @@ std::unique_ptr<AbstractHook> find_correct_hook(const std::string& executable) {
 }  // namespace
 
 std::unique_ptr<AbstractHook> select_based_on_executable(void) {
-    std::filesystem::path exe_path{};
-
-    std::array<char, FILENAME_MAX> buf{};
-    if (GetModuleFileNameA(nullptr, buf.data(), (DWORD)buf.size()) > 0) {
-        exe_path = std::filesystem::path(buf.data());
-    } else {
-        LOG(ERROR, "Failed to get main executable's path!");
-    }
-
-    auto executable = env::get(env::GAME_OVERRIDE, exe_path.filename().string());
+    auto executable = env::get(env::GAME_OVERRIDE, utils::get_executable().filename().string());
     return find_correct_hook(executable);
 }
 

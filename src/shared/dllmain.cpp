@@ -15,7 +15,7 @@ HMODULE this_module;
  */
 DWORD WINAPI startup_thread(LPVOID /*unused*/) {
     try {
-        unrealsdk::init(unrealsdk::game::select_based_on_executable());
+        unrealsdk::init(unrealsdk::game::select_based_on_executable);
     } catch (std::exception& ex) {
         LOG(ERROR, "Exception occurred while initializing the sdk: {}", ex.what());
     }

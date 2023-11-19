@@ -45,9 +45,9 @@ T sigscan(const uint8_t* bytes,
  * @param name Name of the detour, to be used in log messages on error.
  * @return True if the detour was successfully created.
  */
-bool detour(uintptr_t addr, void* detour_func, void** original_func, const std::string& name);
+bool detour(uintptr_t addr, void* detour_func, void** original_func, std::string_view name);
 template <typename T>
-bool detour(uintptr_t addr, T detour_func, T* original_func, const std::string& name) {
+bool detour(uintptr_t addr, T detour_func, T* original_func, std::string_view name) {
     return detour(addr, reinterpret_cast<void*>(detour_func),
                   reinterpret_cast<void**>(original_func), name);
 }

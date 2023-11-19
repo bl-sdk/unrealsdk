@@ -27,13 +27,16 @@ struct TemporaryFString;
 namespace unrealsdk {
 
 #ifndef UNREALSDK_IMPORTING
+
 /**
  * @brief Initializes the sdk.
+ * @note Logging is initialized before calling the getter, it is safe to log within it.
  *
- * @param game An instance of the hook type to use to hook the current game.
+ * @param game_getter A function which gets an instance of the hook type to use on the current game.
  * @return True if the sdk was initialized with the given game, false if it was already initialized.
  */
-bool init(std::unique_ptr<game::AbstractHook>&& game);
+bool init(const std::function<std::unique_ptr<game::AbstractHook>(void)>& game_getter);
+
 #endif
 
 /**
@@ -77,7 +80,7 @@ bool init(std::unique_ptr<game::AbstractHook>&& game);
  * @param number The number to initialize the name to.
  */
 void fname_init(unreal::FName* name, const wchar_t* str, int32_t number);
-void fname_init(unreal::FName* name, const std::wstring& str, int32_t number);
+void fname_init(unreal::FName* name, std::wstring_view str, int32_t number);
 
 /**
  * @brief Calls FFrame::Step.
@@ -153,7 +156,7 @@ void process_event(unreal::UObject* object, unreal::UFunction* func, void* param
  *
  * @param str The string to write.
  */
-void uconsole_output_text(const std::wstring& str);
+void uconsole_output_text(std::wstring_view str);
 
 /**
  * @brief Calls `UObject::PathName` on the given object.
@@ -170,9 +173,9 @@ void uconsole_output_text(const std::wstring& str);
  * @param name The object's full path name.
  * @return The object, or nullptr if unable to find.
  */
-[[nodiscard]] unreal::UObject* find_object(unreal::UClass* cls, const std::wstring& name);
-[[nodiscard]] unreal::UObject* find_object(const unreal::FName& cls, const std::wstring& name);
-[[nodiscard]] unreal::UObject* find_object(const std::wstring& cls, const std::wstring& name);
+[[nodiscard]] unreal::UObject* find_object(unreal::UClass* cls, std::wstring_view name);
+[[nodiscard]] unreal::UObject* find_object(const unreal::FName& cls, std::wstring_view name);
+[[nodiscard]] unreal::UObject* find_object(std::wstring_view cls, std::wstring_view name);
 
 #ifdef UE4
 

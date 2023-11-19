@@ -109,7 +109,7 @@ template <>
 struct GameTraits<BL2Hook> {
     static constexpr auto NAME = "Borderlands 2";
 
-    static bool matches_executable(const std::string& executable) {
+    static bool matches_executable(std::string_view executable) {
         return executable == "Borderlands2.exe" || executable == "TinyTina.exe";
     }
 };

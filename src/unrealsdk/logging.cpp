@@ -64,7 +64,7 @@ const std::string TRUNCATION_PREFIX = "~ ";
  * @return The truncated string.
  */
 std::string truncate_leading_chunks(const std::string&& str,
-                                    const std::string& separators,
+                                    std::string_view separators,
                                     size_t max_width) {
     auto width = str.size();
     size_t start_pos = 0;
@@ -156,7 +156,7 @@ std::string get_header(void) {
  * @param str The string.
  * @return The parsed log level, or `Level::INVALID`.
  */
-Level get_level_from_string(const std::string& str) {
+Level get_level_from_string(std::string_view str) {
     if (str.empty()) {
         return Level::INVALID;
     }
@@ -179,7 +179,7 @@ Level get_level_from_string(const std::string& str) {
 
     // Otherwise try parse as an int
     uint32_t int_level = 0;
-    auto res = std::from_chars(str.c_str(), str.c_str() + str.size(), int_level);
+    auto res = std::from_chars(str.data(), str.data() + str.size(), int_level);
     if (res.ec == std::errc()) {
         return Level::INVALID;
     }
@@ -274,14 +274,14 @@ UNREALSDK_CAPI(void, log_msg_internal, const LogMessage* msg) {
 
 }  // namespace
 
-void log(Level level, const std::string& msg, const char* location, int line) {
-    const LogMessage log_msg{unix_ms_now(), level, msg.c_str(), msg.size(), location, line};
+void log(Level level, std::string_view msg, const char* location, int line) {
+    const LogMessage log_msg{unix_ms_now(), level, msg.data(), msg.size(), location, line};
     UNREALSDK_MANGLE(log_msg_internal)(&log_msg);
 }
 
-void log(Level level, const std::wstring& msg, const char* location, int line) {
+void log(Level level, std::wstring_view msg, const char* location, int line) {
     auto narrow = utils::narrow(msg);
-    const LogMessage log_msg{unix_ms_now(), level, narrow.c_str(), narrow.size(), location, line};
+    const LogMessage log_msg{unix_ms_now(), level, narrow.data(), narrow.size(), location, line};
     UNREALSDK_MANGLE(log_msg_internal)(&log_msg);
 }
 

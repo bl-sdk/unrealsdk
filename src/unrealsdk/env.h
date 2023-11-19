@@ -1,6 +1,8 @@
 #ifndef UNREALSDK_ENV_H
 #define UNREALSDK_ENV_H
 
+#include "unrealsdk/pch.h"
+
 namespace unrealsdk::env {
 using env_var_key = const char*;
 
@@ -67,7 +69,7 @@ bool defined(env_var_key env_var);
  * @param default_value The default value to return if not defined.
  * @return The environment variable's value.
  */
-std::string get(env_var_key env_var, const std::string& default_value = "");
+std::string get(env_var_key env_var, std::string_view default_value = "");
 
 /**
  * @brief Gets the value of an environment variable as a number.
