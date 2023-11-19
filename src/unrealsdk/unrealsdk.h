@@ -27,13 +27,16 @@ struct TemporaryFString;
 namespace unrealsdk {
 
 #ifndef UNREALSDK_IMPORTING
+
 /**
  * @brief Initializes the sdk.
+ * @note Logging is initialized before calling the getter, it is safe to log within it.
  *
- * @param game An instance of the hook type to use to hook the current game.
+ * @param game_getter A function which gets an instance of the hook type to use on the current game.
  * @return True if the sdk was initialized with the given game, false if it was already initialized.
  */
-bool init(std::unique_ptr<game::AbstractHook>&& game);
+bool init(const std::function<std::unique_ptr<game::AbstractHook>(void)>& game_getter);
+
 #endif
 
 /**

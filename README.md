@@ -9,7 +9,7 @@ sdk can work with multiple (somewhat similar) UE versions from a single binary, 
 it how exactly to hook everything. The easiest way is to let it autodetect.
 
 ```cpp
-unrealsdk::init(unrealsdk::game::select_based_on_executable());
+unrealsdk::init(unrealsdk::game::select_based_on_executable);
 ```
 If this doesn't work correctly, you can always implement your own version (and then merge it back
 into this project).

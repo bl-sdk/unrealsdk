@@ -44,7 +44,7 @@ std::unique_ptr<game::AbstractHook> hook_instance;
 std::unordered_set<void*> unreal_allocations{};
 #endif
 
-bool init(std::unique_ptr<game::AbstractHook>&& game) {
+bool init(const std::function<std::unique_ptr<game::AbstractHook>(void)>& game_getter) {
     const std::lock_guard<std::mutex> lock(init_mutex);
 
     if (hook_instance != nullptr) {
@@ -63,9 +63,10 @@ bool init(std::unique_ptr<game::AbstractHook>&& game) {
         throw std::runtime_error("Minhook initialization failed!");
     }
 
+    auto game = game_getter();
+
     // Initialize the hook before moving it, to weed out any order of initialization problems.
     game->hook();
-
     hook_instance = std::move(game);
     return true;
 }
