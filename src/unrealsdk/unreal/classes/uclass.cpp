@@ -8,12 +8,12 @@ namespace unrealsdk::unreal {
 
 bool UClass::implements(const UClass* iface, FImplementedInterface** impl_out) const {
     // For each class in the inheritance chain
-    for (const UStruct* str = this; str != nullptr; str = str->SuperField) {
+    for (const UObject* superfield : this->superfields()) {
         // Make sure it's a class
-        if (!str->inherits(find_class<UClass>())) {
+        if (!superfield->is_instance(find_class<UClass>())) {
             continue;
         }
-        auto cls = reinterpret_cast<const UClass*>(str);
+        auto cls = reinterpret_cast<const UClass*>(superfield);
 
         // For each interface on that class
         for (auto our_iface : cls->Interfaces) {

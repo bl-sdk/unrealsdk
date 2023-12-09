@@ -211,6 +211,13 @@ jobs:
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: cmake . --preset ${{ matrix.preset }} -DCMAKE_DISABLE_PRECOMPILE_HEADERS=On
 
+    - name: Remove `.modmap`s from compile commands
+      run: |
+        (Get-Content "out\build\${{ matrix.preset }}\compile_commands.json")    `
+          -replace "@CMakeFiles.+?\.modmap", ""                                 `
+        | Set-Content                                                           `
+          -Path "out\build\${{ matrix.preset }}\compile_commands.json"
+
     - name: Run clang-tidy
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: |

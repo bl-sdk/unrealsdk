@@ -27,10 +27,10 @@ size_t UProperty::class_size(void) {
     auto obj = *unrealsdk::gobjects().begin();
     auto prop = obj->Class->PropertyLink;
 
-    UStruct* cls = prop->Class;
-    while (cls->Name != L"Property"_fn) {
-        cls = cls->SuperField;
-        if (cls == nullptr) {
+    const UStruct* cls = nullptr;
+    for (auto superfield : prop->Class->superfields()) {
+        if (superfield->Name == L"Property"_fn) {
+            cls = superfield;
             break;
         }
     }

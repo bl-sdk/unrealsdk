@@ -131,6 +131,28 @@ class UStruct : public UField {
         bool operator!=(const PropertyIterator& rhs) const;
     };
 
+    struct SuperFieldIterator {
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = const UStruct*;
+        using pointer = const UStruct**;
+        using reference = const UStruct*;
+
+       private:
+        const UStruct* this_struct;
+
+       public:
+        SuperFieldIterator(const UStruct* this_struct);
+
+        reference operator*() const;
+
+        SuperFieldIterator& operator++();
+        SuperFieldIterator operator++(int);
+
+        bool operator==(const SuperFieldIterator& rhs) const;
+        bool operator!=(const SuperFieldIterator& rhs) const;
+    };
+
     /**
      * @brief Gets an iterator over this struct's fields.
      *
@@ -144,6 +166,14 @@ class UStruct : public UField {
      * @return The iterator.
      */
     [[nodiscard]] utils::IteratorProxy<PropertyIterator> properties(void) const;
+
+    /**
+     * @brief Gets an iterator over this struct and it's superfields.
+     * @note Includes this struct itself.
+     *
+     * @return The iterator.
+     */
+    [[nodiscard]] utils::IteratorProxy<SuperFieldIterator> superfields(void) const;
 #pragma endregion
 
     /**
