@@ -91,6 +91,38 @@ utils::IteratorProxy<UStruct::PropertyIterator> UStruct::properties(void) const 
 
 #pragma endregion
 
+#pragma region SuperField Iterator
+
+UStruct::SuperFieldIterator::SuperFieldIterator(const UStruct* this_struct)
+    : this_struct(this_struct) {}
+
+UStruct::SuperFieldIterator::reference UStruct::SuperFieldIterator::operator*() const {
+    return this->this_struct;
+}
+
+UStruct::SuperFieldIterator& UStruct::SuperFieldIterator::operator++() {
+    this->this_struct = this->this_struct->SuperField;
+    return *this;
+}
+UStruct::SuperFieldIterator UStruct::SuperFieldIterator::operator++(int) {
+    auto tmp = *this;
+    ++(*this);
+    return tmp;
+}
+
+bool UStruct::SuperFieldIterator::operator==(const UStruct::SuperFieldIterator& rhs) const {
+    return this->this_struct == rhs.this_struct;
+};
+bool UStruct::SuperFieldIterator::operator!=(const UStruct::SuperFieldIterator& rhs) const {
+    return !(*this == rhs);
+};
+
+utils::IteratorProxy<UStruct::SuperFieldIterator> UStruct::superfields(void) const {
+    return {{this}, {nullptr}};
+}
+
+#pragma endregion
+
 size_t UStruct::get_struct_size(void) const {
 #ifdef UE4
     return (this->PropertySize + this->MinAlignment - 1) & ~(this->MinAlignment - 1);
@@ -124,16 +156,8 @@ UFunction* UStruct::find_func_and_validate(const FName& name) const {
 }
 
 bool UStruct::inherits(const UStruct* base_struct) const {
-    // For each struct in the inheritance chain
-    for (const UStruct* our_struct = this; our_struct != nullptr;
-         our_struct = our_struct->SuperField) {
-        // If it matches
-        if (our_struct == base_struct) {
-            return true;
-        }
-    }
-
-    return false;
+    auto superfields = this->superfields();
+    return std::find(superfields.begin(), superfields.end(), base_struct) != superfields.end();
 }
 
 }  // namespace unrealsdk::unreal
