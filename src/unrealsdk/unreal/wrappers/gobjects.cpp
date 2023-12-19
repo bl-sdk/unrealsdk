@@ -83,7 +83,7 @@ UObject* GObjects::get_weak_object(const FWeakObjectPtr* ptr) const {
     if (ptr->object_serial_number == 0) {
         return nullptr;
     }
-    if (ptr->object_index < 0) {
+    if (0 > ptr->object_index || ptr->object_index >= this->internal->ObjObjects.Count) {
         return nullptr;
     }
 
