@@ -177,8 +177,6 @@ void uconsole_output_text(std::wstring_view str);
 [[nodiscard]] unreal::UObject* find_object(const unreal::FName& cls, std::wstring_view name);
 [[nodiscard]] unreal::UObject* find_object(std::wstring_view cls, std::wstring_view name);
 
-#ifdef UE4
-
 /**
  * @brief Calls `FText::AsCultureInvariant`.
  *
@@ -187,7 +185,16 @@ void uconsole_output_text(std::wstring_view str);
  */
 void ftext_as_culture_invariant(unreal::FText* text, unreal::TemporaryFString&& str);
 
-#endif
+/**
+ * @brief Loads a package, and all it's contained objects.
+ * @note This function may block for several seconds while the package is loaded.
+ *
+ * @param name The package's name.
+ * @param flags The loading flags to use.
+ * @return The loaded `Package` object.
+ */
+// NOLINTNEXTLINE(modernize-use-nodiscard)
+unreal::UObject* load_package(std::wstring_view name, uint32_t flags = 0);
 
 }  // namespace unrealsdk
 

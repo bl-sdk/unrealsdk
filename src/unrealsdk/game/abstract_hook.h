@@ -59,10 +59,10 @@ struct AbstractHook {
     [[nodiscard]] virtual std::wstring uobject_path_name(const unreal::UObject* obj) const = 0;
     [[nodiscard]] virtual unreal::UObject* find_object(unreal::UClass* cls,
                                                        const std::wstring& name) const = 0;
-#ifdef UE4
     virtual void ftext_as_culture_invariant(unreal::FText* text,
                                             unreal::TemporaryFString&& str) const = 0;
-#endif
+    [[nodiscard]] virtual unreal::UObject* load_package(const std::wstring& name,
+                                                        uint32_t flags) const = 0;
 };
 
 #pragma endregion

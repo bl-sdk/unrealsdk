@@ -52,9 +52,11 @@ UNREALSDK_CAPI([[nodiscard]] UObject*,
                UClass* cls,
                const wchar_t* name,
                size_t name_size);
-
-#ifdef UE4
 UNREALSDK_CAPI(void, ftext_as_culture_invariant, FText* text, TemporaryFString&& str);
-#endif
+UNREALSDK_CAPI([[nodiscard]] UObject*,
+               load_package,
+               const wchar_t* name,
+               size_t size,
+               uint32_t flags);
 
 }  // namespace unrealsdk

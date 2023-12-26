@@ -86,12 +86,12 @@ UObject* find_object(std::wstring_view cls, std::wstring_view name) {
     return UNREALSDK_MANGLE(find_object)(find_class(cls), name.data(), name.size());
 }
 
-#ifdef UE4
-
 void ftext_as_culture_invariant(unreal::FText* text, unreal::TemporaryFString&& str) {
     UNREALSDK_MANGLE(ftext_as_culture_invariant)(text, std::move(str));
 }
 
-#endif
+UObject* load_package(std::wstring_view name, uint32_t flags) {
+    return UNREALSDK_MANGLE(load_package)(name.data(), name.size(), flags);
+}
 
 }  // namespace unrealsdk
