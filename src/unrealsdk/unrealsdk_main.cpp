@@ -175,6 +175,14 @@ UNREALSDK_CAPI(void,
     hook_instance->ftext_as_culture_invariant(text, std::move(str));
 }
 
+UNREALSDK_CAPI([[nodiscard]] UObject*,
+               load_package,
+               const wchar_t* name,
+               size_t size,
+               uint32_t flags) {
+    return hook_instance->load_package({name, size}, flags);
+}
+
 }  // namespace unrealsdk
 
 #endif

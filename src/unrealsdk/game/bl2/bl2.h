@@ -76,6 +76,11 @@ class BL2Hook : public AbstractHook {
     static void find_construct_object(void);
 
     /**
+     * @brief Finds `LoadPackage`, and sets up such that `load_package` may be called.
+     */
+    static void find_load_package(void);
+
+    /**
      * @brief Creates a console and sets the bind (if required), and hooks logging onto it.
      */
     static void inject_console(void);
@@ -105,6 +110,8 @@ class BL2Hook : public AbstractHook {
                                                const std::wstring& name) const override;
     void ftext_as_culture_invariant(unreal::FText* text,
                                     unreal::TemporaryFString&& str) const override;
+    [[nodiscard]] unreal::UObject* load_package(const std::wstring& name,
+                                                uint32_t flags) const override;
 };
 
 template <>

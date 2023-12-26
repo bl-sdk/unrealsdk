@@ -29,6 +29,7 @@ void BL2Hook::hook(void) {
     find_fframe_step();
     find_gmalloc();
     find_construct_object();
+    find_load_package();
 
     inject_console();
 

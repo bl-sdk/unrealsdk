@@ -27,6 +27,7 @@ void BL3Hook::hook(void) {
     find_get_path_name();
     find_static_find_object();
     find_ftext_as_culture_invariant();
+    find_load_package();
 
     inject_console();
 }

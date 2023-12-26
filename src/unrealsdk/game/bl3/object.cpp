@@ -130,6 +130,38 @@ UObject* BL3Hook::find_object(UClass* cls, const std::wstring& name) const {
 
 #pragma endregion
 
+#pragma region LoadPackage
+
+namespace {
+
+using load_package_func = UObject* (*)(const UObject* outer,
+                                       const wchar_t* name,
+                                       uint32_t flags,
+                                       void* reader_override);
+load_package_func load_package_ptr;
+
+const constinit Pattern<16> LOAD_PACKAGE_PATTERN{
+    "48 8B C4"     // mov rax, rsp
+    "53"           // push rbx
+    "56"           // push rsi
+    "48 83 EC 68"  // sub rsp, 68
+    "48 89 68 ??"  // mov [rax+08], rbp
+    "48 8B EA"     // mov rbp, rdx
+};
+
+}  // namespace
+
+void BL3Hook::find_load_package(void) {
+    load_package_ptr = LOAD_PACKAGE_PATTERN.sigscan<load_package_func>();
+    LOG(MISC, "LoadPackage: {:p}", reinterpret_cast<void*>(load_package_ptr));
+}
+
+[[nodiscard]] UObject* BL3Hook::load_package(const std::wstring& name, uint32_t flags) const {
+    return load_package_ptr(nullptr, name.data(), flags, nullptr);
+}
+
+#pragma endregion
+
 }  // namespace unrealsdk::game
 
 #endif

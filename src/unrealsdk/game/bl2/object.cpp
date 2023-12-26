@@ -114,6 +114,46 @@ UObject* BL2Hook::find_object(UClass* cls, const std::wstring& name) const {
 
 #pragma endregion
 
+#pragma region LoadPackage
+
+namespace {
+
+using load_package_func = UObject* (*)(const UObject* outer, const wchar_t* name, uint32_t flags);
+load_package_func load_package_ptr;
+
+const constinit Pattern<46> LOAD_PACKAGE_PATTERN{
+    "55"              // push ebp
+    "8B EC"           // mov ebp, esp
+    "6A FF"           // push -01
+    "68 ????????"     // push Borderlands2.exe+1108180
+    "64 A1 ????????"  // mov eax, fs:[00000000]
+    "50"              // push eax
+    "83 EC 68"        // sub esp, 68
+    "A1 ????????"     // mov eax, [Borderlands2.g_LEngineDefaultPoolId+B2DC]
+    "33 C5"           // xor eax, ebp
+    "89 45 ??"        // mov [ebp-14], eax
+    "53"              // push ebx
+    "56"              // push esi
+    "57"              // push edi
+    "50"              // push eax
+    "8D 45 ??"        // lea eax, [ebp-0C]
+    "64 A3 ????????"  // mov fs:[00000000], eax
+    "89 65 ??"        // mov [ebp-10], esp
+};
+
+}  // namespace
+
+void BL2Hook::find_load_package(void) {
+    load_package_ptr = LOAD_PACKAGE_PATTERN.sigscan<load_package_func>();
+    LOG(MISC, "LoadPackage: {:p}", reinterpret_cast<void*>(load_package_ptr));
+}
+
+[[nodiscard]] UObject* BL2Hook::load_package(const std::wstring& name, uint32_t flags) const {
+    return load_package_ptr(nullptr, name.data(), flags);
+}
+
+#pragma endregion
+
 }  // namespace unrealsdk::game
 
 #endif

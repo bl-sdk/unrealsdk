@@ -90,4 +90,8 @@ void ftext_as_culture_invariant(unreal::FText* text, unreal::TemporaryFString&& 
     UNREALSDK_MANGLE(ftext_as_culture_invariant)(text, std::move(str));
 }
 
+UObject* load_package(std::wstring_view name, uint32_t flags) {
+    return UNREALSDK_MANGLE(load_package)(name.data(), name.size(), flags);
+}
+
 }  // namespace unrealsdk
