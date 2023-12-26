@@ -177,8 +177,6 @@ void uconsole_output_text(std::wstring_view str);
 [[nodiscard]] unreal::UObject* find_object(const unreal::FName& cls, std::wstring_view name);
 [[nodiscard]] unreal::UObject* find_object(std::wstring_view cls, std::wstring_view name);
 
-#ifdef UE4
-
 /**
  * @brief Calls `FText::AsCultureInvariant`.
  *
@@ -186,8 +184,6 @@ void uconsole_output_text(std::wstring_view str);
  * @param str The string to initialize the text to.
  */
 void ftext_as_culture_invariant(unreal::FText* text, unreal::TemporaryFString&& str);
-
-#endif
 
 }  // namespace unrealsdk
 

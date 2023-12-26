@@ -168,16 +168,12 @@ UNREALSDK_CAPI([[nodiscard]] UObject*,
     return hook_instance->find_object(cls, {name, name_size});
 }
 
-#ifdef UE4
-
 UNREALSDK_CAPI(void,
                ftext_as_culture_invariant,
                unreal::FText* text,
                unreal::TemporaryFString&& str) {
     hook_instance->ftext_as_culture_invariant(text, std::move(str));
 }
-
-#endif
 
 }  // namespace unrealsdk
 

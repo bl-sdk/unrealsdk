@@ -15,6 +15,7 @@
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer_funcs.h"
 #include "unrealsdk/unrealsdk.h"
+#include "unrealsdk/version_error.h"
 
 #if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
@@ -195,6 +196,15 @@ UObject* BL2Hook::find_object(UClass* cls, const std::wstring& name) const {
 
     return BoundFunction{findobject_func, cls}.call<UObjectProperty, UStrProperty, UClassProperty>(
         name, cls);
+}
+
+#pragma endregion
+
+#pragma region FText::AsCultureInvariant
+
+void BL2Hook::ftext_as_culture_invariant(unreal::FText* /*text*/,
+                                         unreal::TemporaryFString&& /*str*/) const {
+    throw_version_error("FTexts are not implemented in UE3");
 }
 
 #pragma endregion
