@@ -129,6 +129,7 @@ struct TArray {
         size_t idx{};
 
        public:
+        Iterator(void) : arr(nullptr) {}
         Iterator(const TArray<U>* arr) : arr(arr) {}
 
         reference operator*() const { return (*this->arr)[this->idx]; };
@@ -136,8 +137,7 @@ struct TArray {
         Iterator& operator++() {
             ++this->idx;
             // Use `arr == nullptr` as the end condition, so we behave a little better if the array
-            //  grows during iteration - we can't guarantee control over this iterator as well as
-            //  the others
+            // grows during iteration
             if (this->idx >= (size_t)arr->count) {
                 arr = nullptr;
             }
@@ -179,7 +179,7 @@ struct TArray {
     template <typename U = T,
               typename = std::enable_if_t<std::is_same_v<U, T> && std::negation_v<std::is_void<U>>>>
     [[nodiscard]] static Iterator<U> end(void) {
-        return {nullptr};
+        return {};
     }
 #pragma endregion
 };

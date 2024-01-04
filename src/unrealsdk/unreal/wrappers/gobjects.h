@@ -37,6 +37,7 @@ class GObjects {
         size_t idx;
 
        public:
+        Iterator(void);
         Iterator(const GObjects& gobjects, size_t idx);
 
         reference operator*() const;
@@ -83,7 +84,7 @@ class GObjects {
      *
      * @return The iterator.
      */
-    [[nodiscard]] Iterator end(void) const;
+    [[nodiscard]] static Iterator end(void);
 
     /**
      * @brief Get the object behind a weak object pointer (or null if it's invalid).

@@ -12,6 +12,7 @@ namespace unrealsdk::unreal {
 
 #pragma region Field Iterator
 
+UStruct::FieldIterator::FieldIterator(void) : this_struct(nullptr), field(nullptr) {}
 UStruct::FieldIterator::FieldIterator(const UStruct* this_struct, UField* field)
     : this_struct(this_struct), field(field) {}
 
@@ -55,13 +56,14 @@ utils::IteratorProxy<UStruct::FieldIterator> UStruct::fields(void) const {
         begin++;
     }
 
-    return {begin, {nullptr, nullptr}};
+    return {begin, {}};
 }
 
 #pragma endregion
 
 #pragma region Property Iterator
 
+UStruct::PropertyIterator::PropertyIterator(void) : prop(nullptr) {}
 UStruct::PropertyIterator::PropertyIterator(UProperty* prop) : prop(prop) {}
 
 UStruct::PropertyIterator::reference UStruct::PropertyIterator::operator*() const {
@@ -86,13 +88,14 @@ bool UStruct::PropertyIterator::operator!=(const UStruct::PropertyIterator& rhs)
 };
 
 utils::IteratorProxy<UStruct::PropertyIterator> UStruct::properties(void) const {
-    return {{this->PropertyLink}, {nullptr}};
+    return {{this->PropertyLink}, {}};
 }
 
 #pragma endregion
 
 #pragma region SuperField Iterator
 
+UStruct::SuperFieldIterator::SuperFieldIterator(void) : this_struct(nullptr) {}
 UStruct::SuperFieldIterator::SuperFieldIterator(const UStruct* this_struct)
     : this_struct(this_struct) {}
 
@@ -118,7 +121,7 @@ bool UStruct::SuperFieldIterator::operator!=(const UStruct::SuperFieldIterator& 
 };
 
 utils::IteratorProxy<UStruct::SuperFieldIterator> UStruct::superfields(void) const {
-    return {{this}, {nullptr}};
+    return {{this}, {}};
 }
 
 #pragma endregion

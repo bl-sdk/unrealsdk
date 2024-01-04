@@ -15,6 +15,7 @@ namespace unrealsdk::unreal {
 
 #pragma region Iterator
 
+GObjects::Iterator::Iterator(void) : gobjects(nullptr), idx(0) {}
 GObjects::Iterator::Iterator(const GObjects& gobjects, size_t idx)
     : gobjects(&gobjects), idx(idx) {}
 
@@ -24,18 +25,18 @@ GObjects::Iterator::reference GObjects::Iterator::operator*() const {
 
 GObjects::Iterator& GObjects::Iterator::operator++() {
     do {
-        // If we're on the last object, increment to max index
+        // If we're on the last object, set gobjects to null to end the iterator
         if (this->idx >= (this->gobjects->size() - 1)) {
-            this->idx = std::numeric_limits<size_t>::max();
+            this->gobjects = nullptr;
             break;
         }
 
         ++this->idx;
 
         // If this index points to a null object, increment again
-        // We really should handle gc'd object entries better (in UE4), but this is a quick hack to
-        // get the iterator mostly working. In practice, you really shouldn't be iterating through
-        // all objects anyway.
+        // We really should handle gc'd object entries better (in UE4), but this is a quick hack
+        // to get the iterator mostly working. In practice, you really shouldn't be iterating
+        // through all objects anyway.
     } while (this->operator*() == nullptr);
 
     return *this;
@@ -47,7 +48,10 @@ GObjects::Iterator GObjects::Iterator::operator++(int) {
 }
 
 bool GObjects::Iterator::operator==(const GObjects::Iterator& rhs) const {
-    return this->idx == rhs.idx;
+    if (this->gobjects == nullptr && rhs.gobjects == nullptr) {
+        return true;
+    }
+    return this->gobjects == rhs.gobjects && this->idx == rhs.idx;
 };
 bool GObjects::Iterator::operator!=(const GObjects::Iterator& rhs) const {
     return !(*this == rhs);
@@ -57,8 +61,8 @@ GObjects::Iterator GObjects::begin(void) const {
     return {*this, 0};
 }
 
-GObjects::Iterator GObjects::end(void) const {
-    return {*this, std::numeric_limits<size_t>::max()};
+GObjects::Iterator GObjects::end(void) {
+    return {};
 }
 
 #pragma endregion
