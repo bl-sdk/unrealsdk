@@ -98,6 +98,7 @@ class UStruct : public UField {
         UField* field;
 
        public:
+        FieldIterator(void);
         FieldIterator(const UStruct* this_struct, UField* field);
 
         reference operator*() const;
@@ -120,6 +121,7 @@ class UStruct : public UField {
         UProperty* prop;
 
        public:
+        PropertyIterator(void);
         PropertyIterator(UProperty* prop);
 
         reference operator*() const;
@@ -142,6 +144,7 @@ class UStruct : public UField {
         const UStruct* this_struct;
 
        public:
+        SuperFieldIterator(void);
         SuperFieldIterator(const UStruct* this_struct);
 
         reference operator*() const;
