@@ -9,6 +9,11 @@ using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
+#if defined(__MINGW32__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"  // thiscall on non-class
+#endif
+
 void TPSHook::fname_init(FName* name, const wchar_t* str, int32_t number) const {
     // NOLINTNEXTLINE(modernize-use-using)
     typedef void*(__thiscall * fname_init_func)(FName * name, const wchar_t* str, int32_t number,
@@ -17,6 +22,10 @@ void TPSHook::fname_init(FName* name, const wchar_t* str, int32_t number) const 
 
     reinterpret_cast<fname_init_func>(this->fname_init_ptr)(name, str, number, 1, 1, 0);
 }
+
+#if defined(__MINGW32__)
+#pragma GCC diagnostic pop
+#endif
 
 }  // namespace unrealsdk::game
 

@@ -13,6 +13,11 @@ namespace unrealsdk::game {
 
 namespace {
 
+#if defined(__MINGW32__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"  // thiscall on non-class
+#endif
+
 struct FMalloc;
 struct FMallocVFtable {
     void* exec;
@@ -23,6 +28,10 @@ struct FMallocVFtable {
 struct FMalloc {
     FMallocVFtable* vftable;
 };
+
+#if defined(__MINGW32__)
+#pragma GCC diagnostic pop
+#endif
 
 FMalloc* gmalloc;
 

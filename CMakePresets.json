@@ -53,6 +53,26 @@
       "toolchainFile": "common_cmake/clang-cross-x64.cmake"
     },
     {
+      "name": "_llvm_mingw_x86",
+      "hidden": true,
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "toolchainFile": "common_cmake/llvm-i686-w64-mingw32.cmake"
+    },
+    {
+      "name": "_llvm_mingw_x64",
+      "hidden": true,
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "toolchainFile": "common_cmake/llvm-x86_64-w64-mingw32.cmake"
+    },
+    {
       "name": "_mingw_x86",
       "hidden": true,
       "condition": {
@@ -219,6 +239,50 @@
       "inherits": [
         "_base",
         "_clang_cross_x64",
+        "_ue4",
+        "_x64",
+        "_release"
+      ]
+    },
+    {
+      "name": "llvm-mingw-ue3-x86-debug",
+      "displayName": "UE3 x86 Debug (LLVM MinGW)",
+      "inherits": [
+        "_base",
+        "_llvm_mingw_x86",
+        "_ue3",
+        "_x86",
+        "_debug"
+      ]
+    },
+    {
+      "name": "llvm-mingw-ue3-x86-release",
+      "displayName": "UE3 x86 Release (LLVM MinGW)",
+      "inherits": [
+        "_base",
+        "_llvm_mingw_x86",
+        "_ue3",
+        "_x86",
+        "_release"
+      ]
+    },
+    {
+      "name": "llvm-mingw-ue4-x64-debug",
+      "displayName": "UE4 x64 Debug (LLVM MinGW)",
+      "inherits": [
+        "_base",
+        "_llvm_mingw_x64",
+        "_ue4",
+        "_x64",
+        "_debug"
+      ]
+    },
+    {
+      "name": "llvm-mingw-ue4-x64-release",
+      "displayName": "UE4 x64 Release (LLVM MinGW)",
+      "inherits": [
+        "_base",
+        "_llvm_mingw_x64",
         "_ue4",
         "_x64",
         "_release"

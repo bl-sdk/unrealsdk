@@ -38,6 +38,11 @@ void BL2Hook::hook(void) {
     hexedit_array_limit_message();
 }
 
+#if defined(__MINGW32__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"  // thiscall on non-class
+#endif
+
 #pragma region FName::Init
 
 namespace {
@@ -104,6 +109,10 @@ void BL2Hook::ftext_as_culture_invariant(unreal::FText* /*text*/,
 }
 
 #pragma endregion
+
+#if defined(__MINGW32__)
+#pragma GCC diagnostic pop
+#endif
 
 }  // namespace unrealsdk::game
 

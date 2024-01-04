@@ -9,9 +9,9 @@ class UObject;
 #pragma pack(push, 0x4)
 #endif
 
-#if defined(__clang__) || defined(__MINGW32__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-private-field"
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-private-field"
 #endif
 
 #if defined(UE4)
