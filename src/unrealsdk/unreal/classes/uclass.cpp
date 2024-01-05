@@ -6,7 +6,7 @@
 
 namespace unrealsdk::unreal {
 
-bool UClass::implements(const UClass* iface, FImplementedInterface** impl_out) const {
+bool UClass::implements(const UClass* iface, FImplementedInterface* impl_out) const {
     // For each class in the inheritance chain
     for (const UObject* superfield : this->superfields()) {
         // Make sure it's a class
@@ -21,7 +21,7 @@ bool UClass::implements(const UClass* iface, FImplementedInterface** impl_out) c
             if (our_iface.Class == iface) {
                 // Output the implementation, if necessary
                 if (impl_out != nullptr) {
-                    *impl_out = &our_iface;
+                    *impl_out = our_iface;
                 }
                 return true;
             }

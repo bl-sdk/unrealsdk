@@ -5,13 +5,71 @@
 
 namespace unrealsdk::unreal {
 
+class UStruct;
+
 namespace impl {
 
-class UnrealPointerControl;
+class UnrealPointerControl {
+   private:
+    // As an implementation detail, we don't need to store the base address of the allocation
+    // because we put the control block at the start, our address *is* the base address
+    std::atomic<size_t> refs;
+
+    // Strictly speaking, std::atomic is not guaranteed to be safe to cross dll boundaries
+    // However in practice, we expect it to be implemented entirely in hardware
+    // To make sure it's safe, we:
+    // - Make sure it's always lock free - i.e. it's implemented in hardware.
+    // - Make all accesses go through virtual functions, so we always use the implementation of
+    //   the library which created the atomic. This kind of does the same as the last point, but
+    //   it's an extra level of safety.
+    // - Make sure it has the same size and alignment as the base type, to make sure it won't
+    //   change the overall layout of the control block.
+    static_assert(std::atomic<size_t>::is_always_lock_free
+                      && sizeof(std::atomic<size_t>) == sizeof(size_t)
+                      && alignof(std::atomic<size_t>) == alignof(size_t),
+                  "atomic size_t may not be safe to cross dll boundaries");
+
+   public:
+    // The only way get a pointer owned by the sdk (excluding calling u_malloc) is by making a new
+    // struct - we have a specific constructor on the just for it.
+    // Structs need to run custom deleter. Because all sdk-owned pointers are structs, the only
+    // deleter metadata we need is the struct type, we can get away with just storing that.
+    // If we add we add more ways to allocate new memory, this will have to turn into a more
+    // comprehensive custom deleter.
+    const UStruct* deleter_struct;
+
+    /**
+     * @brief Construct a new control block.
+     */
+    UnrealPointerControl(const UStruct* deleter_struct) : refs(0), deleter_struct(deleter_struct) {}
+
+    /**
+     * @brief Destroys the control block.
+     *
+     */
+    virtual ~UnrealPointerControl(void) = default;
+
+    /**
+     * @brief Increments the reference count.
+     *
+     * @return The new reference count.
+     */
+    virtual size_t inc_ref(void);
+
+    /**
+     * @brief Decrements the reference count.
+     *
+     * @return The new reference count.
+     */
+    virtual size_t dec_ref(void);
+
+    UnrealPointerControl(const UnrealPointerControl& other) = delete;
+    UnrealPointerControl(UnrealPointerControl&& other) noexcept = delete;
+    UnrealPointerControl& operator=(const UnrealPointerControl& other) = delete;
+    UnrealPointerControl& operator=(UnrealPointerControl&& other) noexcept = delete;
+};
 
 }  // namespace impl
-
-class UStruct;
 
 /**
  * @brief A smart pointer to a block of unreal-allocated memory.
@@ -138,70 +196,6 @@ class UnrealPointer {
     }
     T* operator->() const noexcept { return this->ptr; }
 };
-
-namespace impl {
-
-class UnrealPointerControl {
-   private:
-    // As an implementation detail, we don't need to store the base address of the allocation
-    // because we put the control block at the start, our address *is* the base address
-    std::atomic<size_t> refs;
-
-    // Strictly speaking, std::atomic is not guaranteed to be safe to cross dll boundaries
-    // However in practice, we expect it to be implemented entirely in hardware
-    // To make sure it's safe, we:
-    // - Make sure it's always lock free - i.e. it's implemented in hardware.
-    // - Make all accesses go through virtual functions, so we always use the implementation of
-    //   the library which created the atomic. This kind of does the same as the last point, but
-    //   it's an extra level of safety.
-    // - Make sure it has the same size and alignment as the base type, to make sure it won't
-    //   change the overall layout of the control block.
-    static_assert(std::atomic<size_t>::is_always_lock_free
-                      && sizeof(std::atomic<size_t>) == sizeof(size_t)
-                      && alignof(std::atomic<size_t>) == alignof(size_t),
-                  "atomic size_t may not be safe to cross dll boundaries");
-
-   public:
-    // The only way get a pointer owned by the sdk (excluding calling u_malloc) is by making a new
-    // struct - we have a specific constructor on the just for it.
-    // Structs need to run custom deleter. Because all sdk-owned pointers are structs, the only
-    // deleter metadata we need is the struct type, we can get away with just storing that.
-    // If we add we add more ways to allocate new memory, this will have to turn into a more
-    // comprehensive custom deleter.
-    const UStruct* deleter_struct;
-
-    /**
-     * @brief Construct a new control block.
-     */
-    UnrealPointerControl(const UStruct* deleter_struct) : refs(0), deleter_struct(deleter_struct) {}
-
-    /**
-     * @brief Destroys the control block.
-     *
-     */
-    virtual ~UnrealPointerControl(void) = default;
-
-    /**
-     * @brief Increments the reference count.
-     *
-     * @return The new reference count.
-     */
-    virtual size_t inc_ref(void);
-
-    /**
-     * @brief Decrements the reference count.
-     *
-     * @return The new reference count.
-     */
-    virtual size_t dec_ref(void);
-
-    UnrealPointerControl(const UnrealPointerControl& other) = delete;
-    UnrealPointerControl(UnrealPointerControl&& other) noexcept = delete;
-    UnrealPointerControl& operator=(const UnrealPointerControl& other) = delete;
-    UnrealPointerControl& operator=(UnrealPointerControl&& other) noexcept = delete;
-};
-
-}  // namespace impl
 
 }  // namespace unrealsdk::unreal
 

@@ -43,6 +43,7 @@
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 // This file is just a forwarder for whichever formatting library is configured, it doesn't define
 // anything itself, so is fine to include here

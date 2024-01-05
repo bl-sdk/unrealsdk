@@ -34,12 +34,12 @@ void PropTraits<UInterfaceProperty>::set(const UInterfaceProperty* prop,
 
     // Ensure the object is of a valid class
     if (value != nullptr) {
-        FImplementedInterface* impl = nullptr;
+        FImplementedInterface impl{};
         if (!value->is_implementation(prop_iface, &impl)) {
             throw std::runtime_error("Object is not implementation of "
                                      + (std::string)prop_iface->Name);
         }
-        pointer_offset = impl->get_pointer_offset();
+        pointer_offset = impl.get_pointer_offset();
     }
 
     auto iface = reinterpret_cast<FScriptInterface*>(addr);

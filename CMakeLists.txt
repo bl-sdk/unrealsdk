@@ -13,10 +13,15 @@ set_target_properties(_unrealsdk_interface PROPERTIES
     COMPILE_WARNING_AS_ERROR True
     INTERPROCEDURAL_OPTIMIZATION True
 )
+
 if(MSVC)
     target_compile_options(_unrealsdk_interface INTERFACE /W4)
 else()
     target_compile_options(_unrealsdk_interface INTERFACE -Wall -Wextra -Wpedantic)
+endif()
+# CMake doesn't understand warnings as errors for MinGW yet
+if(MINGW)
+    target_compile_options(_unrealsdk_interface INTERFACE -Werror)
 endif()
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)

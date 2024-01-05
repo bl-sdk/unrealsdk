@@ -141,7 +141,7 @@ class UObject {
      * @return True if this object implements the given interface.
      */
     [[nodiscard]] bool is_implementation(const UClass* iface,
-                                         FImplementedInterface** impl_out = nullptr) const;
+                                         FImplementedInterface* impl_out = nullptr) const;
 };
 
 template <>

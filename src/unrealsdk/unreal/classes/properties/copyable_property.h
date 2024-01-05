@@ -22,12 +22,12 @@ namespace unrealsdk::unreal {
 template <typename T>
 class CopyableProperty : public UProperty {
    public:
-    CopyableProperty<T>() = delete;
-    CopyableProperty<T>(const CopyableProperty<T>&) = delete;
-    CopyableProperty<T>(CopyableProperty<T>&&) = delete;
-    CopyableProperty<T>& operator=(const CopyableProperty<T>&) = delete;
-    CopyableProperty<T>& operator=(CopyableProperty<T>&&) = delete;
-    ~CopyableProperty<T>() = delete;
+    CopyableProperty() = delete;
+    CopyableProperty(const CopyableProperty&) = delete;
+    CopyableProperty(CopyableProperty&&) = delete;
+    CopyableProperty& operator=(const CopyableProperty&) = delete;
+    CopyableProperty& operator=(CopyableProperty&&) = delete;
+    ~CopyableProperty() = delete;
 };
 
 template <typename T>

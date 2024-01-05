@@ -53,7 +53,7 @@ bool UObject::is_instance(const UClass* cls) const {
     return this->Class->inherits(cls);
 }
 
-bool UObject::is_implementation(const UClass* iface, FImplementedInterface** impl_out) const {
+bool UObject::is_implementation(const UClass* iface, FImplementedInterface* impl_out) const {
     return this->Class->implements(iface, impl_out);
 }
 
