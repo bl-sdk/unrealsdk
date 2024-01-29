@@ -1,5 +1,4 @@
 #include "unrealsdk/pch.h"
-#include <string_view>
 
 #include "unrealsdk/hook_manager.h"
 #include "unrealsdk/unreal/classes/ufunction.h"
