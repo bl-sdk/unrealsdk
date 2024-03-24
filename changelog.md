@@ -1,5 +1,11 @@
 # Changelog
 
+## Upcoming
+- When an exception occurs during a hook, now mention what function it was under, to make debugging
+  easier.
+
+  [f2e21f60](https://github.com/bl-sdk/unrealsdk/commit/f2e21f60)
+
 ## v1.1.0
 - Changed a number of interfaces to take a string view rather than a const string reference.
 
