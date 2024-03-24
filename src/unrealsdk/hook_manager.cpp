@@ -288,7 +288,9 @@ bool run_hooks_of_type(const List& list, Type type, Details& hook) {
         try {
             ret |= hook_function->operator()(hook);
         } catch (const std::exception& ex) {
-            LOG(ERROR, "An exception occurred during hook processing: {}", ex.what());
+            LOG(ERROR, "An exception occurred during hook processing");
+            LOG(ERROR, L"Function: {}", hook.func.func->get_path_name());
+            LOG(ERROR, "Exception: {}", ex.what());
         }
     }
 
