@@ -1,5 +1,6 @@
 #include "unrealsdk/pch.h"
 
+#include "unrealsdk/env.h"
 #include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/hook_manager.h"
 #include "unrealsdk/memory.h"
@@ -107,17 +108,49 @@ void __fastcall process_event_hook(UObject* obj,
 
     process_event_ptr(obj, edx, func, params, null);
 }
+
+std::recursive_mutex process_event_mutex{};
+
+void __fastcall locking_process_event_hook(UObject* obj,
+                                           void* edx,
+                                           UFunction* func,
+                                           void* params,
+                                           void* null) {
+    std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
+    process_event_hook(obj, edx, func, params, null);
+}
+
 static_assert(std::is_same_v<decltype(&process_event_hook), process_event_func>,
               "process_event signature is incorrect");
+static_assert(std::is_same_v<decltype(&process_event_hook), decltype(&locking_process_event_hook)>,
+              "process_event signature is incorrect");
+
+/**
+ * @brief Checks if we should use a locking process event implementation.
+ *
+ * @return True if we should use locks.
+ */
+bool locking(void) {
+    // Basically just a function so we can be sure this static is initialized late - LTO hopefully
+    // takes care of it
+    static auto locking = env::defined(env::LOCKING_PROCESS_EVENT);
+    return locking;
+}
 
 }  // namespace
 
 void BL2Hook::hook_process_event(void) {
-    detour(PROCESS_EVENT_SIG.sigscan(), process_event_hook, &process_event_ptr, "ProcessEvent");
+    detour(PROCESS_EVENT_SIG.sigscan(), locking() ? locking_process_event_hook : process_event_hook,
+           &process_event_ptr, "ProcessEvent");
 }
 
 void BL2Hook::process_event(UObject* object, UFunction* func, void* params) const {
-    process_event_hook(object, nullptr, func, params, nullptr);
+    if (locking()) {
+        std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
+        process_event_hook(object, nullptr, func, params, nullptr);
+    } else {
+        process_event_hook(object, nullptr, func, params, nullptr);
+    }
 }
 
 namespace {
@@ -146,7 +179,7 @@ void __fastcall call_function_hook(UObject* obj,
                                    void* result,
                                    UFunction* func) {
     try {
-        auto data = hook_manager::impl::preprocess_hook("ProcessEvent", func, obj);
+        auto data = hook_manager::impl::preprocess_hook("CallFunction", func, obj);
         if (data != nullptr) {
             WrappedStruct args{func};
             auto original_code = stack->extract_current_args(args);

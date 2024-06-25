@@ -64,6 +64,7 @@ build configurations.
 | `UNREALSDK_CONSOLE_KEY`                       | Changes the default console key which is set when one is not already bound.                                                     |
 | `UNREALSDK_UCONSOLE_CONSOLE_COMMAND_VF_INDEX` | Overrides the virtual function index used when hooking `UConsole::ConsoleCommand`.                                              |
 | `UNREALSDK_UCONSOLE_OUTPUT_TEXT_VF_INDEX`     | Overrides the virtual function index used when calling `UConsole::OutputText`.                                                  |
+| `UNREALSDK_LOCKING_PROCESS_EVENT`             | If defined, locks simultaneous ProcessEvent (used in unreal function calls) calls from different threads.                       |
 
 You can also define any of these in an env file, which will automatically be loaded when the sdk
 starts (excluding `UNREALSDK_ENV_FILE` of course). This file should contain lines of equals

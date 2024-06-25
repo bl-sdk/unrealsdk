@@ -24,6 +24,7 @@ const constexpr env_var_key TREFERENCE_CONTROLLER_DESTRUCTOR_VF_INDEX =
     "UNREALSDK_TREFERENCE_CONTROLLER_DESTRUCTOR_VF_INDEX";
 const constexpr env_var_key FTEXT_GET_DISPLAY_STRING_VF_INDEX =
     "UNREALSDK_FTEXT_GET_DISPLAY_STRING_VF_INDEX";
+const constexpr env_var_key LOCKING_PROCESS_EVENT = "UNREALSDK_LOCKING_PROCESS_EVENT";
 
 namespace defaults {
 
@@ -42,6 +43,7 @@ const constexpr auto UCONSOLE_OUTPUT_TEXT_VF_INDEX = 83;
 const constexpr auto TREFERENCE_CONTROLLER_DESTROY_OBJ_VF_INDEX = 0;
 const constexpr auto TREFERENCE_CONTROLLER_DESTRUCTOR_VF_INDEX = 1;
 const constexpr auto FTEXT_GET_DISPLAY_STRING_VF_INDEX = 2;
+// LOCKING_PROCESS_EVENT - defaults to empty string (only used in defined checks)
 
 }  // namespace defaults
 
