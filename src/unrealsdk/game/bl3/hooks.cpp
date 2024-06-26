@@ -83,7 +83,7 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
 std::recursive_mutex process_event_mutex{};
 
 void locking_process_event_hook(UObject* obj, UFunction* func, void* params) {
-    std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
+    const std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
     process_event_hook(obj, func, params);
 }
 
@@ -111,7 +111,7 @@ void BL3Hook::hook_process_event(void) {
 
 void BL3Hook::process_event(UObject* object, UFunction* func, void* params) const {
     if (locking()) {
-        std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
+        const std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
         process_event_hook(object, func, params);
     } else {
         process_event_hook(object, func, params);

@@ -116,7 +116,7 @@ void __fastcall locking_process_event_hook(UObject* obj,
                                            UFunction* func,
                                            void* params,
                                            void* null) {
-    std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
+    const std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
     process_event_hook(obj, edx, func, params, null);
 }
 
@@ -146,7 +146,7 @@ void BL2Hook::hook_process_event(void) {
 
 void BL2Hook::process_event(UObject* object, UFunction* func, void* params) const {
     if (locking()) {
-        std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
+        const std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
         process_event_hook(object, nullptr, func, params, nullptr);
     } else {
         process_event_hook(object, nullptr, func, params, nullptr);
