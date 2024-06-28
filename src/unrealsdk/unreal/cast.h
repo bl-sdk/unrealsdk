@@ -6,6 +6,7 @@
 
 // Note: this header needs to pull in all unreal classes
 // Refrain from including it in other headers
+#include "unrealsdk/unreal/classes/properties/attribute_property.h"
 #include "unrealsdk/unreal/classes/properties/copyable_property.h"
 #include "unrealsdk/unreal/classes/properties/uarrayproperty.h"
 #include "unrealsdk/unreal/classes/properties/uboolproperty.h"
@@ -40,6 +41,7 @@ using all_unreal_classes = std::tuple<  //
     UArrayProperty,
     UBlueprintGeneratedClass,
     UBoolProperty,
+    UByteAttributeProperty,
     UByteProperty,
     UClass,
     UClassProperty,
@@ -49,11 +51,13 @@ using all_unreal_classes = std::tuple<  //
     UEnum,
     UEnumProperty,
     UField,
+    UFloatAttributeProperty,
     UFloatProperty,
     UFunction,
     UInt16Property,
     UInt64Property,
     UInt8Property,
+    UIntAttributeProperty,
     UInterfaceProperty,
     UIntProperty,
     UNameProperty,
