@@ -9,6 +9,7 @@
 #include "unrealsdk/unreal/classes/properties/copyable_property.h"
 #include "unrealsdk/unreal/classes/properties/uarrayproperty.h"
 #include "unrealsdk/unreal/classes/properties/uboolproperty.h"
+#include "unrealsdk/unreal/classes/properties/ubyteproperty.h"
 #include "unrealsdk/unreal/classes/properties/uclassproperty.h"
 #include "unrealsdk/unreal/classes/properties/ucomponentproperty.h"
 #include "unrealsdk/unreal/classes/properties/uenumproperty.h"
