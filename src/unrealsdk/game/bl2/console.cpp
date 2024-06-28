@@ -119,6 +119,8 @@ bool console_command_hook(hook_manager::Details& hook) {
     return true;
 }
 
+// Would prefer to call a native function where possible, however best I can tell, OutputText is
+// actually implemented directly in unrealscript (along most of the console mechanics).
 BoundFunction console_output_text{};
 
 bool inject_console_hook(hook_manager::Details& hook) {

@@ -8,6 +8,7 @@
 #include "unrealsdk/unreal/classes/uclass.h"
 #include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/structs/fname.h"
+#include "unrealsdk/unreal/structs/fstring.h"
 #include "unrealsdk/unreal/wrappers/bound_function.h"
 
 #if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
@@ -72,44 +73,95 @@ UObject* BL2Hook::construct_object(UClass* cls,
 
 #pragma region PathName
 
+// UObject::PathName is exposed to UnrealScript, we *can* get away with just calling it.
+// That has a decent bit of overhead however, especially if process event is locking, and this
+// function is used to tell if to call a hook, it's called all the time.
+// Stick with a native function call for speed.
+
+#if defined(__MINGW32__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"  // thiscall on non-class
+#endif
+
+// NOLINTNEXTLINE(modernize-use-using)
+typedef void(__thiscall* get_path_name_func)(const UObject* self,
+                                             const UObject* stop_outer,
+                                             ManagedFString* str);
+
+#if defined(__MINGW32__)
+#pragma GCC diagnostic pop
+#endif
+
+get_path_name_func get_path_name_ptr;
+
+const constinit Pattern<15> GET_PATH_NAME_PATTERN{
+    "55"        // push ebp
+    "8B EC"     // mov ebp, esp
+    "8B 45 ??"  // mov eax, [ebp+08]
+    "56"        // push esi
+    "8B F1"     // mov esi, ecx
+    "3B F0"     // cmp esi, eax
+    "74 ??"     // je Borderlands2.exe+ADB04
+    "85 F6"     // test esi, esi
+};
+
+void BL2Hook::find_get_path_name(void) {
+    get_path_name_ptr = GET_PATH_NAME_PATTERN.sigscan<get_path_name_func>();
+    LOG(MISC, "GetPathName: {:p}", reinterpret_cast<void*>(get_path_name_ptr));
+}
+
 std::wstring BL2Hook::uobject_path_name(const UObject* obj) const {
-    static UFunction* pathname_func = nullptr;
-
-    // Optimize so we only call find once
-    if (pathname_func == nullptr) {
-        pathname_func = obj->Class->find_func_and_validate(L"PathName"_fn);
-    }
-
-    // Bound functions need mutable references, since they might actually modify the object
-    // Object properties need mutable references, since you may want to modify the object you get
-    // We know when calling PathName neither of these apply, so we want this function to explicitly
-    // take a const reference - meaning we need a cast
-    // While this is technically undefined behaviour, we only pass the reference around, so this
-    // should be safe enough
-
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
-    auto mutable_obj = const_cast<UObject*>(obj);
-
-    // The hook manager calls this function to work out if to run a hook, so we need to inject next
-    // call to avoid recursion
-    hook_manager::inject_next_call();
-    return BoundFunction{pathname_func, mutable_obj}.call<UStrProperty, UObjectProperty>(
-        mutable_obj);
+    ManagedFString str{};
+    get_path_name_ptr(obj, nullptr, &str);
+    return str;
 }
 
 #pragma endregion
 
 #pragma region FindObject
 
+// Again UObject::FindObject is exposed to UnrealScript. We don't care as much about performance
+// here, but may as well still use a native call, was easy enough to find.
+
+namespace {
+
+// NOLINTNEXTLINE(modernize-use-using)
+typedef UObject*(__cdecl* static_find_object_func)(const UClass* cls,
+                                                   const UObject* package,
+                                                   const wchar_t* str,
+                                                   uint32_t exact_class);
+
+static_find_object_func static_find_object_ptr;
+const constinit Pattern<56> STATIC_FIND_OBJECT_PATTERN{
+    "55"                 // push ebp
+    "8B EC"              // mov ebp, esp
+    "6A FF"              // push -01
+    "68 ????????"        // push Borderlands2.exe+1106400
+    "64 A1 ????????"     // mov eax, fs:[00000000]
+    "50"                 // push eax
+    "83 EC 24"           // sub esp, 24
+    "53"                 // push ebx
+    "56"                 // push esi
+    "57"                 // push edi
+    "A1 ????????"        // mov eax, [Borderlands2.g_LEngineDefaultPoolId+B2DC]
+    "33 C5"              // xor eax, ebp
+    "50"                 // push eax
+    "8D 45 ??"           // lea eax, [ebp-0C]
+    "64 A3 ????????"     // mov fs:[00000000], eax
+    "83 3D ???????? 00"  // cmp dword ptr [Borderlands2.exe+1682B14], 00
+    "75 ??"              // jne Borderlands2.GetOutermost+429A
+    "83 3D ???????? 00"  // cmp dword ptr [Borderlands2.exe+15E801C], 00
+};
+
+}  // namespace
+
+void BL2Hook::find_static_find_object(void) {
+    static_find_object_ptr = STATIC_FIND_OBJECT_PATTERN.sigscan<static_find_object_func>();
+    LOG(MISC, "StaticFindObject: {:p}", reinterpret_cast<void*>(static_find_object_ptr));
+}
+
 UObject* BL2Hook::find_object(UClass* cls, const std::wstring& name) const {
-    static UFunction* findobject_func = nullptr;
-
-    if (findobject_func == nullptr) {
-        findobject_func = cls->find_func_and_validate(L"FindObject"_fn);
-    }
-
-    return BoundFunction{findobject_func, cls}.call<UObjectProperty, UStrProperty, UClassProperty>(
-        name, cls);
+    return static_find_object_ptr(cls, nullptr, name.c_str(), 0 /* false */);
 }
 
 #pragma endregion
