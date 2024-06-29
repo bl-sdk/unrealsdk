@@ -49,7 +49,7 @@ using UInt16Property = CopyableProperty<int16_t>;
 using UIntProperty = CopyableProperty<int32_t>;
 using UInt64Property = CopyableProperty<int64_t>;
 
-using UByteProperty = CopyableProperty<uint8_t>;
+// UByteProperty has an extra field in UE3, handled in a different file
 using UUInt16Property = CopyableProperty<uint16_t>;
 using UUInt32Property = CopyableProperty<uint32_t>;
 using UUInt64Property = CopyableProperty<uint64_t>;
@@ -68,8 +68,6 @@ inline const wchar_t* const ClassTraits<UIntProperty>::NAME = L"IntProperty";
 template <>
 inline const wchar_t* const ClassTraits<UInt64Property>::NAME = L"Int64Property";
 
-template <>
-inline const wchar_t* const ClassTraits<UByteProperty>::NAME = L"ByteProperty";
 template <>
 inline const wchar_t* const ClassTraits<UUInt16Property>::NAME = L"UInt16Property";
 template <>

@@ -105,6 +105,7 @@ bool has_hook(std::wstring_view func, Type type, std::wstring_view identifier);
  */
 bool remove_hook(std::wstring_view func, Type type, std::wstring_view identifier);
 
+#ifndef UNREALSDK_IMPORTING
 namespace impl {  // These functions are only relevant when implementing a game hook
 
 struct List;
@@ -163,6 +164,7 @@ bool has_post_hooks(const List& list);
 bool run_hooks_of_type(const List& list, Type type, Details& hook);
 
 }  // namespace impl
+#endif
 
 }  // namespace unrealsdk::hook_manager
 

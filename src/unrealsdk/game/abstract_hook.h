@@ -33,9 +33,19 @@ struct AbstractHook {
     virtual ~AbstractHook() = default;
 
     /**
-     * @brief Hooks the current game and sets up all other functions on this object.
+     * @brief Hooks the active game.
+     * @note Always called before any of the other functions on this object.
+     * @note On return, all other functions on this object must be set up and valid to call.
+     * @note The unrealsdk globals are not yet valid during this call, and may crash if used.
      */
     virtual void hook(void) = 0;
+
+    /**
+     * @brief Performs any additional hooking which requires unrealsdk initialization.
+     * @note unrealsdk globals *are* valid during this call.
+     * @note Typically used to setup hooks, e.g. for console.
+     */
+    virtual void post_init(void) {};
 
     // Inner methods accessed by the global wrappers in `unrealsdk.h`
     [[nodiscard]] virtual const unreal::GObjects& gobjects(void) const = 0;

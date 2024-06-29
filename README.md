@@ -52,18 +52,19 @@ auto op_string = hook.obj->get<UFunction, BoundFunction>(L"BuildOverpowerPromptS
 A few environment variables adjust the sdk's behaviour. Note that not all variables are used in all
 build configurations.
 
-| Environment Variable                          | Usage                                                                                                                           |
-| :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
-| `UNREALSDK_ENV_FILE`                          | A file containing environment variables to load, relative to the dll. Defaults to `unrealsdk.env`. More below.                  |
-| `UNREALSDK_EXTERNAL_CONSOLE`                  | If defined, creates an external console window mirroring what is written to the game's console. Always enabled in debug builds. |
-| `UNREALSDK_LOG_FILE`                          | The file to write log messages to, relative to the dll. Defaults to `unrealsdk.log`.                                            |
-| `UNREALSDK_LOG_LEVEL`                         | Changes the default logging level used in the unreal console. May use either the level names or their numerical values.         |
-| `UNREALSDK_GAME_OVERRIDE`                     | Override the executable name used for game detection.                                                                           |
-| `UNREALSDK_UPROPERTY_SIZE`                    | Changes the size the `UProperty` class is assumed to have.                                                                      |
-| `UNREALSDK_ALLOC_ALIGNMENT`                   | Changes the alignment used when calling the unreal memory allocation functions.                                                 |
-| `UNREALSDK_CONSOLE_KEY`                       | Changes the default console key which is set when one is not already bound.                                                     |
-| `UNREALSDK_UCONSOLE_CONSOLE_COMMAND_VF_INDEX` | Overrides the virtual function index used when hooking `UConsole::ConsoleCommand`.                                              |
-| `UNREALSDK_UCONSOLE_OUTPUT_TEXT_VF_INDEX`     | Overrides the virtual function index used when calling `UConsole::OutputText`.                                                  |
+| Environment Variable                          | Usage                                                                                                                                                                                 |
+| :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `UNREALSDK_ENV_FILE`                          | A file containing environment variables to load, relative to the dll. Defaults to `unrealsdk.env`. More below.                                                                        |
+| `UNREALSDK_EXTERNAL_CONSOLE`                  | If defined, creates an external console window mirroring what is written to the game's console. Always enabled in debug builds.                                                       |
+| `UNREALSDK_LOG_FILE`                          | The file to write log messages to, relative to the dll. Defaults to `unrealsdk.log`.                                                                                                  |
+| `UNREALSDK_LOG_LEVEL`                         | Changes the default logging level used in the unreal console. May use either the level names or their numerical values.                                                               |
+| `UNREALSDK_GAME_OVERRIDE`                     | Override the executable name used for game detection.                                                                                                                                 |
+| `UNREALSDK_UPROPERTY_SIZE`                    | Changes the size the `UProperty` class is assumed to have.                                                                                                                            |
+| `UNREALSDK_ALLOC_ALIGNMENT`                   | Changes the alignment used when calling the unreal memory allocation functions.                                                                                                       |
+| `UNREALSDK_CONSOLE_KEY`                       | Changes the default console key which is set when one is not already bound.                                                                                                           |
+| `UNREALSDK_UCONSOLE_CONSOLE_COMMAND_VF_INDEX` | Overrides the virtual function index used when hooking `UConsole::ConsoleCommand`.                                                                                                    |
+| `UNREALSDK_UCONSOLE_OUTPUT_TEXT_VF_INDEX`     | Overrides the virtual function index used when calling `UConsole::OutputText`.                                                                                                        |
+| `UNREALSDK_LOCKING_PROCESS_EVENT`             | If defined, locks simultaneous ProcessEvent calls from different threads. This is used both for hooks and for calling unreal functions - external code must take care wrt. deadlocks. |
 
 You can also define any of these in an env file, which will automatically be loaded when the sdk
 starts (excluding `UNREALSDK_ENV_FILE` of course). This file should contain lines of equals

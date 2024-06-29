@@ -1,5 +1,39 @@
 # Changelog
 
+## v1.2.0 (Upcoming)
+- When an exception occurs during a hook, now mention what function it was under, to make debugging
+  easier.
+
+  [f2e21f60](https://github.com/bl-sdk/unrealsdk/commit/f2e21f60)
+
+- Optimized performance of checking if to run hooks on functions which have none.
+
+  [77bc3c54](https://github.com/bl-sdk/unrealsdk/commit/77bc3c54)
+
+- Added support for `UByteAttributeProperty`, `UComponentProperty`, `UFloatAttributeProperty`,
+  and `UIntAttributeProperty`.
+
+  [45f07875](https://github.com/bl-sdk/unrealsdk/commit/45f07875),
+  [adb5c986](https://github.com/bl-sdk/unrealsdk/commit/adb5c986)
+
+- Added the `Enum` field to `UByteAttributeProperty`s.
+
+  [fb9c043b](https://github.com/bl-sdk/unrealsdk/commit/fb9c043b)
+
+- Added the `UNREALSDK_LOCKING_PROCESS_EVENT` env var, to help deal with games where it's not thread
+  safe.
+
+  **Note that this opens up the possibility for a deadlock in external code.**
+
+  Both hooks and unreal function calls will attempt to acquire the "process event lock". It is
+  possible to deadlock if a hook (which holds the process event lock) attempts to acquire another
+  lock at the same time as the thread holding that lock tries to (transitively) call an unreal
+  function (which will attempt to acquire the process event lock).
+
+  [35857adf](https://github.com/bl-sdk/unrealsdk/commit/35857adf),
+  [b9469bbf](https://github.com/bl-sdk/unrealsdk/commit/b9469bbf)
+
+
 ## v1.1.0
 - Changed a number of interfaces to take a string view rather than a const string reference.
 

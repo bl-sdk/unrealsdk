@@ -76,6 +76,16 @@ class BL2Hook : public AbstractHook {
     static void find_construct_object(void);
 
     /**
+     * @brief Finds `UObject::GetPathName`, and sets up such that `uobject_path_name` may be called.
+     */
+    static void find_get_path_name(void);
+
+    /**
+     * @brief Finds `StaticFindObject`, and sets up such that `find_object` may be called.
+     */
+    static void find_static_find_object(void);
+
+    /**
      * @brief Finds `LoadPackage`, and sets up such that `load_package` may be called.
      */
     static void find_load_package(void);
@@ -87,6 +97,7 @@ class BL2Hook : public AbstractHook {
 
    public:
     void hook(void) override;
+    void post_init(void) override;
 
     [[nodiscard]] const unreal::GObjects& gobjects(void) const override;
     [[nodiscard]] const unreal::GNames& gnames(void) const override;

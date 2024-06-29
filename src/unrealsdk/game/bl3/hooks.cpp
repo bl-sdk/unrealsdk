@@ -1,5 +1,6 @@
 #include "unrealsdk/pch.h"
 
+#include "unrealsdk/env.h"
 #include "unrealsdk/game/bl3/bl3.h"
 #include "unrealsdk/hook_manager.h"
 #include "unrealsdk/memory.h"
@@ -78,15 +79,43 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
 
     process_event_ptr(obj, func, params);
 }
+
+std::recursive_mutex process_event_mutex{};
+
+void locking_process_event_hook(UObject* obj, UFunction* func, void* params) {
+    const std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
+    process_event_hook(obj, func, params);
+}
+
 static_assert(std::is_same_v<decltype(process_event_hook), process_event_func>,
               "process_event signature is incorrect");
+static_assert(std::is_same_v<decltype(process_event_hook), decltype(locking_process_event_hook)>,
+              "process_event signature is incorrect");
+
+/**
+ * @brief Checks if we should use a locking process event implementation.
+ *
+ * @return True if we should use locks.
+ */
+bool locking(void) {
+    // Basically just a function so we can be sure this static is initialized late - LTO hopefully
+    // takes care of it
+    static auto locking = env::defined(env::LOCKING_PROCESS_EVENT);
+    return locking;
+}
 
 void BL3Hook::hook_process_event(void) {
-    detour(PROCESS_EVENT_SIG.sigscan(), process_event_hook, &process_event_ptr, "ProcessEvent");
+    detour(PROCESS_EVENT_SIG.sigscan(), locking() ? locking_process_event_hook : process_event_hook,
+           &process_event_ptr, "ProcessEvent");
 }
 
 void BL3Hook::process_event(UObject* object, UFunction* func, void* params) const {
-    process_event_hook(object, func, params);
+    if (locking()) {
+        const std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
+        process_event_hook(object, func, params);
+    } else {
+        process_event_hook(object, func, params);
+    }
 }
 
 namespace {
@@ -134,7 +163,7 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
         implementation simpler.
         */
 
-        auto data = hook_manager::impl::preprocess_hook("ProcessEvent", func, obj);
+        auto data = hook_manager::impl::preprocess_hook("CallFunction", func, obj);
         if (data != nullptr) {
             WrappedStruct args{func};
             auto original_code = stack->extract_current_args(args);

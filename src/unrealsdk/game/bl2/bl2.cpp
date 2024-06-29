@@ -29,13 +29,17 @@ void BL2Hook::hook(void) {
     find_fframe_step();
     find_gmalloc();
     find_construct_object();
+    find_get_path_name();
+    find_static_find_object();
     find_load_package();
-
-    inject_console();
 
     hexedit_set_command();
     hexedit_array_limit();
     hexedit_array_limit_message();
+}
+
+void BL2Hook::post_init(void) {
+    inject_console();
 }
 
 #if defined(__MINGW32__)
