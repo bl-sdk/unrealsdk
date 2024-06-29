@@ -10,11 +10,15 @@
 
 using namespace unrealsdk::unreal;
 
-namespace unrealsdk::hook_manager {
+#pragma region Implementation
+#ifndef UNREALSDK_IMPORTING
+namespace unrealsdk::hook_manager::impl {
 
-namespace impl {
+namespace {
 
 using Group = utils::StringViewMap<std::wstring, DLLSafeCallback*>;
+
+}
 
 struct List {
     Group pre;
@@ -29,175 +33,91 @@ struct List {
     [[nodiscard]] bool empty(void) const {
         return this->pre.empty() && this->post.empty() && this->post_unconditional.empty();
     }
-};
 
-}  // namespace impl
+    /**
+     * @brief Gets a hook group on this list from it's type.
+     *
+     * @param type The hook type to get.
+     * @return A reference to the selected hook group on this object, or nullptr if calling the safe
+     *         version and the type's invalid.
+     */
+    [[nodiscard]] Group& get_group_by_type(Type type) {
+        switch (type) {
+            case Type::PRE:
+                return this->pre;
+            case Type::POST:
+                return this->post;
+            case Type::POST_UNCONDITIONAL:
+                return this->post_unconditional;
+            default:
+                throw std::invalid_argument("Invalid hook type " + std::to_string((uint8_t)type));
+        }
+    }
+    // We only need the const version in practice
+    [[nodiscard]] const Group* get_safe_group_by_type(Type type) const noexcept {
+        switch (type) {
+            case Type::PRE:
+                return &this->pre;
+            case Type::POST:
+                return &this->post;
+            case Type::POST_UNCONDITIONAL:
+                return &this->post_unconditional;
+            default:
+                return nullptr;
+        }
+    }
+};
 
 namespace {
 
-#ifndef UNREALSDK_IMPORTING
 bool should_log_all_calls = false;
 bool should_inject_next_call = false;
 
-utils::StringViewMap<std::wstring, impl::List> hooks{};
+utils::StringViewMap<std::wstring, List> hooks{};
 
-/**
- * @brief Get the hook group for a certain type from it's list.
- *
- * @param list The hook list to get from.
- * @param type The hook type to get.
- * @return The selected hook group.
- */
-impl::Group& get_group_by_type(impl::List& list, Type type) {
-    switch (type) {
-        case Type::PRE:
-            return list.pre;
-        case Type::POST:
-            return list.post;
-        case Type::POST_UNCONDITIONAL:
-            return list.post_unconditional;
-        default:
-            throw std::invalid_argument("Invalid hook type " + std::to_string((uint8_t)type));
-    }
-}
-#endif
-
-}  // namespace
-
-#ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI(void, log_all_calls, bool should_log);
-#endif
-#ifndef UNREALSDK_IMPORTING
-UNREALSDK_CAPI(void, log_all_calls, bool should_log) {
+void log_all_calls(bool should_log) {
     should_log_all_calls = should_log;
 }
-#endif
-void log_all_calls(bool should_log) {
-    UNREALSDK_MANGLE(log_all_calls)(should_log);
-}
 
-#ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI(void, inject_next_call);
-#endif
-#ifndef UNREALSDK_IMPORTING
-UNREALSDK_CAPI(void, inject_next_call) {
+void inject_next_call(void) {
     should_inject_next_call = true;
 }
-#endif
-void inject_next_call(void) {
-    UNREALSDK_MANGLE(inject_next_call)();
-}
-
-#ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI(bool,
-               add_hook,
-               const wchar_t* func,
-               size_t func_size,
-               Type type,
-               const wchar_t* identifier,
-               size_t identifier_size,
-               DLLSafeCallback* callback);
-#endif
-#ifndef UNREALSDK_IMPORTING
-UNREALSDK_CAPI(bool,
-               add_hook,
-               const wchar_t* func,
-               size_t func_size,
-               Type type,
-               const wchar_t* identifier,
-               size_t identifier_size,
-               DLLSafeCallback* callback) {
-    const std::wstring_view func_view{func, func_size};
-    auto iter = hooks.find(func_view);
-    if (iter == hooks.end()) {
-        iter = hooks.emplace(func_view, impl::List{}).first;
-    }
-
-    auto& group = get_group_by_type(iter->second, type);
-
-    const std::wstring_view identifier_view{identifier, identifier_size};
-    if (group.contains(identifier_view)) {
-        return false;
-    }
-
-    group.emplace(identifier_view, callback);
-    return true;
-}
-#endif
 
 bool add_hook(std::wstring_view func,
               Type type,
               std::wstring_view identifier,
-              const Callback& callback) {
-    // NOLINTBEGIN(cppcoreguidelines-owning-memory)
-    return UNREALSDK_MANGLE(add_hook)(func.data(), func.size(), type, identifier.data(),
-                                      identifier.size(), new DLLSafeCallback(callback));
-    // NOLINTEND(cppcoreguidelines-owning-memory)
+              DLLSafeCallback* callback) {
+    auto iter = hooks.find(func);
+    if (iter == hooks.end()) {
+        iter = hooks.emplace(func, impl::List{}).first;
+    }
+
+    auto& group = iter->second.get_group_by_type(type);
+    if (group.contains(identifier)) {
+        return false;
+    }
+
+    group.emplace(identifier, callback);
+    return true;
 }
 
-#ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI(bool,
-               has_hook,
-               const wchar_t* func,
-               size_t func_size,
-               Type type,
-               const wchar_t* identifier,
-               size_t identifier_size);
-#endif
-#ifndef UNREALSDK_IMPORTING
-UNREALSDK_CAPI(bool,
-               has_hook,
-               const wchar_t* func,
-               size_t func_size,
-               Type type,
-               const wchar_t* identifier,
-               size_t identifier_size) {
-    const std::wstring_view func_view{func, func_size};
-    auto iter = hooks.find(func_view);
+bool has_hook(std::wstring_view func, Type type, std::wstring_view identifier) {
+    auto iter = hooks.find(func);
     if (iter == hooks.end()) {
         return false;
     }
 
-    auto& group = get_group_by_type(iter->second, type);
-
-    const std::wstring_view identifier_view{identifier, identifier_size};
-    return group.contains(identifier_view);
-}
-#endif
-
-bool has_hook(std::wstring_view func, Type type, std::wstring_view identifier) {
-    return UNREALSDK_MANGLE(has_hook)(func.data(), func.size(), type, identifier.data(),
-                                      identifier.size());
+    return iter->second.get_group_by_type(type).contains(identifier);
 }
 
-#ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI(bool,
-               remove_hook,
-               const wchar_t* func,
-               size_t func_size,
-               Type type,
-               const wchar_t* identifier,
-               size_t identifier_size);
-#endif
-#ifndef UNREALSDK_IMPORTING
-
-UNREALSDK_CAPI(bool,
-               remove_hook,
-               const wchar_t* func,
-               size_t func_size,
-               Type type,
-               const wchar_t* identifier,
-               size_t identifier_size) {
-    const std::wstring_view func_view{func, func_size};
-    auto func_iter = hooks.find(func_view);
+bool remove_hook(std::wstring_view func, Type type, std::wstring_view identifier) {
+    auto func_iter = hooks.find(func);
     if (func_iter == hooks.end()) {
         return false;
     }
 
-    auto& group = get_group_by_type(func_iter->second, type);
-
-    const std::wstring identifier_view{identifier, identifier_size};
-    auto group_iter = group.find(identifier_view);
+    auto& group = func_iter->second.get_group_by_type(type);
+    auto group_iter = group.find(identifier);
     if (group_iter == group.end()) {
         return false;
     }
@@ -218,16 +138,8 @@ UNREALSDK_CAPI(bool,
     return true;
 }
 
-#endif
+}  // namespace
 
-bool remove_hook(std::wstring_view func, Type type, std::wstring_view identifier) {
-    return UNREALSDK_MANGLE(remove_hook)(func.data(), func.size(), type, identifier.data(),
-                                         identifier.size());
-}
-
-namespace impl {
-
-#ifndef UNREALSDK_IMPORTING
 const List* preprocess_hook(std::string_view source, const UFunction* func, const UObject* obj) {
     if (should_inject_next_call) {
         should_inject_next_call = false;
@@ -262,26 +174,15 @@ bool has_post_hooks(const List& list) {
 }
 
 bool run_hooks_of_type(const List& list, Type type, Details& hook) {
+    const Group* group_ptr = list.get_safe_group_by_type(type);
+    if (group_ptr == nullptr) {
+        LOG(ERROR, "Tried to run hooks of invalid type {}", (uint8_t)type);
+        return false;
+    }
+
     // Grab a copy of the revelevant hook group, incase the hook removes itself (which would
     // invalidate the iterator)
-    Group group{};
-
-    // Not using `get_group_by_type` because we don't want to throw on an invalid type (and
-    // const-ness messes with it).
-    switch (type) {
-        case Type::PRE:
-            group = list.pre;
-            break;
-        case Type::POST:
-            group = list.post;
-            break;
-        case Type::POST_UNCONDITIONAL:
-            group = list.post_unconditional;
-            break;
-        default:
-            LOG(ERROR, "Tried to run hooks of invalid type {}", (uint8_t)type);
-            return false;
-    }
+    Group group = *group_ptr;
 
     bool ret = false;
     for (const auto& [_, hook_function] : group) {
@@ -296,8 +197,127 @@ bool run_hooks_of_type(const List& list, Type type, Details& hook) {
 
     return ret;
 }
+
+}  // namespace unrealsdk::hook_manager::impl
+#endif
+#pragma endregion
+
+// =================================================================================================
+
+#pragma region Public Interface
+namespace unrealsdk::hook_manager {
+
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI(void, log_all_calls, bool should_log);
+#endif
+#ifndef UNREALSDK_IMPORTING
+UNREALSDK_CAPI(void, log_all_calls, bool should_log) {
+    impl::log_all_calls(should_log);
+}
+#endif
+void log_all_calls(bool should_log) {
+    UNREALSDK_MANGLE(log_all_calls)(should_log);
+}
+
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI(void, inject_next_call);
+#endif
+#ifndef UNREALSDK_IMPORTING
+UNREALSDK_CAPI(void, inject_next_call) {
+    impl::inject_next_call();
+}
+#endif
+void inject_next_call(void) {
+    UNREALSDK_MANGLE(inject_next_call)();
+}
+
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI(bool,
+               add_hook,
+               const wchar_t* func,
+               size_t func_size,
+               Type type,
+               const wchar_t* identifier,
+               size_t identifier_size,
+               DLLSafeCallback* callback);
+#endif
+#ifndef UNREALSDK_IMPORTING
+UNREALSDK_CAPI(bool,
+               add_hook,
+               const wchar_t* func,
+               size_t func_size,
+               Type type,
+               const wchar_t* identifier,
+               size_t identifier_size,
+               DLLSafeCallback* callback) {
+    return impl::add_hook({func, func_size}, type, {identifier, identifier_size}, callback);
+}
 #endif
 
-}  // namespace impl
+bool add_hook(std::wstring_view func,
+              Type type,
+              std::wstring_view identifier,
+              const Callback& callback) {
+    // NOLINTBEGIN(cppcoreguidelines-owning-memory)
+    return UNREALSDK_MANGLE(add_hook)(func.data(), func.size(), type, identifier.data(),
+                                      identifier.size(), new DLLSafeCallback(callback));
+    // NOLINTEND(cppcoreguidelines-owning-memory)
+}
+
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI(bool,
+               has_hook,
+               const wchar_t* func,
+               size_t func_size,
+               Type type,
+               const wchar_t* identifier,
+               size_t identifier_size);
+#endif
+#ifndef UNREALSDK_IMPORTING
+UNREALSDK_CAPI(bool,
+               has_hook,
+               const wchar_t* func,
+               size_t func_size,
+               Type type,
+               const wchar_t* identifier,
+               size_t identifier_size) {
+    return impl::has_hook({func, func_size}, type, {identifier, identifier_size});
+}
+#endif
+
+bool has_hook(std::wstring_view func, Type type, std::wstring_view identifier) {
+    return UNREALSDK_MANGLE(has_hook)(func.data(), func.size(), type, identifier.data(),
+                                      identifier.size());
+}
+
+#ifdef UNREALSDK_SHARED
+UNREALSDK_CAPI(bool,
+               remove_hook,
+               const wchar_t* func,
+               size_t func_size,
+               Type type,
+               const wchar_t* identifier,
+               size_t identifier_size);
+#endif
+#ifndef UNREALSDK_IMPORTING
+
+UNREALSDK_CAPI(bool,
+               remove_hook,
+               const wchar_t* func,
+               size_t func_size,
+               Type type,
+               const wchar_t* identifier,
+               size_t identifier_size) {
+    return impl::remove_hook({func, func_size}, type, {identifier, identifier_size});
+}
+
+#endif
+
+bool remove_hook(std::wstring_view func, Type type, std::wstring_view identifier) {
+    return UNREALSDK_MANGLE(remove_hook)(func.data(), func.size(), type, identifier.data(),
+                                         identifier.size());
+}
 
 }  // namespace unrealsdk::hook_manager
+
+#pragma endregion
