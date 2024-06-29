@@ -97,6 +97,7 @@ class BL2Hook : public AbstractHook {
 
    public:
     void hook(void) override;
+    void post_init(void) override;
 
     [[nodiscard]] const unreal::GObjects& gobjects(void) const override;
     [[nodiscard]] const unreal::GNames& gnames(void) const override;

@@ -4,6 +4,7 @@
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/structs/fframe.h"
+#include "unrealsdk/unreal/structs/fname.h"
 #include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 #include "unrealsdk/unrealsdk.h"
 #include "unrealsdk/utils.h"
@@ -16,9 +17,23 @@ namespace unrealsdk::hook_manager::impl {
 
 namespace {
 
+/*
+We store all hooks in a multi layered mapping.
+
+The outermost level is the FName of the function, which lets us do a very quick compare to discard
+most calls. The second level is the full path name string, what was passed in, which we use to
+confirm we've got the right hook.
+
+`preprocess_hook` looks through these first two levels to determine if the called function has any
+hooks, and returns the "List" of all hooks which apply to that function at any stage.
+
+The list then maps each hook type into "Group"s. Each group is a full set to hooks to run on a
+specific stage.
+*/
+
 using Group = utils::StringViewMap<std::wstring, DLLSafeCallback*>;
 
-}
+}  // namespace
 
 struct List {
     Group pre;
@@ -73,7 +88,7 @@ namespace {
 bool should_log_all_calls = false;
 bool should_inject_next_call = false;
 
-utils::StringViewMap<std::wstring, List> hooks{};
+std::unordered_map<FName, utils::StringViewMap<std::wstring, List>> hooks{};
 
 void log_all_calls(bool should_log) {
     should_log_all_calls = should_log;
@@ -83,13 +98,33 @@ void inject_next_call(void) {
     should_inject_next_call = true;
 }
 
+/**
+ * @brief Extracts the object name from a hook function's full path name.
+ *
+ * @param func The full function path name.
+ * @return The FName we expect it's object to use.
+ */
+FName extract_func_obj_name(std::wstring_view func) {
+    auto idx = func.find_last_of(L".:");
+    if (idx == std::wstring_view::npos) {
+        return func;
+    }
+    return func.substr(idx + 1);
+}
+
 bool add_hook(std::wstring_view func,
               Type type,
               std::wstring_view identifier,
               DLLSafeCallback* callback) {
-    auto iter = hooks.find(func);
-    if (iter == hooks.end()) {
-        iter = hooks.emplace(func, impl::List{}).first;
+    auto fname = extract_func_obj_name(func);
+
+    auto& path_name_map = hooks[fname];
+
+    // Doing this a bit weirdly to try avoid allocating a new string - we can get via string view,
+    // but setting requires converting to a full string first
+    auto iter = path_name_map.find(func);
+    if (iter == path_name_map.end()) {
+        iter = path_name_map.emplace(func, List{}).first;
     }
 
     auto& group = iter->second.get_group_by_type(type);
@@ -102,21 +137,37 @@ bool add_hook(std::wstring_view func,
 }
 
 bool has_hook(std::wstring_view func, Type type, std::wstring_view identifier) {
-    auto iter = hooks.find(func);
-    if (iter == hooks.end()) {
+    auto fname = extract_func_obj_name(func);
+
+    auto fname_iter = hooks.find(fname);
+    if (fname_iter == hooks.end()) {
+        return false;
+    }
+    auto& path_name_map = fname_iter->second;
+
+    auto path_name_iter = path_name_map.find(func);
+    if (path_name_iter == path_name_map.end()) {
         return false;
     }
 
-    return iter->second.get_group_by_type(type).contains(identifier);
+    return path_name_iter->second.get_group_by_type(type).contains(identifier);
 }
 
 bool remove_hook(std::wstring_view func, Type type, std::wstring_view identifier) {
-    auto func_iter = hooks.find(func);
-    if (func_iter == hooks.end()) {
+    auto fname = extract_func_obj_name(func);
+
+    auto fname_iter = hooks.find(fname);
+    if (fname_iter == hooks.end()) {
+        return false;
+    }
+    auto& path_name_map = fname_iter->second;
+
+    auto path_name_iter = path_name_map.find(func);
+    if (path_name_iter == path_name_map.end()) {
         return false;
     }
 
-    auto& group = func_iter->second.get_group_by_type(type);
+    auto& group = path_name_iter->second.get_group_by_type(type);
     auto group_iter = group.find(identifier);
     if (group_iter == group.end()) {
         return false;
@@ -126,13 +177,13 @@ bool remove_hook(std::wstring_view func, Type type, std::wstring_view identifier
     group.erase(group_iter);
 
     /*
-    Important Note: While it's tempting, we can't also erase the hook list here if it's empty,
-    because we may be being called from inside a hook .
+    Important Note: While it's tempting, we can't also erase the higher levels here if they're
+    empty, because we may be being called from inside a hook, since this may cause a use after free.
 
-    If we are, we'd end up freeing the list which the native hook still has a reference to, and will
-    pass back to us to process further - i.e. it'll use after free, and probably crash.
+    We make sure to take a copy of the group in `run_hooks_of_type`, so invalidating iterators
+    within it is not a concern.
 
-    Instead, we clean up hook lists during `preprocess_hook`
+    Instead, we clean up during `preprocess_hook`
     */
 
     return true;
@@ -146,27 +197,42 @@ const List* preprocess_hook(std::string_view source, const UFunction* func, cons
         return nullptr;
     }
 
-    auto func_name = func->get_path_name();
+    // Want to delay filling this, but if we're logging all calls
+    std::wstring func_name{};
 
     if (should_log_all_calls) {
+        func_name = func->get_path_name();
         LOG(MISC, "===== {} called =====", source);
         LOG(MISC, L"Function: {}", func_name);
         LOG(MISC, L"Object: {}", obj->get_path_name());
     }
 
-    if (!hooks.contains(func_name)) {
+    // Check if anything matches the function FName
+    auto fname_iter = hooks.find(func->Name);
+    if (fname_iter == hooks.end()) {
+        return nullptr;
+    }
+    auto& path_name_map = fname_iter->second;
+    if (path_name_map.empty()) {
+        hooks.erase(func->Name);
         return nullptr;
     }
 
-    auto list = &hooks[func_name];
-
-    // Cleanup the list if it's empty
-    if (list->empty()) {
-        hooks.erase(func_name);
+    // Now check the full path name
+    if (!should_log_all_calls) {
+        func_name = func->get_path_name();
+    }
+    auto path_name_iter = path_name_map.find(func_name);
+    if (path_name_iter == path_name_map.end()) {
+        return nullptr;
+    }
+    auto& list = path_name_iter->second;
+    if (list.empty()) {
+        path_name_map.erase(func_name);
         return nullptr;
     }
 
-    return list;
+    return &list;
 }
 
 bool has_post_hooks(const List& list) {
@@ -180,9 +246,9 @@ bool run_hooks_of_type(const List& list, Type type, Details& hook) {
         return false;
     }
 
-    // Grab a copy of the revelevant hook group, incase the hook removes itself (which would
+    // Grab a copy of the revelevant hook group, in case the hook removes itself (which would
     // invalidate the iterator)
-    Group group = *group_ptr;
+    const Group group = *group_ptr;
 
     bool ret = false;
     for (const auto& [_, hook_function] : group) {

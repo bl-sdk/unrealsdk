@@ -65,9 +65,12 @@ bool init(const std::function<std::unique_ptr<game::AbstractHook>(void)>& game_g
 
     auto game = game_getter();
 
-    // Initialize the hook before moving it, to weed out any order of initialization problems.
+    // Initialize the hook before moving it, to weed out any unexpected calls to the globals.
     game->hook();
     hook_instance = std::move(game);
+
+    hook_instance->post_init();
+
     return true;
 }
 
