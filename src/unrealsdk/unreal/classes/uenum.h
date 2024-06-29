@@ -36,6 +36,8 @@ class UEnum : public UField {
     UnmanagedFString CppType;
     TArray<TPair<FName, uint64_t>> Names;
     int64_t CppForm;
+#else
+    TArray<FName> Names;
 #endif
 
     // NOLINTEND(readability-identifier-naming)

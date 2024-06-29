@@ -24,20 +24,9 @@ std::unordered_map<FName, uint64_t> UEnum::get_names(void) const {
 #else
 
 std::unordered_map<FName, uint64_t> UEnum::get_names(void) const {
-    static const auto name_sentinel = L"None"_fn;
-    auto func = this->get<UFunction, BoundFunction>(L"GetEnum"_fn);
-
     std::unordered_map<FName, uint64_t> output;
-
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
-    auto this_obj = const_cast<UObject*>(static_cast<const UObject*>(this));
-
-    for (int32_t i = 0; i < std::numeric_limits<int32_t>::max(); i++) {
-        auto name = func.call<UNameProperty, UObjectProperty, UIntProperty>(this_obj, i);
-        if (name == name_sentinel) {
-            break;
-        }
-        output.emplace(name, i);
+    for (size_t i = 0; i < this->Names.size(); i++) {
+        output.emplace(this->Names.at(i), i);
     }
     return output;
 }
