@@ -2,8 +2,6 @@
 #define UNREALSDK_LOGGING_H
 
 // Because this file in included in the pch, we can't include the pch here instead of these
-#include <chrono>
-#include <string>
 #include "unrealsdk/format.h"
 
 namespace unrealsdk::logging {
@@ -26,16 +24,12 @@ enum class Level : uint8_t {
 };
 
 struct LogMessage {
-    // NOLINTBEGIN(cppcoreguidelines-avoid-const-or-ref-data-members)
-
-    const uint64_t unix_time_ms{};
-    const Level level{};
+    uint64_t unix_time_ms{};
+    Level level{};
     const char* msg{};
-    const size_t msg_size{};
+    size_t msg_size{};
     const char* location{};
-    const int line{};
-
-    // NOLINTEND(cppcoreguidelines-avoid-const-or-ref-data-members)
+    int line{};
 };
 
 #ifndef UNREALSDK_IMPORTING
@@ -44,11 +38,10 @@ struct LogMessage {
  * @note Only the first call is used. This means manually calling this before initializing the sdk
  *       overrides the defaults.
  *
- * @param file The file to write logs to.
- * @param callbacks_only If true, disables all output, and only runs the logging callbacks. Means
- *                       the filename arg is ignored.
+ * @param file The file to write logs to, or an empty path if not to use a file.
+ * @param unreal_console If true, also logs to the unreal console.
  */
-void init(const std::filesystem::path& file, bool callbacks_only = false);
+void init(const std::filesystem::path& file, bool unreal_console = true);
 #endif
 
 /**
