@@ -100,6 +100,7 @@ uint64_t unix_ms_now(void) {
     return std::chrono::round<std::chrono::milliseconds>(time.time_since_epoch()).count();
 }
 
+#ifndef UNREALSDK_IMPORTING
 /**
  * @brief Gets a system clock time point from unix time milliseconds.
  *
@@ -174,10 +175,12 @@ Level get_level_from_string(std::string_view str) {
 
     return Level::INVALID;
 }
+#endif
 
 #pragma endregion
 
 #pragma region Formatting
+#ifndef UNREALSDK_IMPORTING
 
 const std::string TRUNCATION_PREFIX = "~ ";
 
@@ -253,6 +256,7 @@ std::string get_header(void) {
                                   "location", LINE_WIDTH, "line", LEVEL_WIDTH, "v");
 }
 
+#endif
 #pragma endregion
 
 #pragma region Built-in Logger
