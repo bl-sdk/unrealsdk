@@ -129,7 +129,8 @@ bool inject_console_hook(hook_manager::Details& hook) {
     auto console = hook.obj->get<UObjectProperty>(L"ViewportConsole"_fn);
 
     // Grab this reference ASAP
-    console_output_text = console->get<UFunction, BoundFunction>(L"OutputText"_fn);
+    // Actually using OutputTextLine because it handles an empty string - OutputText does nothing
+    console_output_text = console->get<UFunction, BoundFunction>(L"OutputTextLine"_fn);
 
     auto existing_console_key = console->get<UNameProperty>(L"ConsoleKey"_fn);
     if (existing_console_key != L"None"_fn || existing_console_key == L"Undefine"_fn) {
