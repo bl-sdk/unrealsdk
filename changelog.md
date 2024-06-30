@@ -27,11 +27,41 @@
 
   Both hooks and unreal function calls will attempt to acquire the "process event lock". It is
   possible to deadlock if a hook (which holds the process event lock) attempts to acquire another
-  lock at the same time as the thread holding that lock tries to (transitively) call an unreal
-  function (which will attempt to acquire the process event lock).
+  lock at the same time as the thread holding that lock tries to call an unreal function (which will
+  attempt to acquire the process event lock).
+  
+  Swapped various unreal function calls with native equivalents to try reduce how many functions
+  transitively have this behaviour - should only need to worry about calls to `BoundFunction::call`,
+  or to `unrealsdk::process_event` directly.
 
   [35857adf](https://github.com/bl-sdk/unrealsdk/commit/35857adf),
-  [b9469bbf](https://github.com/bl-sdk/unrealsdk/commit/b9469bbf)
+  [b9469bbf](https://github.com/bl-sdk/unrealsdk/commit/b9469bbf),
+  [d74ff4eb](https://github.com/bl-sdk/unrealsdk/commit/d74ff4eb),
+  [91e3fcd5](https://github.com/bl-sdk/unrealsdk/commit/91e3fcd5)
+
+- Several logging module reworks. *This breaks binary compatibility*, though existing code should
+  work pretty much as is after a recompile.
+
+  - *Changed the semantics of `unrealsdk::logging::init`.* The `callbacks_only` arg was removed in
+    favour of passing an empty path to disable file output, and disabling console output separately.
+    The never version has the exact same signature, so existing code which used both args may need
+    to be updated.
+
+  - Changed the `location` arg to take a string view rather than a raw pointer.
+
+  - Moved to a message queue model, where all printing is done in its own thread. This helps avoid
+    deadlocks when using locking process event, should mean filesystem access doesn't block logic
+    threads.
+
+  - Fixed that empty log messages would not be properly shown in the unreal console.
+
+  [02b56f18](https://github.com/bl-sdk/unrealsdk/commit/02b56f18),
+  [91e3fcd5](https://github.com/bl-sdk/unrealsdk/commit/91e3fcd5),
+  [8ec285fc](https://github.com/bl-sdk/unrealsdk/commit/8ec285fc)
+
+- Made the `UnrealPointer` constructor explicit.
+
+  [26a47713](https://github.com/bl-sdk/unrealsdk/commit/26a47713)
 
 
 ## v1.1.0

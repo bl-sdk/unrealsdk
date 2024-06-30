@@ -198,7 +198,11 @@ void BL3Hook::uconsole_output_text(const std::wstring& str) const {
         return;
     }
 
-    TemporaryFString fstr{str};
+    // UConsole::OutputText does not print anything on a completely empty line - we would prefer to
+    // call UConsole::OutputTextLine, but that got completely inlined
+    // If we have an empty string, replace with with a single newline.
+    static const std::wstring newline = L"\n";
+    TemporaryFString fstr{str.empty() ? newline : str};
     console->call_virtual_function<void, TemporaryFString*>(idx, &fstr);
 }
 

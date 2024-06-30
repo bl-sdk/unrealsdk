@@ -2,8 +2,6 @@
 #define UNREALSDK_LOGGING_H
 
 // Because this file in included in the pch, we can't include the pch here instead of these
-#include <chrono>
-#include <string>
 #include "unrealsdk/format.h"
 
 namespace unrealsdk::logging {
@@ -26,16 +24,13 @@ enum class Level : uint8_t {
 };
 
 struct LogMessage {
-    // NOLINTBEGIN(cppcoreguidelines-avoid-const-or-ref-data-members)
-
-    const uint64_t unix_time_ms{};
-    const Level level{};
-    const char* msg{};
-    const size_t msg_size{};
-    const char* location{};
-    const int line{};
-
-    // NOLINTEND(cppcoreguidelines-avoid-const-or-ref-data-members)
+    uint64_t unix_time_ms;
+    Level level;
+    const char* msg;
+    size_t msg_size;
+    const char* location;
+    size_t location_size;
+    int line;
 };
 
 #ifndef UNREALSDK_IMPORTING
@@ -44,11 +39,10 @@ struct LogMessage {
  * @note Only the first call is used. This means manually calling this before initializing the sdk
  *       overrides the defaults.
  *
- * @param file The file to write logs to.
- * @param callbacks_only If true, disables all output, and only runs the logging callbacks. Means
- *                       the filename arg is ignored.
+ * @param file The file to write logs to, or an empty path if not to use a file.
+ * @param unreal_console If true, also logs to the unreal console.
  */
-void init(const std::filesystem::path& file, bool callbacks_only = false);
+void init(const std::filesystem::path& file, bool unreal_console = true);
 #endif
 
 /**
@@ -61,8 +55,8 @@ void init(const std::filesystem::path& file, bool callbacks_only = false);
  *                 colon-namespaced function name.
  * @param line The line number the message was logged from.
  */
-void log(Level level, std::string_view msg, const char* location, int line);
-void log(Level level, std::wstring_view msg, const char* location, int line);
+void log(Level level, std::string_view msg, std::string_view location, int line);
+void log(Level level, std::wstring_view msg, std::string_view location, int line);
 
 /**
  * @brief Sets the log level of the unreal console.
@@ -98,9 +92,9 @@ void remove_callback(log_callback callback);
  * @param ... The format string + it's contents.
  */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG(level, ...)                                                                       \
-    unrealsdk::logging::log((unrealsdk::logging::Level::level),                               \
-                            unrealsdk::fmt::format(__VA_ARGS__), (const char*)(__FUNCTION__), \
-                            (__LINE__))
+#define LOG(level, ...)                                          \
+    unrealsdk::logging::log((unrealsdk::logging::Level::level),  \
+                            unrealsdk::fmt::format(__VA_ARGS__), \
+                            {(const char*)(__FUNCTION__), sizeof(__FUNCTION__) - 1}, (__LINE__))
 
 #endif /* UNREALSDK_LOGGING_H */

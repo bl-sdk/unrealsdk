@@ -123,7 +123,7 @@ class UnrealPointer {
      *
      * @param struct_type The type of struct to construct.
      */
-    UnrealPointer(const UStruct* struct_type);
+    explicit UnrealPointer(const UStruct* struct_type);
 
     /**
      * @brief Construct a new pointer pointing at memory owned by another pointer.
