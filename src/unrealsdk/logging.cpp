@@ -10,14 +10,85 @@ namespace unrealsdk::logging {
 namespace {
 
 #ifndef UNREALSDK_IMPORTING
-std::mutex mutex{};
+// We push log messages into a queue, to be written by another thread
+// This means we need to own the strings - the raw LogMessage is just a reference type for callbacks
+struct OwnedLogMessage : public LogMessage {
+   private:
+    std::string msg_str;
+    std::string location_str;
+
+   public:
+    OwnedLogMessage(uint64_t unix_time_ms,
+                    Level level,
+                    const char* msg,
+                    size_t msg_size,
+                    const char* location,
+                    size_t location_size,
+                    int line)
+        : LogMessage(unix_time_ms, level, nullptr, 0, nullptr, 0, line),
+          msg_str{msg, msg_size},
+          location_str{location, location_size} {}
+
+    /**
+     * @brief Fills in the string pointers and decays back into a raw log message.
+     *
+     * @return A pointer to this message.
+     */
+    LogMessage* as_ptr(void) {
+        this->msg = this->msg_str.data();
+        this->msg_size = this->msg_str.size();
+        this->location = this->location_str.data();
+        this->location_size = this->location_str.size();
+        return this;
+    }
+};
+
+std::mutex pending_messages_mutex{};
+std::queue<OwnedLogMessage> pending_messages{};
+std::condition_variable pending_messages_available{};
 
 Level unreal_console_level = Level::DEFAULT_CONSOLE_LEVEL;
 HANDLE external_console_handle = nullptr;
 std::unique_ptr<std::ostream> log_file_stream;
 
+std::mutex callback_mutex{};
 std::vector<log_callback> all_log_callbacks{};
+
+#pragma region Logger Thread
+
+[[noreturn]] void logger_thread(void) {
+    SetThreadDescription(GetCurrentThread(), L"unrealsdk logger");
+
+    while (true) {
+        std::unique_lock<std::mutex> pending_messages_lock(pending_messages_mutex);
+        if (pending_messages.empty()) {
+            pending_messages_available.wait(pending_messages_lock,
+                                            []() { return !pending_messages.empty(); });
+        }
+
+        {
+            const std::lock_guard<std::mutex> callback_lock(callback_mutex);
+            while (!pending_messages.empty()) {
+                auto msg = std::move(pending_messages.front());
+                pending_messages.pop();
+
+                pending_messages_lock.unlock();
+
+                auto ptr = msg.as_ptr();
+                for (const auto& callback : all_log_callbacks) {
+                    callback(ptr);
+                }
+
+                pending_messages_lock.lock();
+            }
+        }
+    }
+}
+
+#pragma endregion
 #endif
+
+#pragma region Conversions
 
 /**
  * @brief Gets the current unix time in milliseconds.
@@ -104,6 +175,8 @@ Level get_level_from_string(std::string_view str) {
     return Level::INVALID;
 }
 
+#pragma endregion
+
 #pragma region Formatting
 
 const std::string TRUNCATION_PREFIX = "~ ";
@@ -163,7 +236,7 @@ constexpr auto LEVEL_WIDTH = 4;
  */
 std::string format_message(const LogMessage& msg) {
     return unrealsdk::fmt::format(
-        "{1:>{0}%F %T}Z {3:>{2}}@{5:<{4}d} {7:>{6}}| {8}\n", DATE_WIDTH + 1 + TIME_WIDTH + 1,
+        "{1:>{0}%F %T}Z {3:>{2}}@{5:<{4}d} {7:>{6}}| {8}\n", DATE_WIDTH + sizeof(' ') + TIME_WIDTH,
         time_from_unix_ms(msg.unix_time_ms), LOCATION_WIDTH,
         truncate_leading_chunks(msg.location, "\\/:", LOCATION_WIDTH), LINE_WIDTH, msg.line,
         LEVEL_WIDTH, get_level_name(msg.level), std::string{msg.msg, msg.msg_size});
@@ -176,15 +249,20 @@ std::string format_message(const LogMessage& msg) {
  */
 std::string get_header(void) {
     return unrealsdk::fmt::format("{1:<{0}} {3:<{2}} {5:>{4}}@{7:<{6}} {9:>{8}}| \n", DATE_WIDTH,
-                                  "date", TIME_WIDTH + 1, "time", LOCATION_WIDTH, "location",
-                                  LINE_WIDTH, "line", LEVEL_WIDTH, "v");
+                                  "date", TIME_WIDTH + sizeof('Z'), "time", LOCATION_WIDTH,
+                                  "location", LINE_WIDTH, "line", LEVEL_WIDTH, "v");
 }
 
 #pragma endregion
 
 #pragma region Built-in Logger
+#ifndef UNREALSDK_IMPORTING
 
 void builtin_logger(const LogMessage* msg) {
+    if (msg == nullptr) {
+        return;
+    }
+
     if (unreal_console_level != Level::INVALID && unreal_console_level <= msg->level) {
         unrealsdk::uconsole_output_text(utils::widen({msg->msg, msg->msg_size}));
     }
@@ -203,6 +281,7 @@ void builtin_logger(const LogMessage* msg) {
     }
 }
 
+#endif
 #pragma endregion
 
 }  // namespace
@@ -211,17 +290,19 @@ void builtin_logger(const LogMessage* msg) {
 #ifndef UNREALSDK_IMPORTING
 namespace impl {
 
-void run_log_callbacks(const LogMessage* msg) {
-    if (msg == nullptr) {
-        return;
+void enqueue_log_msg(uint64_t unix_time_ms,
+                     Level level,
+                     const char* msg,
+                     size_t msg_size,
+                     const char* location,
+                     size_t location_size,
+                     int line) {
+    {
+        const std::lock_guard<std::mutex> lock(pending_messages_mutex);
+        pending_messages.emplace(unix_time_ms, level, msg, msg_size, location, location_size, line);
     }
-
-    const std::lock_guard<std::mutex> lock(mutex);
-
-    for (const auto& callback : all_log_callbacks) {
-        callback(msg);
-    }
-};
+    pending_messages_available.notify_all();
+}
 
 bool set_console_level(Level level) {
     if (Level::MIN > level || level > Level::MAX) {
@@ -233,13 +314,13 @@ bool set_console_level(Level level) {
 }
 
 void add_callback(log_callback callback) {
-    const std::lock_guard<std::mutex> lock(mutex);
+    const std::lock_guard<std::mutex> lock(callback_mutex);
 
     all_log_callbacks.push_back(callback);
 }
 
 void remove_callback(log_callback callback) {
-    const std::lock_guard<std::mutex> lock(mutex);
+    const std::lock_guard<std::mutex> lock(callback_mutex);
 
     all_log_callbacks.erase(
         std::remove(all_log_callbacks.begin(), all_log_callbacks.end(), callback),
@@ -254,6 +335,9 @@ void init(const std::filesystem::path& file, bool unreal_console) {
         return;
     }
     initialized = true;
+
+    // Start the logger thread first thing
+    std::thread(logger_thread).detach();
 
     if (unreal_console) {
         auto env_level = get_level_from_string(env::get(env::LOG_LEVEL));
@@ -295,22 +379,39 @@ void init(const std::filesystem::path& file, bool unreal_console) {
 #pragma region C API Wrappers
 
 #ifdef UNREALSDK_SHARED
-// Keeping the old symbol name, even though we've since renamed the implementation
-UNREALSDK_CAPI(void, log_msg_internal, const LogMessage* msg);
+UNREALSDK_CAPI(void,
+               enqueue_log_msg,
+               uint64_t unix_time_ms,
+               Level level,
+               const char* msg,
+               size_t msg_size,
+               const char* location,
+               size_t location_size,
+               int line);
 #endif
 #ifndef UNREALSDK_IMPORTING
-UNREALSDK_CAPI(void, log_msg_internal, const LogMessage* msg) {
-    impl::run_log_callbacks(msg);
+UNREALSDK_CAPI(void,
+               enqueue_log_msg,
+               uint64_t unix_time_ms,
+               Level level,
+               const char* msg,
+               size_t msg_size,
+               const char* location,
+               size_t location_size,
+               int line) {
+    impl::enqueue_log_msg(unix_time_ms, level, msg, msg_size, location, location_size, line);
 }
 #endif
-void log(Level level, std::string_view msg, const char* location, int line) {
-    const LogMessage log_msg{unix_ms_now(), level, msg.data(), msg.size(), location, line};
-    UNREALSDK_MANGLE(log_msg_internal)(&log_msg);
+void log(Level level, std::string_view msg, std::string_view location, int line) {
+    auto now = unix_ms_now();
+    UNREALSDK_MANGLE(enqueue_log_msg)
+    (now, level, msg.data(), msg.size(), location.data(), location.size(), line);
 }
-void log(Level level, std::wstring_view msg, const char* location, int line) {
+void log(Level level, std::wstring_view msg, std::string_view location, int line) {
+    auto now = unix_ms_now();
     auto narrow = utils::narrow(msg);
-    const LogMessage log_msg{unix_ms_now(), level, narrow.data(), narrow.size(), location, line};
-    UNREALSDK_MANGLE(log_msg_internal)(&log_msg);
+    UNREALSDK_MANGLE(enqueue_log_msg)
+    (now, level, narrow.data(), narrow.size(), location.data(), location.size(), line);
 }
 
 #ifdef UNREALSDK_SHARED

@@ -24,12 +24,13 @@ enum class Level : uint8_t {
 };
 
 struct LogMessage {
-    uint64_t unix_time_ms{};
-    Level level{};
-    const char* msg{};
-    size_t msg_size{};
-    const char* location{};
-    int line{};
+    uint64_t unix_time_ms;
+    Level level;
+    const char* msg;
+    size_t msg_size;
+    const char* location;
+    size_t location_size;
+    int line;
 };
 
 #ifndef UNREALSDK_IMPORTING
@@ -54,8 +55,8 @@ void init(const std::filesystem::path& file, bool unreal_console = true);
  *                 colon-namespaced function name.
  * @param line The line number the message was logged from.
  */
-void log(Level level, std::string_view msg, const char* location, int line);
-void log(Level level, std::wstring_view msg, const char* location, int line);
+void log(Level level, std::string_view msg, std::string_view location, int line);
+void log(Level level, std::wstring_view msg, std::string_view location, int line);
 
 /**
  * @brief Sets the log level of the unreal console.
@@ -91,9 +92,9 @@ void remove_callback(log_callback callback);
  * @param ... The format string + it's contents.
  */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG(level, ...)                                                                       \
-    unrealsdk::logging::log((unrealsdk::logging::Level::level),                               \
-                            unrealsdk::fmt::format(__VA_ARGS__), (const char*)(__FUNCTION__), \
-                            (__LINE__))
+#define LOG(level, ...)                                          \
+    unrealsdk::logging::log((unrealsdk::logging::Level::level),  \
+                            unrealsdk::fmt::format(__VA_ARGS__), \
+                            {(const char*)(__FUNCTION__), sizeof(__FUNCTION__) - 1}, (__LINE__))
 
 #endif /* UNREALSDK_LOGGING_H */

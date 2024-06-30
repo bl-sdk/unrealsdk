@@ -15,6 +15,13 @@
 #undef WIN32_NO_STATUS
 #include <ntstatus.h>
 
+#include <processthreadsapi.h>
+#ifdef __MINGW32__
+// MinGW doesn't define this yet, stub it out - it's only used for debug
+// NOLINTNEXTLINE(readability-identifier-naming)
+#define SetThreadDescription(x, y)
+#endif
+
 #include <MinHook.h>
 
 #ifdef __cplusplus
@@ -24,6 +31,7 @@
 #include <cctype>
 #include <charconv>
 #include <chrono>
+#include <condition_variable>
 #include <cstdint>
 #include <cstring>
 #include <cwctype>
@@ -35,10 +43,12 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <queue>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <thread>
 #include <tuple>
 #include <type_traits>
 #include <unordered_map>
