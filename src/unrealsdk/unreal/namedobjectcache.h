@@ -1,7 +1,8 @@
-#ifndef UNREALSDK_UNREAL_NAMEDCLASSCACHE_H
-#define UNREALSDK_UNREAL_NAMEDCLASSCACHE_H
+#ifndef UNREALSDK_UNREAL_NAMEDOBJECTCACHE_H
+#define UNREALSDK_UNREAL_NAMEDOBJECTCACHE_H
 
 #include "unrealsdk/pch.h"
+#include "unrealsdk/format.h"
 #include "unrealsdk/unreal/class_name.h"
 #include "unrealsdk/unreal/find_class.h"
 #include "unrealsdk/unreal/structs/fname.h"
@@ -96,12 +97,18 @@ class NamedObjectCache {
     [[nodiscard]] CacheType find(std::wstring_view name) {
         this->ensure_initialized();
 
-        auto obj = validate_type<ObjectType>(unrealsdk::find_object(this->uclass, name));
+        auto obj = unrealsdk::find_object(this->uclass, name);
         if (obj == nullptr) {
             return {};
         }
+        // This should never really happen, but double check
+        if (!obj->is_instance(this->uclass)) {
+            throw std::invalid_argument(unrealsdk::utils::narrow(unrealsdk::fmt::format(
+                L"Found object of unexpected class when searching for '{}': {}", name,
+                obj->get_path_name())));
+        }
 
-        return add_to_cache(obj);
+        return add_to_cache(reinterpret_cast<ObjectType*>(obj));
     }
 
     /**
@@ -118,4 +125,4 @@ class NamedObjectCache {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREALSDK_UNREAL_NAMEDCLASSCACHE_H */
+#endif /* UNREALSDK_UNREAL_NAMEDOBJECTCACHE_H */
