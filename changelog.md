@@ -39,6 +39,11 @@
   [d74ff4eb](https://github.com/bl-sdk/unrealsdk/commit/d74ff4eb),
   [91e3fcd5](https://github.com/bl-sdk/unrealsdk/commit/91e3fcd5)
 
+- Fixed that a fully qualified `NamedObjectCache::find` would not allow subclasses. This was most
+  notable with blueprint generated classes.
+
+  [643fb46e](https://github.com/bl-sdk/unrealsdk/commit/643fb46e)
+
 - Several logging module reworks. *This breaks binary compatibility*, though existing code should
   work pretty much as is after a recompile.
 
