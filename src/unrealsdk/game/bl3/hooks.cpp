@@ -105,7 +105,7 @@ bool locking(void) {
 }
 
 void BL3Hook::hook_process_event(void) {
-    detour(PROCESS_EVENT_SIG.sigscan(), locking() ? locking_process_event_hook : process_event_hook,
+    detour(PROCESS_EVENT_SIG, locking() ? locking_process_event_hook : process_event_hook,
            &process_event_ptr, "ProcessEvent");
 }
 
@@ -133,7 +133,6 @@ const constinit Pattern<20> CALL_FUNCTION_SIG{
     "41 56"              // push r14
     "41 57"              // push r15
     "48 81 EC 28010000"  // sub rsp, 00000128
-
 };
 
 }  // namespace
@@ -214,7 +213,7 @@ static_assert(std::is_same_v<decltype(call_function_hook), call_function_func>,
               "call_function signature is incorrect");
 
 void BL3Hook::hook_call_function(void) {
-    detour(CALL_FUNCTION_SIG.sigscan(), call_function_hook, &call_function_ptr, "CallFunction");
+    detour(CALL_FUNCTION_SIG, call_function_hook, &call_function_ptr, "CallFunction");
 }
 
 }  // namespace unrealsdk::game

@@ -1,9 +1,12 @@
-#ifndef UNREALSDK_SIGSCAN_H
-#define UNREALSDK_SIGSCAN_H
+#ifndef UNREALSDK_MEMORY_H
+#define UNREALSDK_MEMORY_H
 
 #include "unrealsdk/pch.h"
 
 namespace unrealsdk::memory {
+
+template <size_t n>
+struct Pattern;
 
 /**
  * @brief Performs a sigscan.
@@ -39,7 +42,9 @@ T sigscan(const uint8_t* bytes,
  * @brief Detours a function.
  *
  * @tparam T The signature of the detour'd function (should be picked up automatically).
+ * @tparam n The size of the sigscan pattern (should be picked up automatically).
  * @param addr The address of the function.
+ * @param pattern A sigscan pattern matching the function to detour.
  * @param detour_func The detour function.
  * @param original_func Pointer to store the original function.
  * @param name Name of the detour, to be used in log messages on error.
@@ -49,6 +54,19 @@ bool detour(uintptr_t addr, void* detour_func, void** original_func, std::string
 template <typename T>
 bool detour(uintptr_t addr, T detour_func, T* original_func, std::string_view name) {
     return detour(addr, reinterpret_cast<void*>(detour_func),
+                  reinterpret_cast<void**>(original_func), name);
+}
+template <size_t n>
+bool detour(const Pattern<n>& pattern,
+            void* detour_func,
+            void** original_func,
+            std::string_view name) {
+    // Use sigscan nullable since the base detour function will warn about a null address
+    return detour(pattern.sigscan_nullable(), detour_func, original_func, name);
+}
+template <typename T, size_t n>
+bool detour(const Pattern<n>& pattern, T detour_func, T* original_func, std::string_view name) {
+    return detour(pattern.sigscan_nullable(), reinterpret_cast<void*>(detour_func),
                   reinterpret_cast<void**>(original_func), name);
 }
 
@@ -107,10 +125,35 @@ struct Pattern {
         static_assert(sizeof(uint8_t) == sizeof(char), "uint8_t is different size to char");
     }
 
+   private:
+    /**
+     * @brief Converts a hex character to it's nibble and a mask.
+     *
+     * @param character The character.
+     * @return A pair of the nibble and it's mask.
+     */
+    consteval std::pair<uint8_t, uint8_t> char_to_nibble_and_mask(char character) {
+        // NOLINTBEGIN(readability-magic-numbers)
+        if ('0' <= character && character <= '9') {
+            return {(uint8_t)(character - '0'), (uint8_t)0xF};
+        }
+        if ('A' <= character && character <= 'F') {
+            return {(uint8_t)(character - 'A' + 0xA), (uint8_t)0xF};
+        }
+        if ('a' <= character && character <= 'f') {
+            return {(uint8_t)(character - 'a' + 0xA), (uint8_t)0xF};
+        }
+        return {(uint8_t)0, (uint8_t)0};
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+   public:
     /**
      * @brief Constructs a pattern from a hex string, at compile time.
-     * @note Spaces are ignored, all other non hex characters get converted into a wildcard.
-     * @note The string must contain a whole number of bytes.
+     * @note An opening curly bracket sets the offset - only the first instance is used.
+     * @note Spaces and closing curly brackets are ignored.
+     * @note All other characters are considered wildcards.
+     * @note The string must contain a whole number of bytes. Nibble wildcards are allowed.
      *
      * @tparam m The size of the passed hex string - should be picked up automatically.
      * @param hex The hex string to convert.
@@ -118,7 +161,8 @@ struct Pattern {
      * @return A sigscan pattern.
      */
     template <size_t m>
-    consteval Pattern(const char (&hex)[m], ptrdiff_t offset = 0)
+    consteval Pattern(const char (&hex)[m],
+                      ptrdiff_t offset = std::numeric_limits<ptrdiff_t>::max())
         : bytes(), mask(), offset(offset) {
         size_t idx = 0;
         bool upper_nibble = true;
@@ -127,34 +171,28 @@ struct Pattern {
             if (character == '\0') {
                 break;
             }
-            if (character == ' ') {
+            if (character == ' ' || character == '}') {
+                continue;
+            }
+            if (character == '{') {
+                if (!upper_nibble) {
+                    throw std::logic_error("Cannot start pattern offset halfway through a byte");
+                }
+                if (this->offset == std::numeric_limits<ptrdiff_t>::max()) {
+                    this->offset = idx;
+                }
                 continue;
             }
 
-            uint8_t byte = 0;
-            uint8_t mask_byte = 0;
-
-            // NOLINTBEGIN(readability-magic-numbers)
-            if ('0' <= character && character <= '9') {
-                byte = character - '0';
-                mask_byte = 0xF;
-            } else if ('A' <= character && character <= 'F') {
-                byte = character - 'A' + 0xA;
-                mask_byte = 0xF;
-            } else if ('a' <= character && character <= 'f') {
-                byte = character - 'a' + 0xA;
-                mask_byte = 0xF;
-            }
-            // NOLINTEND(readability-magic-numbers)
-
+            auto [nibble, nibble_mask] = char_to_nibble_and_mask(character);
             if (upper_nibble) {
-                this->bytes[idx] = byte << 4;
-                this->mask[idx] = mask_byte << 4;
+                this->bytes[idx] = nibble << 4;
+                this->mask[idx] = nibble_mask << 4;
 
                 upper_nibble = false;
             } else {
-                this->bytes[idx] |= byte;
-                this->mask[idx] |= mask_byte;
+                this->bytes[idx] |= nibble;
+                this->mask[idx] |= nibble_mask;
 
                 idx++;
                 upper_nibble = true;
@@ -164,36 +202,45 @@ struct Pattern {
         // Make sure we completely filled the pattern, there are no missing or extra bytes, and
         // we're not halfway through one.
         if (idx != n || !upper_nibble) {
-            throw "Invalid pattern size";
+            throw std::logic_error("Invalid pattern size");
+        }
+
+        if (this->offset == std::numeric_limits<ptrdiff_t>::max()) {
+            this->offset = 0;
         }
     }
 
     /**
-     * @brief Performs a sigscan for this pattern.
+     * @brief Performs a sigscan for this pattern across the main executable.
+     * @note When not found, `sigscan` throws, while `sigscan_nullable` returns 0.
      *
      * @tparam T The type to cast the result to.
-     * @param start The address to start the search at. Defaults to the start of the exe.
-     * @param size The length of the region to search. Defaults to the exe size
-     * @return The found location, or nullptr.
+     * @param name The name of this pattern, to use in error messages.
+     * @return The found location, or 0.
      */
-    [[nodiscard]] uintptr_t sigscan(void) const {
+    [[nodiscard]] uintptr_t sigscan(std::string_view name) const {
+        auto addr = memory::sigscan(this->bytes.data(), this->mask.data(), n);
+        if (addr == 0) {
+            // Make sure to log something on error, even if calling code doesn't catch it
+            LOG(ERROR, "Sigscan for {} failed!", name);
+            throw std::runtime_error("sigscan failed");
+        }
+        return addr == 0 ? 0 : addr + offset;
+    }
+    template <typename T>
+    [[nodiscard]] T sigscan(std::string_view name) const {
+        return reinterpret_cast<T>(this->sigscan(name));
+    }
+    [[nodiscard]] uintptr_t sigscan_nullable(void) const {
         auto addr = memory::sigscan(this->bytes.data(), this->mask.data(), n);
         return addr == 0 ? 0 : addr + offset;
     }
-    [[nodiscard]] uintptr_t sigscan(uintptr_t start, size_t size) const {
-        auto addr = memory::sigscan(this->bytes.data(), this->mask.data(), n, start, size);
-        return addr == 0 ? 0 : addr + offset;
-    }
     template <typename T>
-    [[nodiscard]] T sigscan(void) const {
-        return reinterpret_cast<T>(this->sigscan());
-    }
-    template <typename T>
-    [[nodiscard]] T sigscan(uintptr_t start, size_t size) const {
-        return reinterpret_cast<T>(this->sigscan(start, size));
+    [[nodiscard]] T sigscan_nullable(void) const {
+        return reinterpret_cast<T>(this->sigscan_nullable());
     }
 };
 
 }  // namespace unrealsdk::memory
 
-#endif /* UNREALSDK_SIGSCAN_H */
+#endif /* UNREALSDK_MEMORY_H */

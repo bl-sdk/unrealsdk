@@ -84,6 +84,11 @@ bool detour(uintptr_t addr, void* detour_func, void** original_func, std::string
 }
 #else
 bool detour(uintptr_t addr, void* detour_func, void** original_func, std::string_view name) {
+    if (addr == 0) {
+        LOG(ERROR, "Detour for {} was passed a null address!", name);
+        return false;
+    }
+
     MH_STATUS status = MH_OK;
 
     status = MH_CreateHook(reinterpret_cast<LPVOID>(addr), detour_func, original_func);
@@ -114,6 +119,10 @@ UNREALSDK_CAPI(bool,
 #endif
 
 uintptr_t read_offset(uintptr_t address) {
+    if (address == 0) {
+        LOG(ERROR, "Attempted to read a null offset!");
+        return 0;
+    }
 #ifdef ARCH_X64
     return address + *reinterpret_cast<int32_t*>(address) + 4;
 #else

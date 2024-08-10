@@ -48,7 +48,7 @@ const constinit Pattern<55> CONSTRUCT_OBJECT_PATTERN{
 }  // namespace
 
 void BL3Hook::find_construct_object(void) {
-    construct_obj_ptr = CONSTRUCT_OBJECT_PATTERN.sigscan<construct_obj_func>();
+    construct_obj_ptr = CONSTRUCT_OBJECT_PATTERN.sigscan_nullable<construct_obj_func>();
     LOG(MISC, "StaticConstructObject: {:p}", reinterpret_cast<void*>(construct_obj_ptr));
 }
 
@@ -84,7 +84,7 @@ const constinit Pattern<21> GET_PATH_NAME_PATTERN{
 }  // namespace
 
 void BL3Hook::find_get_path_name(void) {
-    get_path_name_ptr = GET_PATH_NAME_PATTERN.sigscan<get_path_name_func>();
+    get_path_name_ptr = GET_PATH_NAME_PATTERN.sigscan_nullable<get_path_name_func>();
     LOG(MISC, "GetPathName: {:p}", reinterpret_cast<void*>(get_path_name_ptr));
 }
 
@@ -120,7 +120,8 @@ const constexpr intptr_t ANY_PACKAGE = -1;
 }  // namespace
 
 void BL3Hook::find_static_find_object(void) {
-    static_find_object_ptr = STATIC_FIND_OBJECT_PATTERN.sigscan<static_find_object_safe_func>();
+    static_find_object_ptr =
+        STATIC_FIND_OBJECT_PATTERN.sigscan_nullable<static_find_object_safe_func>();
     LOG(MISC, "StaticFindObjectSafe: {:p}", reinterpret_cast<void*>(static_find_object_ptr));
 }
 
@@ -152,7 +153,7 @@ const constinit Pattern<16> LOAD_PACKAGE_PATTERN{
 }  // namespace
 
 void BL3Hook::find_load_package(void) {
-    load_package_ptr = LOAD_PACKAGE_PATTERN.sigscan<load_package_func>();
+    load_package_ptr = LOAD_PACKAGE_PATTERN.sigscan_nullable<load_package_func>();
     LOG(MISC, "LoadPackage: {:p}", reinterpret_cast<void*>(load_package_ptr));
 }
 

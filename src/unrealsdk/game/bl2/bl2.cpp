@@ -64,7 +64,7 @@ const constinit Pattern<23> FNAME_INIT_SIG{
 }
 
 void BL2Hook::find_fname_init(void) {
-    this->fname_init_ptr = FNAME_INIT_SIG.sigscan<void*>();
+    this->fname_init_ptr = FNAME_INIT_SIG.sigscan_nullable<void*>();
     LOG(MISC, "FName::Init: {:p}", this->fname_init_ptr);
 }
 
@@ -96,7 +96,7 @@ const constinit Pattern<9> FFRAME_STEP_SIG{
 }  // namespace
 
 void BL2Hook::find_fframe_step(void) {
-    fframe_step_ptr = FFRAME_STEP_SIG.sigscan<fframe_step_func>();
+    fframe_step_ptr = FFRAME_STEP_SIG.sigscan_nullable<fframe_step_func>();
     LOG(MISC, "FFrame::Step: {:p}", reinterpret_cast<void*>(fframe_step_ptr));
 }
 void BL2Hook::fframe_step(FFrame* frame, UObject* obj, void* param) const {

@@ -20,7 +20,7 @@ const constinit Pattern<11> ARRAY_LIMIT_MESSAGE{
 }  // namespace
 
 void TPSHook::hexedit_array_limit_message(void) const {
-    auto array_limit_msg = ARRAY_LIMIT_MESSAGE.sigscan<uint8_t*>();
+    auto array_limit_msg = ARRAY_LIMIT_MESSAGE.sigscan_nullable<uint8_t*>();
     if (array_limit_msg == nullptr) {
         LOG(ERROR, "Couldn't find array limit message signature");
     } else {
