@@ -17,12 +17,11 @@ namespace {
 GObjects gobjects_wrapper{};
 
 const constinit Pattern<17> GOBJECTS_SIG{
-    "8B 0D ????????"  // mov ecx, [Borderlands2.exe+1682BD0]
-    "8B 04 ??"        // mov eax, [ecx+esi*4]
-    "8B 40 ??"        // mov eax, [eax+08]
-    "25 00020000"     // and eax, 00000200
-    ,
-    2};
+    "8B 0D {????????}"  // mov ecx, [Borderlands2.exe+1682BD0]
+    "8B 04 ??"          // mov eax, [ecx+esi*4]
+    "8B 40 ??"          // mov eax, [eax+08]
+    "25 00020000"       // and eax, 00000200
+};
 
 }  // namespace
 
@@ -42,11 +41,10 @@ namespace {
 GNames gnames_wrapper{};
 
 const constinit Pattern<10> GNAMES_SIG{
-    "A3 ????????"  // mov [BorderlandsPreSequel.exe+1520214], eax
-    "8B 45 ??"     // mov eax, [ebp+10]
-    "89 03"        // mov [ebx], eax
-    ,
-    1};
+    "A3 {????????}"  // mov [BorderlandsPreSequel.exe+1520214], eax
+    "8B 45 ??"       // mov eax, [ebp+10]
+    "89 03"          // mov [ebx], eax
+};
 
 }  // namespace
 

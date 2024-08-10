@@ -36,10 +36,9 @@ struct FMalloc {
 FMalloc* gmalloc;
 
 const constinit Pattern<8> GMALLOC_PATTERN{
-    "89 35 ????????"  // mov [Borderlands2.GDebugger+A95C], esi
-    "FF D7"           // call edi
-    ,
-    2};
+    "89 35 {????????}"  // mov [Borderlands2.GDebugger+A95C], esi
+    "FF D7"             // call edi
+};
 
 }  // namespace
 

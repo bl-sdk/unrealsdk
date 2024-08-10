@@ -133,7 +133,6 @@ const constinit Pattern<20> CALL_FUNCTION_SIG{
     "41 56"              // push r14
     "41 57"              // push r15
     "48 81 EC 28010000"  // sub rsp, 00000128
-
 };
 
 }  // namespace
