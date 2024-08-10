@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.2.0 (Upcoming)
+## v1.2.0
 - When an exception occurs during a hook, now mention what function it was under, to make debugging
   easier.
 
@@ -58,6 +58,13 @@
   [02b56f18](https://github.com/bl-sdk/unrealsdk/commit/02b56f18),
   [91e3fcd5](https://github.com/bl-sdk/unrealsdk/commit/91e3fcd5),
   [8ec285fc](https://github.com/bl-sdk/unrealsdk/commit/8ec285fc)
+
+- Tweaked `Pattern::sigscan` to more explicitly deal with sigscans failing. Existing code will have
+  to be updated to either call `sigscan_nullable` (if failing is ok), or to pass a name to use in
+  case of error (if throwing is ok).
+
+  [7135bdf3](https://github.com/bl-sdk/unrealsdk/commit/7135bdf3),
+  [b849b0e8](https://github.com/bl-sdk/unrealsdk/commit/91e3fcd5)
 
 - Made the `UnrealPointer` constructor explicit.
 
