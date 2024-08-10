@@ -26,7 +26,7 @@ const constinit Pattern<17> GOBJECTS_SIG{
 }  // namespace
 
 void BL2Hook::find_gobjects(void) {
-    auto gobjects_ptr = read_offset<GObjects::internal_type>(GOBJECTS_SIG.sigscan());
+    auto gobjects_ptr = read_offset<GObjects::internal_type>(GOBJECTS_SIG.sigscan_nullable());
     LOG(MISC, "GObjects: {:p}", reinterpret_cast<void*>(gobjects_ptr));
 
     gobjects_wrapper = GObjects(gobjects_ptr);
@@ -49,7 +49,7 @@ const constinit Pattern<10> GNAMES_SIG{
 }  // namespace
 
 void BL2Hook::find_gnames(void) {
-    auto gnames_ptr = read_offset<GNames::internal_type>(GNAMES_SIG.sigscan());
+    auto gnames_ptr = read_offset<GNames::internal_type>(GNAMES_SIG.sigscan_nullable());
     LOG(MISC, "GNames: {:p}", reinterpret_cast<void*>(gnames_ptr));
 
     gnames_wrapper = GNames(gnames_ptr);

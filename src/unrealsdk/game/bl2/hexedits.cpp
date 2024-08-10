@@ -40,7 +40,7 @@ const constinit Pattern<15> ARRAY_LIMIT_MESSAGE{
 }  // namespace
 
 void BL2Hook::hexedit_set_command(void) {
-    auto set_command = SET_COMMAND_SIG.sigscan<uint8_t*>();
+    auto set_command = SET_COMMAND_SIG.sigscan_nullable<uint8_t*>();
     if (set_command == nullptr) {
         LOG(ERROR, "Couldn't find set command signature");
     } else {
@@ -55,7 +55,7 @@ void BL2Hook::hexedit_set_command(void) {
 }
 
 void BL2Hook::hexedit_array_limit(void) {
-    auto array_limit = ARRAY_LIMIT_SIG.sigscan<uint8_t*>();
+    auto array_limit = ARRAY_LIMIT_SIG.sigscan_nullable<uint8_t*>();
     if (array_limit == nullptr) {
         LOG(ERROR, "Couldn't find array limit signature");
     } else {
@@ -69,7 +69,7 @@ void BL2Hook::hexedit_array_limit(void) {
 }
 
 void BL2Hook::hexedit_array_limit_message(void) const {
-    auto array_limit_msg = ARRAY_LIMIT_MESSAGE.sigscan<uint8_t*>();
+    auto array_limit_msg = ARRAY_LIMIT_MESSAGE.sigscan_nullable<uint8_t*>();
     if (array_limit_msg == nullptr) {
         LOG(ERROR, "Couldn't find array limit message signature");
     } else {

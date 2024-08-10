@@ -43,7 +43,9 @@ const constinit Pattern<8> GMALLOC_PATTERN{
 }  // namespace
 
 void BL2Hook::find_gmalloc(void) {
-    gmalloc = *read_offset<FMalloc**>(GMALLOC_PATTERN.sigscan());
+    // Using plain `sigscan` since there's an extra level of indirection here, want to make sure to
+    // print an error before we potentially dereference it
+    gmalloc = *read_offset<FMalloc**>(GMALLOC_PATTERN.sigscan("GMalloc"));
     LOG(MISC, "GMalloc: {:p}", reinterpret_cast<void*>(gmalloc));
 }
 void* BL2Hook::u_malloc(size_t len) const {

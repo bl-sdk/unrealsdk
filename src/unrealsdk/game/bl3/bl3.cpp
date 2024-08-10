@@ -57,7 +57,7 @@ const constinit Pattern<15> FNAME_INIT_PATTERN{
 }  // namespace
 
 void BL3Hook::find_fname_init(void) {
-    fname_init_ptr = FNAME_INIT_PATTERN.sigscan<fname_init_func>();
+    fname_init_ptr = FNAME_INIT_PATTERN.sigscan_nullable<fname_init_func>();
     LOG(MISC, "FName::Init: {:p}", reinterpret_cast<void*>(fname_init_ptr));
 }
 
@@ -83,7 +83,7 @@ const constinit Pattern<10> FFRAME_STEP_SIG{
 }  // namespace
 
 void BL3Hook::find_fframe_step(void) {
-    fframe_step_ptr = FFRAME_STEP_SIG.sigscan<fframe_step_func>();
+    fframe_step_ptr = FFRAME_STEP_SIG.sigscan_nullable<fframe_step_func>();
     LOG(MISC, "FFrame::Step: {:p}", reinterpret_cast<void*>(fframe_step_ptr));
 }
 void BL3Hook::fframe_step(FFrame* frame, UObject* obj, void* param) const {
@@ -145,7 +145,7 @@ const constinit Pattern<131> FTEXT_AS_CULTURE_INVARIANT_PATTERN{
 
 void BL3Hook::find_ftext_as_culture_invariant(void) {
     ftext_as_culture_invariant_ptr =
-        FTEXT_AS_CULTURE_INVARIANT_PATTERN.sigscan<ftext_as_culture_invariant_func>();
+        FTEXT_AS_CULTURE_INVARIANT_PATTERN.sigscan_nullable<ftext_as_culture_invariant_func>();
     LOG(MISC, "FText::AsCultureInvariant: {:p}", reinterpret_cast<void*>(fname_init_ptr));
 }
 

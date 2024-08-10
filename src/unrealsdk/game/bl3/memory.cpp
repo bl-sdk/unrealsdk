@@ -53,9 +53,9 @@ const constinit Pattern<20> FREE_PATTERN{
 }  // namespace
 
 void BL3Hook::find_gmalloc(void) {
-    fmemory_malloc_ptr = MALLOC_PATTERN.sigscan<fmemory_malloc_func>();
-    fmemory_realloc_ptr = REALLOC_PATTERN.sigscan<fmemory_realloc_func>();
-    fmemory_free_ptr = FREE_PATTERN.sigscan<fmemory_free_func>();
+    fmemory_malloc_ptr = MALLOC_PATTERN.sigscan_nullable<fmemory_malloc_func>();
+    fmemory_realloc_ptr = REALLOC_PATTERN.sigscan_nullable<fmemory_realloc_func>();
+    fmemory_free_ptr = FREE_PATTERN.sigscan_nullable<fmemory_free_func>();
 
     LOG(MISC, "FMemory::Malloc: {:p}", reinterpret_cast<void*>(fmemory_malloc_ptr));
     LOG(MISC, "FMemory::Realloc: {:p}", reinterpret_cast<void*>(fmemory_realloc_ptr));

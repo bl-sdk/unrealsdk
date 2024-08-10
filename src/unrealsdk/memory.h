@@ -5,6 +5,9 @@
 
 namespace unrealsdk::memory {
 
+template <size_t n>
+struct Pattern;
+
 /**
  * @brief Performs a sigscan.
  *
@@ -39,7 +42,9 @@ T sigscan(const uint8_t* bytes,
  * @brief Detours a function.
  *
  * @tparam T The signature of the detour'd function (should be picked up automatically).
+ * @tparam n The size of the sigscan pattern (should be picked up automatically).
  * @param addr The address of the function.
+ * @param pattern A sigscan pattern matching the function to detour.
  * @param detour_func The detour function.
  * @param original_func Pointer to store the original function.
  * @param name Name of the detour, to be used in log messages on error.
@@ -49,6 +54,19 @@ bool detour(uintptr_t addr, void* detour_func, void** original_func, std::string
 template <typename T>
 bool detour(uintptr_t addr, T detour_func, T* original_func, std::string_view name) {
     return detour(addr, reinterpret_cast<void*>(detour_func),
+                  reinterpret_cast<void**>(original_func), name);
+}
+template <size_t n>
+bool detour(const Pattern<n>& pattern,
+            void* detour_func,
+            void** original_func,
+            std::string_view name) {
+    // Use sigscan nullable since the base detour function will warn about a null address
+    return detour(pattern.sigscan_nullable(), detour_func, original_func, name);
+}
+template <typename T, size_t n>
+bool detour(const Pattern<n>& pattern, T detour_func, T* original_func, std::string_view name) {
+    return detour(pattern.sigscan_nullable(), reinterpret_cast<void*>(detour_func),
                   reinterpret_cast<void**>(original_func), name);
 }
 
@@ -193,28 +211,33 @@ struct Pattern {
     }
 
     /**
-     * @brief Performs a sigscan for this pattern.
+     * @brief Performs a sigscan for this pattern across the main executable.
+     * @note When not found, `sigscan` throws, while `sigscan_nullable` returns 0.
      *
      * @tparam T The type to cast the result to.
-     * @param start The address to start the search at. Defaults to the start of the exe.
-     * @param size The length of the region to search. Defaults to the exe size
-     * @return The found location, or nullptr.
+     * @param name The name of this pattern, to use in error messages.
+     * @return The found location, or 0.
      */
-    [[nodiscard]] uintptr_t sigscan(void) const {
+    [[nodiscard]] uintptr_t sigscan(std::string_view name) const {
+        auto addr = memory::sigscan(this->bytes.data(), this->mask.data(), n);
+        if (addr == 0) {
+            // Make sure to log something on error, even if calling code doesn't catch it
+            LOG(ERROR, "Sigscan for {} failed!", name);
+            throw std::runtime_error("sigscan failed");
+        }
+        return addr == 0 ? 0 : addr + offset;
+    }
+    template <typename T>
+    [[nodiscard]] T sigscan(std::string_view name) const {
+        return reinterpret_cast<T>(this->sigscan(name));
+    }
+    [[nodiscard]] uintptr_t sigscan_nullable(void) const {
         auto addr = memory::sigscan(this->bytes.data(), this->mask.data(), n);
         return addr == 0 ? 0 : addr + offset;
     }
-    [[nodiscard]] uintptr_t sigscan(uintptr_t start, size_t size) const {
-        auto addr = memory::sigscan(this->bytes.data(), this->mask.data(), n, start, size);
-        return addr == 0 ? 0 : addr + offset;
-    }
     template <typename T>
-    [[nodiscard]] T sigscan(void) const {
-        return reinterpret_cast<T>(this->sigscan());
-    }
-    template <typename T>
-    [[nodiscard]] T sigscan(uintptr_t start, size_t size) const {
-        return reinterpret_cast<T>(this->sigscan(start, size));
+    [[nodiscard]] T sigscan_nullable(void) const {
+        return reinterpret_cast<T>(this->sigscan_nullable());
     }
 };
 

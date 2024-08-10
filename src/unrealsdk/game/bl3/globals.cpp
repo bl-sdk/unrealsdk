@@ -26,7 +26,7 @@ const constinit Pattern<26> GOBJECTS_SIG{
 }  // namespace
 
 void BL3Hook::find_gobjects(void) {
-    auto gobjects_ptr = read_offset<GObjects::internal_type>(GOBJECTS_SIG.sigscan());
+    auto gobjects_ptr = read_offset<GObjects::internal_type>(GOBJECTS_SIG.sigscan_nullable());
     LOG(MISC, "GObjects: {:p}", reinterpret_cast<void*>(gobjects_ptr));
 
     gobjects_wrapper = GObjects(gobjects_ptr);
@@ -53,7 +53,9 @@ const constinit Pattern<27> GNAMES_SIG{
 }  // namespace
 
 void BL3Hook::find_gnames(void) {
-    auto gnames_ptr = *read_offset<GNames::internal_type*>(GNAMES_SIG.sigscan());
+    // Using plain `sigscan` since there's an extra level of indirection here, want to make sure to
+    // print an error before we potentially dereference it
+    auto gnames_ptr = *read_offset<GNames::internal_type*>(GNAMES_SIG.sigscan("GNames"));
     LOG(MISC, "GNames: {:p}", reinterpret_cast<void*>(gnames_ptr));
 
     gnames_wrapper = GNames(gnames_ptr);
