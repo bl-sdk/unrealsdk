@@ -77,7 +77,7 @@ size_t GObjects::size(void) const {
 }
 
 UObject* GObjects::obj_at(size_t idx) const {
-    if (idx > (size_t)this->internal->ObjObjects.Count) {
+    if (idx >= (size_t)this->internal->ObjObjects.Count) {
         throw std::out_of_range("GObjects index out of range");
     }
     return this->internal->ObjObjects.at(idx)->Object;

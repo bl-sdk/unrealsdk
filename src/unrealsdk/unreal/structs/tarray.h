@@ -108,7 +108,7 @@ struct TArray {
     template <typename U = T,
               typename = std::enable_if_t<std::is_same_v<U, T> && std::negation_v<std::is_void<U>>>>
     [[nodiscard]] U at(size_t idx) const {
-        if (idx > (size_t)this->count) {
+        if (idx >= (size_t)this->count) {
             throw std::out_of_range("TArray index out of range");
         }
         return this->operator[](idx);
