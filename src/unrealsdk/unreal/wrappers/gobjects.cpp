@@ -101,8 +101,7 @@ UObject* GObjects::get_weak_object(const FWeakObjectPtr* ptr) const {
 
 void GObjects::set_weak_object(FWeakObjectPtr* ptr, const UObject* obj) const {
     if (obj == nullptr) {
-        ptr->object_index = -1;
-        ptr->object_serial_number = 0;
+        *ptr = {};
     } else {
         ptr->object_index = obj->InternalIndex;
 
