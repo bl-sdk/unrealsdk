@@ -13,7 +13,7 @@ namespace unrealsdk::unreal {
 
 FText::FText(std::string_view str) : FText(utils::widen(str)) {}
 FText::FText(std::wstring_view str) : data(), flags() {
-    unrealsdk::ftext_as_culture_invariant(this, str);
+    unrealsdk::internal::ftext_as_culture_invariant(this, str);
 }
 
 FText& FText::operator=(std::string_view str) {

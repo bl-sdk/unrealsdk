@@ -268,7 +268,7 @@ void builtin_logger(const LogMessage* msg) {
     }
 
     if (unreal_console_level != Level::INVALID && unreal_console_level <= msg->level) {
-        unrealsdk::uconsole_output_text(utils::widen({msg->msg, msg->msg_size}));
+        unrealsdk::internal::uconsole_output_text(utils::widen({msg->msg, msg->msg_size}));
     }
 
     if (external_console_handle != nullptr || log_file_stream) {

@@ -9,9 +9,9 @@ namespace unrealsdk::unreal {
 
 FName::FName(int32_t index, int32_t number) : index(index), number(number) {}
 
-FName::FName(std::string_view name, int32_t number) : FName(utils::widen(name), number) {};
+FName::FName(std::string_view name, int32_t number) : FName(utils::widen(name), number){};
 FName::FName(std::wstring_view name, int32_t number) {
-    unrealsdk::fname_init(this, name, number);
+    unrealsdk::internal::fname_init(this, name, number);
 }
 
 bool FName::operator==(const FName& other) const {
@@ -29,7 +29,7 @@ std::ostream& operator<<(std::ostream& stream, const FName& name) {
     if (entry->is_wide()) {
         stream << utils::narrow(entry->WideName);
     } else {
-        stream << std::string{entry->AnsiName};
+        stream << std::string_view{entry->AnsiName};
     }
     // NOLINTEND(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
 
@@ -44,7 +44,7 @@ std::wostream& operator<<(std::wostream& stream, const FName& name) {
 
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
     if (entry->is_wide()) {
-        stream << std::wstring{entry->WideName};
+        stream << std::wstring_view{entry->WideName};
     } else {
         stream << utils::widen(entry->AnsiName);
     }

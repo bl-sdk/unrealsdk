@@ -107,8 +107,7 @@ bool console_command_hook(hook_manager::Details& hook) {
         hook.obj->get<UFunction, BoundFunction>(save_config_func).call<void>();
     }
 
-    // Don't want to log this, just output to console by itself
-    unrealsdk::uconsole_output_text(unrealsdk::fmt::format(L">>> {} <<<", line));
+    LOG(INFO, L">>> {} <<<", line);
 
     try {
         callback->operator()(line.c_str(), line.size(), cmd_len);

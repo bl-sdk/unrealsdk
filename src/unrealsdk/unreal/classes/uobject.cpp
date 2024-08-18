@@ -44,7 +44,7 @@ std::wstring UObject::get_path_name(void) const {
 #else
 
 std::wstring UObject::get_path_name(void) const {
-    return unrealsdk::uobject_path_name(this);
+    return unrealsdk::internal::uobject_path_name(this);
 }
 
 #endif

@@ -82,30 +82,32 @@ class BL3Hook : public AbstractHook {
     void hook(void) override;
     void post_init(void) override;
 
+    [[nodiscard]] bool is_console_ready(void) const override;
+
     [[nodiscard]] const unreal::GObjects& gobjects(void) const override;
     [[nodiscard]] const unreal::GNames& gnames(void) const override;
-    void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const override;
-    void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const override;
     [[nodiscard]] void* u_malloc(size_t len) const override;
     [[nodiscard]] void* u_realloc(void* original, size_t len) const override;
     void u_free(void* data) const override;
-    void process_event(unreal::UObject* object,
-                       unreal::UFunction* func,
-                       void* params) const override;
     [[nodiscard]] unreal::UObject* construct_object(unreal::UClass* cls,
                                                     unreal::UObject* outer,
                                                     const unreal::FName& name,
                                                     decltype(unreal::UObject::ObjectFlags) flags,
                                                     unreal::UObject* template_obj) const override;
-    void uconsole_output_text(const std::wstring& str) const override;
-    [[nodiscard]] bool is_console_ready(void) const override;
-    [[nodiscard]] std::wstring uobject_path_name(const unreal::UObject* obj) const override;
     [[nodiscard]] unreal::UObject* find_object(unreal::UClass* cls,
                                                const std::wstring& name) const override;
-    void ftext_as_culture_invariant(unreal::FText* text,
-                                    unreal::TemporaryFString&& str) const override;
     [[nodiscard]] unreal::UObject* load_package(const std::wstring& name,
                                                 uint32_t flags) const override;
+
+    void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const override;
+    void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const override;
+    void process_event(unreal::UObject* object,
+                       unreal::UFunction* func,
+                       void* params) const override;
+    void uconsole_output_text(const std::wstring& str) const override;
+    [[nodiscard]] std::wstring uobject_path_name(const unreal::UObject* obj) const override;
+    void ftext_as_culture_invariant(unreal::FText* text,
+                                    unreal::TemporaryFString&& str) const override;
 };
 
 template <>

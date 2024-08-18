@@ -91,14 +91,6 @@ UNREALSDK_CAPI([[nodiscard]] const GNames*, gnames) {
     return &hook_instance->gnames();
 }
 
-UNREALSDK_CAPI(void, fname_init, FName* name, const wchar_t* str, int32_t number) {
-    hook_instance->fname_init(name, str, number);
-}
-
-UNREALSDK_CAPI(void, fframe_step, FFrame* frame, UObject* obj, void* param) {
-    hook_instance->fframe_step(frame, obj, param);
-}
-
 UNREALSDK_CAPI(void*, u_malloc, size_t len) {
     auto ptr = hook_instance->u_malloc(len);
 
@@ -126,10 +118,6 @@ UNREALSDK_CAPI(void, u_free, void* data) {
     hook_instance->u_free(data);
 }
 
-UNREALSDK_CAPI(void, process_event, UObject* object, UFunction* function, void* params) {
-    hook_instance->process_event(object, function, params);
-}
-
 UNREALSDK_CAPI([[nodiscard]] UObject*,
                construct_object,
                UClass* cls,
@@ -142,6 +130,36 @@ UNREALSDK_CAPI([[nodiscard]] UObject*,
         local_name = *name;
     }
     return hook_instance->construct_object(cls, outer, local_name, flags, template_obj);
+}
+
+UNREALSDK_CAPI([[nodiscard]] UObject*,
+               find_object,
+               UClass* cls,
+               const wchar_t* name,
+               size_t name_size) {
+    return hook_instance->find_object(cls, {name, name_size});
+}
+
+UNREALSDK_CAPI([[nodiscard]] UObject*,
+               load_package,
+               const wchar_t* name,
+               size_t size,
+               uint32_t flags) {
+    return hook_instance->load_package({name, size}, flags);
+}
+
+namespace internal {
+
+UNREALSDK_CAPI(void, fname_init, FName* name, const wchar_t* str, int32_t number) {
+    hook_instance->fname_init(name, str, number);
+}
+
+UNREALSDK_CAPI(void, fframe_step, FFrame* frame, UObject* obj, void* param) {
+    hook_instance->fframe_step(frame, obj, param);
+}
+
+UNREALSDK_CAPI(void, process_event, UObject* object, UFunction* function, void* params) {
+    hook_instance->process_event(object, function, params);
 }
 
 UNREALSDK_CAPI(void, uconsole_output_text, const wchar_t* str, size_t size) {
@@ -163,14 +181,6 @@ UNREALSDK_CAPI([[nodiscard]] wchar_t*, uobject_path_name, const UObject* obj, si
     return mem;
 }
 
-UNREALSDK_CAPI([[nodiscard]] UObject*,
-               find_object,
-               UClass* cls,
-               const wchar_t* name,
-               size_t name_size) {
-    return hook_instance->find_object(cls, {name, name_size});
-}
-
 UNREALSDK_CAPI(void,
                ftext_as_culture_invariant,
                unreal::FText* text,
@@ -178,13 +188,7 @@ UNREALSDK_CAPI(void,
     hook_instance->ftext_as_culture_invariant(text, std::move(str));
 }
 
-UNREALSDK_CAPI([[nodiscard]] UObject*,
-               load_package,
-               const wchar_t* name,
-               size_t size,
-               uint32_t flags) {
-    return hook_instance->load_package({name, size}, flags);
-}
+}  // namespace internal
 
 }  // namespace unrealsdk
 
