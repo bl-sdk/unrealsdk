@@ -33,6 +33,12 @@ struct TArray {
     [[nodiscard]] size_t capacity(void) const { return this->max; };
 
     /**
+     * @brief Frees the contained array, setting size/capacity back to 0.
+     * @note Caller must ensure any removed entries are already destroyed, so they don't leak.
+     */
+    void free(void);
+
+    /**
      * @brief Changes the capacity of this array, reserving new memory as needed.
      * @note Can be used to shrink the capacity.
      * @note Caller must ensure any removed entries are already destroyed, so they don't leak, and

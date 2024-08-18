@@ -88,10 +88,7 @@ UnmanagedFString::operator std::wstring_view() const {
 #pragma region ManagedFString
 
 ManagedFString::~ManagedFString() {
-    if (this->data != nullptr) {
-        unrealsdk::u_free(this->data);
-        this->data = nullptr;
-    }
+    this->free();
 }
 
 ManagedFString::ManagedFString(const UnmanagedFString& other)

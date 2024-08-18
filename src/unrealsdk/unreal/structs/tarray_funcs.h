@@ -9,6 +9,16 @@
 namespace unrealsdk::unreal {
 
 template <typename T>
+void TArray<T>::free(void) {
+    if (this->data != nullptr) {
+        unrealsdk::u_free(this->data);
+    }
+    this->data = nullptr;
+    this->count = 0;
+    this->max = 0;
+}
+
+template <typename T>
 void TArray<T>::reserve(size_t new_cap, size_t element_size) {
     if (new_cap > MAX_CAPACITY) {
         throw std::length_error("Tried to increase TArray beyond max capacity!");
