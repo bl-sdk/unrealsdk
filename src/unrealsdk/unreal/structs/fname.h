@@ -20,13 +20,14 @@ struct FName {
      * @note Automatically converts utf8 to utf16 if needed.
      *
      * @param index The name index to use.
-     * @param name A string to lookup/create the name index of.
+     * @param name A string to lookup/create the name index of. Must be null terminated.
      * @param number The name number to use.
      */
     FName(void) = default;
     FName(int32_t index, int32_t number);
-    FName(std::string_view name, int32_t number = 0);
-    FName(std::wstring_view name, int32_t number = 0);
+    explicit FName(const wchar_t* name, int32_t number = 0);
+    explicit FName(const std::string& name, int32_t number = 0);
+    explicit FName(const std::wstring& name, int32_t number = 0);
 
     bool operator==(const FName& other) const;
     bool operator!=(const FName& other) const;
