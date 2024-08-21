@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.24)
+﻿cmake_minimum_required(VERSION 3.25)
 
 project(unrealsdk VERSION 1.2.0)
 
@@ -13,6 +13,14 @@ set_target_properties(_unrealsdk_interface PROPERTIES
     COMPILE_WARNING_AS_ERROR True
     INTERPROCEDURAL_OPTIMIZATION True
 )
+
+if(MSVC)
+    # Under MSVC, enable edit and continue in debug - which conflicts with LTO
+    set_target_properties(${target_name} PROPERTIES
+        MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug>:EditAndContinue>"
+        INTERPROCEDURAL_OPTIMIZATION $<CONFIG:Release>
+    )
+endif()
 
 if(MSVC)
     target_compile_options(_unrealsdk_interface INTERFACE /W4)
