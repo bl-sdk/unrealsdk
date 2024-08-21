@@ -1,5 +1,43 @@
 # Changelog
 
+## v1.3.0
+- Added a `WeakPointer` wrapper class with better ergonomics, including an emulated implementation
+  when built under UE3.
+
+  [fe3a9130](https://github.com/bl-sdk/unrealsdk/commit/fe3a9130)
+
+- Added support for Soft Object, Soft Class, and Lazy Object Pointer properties.
+
+  When accessing these via the standard getters/setters, they return their object reference
+  directly. You can get the object identifier separately via `FSoftObjectPath::get_from` + related.
+
+  [8f6fd71d](https://github.com/bl-sdk/unrealsdk/commit/8f6fd71d)
+
+- Console commands bound via the sdk now appear in the sdk log file.
+
+  [73ded7cb](https://github.com/bl-sdk/unrealsdk/commit/73ded7cb)
+
+- Fixed that hooks could not always be removed after adding, or that they might not always fire.
+  This could be caused by constructing `FName`s with strings which were *not* null terminated. The
+  `FName` constructor no longer takes string views to avoid this, it needs explicitly strings.
+
+  [227a93d2](https://github.com/bl-sdk/unrealsdk/commit/227a93d2)
+
+- Moved several functions in the base `unrealsdk` namespace into `unrealsdk::internal`. These were
+  all functions which relied on a game hook, but were primarily used to implement sdk internals, so
+  shouldn't really have had reason to be called from user code. For example, `fname_init` is used
+  to implement the `FName` constructor, so there's no reason for user code to call it directly.
+
+  [73ded7cb](https://github.com/bl-sdk/unrealsdk/commit/73ded7cb)
+
+- Added a dedicated `TArray<T>::free()` helper function, and inserted it where appropriate.
+
+  [850763f9](https://github.com/bl-sdk/unrealsdk/commit/850763f9)
+
+- Fixed an off by one in basically all array bounds checks.
+
+  [001a87be](https://github.com/bl-sdk/unrealsdk/commit/001a87be)
+
 ## v1.2.0
 - When an exception occurs during a hook, now mention what function it was under, to make debugging
   easier.
