@@ -188,6 +188,14 @@ UNREALSDK_CAPI(void,
     hook_instance->ftext_as_culture_invariant(text, std::move(str));
 }
 
+UNREALSDK_CAPI(void, fsoftobjectptr_assign, FSoftObjectPtr* ptr, const unreal::UObject* obj) {
+    hook_instance->fsoftobjectptr_assign(ptr, obj);
+}
+
+UNREALSDK_CAPI(void, flazyobjectptr_assign, FLazyObjectPtr* ptr, const unreal::UObject* obj) {
+    hook_instance->flazyobjectptr_assign(ptr, obj);
+}
+
 }  // namespace internal
 
 }  // namespace unrealsdk

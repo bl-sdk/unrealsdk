@@ -74,6 +74,12 @@ class BL3Hook : public AbstractHook {
     static void find_load_package(void);
 
     /**
+     * @brief Finds the required pointers such that `fsoftobjectptr_assign` and
+     *        `flazyobjectptr_assign` may be called.
+     */
+    static void find_persistent_obj_ptrs(void);
+
+    /**
      * @brief Creates a console and sets the bind (if required), and hooks logging onto it.
      */
     static void inject_console(void);
@@ -108,6 +114,10 @@ class BL3Hook : public AbstractHook {
     [[nodiscard]] std::wstring uobject_path_name(const unreal::UObject* obj) const override;
     void ftext_as_culture_invariant(unreal::FText* text,
                                     unreal::TemporaryFString&& str) const override;
+    void fsoftobjectptr_assign(unreal::FSoftObjectPtr* ptr,
+                               const unreal::UObject* obj) const override;
+    void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr,
+                               const unreal::UObject* obj) const override;
 };
 
 template <>

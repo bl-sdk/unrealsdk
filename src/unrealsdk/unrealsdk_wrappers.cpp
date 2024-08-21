@@ -96,6 +96,14 @@ void ftext_as_culture_invariant(unreal::FText* text, unreal::TemporaryFString&& 
     UNREALSDK_MANGLE(ftext_as_culture_invariant)(text, std::move(str));
 }
 
+void fsoftobjectptr_assign(unreal::FSoftObjectPtr* ptr, const unreal::UObject* obj) {
+    UNREALSDK_MANGLE(fsoftobjectptr_assign)(ptr, obj);
+}
+
+void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr, const unreal::UObject* obj) {
+    UNREALSDK_MANGLE(flazyobjectptr_assign)(ptr, obj);
+}
+
 }  // namespace internal
 
 }  // namespace unrealsdk

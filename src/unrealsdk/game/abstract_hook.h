@@ -15,6 +15,8 @@ class GObjects;
 class UClass;
 class UFunction;
 struct FFrame;
+struct FLazyObjectPtr;
+struct FSoftObjectPtr;
 struct FText;
 struct TemporaryFString;
 
@@ -75,6 +77,10 @@ struct AbstractHook {
     [[nodiscard]] virtual std::wstring uobject_path_name(const unreal::UObject* obj) const = 0;
     virtual void ftext_as_culture_invariant(unreal::FText* text,
                                             unreal::TemporaryFString&& str) const = 0;
+    virtual void fsoftobjectptr_assign(unreal::FSoftObjectPtr* ptr,
+                                       const unreal::UObject* obj) const = 0;
+    virtual void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr,
+                                       const unreal::UObject* obj) const = 0;
 };
 
 #pragma endregion

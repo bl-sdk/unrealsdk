@@ -28,6 +28,7 @@ void BL3Hook::hook(void) {
     find_static_find_object();
     find_ftext_as_culture_invariant();
     find_load_package();
+    find_persistent_obj_ptrs();
 }
 
 void BL3Hook::post_init(void) {

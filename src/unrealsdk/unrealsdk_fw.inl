@@ -18,7 +18,8 @@ class GObjects;
 class UClass;
 class UFunction;
 struct FFrame;
-struct FName;
+struct FLazyObjectPtr;
+struct FSoftObjectPtr;
 struct FText;
 struct TemporaryFString;
 
@@ -61,6 +62,8 @@ UNREALSDK_CAPI(void, process_event, UObject* object, UFunction* function, void* 
 UNREALSDK_CAPI(void, uconsole_output_text, const wchar_t* str, size_t size);
 UNREALSDK_CAPI([[nodiscard]] wchar_t*, uobject_path_name, const UObject* obj, size_t& size);
 UNREALSDK_CAPI(void, ftext_as_culture_invariant, FText* text, TemporaryFString&& str);
+UNREALSDK_CAPI(void, fsoftobjectptr_assign, FSoftObjectPtr* ptr, const unreal::UObject* obj);
+UNREALSDK_CAPI(void, flazyobjectptr_assign, FLazyObjectPtr* ptr, const unreal::UObject* obj);
 
 }  // namespace internal
 
