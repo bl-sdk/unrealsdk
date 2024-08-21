@@ -12,7 +12,7 @@ void BoundFunction::call_with_params(void* params) const {
     auto original_flags = this->func->FunctionFlags;
     this->func->FunctionFlags |= UFunction::FUNC_NATIVE;
 
-    process_event(this->object, this->func, params);
+    unrealsdk::internal::process_event(this->object, this->func, params);
 
     func->FunctionFlags = original_flags;
 }

@@ -107,9 +107,9 @@ void inject_next_call(void) {
 FName extract_func_obj_name(std::wstring_view func) {
     auto idx = func.find_last_of(L".:");
     if (idx == std::wstring_view::npos) {
-        return func;
+        return FName{std::wstring{func}};
     }
-    return func.substr(idx + 1);
+    return FName{std::wstring{func.substr(idx + 1)}};
 }
 
 bool add_hook(std::wstring_view func,

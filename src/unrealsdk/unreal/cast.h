@@ -8,6 +8,7 @@
 // Refrain from including it in other headers
 #include "unrealsdk/unreal/classes/properties/attribute_property.h"
 #include "unrealsdk/unreal/classes/properties/copyable_property.h"
+#include "unrealsdk/unreal/classes/properties/persistent_object_ptr_property.h"
 #include "unrealsdk/unreal/classes/properties/uarrayproperty.h"
 #include "unrealsdk/unreal/classes/properties/uboolproperty.h"
 #include "unrealsdk/unreal/classes/properties/ubyteproperty.h"
@@ -60,11 +61,14 @@ using all_unreal_classes = std::tuple<  //
     UIntAttributeProperty,
     UInterfaceProperty,
     UIntProperty,
+    ULazyObjectProperty,
     UNameProperty,
     UObject,
     UObjectProperty,
     UProperty,
     UScriptStruct,
+    USoftClassProperty,
+    USoftObjectProperty,
     UStrProperty,
     UStruct,
     UStructProperty,

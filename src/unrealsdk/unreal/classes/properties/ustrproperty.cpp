@@ -24,15 +24,7 @@ void PropTraits<UStrProperty>::set(const UStrProperty* /*prop*/,
 }
 
 void PropTraits<UStrProperty>::destroy(const UStrProperty* /*prop*/, uintptr_t addr) {
-    auto fstr = reinterpret_cast<UnmanagedFString*>(addr);
-
-    if (fstr->data != nullptr) {
-        u_free(fstr->data);
-    }
-
-    fstr->data = nullptr;
-    fstr->count = 0;
-    fstr->max = 0;
+    reinterpret_cast<UnmanagedFString*>(addr)->free();
 }
 
 }  // namespace unrealsdk::unreal

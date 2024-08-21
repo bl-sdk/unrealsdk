@@ -71,13 +71,7 @@ void PropTraits<UArrayProperty>::destroy(const UArrayProperty* prop, uintptr_t a
         }
     });
 
-    if (arr->data != nullptr) {
-        u_free(arr->data);
-    }
-
-    arr->data = nullptr;
-    arr->count = 0;
-    arr->max = 0;
+    arr->free();
 }
 
 }  // namespace unrealsdk::unreal

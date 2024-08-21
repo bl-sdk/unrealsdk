@@ -19,6 +19,8 @@ class GObjects;
 class UClass;
 class UFunction;
 struct FFrame;
+struct FLazyObjectPtr;
+struct FSoftObjectPtr;
 struct FText;
 struct TemporaryFString;
 
@@ -73,25 +75,6 @@ bool init(const std::function<std::unique_ptr<game::AbstractHook>(void)>& game_g
 [[nodiscard]] const unreal::GNames& gnames(void);
 
 /**
- * @brief Calls FName::Init, set to add new names and split numbers.
- *
- * @param name Pointer to the name to initialize.
- * @param str The string to initialize the name to.
- * @param number The number to initialize the name to.
- */
-void fname_init(unreal::FName* name, const wchar_t* str, int32_t number);
-void fname_init(unreal::FName* name, std::wstring_view str, int32_t number);
-
-/**
- * @brief Calls FFrame::Step.
- *
- * @param frame The frame to step.
- * @param obj The object the frame is coming from.
- * @param param The parameter.
- */
-void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param);
-
-/**
  * @brief Calls unreal's malloc function.
  *
  * @tparam T The type to cast the return to.
@@ -126,15 +109,6 @@ template <typename T>
 void u_free(void* data);
 
 /**
- * @brief Calls `UObject::ProcessEvent`.
- *
- * @param object The object to process an event on.
- * @param func The function to call.
- * @param params The function's params
- */
-void process_event(unreal::UObject* object, unreal::UFunction* func, void* params);
-
-/**
  * @brief Constructs a new object
  *
  * @param cls The class to construct. Required.
@@ -149,6 +123,61 @@ void process_event(unreal::UObject* object, unreal::UFunction* func, void* param
                                                 const unreal::FName& name = {0, 0},
                                                 decltype(unreal::UObject::ObjectFlags) flags = 0,
                                                 unreal::UObject* template_obj = nullptr);
+
+/**
+ * @brief Loads a package, and all it's contained objects.
+ * @note This function may block for several seconds while the package is loaded.
+ *
+ * @param name The package's name.
+ * @param flags The loading flags to use.
+ * @return The loaded `Package` object.
+ */
+// NOLINTNEXTLINE(modernize-use-nodiscard)
+unreal::UObject* load_package(std::wstring_view name, uint32_t flags = 0);
+
+/**
+ * @brief Finds an object by name.
+ *
+ * @param cls The object's class (or it's name).
+ * @param name The object's full path name.
+ * @return The object, or nullptr if unable to find.
+ */
+[[nodiscard]] unreal::UObject* find_object(unreal::UClass* cls, std::wstring_view name);
+[[nodiscard]] unreal::UObject* find_object(const unreal::FName& cls, std::wstring_view name);
+[[nodiscard]] unreal::UObject* find_object(std::wstring_view cls, std::wstring_view name);
+
+// Everything in this namespace is used by sdk internals, and is generally not useful in user code.
+// For example, `fname_init` is called by the `FName` constructor, so there's no real reason to call
+// it over just constructing one directly.
+namespace internal {
+
+/**
+ * @brief Calls `FName::Init`, set to add new names and split numbers.
+ *
+ * @param name Pointer to the name to initialize.
+ * @param str The string to initialize the name to. Must be null terminated.
+ * @param number The number to initialize the name to.
+ */
+void fname_init(unreal::FName* name, const wchar_t* str, int32_t number);
+void fname_init(unreal::FName* name, const std::wstring& str, int32_t number);
+
+/**
+ * @brief Calls `FFrame::Step`.
+ *
+ * @param frame The frame to step.
+ * @param obj The object the frame is coming from.
+ * @param param The parameter.
+ */
+void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param);
+
+/**
+ * @brief Calls `UObject::ProcessEvent`.
+ *
+ * @param object The object to process an event on.
+ * @param func The function to call.
+ * @param params The function's params
+ */
+void process_event(unreal::UObject* object, unreal::UFunction* func, void* params);
 
 /**
  * @brief Calls `UConsole::OutputText` to write to the UE console.
@@ -167,17 +196,6 @@ void uconsole_output_text(std::wstring_view str);
 [[nodiscard]] std::wstring uobject_path_name(const unreal::UObject* obj);
 
 /**
- * @brief Finds an object by name.
- *
- * @param cls The object's class (or it's name).
- * @param name The object's full path name.
- * @return The object, or nullptr if unable to find.
- */
-[[nodiscard]] unreal::UObject* find_object(unreal::UClass* cls, std::wstring_view name);
-[[nodiscard]] unreal::UObject* find_object(const unreal::FName& cls, std::wstring_view name);
-[[nodiscard]] unreal::UObject* find_object(std::wstring_view cls, std::wstring_view name);
-
-/**
  * @brief Calls `FText::AsCultureInvariant`.
  *
  * @param name Pointer to the text to initialize.
@@ -186,15 +204,15 @@ void uconsole_output_text(std::wstring_view str);
 void ftext_as_culture_invariant(unreal::FText* text, unreal::TemporaryFString&& str);
 
 /**
- * @brief Loads a package, and all it's contained objects.
- * @note This function may block for several seconds while the package is loaded.
+ * @brief Assigns an object to a `FSoftObjectPtr` or `FLazyObjectPtr`.
  *
- * @param name The package's name.
- * @param flags The loading flags to use.
- * @return The loaded `Package` object.
+ * @param ptr Pointer to the pointer to assign.
+ * @param obj The object to assign.
  */
-// NOLINTNEXTLINE(modernize-use-nodiscard)
-unreal::UObject* load_package(std::wstring_view name, uint32_t flags = 0);
+void fsoftobjectptr_assign(unreal::FSoftObjectPtr* ptr, const unreal::UObject* obj);
+void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr, const unreal::UObject* obj);
+
+}  // namespace internal
 
 }  // namespace unrealsdk
 

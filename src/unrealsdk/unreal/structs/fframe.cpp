@@ -18,8 +18,8 @@ uint8_t* FFrame::extract_current_args(WrappedStruct& args) {
             continue;
         }
 
-        unrealsdk::fframe_step(this, this->Object,
-                               reinterpret_cast<void*>(args_addr + prop->Offset_Internal));
+        unrealsdk::internal::fframe_step(
+            this, this->Object, reinterpret_cast<void*>(args_addr + prop->Offset_Internal));
     }
 
     return original_code;
