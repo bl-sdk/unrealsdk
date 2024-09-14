@@ -46,12 +46,16 @@ class UObject {
    private:
     void* HashOuterNext;
     void* StateFrame;
-    class UObject* Linker;
-    void* LinkerIndex;
-    int ObjectInternalInteger;
+    class UObject* _Linker;
+    void* _LinkerIndex;
 
    public:
     int InternalIndex;
+
+   private:
+    int NetIndex;
+
+   public:
     UObject* Outer;
     FName Name;
     UClass* Class;
