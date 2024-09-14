@@ -1,5 +1,11 @@
 # Changelog
 
+## Upcoming
+- Fixed that UE3 `WeakPointer`s would always return null, due to an incorrect offset in the
+  `UObject` header layout.
+
+  [aca70889](https://github.com/bl-sdk/unrealsdk/commit/aca70889)
+  
 ## v1.3.0
 - Added a `WeakPointer` wrapper class with better ergonomics, including an emulated implementation
   when built under UE3.
