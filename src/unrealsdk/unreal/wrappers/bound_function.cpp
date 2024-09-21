@@ -8,16 +8,9 @@
 
 namespace unrealsdk::unreal {
 
-void BoundFunction::call_with_params(void* params) const {
-    auto original_flags = this->func->FunctionFlags;
-    this->func->FunctionFlags |= UFunction::FUNC_NATIVE;
+namespace func_params::impl {
 
-    unrealsdk::internal::process_event(this->object, this->func, params);
-
-    func->FunctionFlags = original_flags;
-}
-
-UProperty* BoundFunction::get_next_param(UProperty* prop) {
+UProperty* get_next_param(UProperty* prop) {
     prop = prop->PropertyLinkNext;
     while (prop != nullptr && (prop->PropertyFlags & UProperty::PROP_FLAG_PARAM) == 0) {
         prop = prop->PropertyLinkNext;
@@ -25,7 +18,7 @@ UProperty* BoundFunction::get_next_param(UProperty* prop) {
     return prop;
 }
 
-void BoundFunction::validate_no_more_params(UProperty* prop) {
+void validate_no_more_params(UProperty* prop) {
     for (; prop != nullptr; prop = prop->PropertyLinkNext) {
         if ((prop->PropertyFlags & UProperty::PROP_FLAG_PARAM) == 0) {
             continue;
@@ -40,6 +33,17 @@ void BoundFunction::validate_no_more_params(UProperty* prop) {
 #endif
         throw std::runtime_error("Too few parameters to function call!");
     }
+}
+
+}  // namespace func_params::impl
+
+void BoundFunction::call_with_params(void* params) const {
+    auto original_flags = this->func->FunctionFlags;
+    this->func->FunctionFlags |= UFunction::FUNC_NATIVE;
+
+    unrealsdk::internal::process_event(this->object, this->func, params);
+
+    func->FunctionFlags = original_flags;
 }
 
 }  // namespace unrealsdk::unreal
