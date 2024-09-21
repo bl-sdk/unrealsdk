@@ -14,6 +14,7 @@
 #include "unrealsdk/unreal/classes/properties/ubyteproperty.h"
 #include "unrealsdk/unreal/classes/properties/uclassproperty.h"
 #include "unrealsdk/unreal/classes/properties/ucomponentproperty.h"
+#include "unrealsdk/unreal/classes/properties/udelegateproperty.h"
 #include "unrealsdk/unreal/classes/properties/uenumproperty.h"
 #include "unrealsdk/unreal/classes/properties/uinterfaceproperty.h"
 #include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
@@ -48,6 +49,7 @@ using all_unreal_classes = std::tuple<  //
     UClassProperty,
     UComponentProperty,
     UConst,
+    UDelegateProperty,
     UDoubleProperty,
     UEnum,
     UEnumProperty,
