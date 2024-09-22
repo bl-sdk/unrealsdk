@@ -5,6 +5,11 @@
   `UObject` header layout.
 
   [aca70889](https://github.com/bl-sdk/unrealsdk/commit/aca70889)
+
+- Added support for Delegate and Multicast Delegate properties.
+
+  [4e17d06d](https://github.com/bl-sdk/unrealsdk/commit/4e17d06d),
+  [270ef4bf](https://github.com/bl-sdk/unrealsdk/commit/270ef4bf)
   
 ## v1.3.0
 - Added a `WeakPointer` wrapper class with better ergonomics, including an emulated implementation
