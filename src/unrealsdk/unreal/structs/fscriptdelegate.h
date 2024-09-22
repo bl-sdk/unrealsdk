@@ -38,7 +38,7 @@ struct FScriptDelegate {
      *
      * @param object The object.
      */
-    void set_object(UObject* object);
+    void set_object(UObject* obj);
 
     /**
      * @brief Tries to convert this delegate to a bound function.
