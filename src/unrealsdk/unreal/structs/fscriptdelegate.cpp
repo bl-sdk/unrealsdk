@@ -15,8 +15,8 @@ UObject* FScriptDelegate::get_object(void) const {
     return this->object;
 }
 
-void FScriptDelegate::set_object(UObject* object) {
-    this->object = object;
+void FScriptDelegate::set_object(UObject* obj) {
+    this->object = obj;
 }
 
 #else
