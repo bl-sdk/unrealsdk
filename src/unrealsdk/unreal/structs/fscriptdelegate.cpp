@@ -5,6 +5,7 @@
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/wrappers/gobjects.h"
 #include "unrealsdk/unrealsdk.h"
+#include "unrealsdk/utils.h"
 
 namespace unrealsdk::unreal {
 
@@ -24,19 +25,20 @@ UObject* FScriptDelegate::get_object(void) const {
     return unrealsdk::gobjects().get_weak_object(&this->object);
 }
 
-void FScriptDelegate::set_object(UObject* object) {
-    unrealsdk::gobjects().set_weak_object(&this->object, object);
+void FScriptDelegate::set_object(UObject* obj) {
+    unrealsdk::gobjects().set_weak_object(&this->object, obj);
 }
 #endif
 
 [[nodiscard]] std::optional<BoundFunction> FScriptDelegate::as_function(void) const {
-    auto object = this->get_object();
+    auto obj = this->get_object();
 
-    if (object == nullptr) {
+    if (obj == nullptr) {
         return std::nullopt;
     }
 
-    return BoundFunction{object->Class->find_func_and_validate(this->func_name), object};
+    return BoundFunction{.func = obj->Class->find_func_and_validate(this->func_name),
+                         .object = obj};
 }
 
 void FScriptDelegate::bind(const std::optional<BoundFunction>& func) {
@@ -69,10 +71,10 @@ void FScriptDelegate::validate_signature(const std::optional<BoundFunction>& fun
                 func->func->Name));
         }
         if (func_from_find != func->func) {
-            throw std::invalid_argument(unrealsdk::fmt::format(
-                "Could not convert function to delegate: got another function with the same name,"
+            throw std::invalid_argument(utils::narrow(unrealsdk::fmt::format(
+                L"Could not convert function to delegate: got another function with the same name,"
                 "{} instead of {}",
-                func_from_find->get_path_name(), func->func->get_path_name()));
+                func_from_find->get_path_name(), func->func->get_path_name())));
         }
     }
 
@@ -93,8 +95,8 @@ void FScriptDelegate::validate_signature(const std::optional<BoundFunction>& fun
         auto func_props = func->func->properties();
         auto sig_props = signature->properties();
 
-        auto [func_diff, sig_diff] = std::mismatch(
-            func_props.begin(), func_props.end(), sig_props.begin(), sig_props.end(),
+        auto [func_diff, sig_diff] = std::ranges::mismatch(
+            func_props, sig_props,
             [](UProperty* func, UProperty* sig) { return func->Class == sig->Class; });
 
         if (func_diff != func_props.end() && sig_diff != sig_props.end()) {

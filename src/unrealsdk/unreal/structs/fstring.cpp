@@ -31,24 +31,26 @@ size_type valid_size(std::wstring_view str) {
 #pragma region TemporaryFString
 
 TemporaryFString::TemporaryFString(std::wstring_view str)
-    : TArray{str.data(), valid_size(str), valid_size(str)} {}
+    : TArray{.data = str.data(), .count = valid_size(str), .max = valid_size(str)} {}
 
 #pragma endregion
 
 #pragma region UnmanagedFString
 
 UnmanagedFString::UnmanagedFString(decltype(data) data, decltype(count) count, decltype(max) max)
-    : TArray{data, count, max} {}
+    : TArray{.data = data, .count = count, .max = max} {}
 UnmanagedFString::UnmanagedFString(std::string_view str)
     : UnmanagedFString(unrealsdk::utils::widen(str)) {}
-UnmanagedFString::UnmanagedFString(std::wstring_view str) : TArray{nullptr, 0, 0} {
+UnmanagedFString::UnmanagedFString(std::wstring_view str)
+    : TArray{.data = nullptr, .count = 0, .max = 0} {
     auto size = valid_size(str);
     this->resize(size);
     memcpy(this->data, str.data(), size * sizeof(*this->data));
 }
 UnmanagedFString::UnmanagedFString(UnmanagedFString&& other) noexcept
-    : TArray{std::exchange(other.data, nullptr), std::exchange(other.count, 0),
-             std::exchange(other.max, 0)} {}
+    : TArray{.data = std::exchange(other.data, nullptr),
+             .count = std::exchange(other.count, 0),
+             .max = std::exchange(other.max, 0)} {}
 
 UnmanagedFString& UnmanagedFString::operator=(std::string_view str) {
     return *this = UnmanagedFString{str};

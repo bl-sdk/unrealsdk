@@ -160,7 +160,7 @@ UFunction* UStruct::find_func_and_validate(const FName& name) const {
 
 bool UStruct::inherits(const UStruct* base_struct) const {
     auto superfields = this->superfields();
-    return std::find(superfields.begin(), superfields.end(), base_struct) != superfields.end();
+    return std::ranges::find(superfields, base_struct) != superfields.end();
 }
 
 }  // namespace unrealsdk::unreal

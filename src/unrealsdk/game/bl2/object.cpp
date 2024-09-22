@@ -78,6 +78,8 @@ UObject* BL2Hook::construct_object(UClass* cls,
 // function is used to tell if to call a hook, it's called all the time.
 // Stick with a native function call for speed.
 
+namespace {
+
 #if defined(__MINGW32__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wattributes"  // thiscall on non-class
@@ -104,6 +106,8 @@ const constinit Pattern<15> GET_PATH_NAME_PATTERN{
     "74 ??"     // je Borderlands2.exe+ADB04
     "85 F6"     // test esi, esi
 };
+
+}  // namespace
 
 void BL2Hook::find_get_path_name(void) {
     get_path_name_ptr = GET_PATH_NAME_PATTERN.sigscan_nullable<get_path_name_func>();

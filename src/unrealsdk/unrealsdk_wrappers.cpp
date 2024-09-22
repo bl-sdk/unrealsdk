@@ -1,6 +1,6 @@
 #include "unrealsdk/pch.h"
-
 #include "unrealsdk/unreal/find_class.h"
+#include "unrealsdk/unrealsdk.h"
 
 #include "unrealsdk/unrealsdk_fw.inl"
 /*

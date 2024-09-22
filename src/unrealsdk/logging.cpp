@@ -293,6 +293,7 @@ void builtin_logger(const LogMessage* msg) {
 #pragma region Public Interface Implementations
 #ifndef UNREALSDK_IMPORTING
 namespace impl {
+namespace {
 
 void enqueue_log_msg(uint64_t unix_time_ms,
                      Level level,
@@ -326,11 +327,11 @@ void add_callback(log_callback callback) {
 void remove_callback(log_callback callback) {
     const std::lock_guard<std::mutex> lock(callback_mutex);
 
-    all_log_callbacks.erase(
-        std::remove(all_log_callbacks.begin(), all_log_callbacks.end(), callback),
-        all_log_callbacks.end());
+    auto [begin, end] = std::ranges::remove(all_log_callbacks, callback);
+    all_log_callbacks.erase(begin, end);
 }
 
+}  // namespace
 }  // namespace impl
 
 void init(const std::filesystem::path& file, bool unreal_console) {

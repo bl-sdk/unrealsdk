@@ -32,7 +32,7 @@ DWORD WINAPI startup_thread(LPVOID /*unused*/) {
  * @param ul_reason_for_call Reason this is being called.
  * @return True if loaded successfully, false otherwise.
  */
-// NOLINTNEXTLINE(readability-identifier-naming)  - for `DllMain`
+// NOLINTNEXTLINE(misc-use-internal-linkage, readability-identifier-naming)
 BOOL APIENTRY DllMain(HMODULE h_module, DWORD ul_reason_for_call, LPVOID /*unused*/) {
     switch (ul_reason_for_call) {
         case DLL_PROCESS_ATTACH:
