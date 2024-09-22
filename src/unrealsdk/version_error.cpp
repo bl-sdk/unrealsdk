@@ -1,4 +1,5 @@
 #include "unrealsdk/pch.h"
+#include "unrealsdk/version_error.h"
 
 namespace unrealsdk {
 

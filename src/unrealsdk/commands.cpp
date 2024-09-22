@@ -88,7 +88,7 @@ std::pair<DLLSafeCallback*, size_t> find_matching_command(std::wstring_view line
         return {callback, 0};
     }
 
-    auto non_space = std::find_if_not(line.begin(), line.end(), &std::iswspace);
+    auto non_space = std::ranges::find_if_not(line, &std::iswspace);
     if (non_space == line.end()) {
         return {nullptr, 0};
     }

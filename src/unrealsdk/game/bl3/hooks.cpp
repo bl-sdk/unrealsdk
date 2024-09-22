@@ -34,8 +34,6 @@ const constinit Pattern<19> PROCESS_EVENT_SIG{
     "48 81 EC F0000000"  // sub rsp, 000000F0
 };
 
-}  // namespace
-
 void process_event_hook(UObject* obj, UFunction* func, void* params) {
     try {
         auto data = hook_manager::impl::preprocess_hook("ProcessEvent", func, obj);
@@ -43,7 +41,10 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
             // Copy args so that hooks can't modify them, for parity with call function
             const WrappedStruct args_base{func, params};
             WrappedStruct args = args_base.copy_params_only();
-            hook_manager::Details hook{obj, &args, {func->find_return_param()}, {func, obj}};
+            hook_manager::Details hook{.obj = obj,
+                                       .args = &args,
+                                       .ret = {func->find_return_param()},
+                                       .func = {.func = func, .object = obj}};
 
             const bool block_execution =
                 hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
@@ -104,6 +105,8 @@ bool locking(void) {
     return locking;
 }
 
+}  // namespace
+
 void BL3Hook::hook_process_event(void) {
     detour(PROCESS_EVENT_SIG, locking() ? locking_process_event_hook : process_event_hook,
            &process_event_ptr, "ProcessEvent");
@@ -135,8 +138,6 @@ const constinit Pattern<20> CALL_FUNCTION_SIG{
     "48 81 EC 28010000"  // sub rsp, 00000128
 };
 
-}  // namespace
-
 void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* func) {
     try {
         /*
@@ -167,7 +168,10 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
             WrappedStruct args{func};
             auto original_code = stack->extract_current_args(args);
 
-            hook_manager::Details hook{obj, &args, {func->find_return_param()}, {func, obj}};
+            hook_manager::Details hook{.obj = obj,
+                                       .args = &args,
+                                       .ret = {func->find_return_param()},
+                                       .func = {.func = func, .object = obj}};
 
             const bool block_execution =
                 hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
@@ -211,6 +215,8 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
 }
 static_assert(std::is_same_v<decltype(call_function_hook), call_function_func>,
               "call_function signature is incorrect");
+
+}  // namespace
 
 void BL3Hook::hook_call_function(void) {
     detour(CALL_FUNCTION_SIG, call_function_hook, &call_function_ptr, "CallFunction");

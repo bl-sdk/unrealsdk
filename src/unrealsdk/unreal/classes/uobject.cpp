@@ -73,7 +73,7 @@ BoundFunction UObject::get<UFunction, BoundFunction>(const UFunction* prop, size
     auto mutable_obj = const_cast<UObject*>(this);
     // NOLINTEND(cppcoreguidelines-pro-type-const-cast)
 
-    return {mutable_func, mutable_obj};
+    return {.func = mutable_func, .object = mutable_obj};
 }
 template <>
 BoundFunction UObject::get<UFunction, BoundFunction>(const FName& name, size_t idx) const {

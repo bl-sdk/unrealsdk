@@ -72,7 +72,10 @@ void __fastcall process_event_hook(UObject* obj,
             // Copy args so that hooks can't modify them, for parity with call function
             const WrappedStruct args_base{func, params};
             WrappedStruct args = args_base.copy_params_only();
-            hook_manager::Details hook{obj, &args, {func->find_return_param()}, {func, obj}};
+            hook_manager::Details hook{.obj = obj,
+                                       .args = &args,
+                                       .ret = {func->find_return_param()},
+                                       .func = {.func = func, .object = obj}};
 
             const bool block_execution =
                 hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
@@ -184,7 +187,10 @@ void __fastcall call_function_hook(UObject* obj,
             WrappedStruct args{func};
             auto original_code = stack->extract_current_args(args);
 
-            hook_manager::Details hook{obj, &args, {func->find_return_param()}, {func, obj}};
+            hook_manager::Details hook{.obj = obj,
+                                       .args = &args,
+                                       .ret = {func->find_return_param()},
+                                       .func = {.func = func, .object = obj}};
 
             const bool block_execution =
                 hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
