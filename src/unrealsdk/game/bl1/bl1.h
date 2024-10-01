@@ -1,5 +1,5 @@
-#ifndef UNREALSDK_BL1_H
-#define UNREALSDK_BL1_H
+#ifndef UNREALSDK_GAME_BL1_BL1_H
+#define UNREALSDK_GAME_BL1_BL1_H
 
 #include "unrealsdk/pch.h"
 
