@@ -43,6 +43,9 @@ class UClass : public UStruct {
    public:
     TArray<FImplementedInterface> Interfaces;
 #else
+
+#if !defined(UNREALSDK_GAME_BL1)
+
    private:
     // Misc Fields I found within this block in BL2, but which we don't care about enough for me to
     //  find in UE4, or to want to increase the compile times by including
@@ -62,6 +65,18 @@ class UClass : public UStruct {
 
    public:
     TArray<FImplementedInterface> Interfaces;
+
+#else // defined(UNREALSDK_GAME_BL1)
+
+   public:
+    uint8_t UnknownData00[0xC0];
+    UObject* ClassDefaultObject; // 340b
+    uint8_t UnknownData01[0x54];
+    TArray<FImplementedInterface> Interfaces; // 428b
+
+
+#endif
+
 #endif
 
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)

@@ -83,6 +83,7 @@ class UProperty : public UField {
     UProperty* PostConstructLinkNext;  // 0x0030(0x0040) MISSED OFFSET
 #else
 
+#if !defined(UNREALSDK_GAME_BL1)
     int32_t ArrayDim;
     int32_t ElementSize;
     uint32_t PropertyFlags;
@@ -96,6 +97,19 @@ class UProperty : public UField {
 
    private:
     uint8_t UnknownData01[0x18];
+
+#else // defined(UNREALSDK_GAME_BL1)
+
+   public: // Total Size: 140b
+    int32_t ArrayDim;            // 68b
+    int32_t ElementSize;         // 72b
+    uint32_t PropertyFlags;      // 76b
+    uint8_t UnknownData00[0x14];
+    int32_t Offset_Internal;     // 100b
+    UProperty* PropertyLinkNext; // 104b
+    uint8_t UnknownData01[0x20];
+
+#endif
 
     /**
      * @brief Gets the size of this class.

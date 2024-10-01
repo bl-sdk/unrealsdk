@@ -62,6 +62,9 @@ class UStruct : public UField {
      * garbage collection code */
     TArray<UObject*> ScriptObjectReferences;
 #else
+
+#if !defined(UNREALSDK_GAME_BL1)
+
    private:
     uint8_t UnknownData00[0x8];
 
@@ -80,6 +83,21 @@ class UStruct : public UField {
     uint8_t UnknownData02[0x10];
 
     TArray<UObject*> ScriptObjectReferences;
+
+#else // defined(UNREALSDK_GAME_BL1)
+
+   public:
+    uint8_t UnknownData00[0x08];
+    UField* Children;                   // 76b
+    uint16_t PropertySize;              // 80b
+    uint8_t UnknownData01[0x1C + 0x02]; // +2 explicit padding
+    UProperty* PropertyLink;            // 112b
+    uint8_t UnknownData02[0x10];
+    TArray<UObject*> ScriptObjectReferences; // 132b
+    uint8_t UnknownData03[0x04];
+
+#endif
+
 #endif
 
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)

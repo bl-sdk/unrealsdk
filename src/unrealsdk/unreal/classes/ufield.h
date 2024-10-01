@@ -19,8 +19,18 @@ class UField : public UObject {
     UField& operator=(UField&&) = delete;
     ~UField() = delete;
 
+#if !defined(UNREALSDK_GAME_BL1)
+
     // NOLINTNEXTLINE(readability-identifier-naming)
     UField* Next;
+
+#else // defined(UNREALSDK_GAME_BL1)
+
+   public:
+    UStruct* SuperField;
+    UField* Next;
+
+#endif
 };
 
 template <>
