@@ -372,6 +372,34 @@
         "_x64",
         "_release"
       ]
+    },
+    {
+      "name": "msvc-bl1-x86-debug",
+      "displayName": "BL1 x86 Debug (MSVC)",
+      "inherits": [
+        "_base",
+        "_msvc",
+        "_ue3",
+        "_x86",
+        "_debug"
+      ],
+      "cacheVariables": {
+        "UNREALSDK_GAME": "BL1"
+      }
+    },
+    {
+      "name": "msvc-bl1-x86-release",
+      "displayName": "BL1 x86 Release (MSVC)",
+      "inherits": [
+        "_base",
+        "_msvc",
+        "_ue3",
+        "_x86",
+        "_release"
+      ],
+      "cacheVariables": {
+        "UNREALSDK_GAME": "BL1"
+      }
     }
   ]
 }

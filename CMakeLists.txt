@@ -6,6 +6,9 @@ set(UNREALSDK_UE_VERSION "UE4" CACHE STRING "The unreal engine version to build 
 set(UNREALSDK_ARCH "x64" CACHE STRING "The architecture to build the sdk for. One of 'x86' or 'x64'.")
 set(UNREALSDK_SHARED False CACHE BOOL "If set, compiles as a shared library instead of as an object.")
 
+# NOTE: Temporary
+set(UNREALSDK_GAME "NONE" CACHE STRING "Game to build for if any")
+
 add_library(_unrealsdk_interface INTERFACE)
 
 target_compile_features(_unrealsdk_interface INTERFACE cxx_std_20)
@@ -13,6 +16,11 @@ set_target_properties(_unrealsdk_interface PROPERTIES
     COMPILE_WARNING_AS_ERROR True
     INTERPROCEDURAL_OPTIMIZATION True
 )
+
+# NOTE: This is temporary
+if (UNREALSDK_GAME STREQUAL "BL1")
+    target_compile_definitions(_unrealsdk_interface INTERFACE -DUNREALSDK_GAME_BL1=1)
+endif ()
 
 if(MSVC)
     # Under MSVC, enable edit and continue in debug - which conflicts with LTO
