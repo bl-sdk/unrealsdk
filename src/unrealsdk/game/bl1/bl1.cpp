@@ -1,3 +1,4 @@
+
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/game/bl1/bl1.h"
@@ -19,6 +20,8 @@
 #include "unrealsdk/unreal/classes/properties/copyable_property.h"
 #include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
 #include "unrealsdk/unreal/prop_traits.h"
+
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING) && defined(UNREALSDK_GAME_BL1)
 
 using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;
@@ -889,3 +892,5 @@ void BL1Hook::inject_console(void) {
 }
 
 }  // namespace unrealsdk::game
+
+#endif
