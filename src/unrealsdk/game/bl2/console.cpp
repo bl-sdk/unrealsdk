@@ -30,7 +30,7 @@ namespace unrealsdk::game {
 namespace {
 
 // Two extra useful hooks, which we don't strictly need for the interface:
-// - By default the game prepends 'say ' to every command as a primative way to disable console.
+// - By default the game prepends 'say ' to every command as a primitive way to disable console.
 //   Bypass it so you can actually use it.
 // - When they rewrote the networking for cross platform, they caused a crash if you tried chatting
 //   without being connected to shift. Fix it.
@@ -106,7 +106,8 @@ bool say_crash_fix_hook(hook_manager::Details& hook) {
         spark_interface_prop->get_interface_class()->find_func_and_validate(L"IsSparkEnabled"_fn);
 
     // Check if we're online, if so allow normal processing
-    if (BoundFunction{is_spark_enabled_func, engine->get<UInterfaceProperty>(spark_interface_prop)}
+    if (BoundFunction{.func = is_spark_enabled_func,
+                      .object = engine->get<UInterfaceProperty>(spark_interface_prop)}
             .call<UBoolProperty>()) {
         return false;
     }
@@ -118,9 +119,9 @@ bool say_crash_fix_hook(hook_manager::Details& hook) {
     static const auto time_format_prop =
         default_save_game_manager->Class->find_prop_and_validate<UStrProperty>(L"TimeFormat"_fn);
 
-    auto timestamp =
-        BoundFunction{get_timestamp_string_func, hook.obj}.call<UStrProperty, UStrProperty>(
-            default_save_game_manager->get<UStrProperty>(time_format_prop));
+    auto timestamp = BoundFunction{.func = get_timestamp_string_func, .object = hook.obj}
+                         .call<UStrProperty, UStrProperty>(
+                             default_save_game_manager->get<UStrProperty>(time_format_prop));
 
     static const auto pri_prop =
         hook.args->type->find_prop_and_validate<UObjectProperty>(L"PRI"_fn);
@@ -137,8 +138,9 @@ bool say_crash_fix_hook(hook_manager::Details& hook) {
         hook.obj->Class->find_func_and_validate(L"AddChatMessageInternal"_fn);
     static const auto msg_prop = hook.args->type->find_prop_and_validate<UStrProperty>(L"msg"_fn);
 
-    BoundFunction{add_chat_message_internal_func, hook.obj}.call<void, UStrProperty, UStrProperty>(
-        player_name, hook.args->get<UStrProperty>(msg_prop));
+    BoundFunction{.func = add_chat_message_internal_func, .object = hook.obj}
+        .call<void, UStrProperty, UStrProperty>(player_name,
+                                                hook.args->get<UStrProperty>(msg_prop));
     return true;
 }
 
