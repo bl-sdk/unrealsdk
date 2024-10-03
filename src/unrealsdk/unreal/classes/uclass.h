@@ -68,12 +68,13 @@ class UClass : public UStruct {
 
 #else // defined(UNREALSDK_GAME_BL1)
 
+    // NOTE: I don't know if the class has changed size; Will do a scan in ghidra for 1AC
+
    public:
     uint8_t UnknownData00[0xC0];
     UObject* ClassDefaultObject; // 340b
-    uint8_t UnknownData01[0x54];
-    TArray<FImplementedInterface> Interfaces; // 428b
-
+    uint8_t UnknownData01[0x48];
+    TArray<FImplementedInterface> Interfaces; //  416b
 
 #endif
 
