@@ -1,5 +1,6 @@
 #include "unrealsdk/pch.h"
 
+#include "unrealsdk/env.h"
 #include "unrealsdk/hook_manager.h"
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/classes/uobject.h"
@@ -85,13 +86,30 @@ struct List {
 
 namespace {
 
-bool should_log_all_calls = false;
 bool should_inject_next_call = false;
+
+bool should_log_all_calls = false;
+std::unique_ptr<std::wostream> log_all_calls_stream;
+std::mutex log_all_calls_stream_mutex{};
 
 std::unordered_map<FName, utils::StringViewMap<std::wstring, List>> hooks{};
 
 void log_all_calls(bool should_log) {
+    // Only keep this file stream open while we need it
+    if (should_log) {
+        const std::lock_guard<std::mutex> lock(log_all_calls_stream_mutex);
+        log_all_calls_stream = std::make_unique<std::wofstream>(
+            utils::get_this_dll().parent_path()
+                / env::get(env::LOG_ALL_CALLS_FILE, env::defaults::LOG_ALL_CALLS_FILE),
+            std::ofstream::trunc);
+    }
+
     should_log_all_calls = should_log;
+
+    if (!should_log) {
+        const std::lock_guard<std::mutex> lock(log_all_calls_stream_mutex);
+        log_all_calls_stream = nullptr;
+    }
 }
 
 void inject_next_call(void) {
@@ -191,20 +209,21 @@ bool remove_hook(std::wstring_view func, Type type, std::wstring_view identifier
 
 }  // namespace
 
-const List* preprocess_hook(std::string_view source, const UFunction* func, const UObject* obj) {
+const List* preprocess_hook(std::wstring_view source, const UFunction* func, const UObject* obj) {
     if (should_inject_next_call) {
         should_inject_next_call = false;
         return nullptr;
     }
 
-    // Want to delay filling this, but if we're logging all calls
+    // Want to delay filling this, but if we're logging all calls we need it straight away
     std::wstring func_name{};
 
     if (should_log_all_calls) {
         func_name = func->get_path_name();
-        LOG(MISC, "===== {} called =====", source);
-        LOG(MISC, L"Function: {}", func_name);
-        LOG(MISC, L"Object: {}", obj->get_path_name());
+        auto obj_name = obj->get_path_name();
+
+        const std::lock_guard<std::mutex> lock(log_all_calls_stream_mutex);
+        *log_all_calls_stream << source << L'\t' << func_name << L'\t' << obj_name << L'\n';
     }
 
     // Check if anything matches the function FName

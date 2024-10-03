@@ -67,7 +67,7 @@ void __fastcall process_event_hook(UObject* obj,
                 func->get_path_name(), obj->get_path_name());
         }
 
-        auto data = hook_manager::impl::preprocess_hook("ProcessEvent", func, obj);
+        auto data = hook_manager::impl::preprocess_hook(L"ProcessEvent", func, obj);
         if (data != nullptr) {
             // Copy args so that hooks can't modify them, for parity with call function
             const WrappedStruct args_base{func, params};
@@ -166,14 +166,26 @@ typedef void(__fastcall* call_function_func)(UObject* obj,
                                              UFunction* func);
 call_function_func call_function_ptr;
 
-const constinit Pattern<23> CALL_FUNCTION_SIG{
+const constinit Pattern<55> CALL_FUNCTION_SIG{
     "55"              // push ebp
     "8B EC"           // mov ebp, esp
     "6A FF"           // push -01
-    "68 ????????"     // push Borderlands2.exe+1110791
+    "68 ????????"     // push BorderlandsPreSequel.exe+108D4B6
     "64 A1 ????????"  // mov eax, fs:[00000000]
     "50"              // push eax
-    "81 EC 58040000"  // sub esp, 00000458
+    "81 EC ????????"  // sub esp, 000000A4
+    "A1 ????????"     // mov eax, [BorderlandsPreSequel.g_LEngineDefaultPoolId+D2FC]
+    "33 C5"           // xor eax, ebp
+    "89 45 ??"        // mov [ebp-10], eax
+    "53"              // push ebx
+    "56"              // push esi
+    "57"              // push edi
+    "50"              // push eax
+    "8D 45 ??"        // lea eax, [ebp-0C]
+    "64 A3 ????????"  // mov fs:[00000000], eax
+    "8B 7D ??"        // mov edi, [ebp+08]
+    "8B 45 ??"        // mov eax, [ebp+14]
+    "8B 5D ??"        // mov ebx, [ebp+0C]
 };
 
 void __fastcall call_function_hook(UObject* obj,
@@ -182,7 +194,7 @@ void __fastcall call_function_hook(UObject* obj,
                                    void* result,
                                    UFunction* func) {
     try {
-        auto data = hook_manager::impl::preprocess_hook("CallFunction", func, obj);
+        auto data = hook_manager::impl::preprocess_hook(L"CallFunction", func, obj);
         if (data != nullptr) {
             WrappedStruct args{func};
             auto original_code = stack->extract_current_args(args);
