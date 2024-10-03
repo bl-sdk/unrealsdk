@@ -93,16 +93,17 @@ bool detour(uintptr_t addr, void* detour_func, void** original_func, std::string
 
     status = MH_CreateHook(reinterpret_cast<LPVOID>(addr), detour_func, original_func);
     if (status != MH_OK) {
-        LOG(ERROR, "Failed to create hook for {}", name);
+        LOG(ERROR, "Failed to create detour for {}", name);
         return false;
     }
 
     status = MH_EnableHook(reinterpret_cast<LPVOID>(addr));
     if (status != MH_OK) {
-        LOG(ERROR, "Failed to enable hook for {}", name);
+        LOG(ERROR, "Failed to enable detour for {}", name);
         return false;
     }
 
+    LOG(MISC, "Detoured {} at {:p}", name, reinterpret_cast<void*>(addr));
     return true;
 }
 #endif
