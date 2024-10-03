@@ -5,17 +5,21 @@
 #include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/hook_manager.h"
 #include "unrealsdk/unreal/classes/properties/copyable_property.h"
+#include "unrealsdk/unreal/classes/properties/uboolproperty.h"
+#include "unrealsdk/unreal/classes/properties/uinterfaceproperty.h"
 #include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
 #include "unrealsdk/unreal/classes/properties/ustrproperty.h"
 #include "unrealsdk/unreal/classes/uclass.h"
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/classes/uobject_funcs.h"
+#include "unrealsdk/unreal/find_class.h"
 #include "unrealsdk/unreal/structs/fname.h"
 #include "unrealsdk/unreal/wrappers/bound_function.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer_funcs.h"
 #include "unrealsdk/unreal/wrappers/wrapped_struct.h"
+#include "unrealsdk/unrealsdk.h"
 
 #if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
@@ -25,12 +29,21 @@ namespace unrealsdk::game {
 
 namespace {
 
+// Two extra useful hooks, which we don't strictly need for the interface:
+// - By default the game prepends 'say ' to every command as a primative way to disable console.
+//   Bypass it so you can actually use it.
+// - When they rewrote the networking for cross platform, they caused a crash if you tried chatting
+//   without being connected to shift. Fix it.
 const std::wstring SAY_BYPASS_FUNC = L"Engine.Console:ShippingConsoleCommand";
 const constexpr auto SAY_BYPASS_TYPE = hook_manager::Type::PRE;
 const std::wstring SAY_BYPASS_ID = L"unrealsdk_bl2_say_bypass";
 
-// We could combine this with the above, but by keeping them separate it'll let users disable one if
-// they really want to
+const std::wstring SAY_CRASH_FIX_FUNC = L"WillowGame.TextChatGFxMovie:AddChatMessage";
+const constexpr auto SAY_CRASH_FIX_TYPE = hook_manager::Type::PRE;
+const std::wstring SAY_CRASH_FIX_ID = L"unrealsdk_bl2_say_crash_fix";
+
+// We could combine this with the say bypass, but by keeping them separate it'll let users disable
+// one if they really want to
 const std::wstring CONSOLE_COMMAND_FUNC = L"Engine.Console:ConsoleCommand";
 const constexpr auto CONSOLE_COMMAND_TYPE = hook_manager::Type::PRE;
 const std::wstring CONSOLE_COMMAND_ID = L"unrealsdk_bl2_console_command";
@@ -40,6 +53,17 @@ const constexpr auto INJECT_CONSOLE_TYPE = hook_manager::Type::PRE;
 const std::wstring INJECT_CONSOLE_ID = L"unrealsdk_bl2_inject_console";
 
 bool say_bypass_hook(hook_manager::Details& hook) {
+    /*
+    This is a native function so we don't have exact source, but we expect it's essentially:
+    ```
+    function ShippingConsoleCommand(string Command) {
+        ConsoleCommand("say" @ Command);
+    }
+    ```
+
+    We simply call straight through to console command without adding anything.
+    */
+
     static const auto console_command_func =
         hook.obj->Class->find_func_and_validate(L"ConsoleCommand"_fn);
     static const auto command_property =
@@ -47,6 +71,74 @@ bool say_bypass_hook(hook_manager::Details& hook) {
 
     hook.obj->get<UFunction, BoundFunction>(console_command_func)
         .call<void, UStrProperty>(hook.args->get<UStrProperty>(command_property));
+    return true;
+}
+
+bool say_crash_fix_hook(hook_manager::Details& hook) {
+    /*
+    Reference unrealscript implementation:
+    ```
+    function AddChatMessage(PlayerReplicationInfo PRI, string msg) {
+        local string TimeStamp;
+        local OnlinePlayerInterfaceEx PlayerInt;
+
+        PlayerInt = class'GameEngine'.static.GetOnlineSubsystem().PlayerInterfaceEx;
+        if(PlayerInt.NetIdIsBlockedForLocalUser(PRI.UniqueId)) {
+            return;
+        }
+        TimeStamp = GetTimestampString(class'WillowSaveGameManager'.default.TimeFormat);
+        AddChatMessageInternal(PRI.PlayerName @ TimeStamp, msg);
+    }
+    ```
+
+    The crash occurs in `NetIdIsBlockedForLocalUser`. We cannot block it directly because there are
+    multiple online subsystems, so we need to do it here instead.
+
+    If we're online, we allow normal processing. If offline, we re-implement this ourselves,
+    skipping that call.
+    */
+
+    static const auto engine =
+        unrealsdk::find_object(L"WillowGameEngine", L"Transient.WillowGameEngine_0");
+    static const auto spark_interface_prop =
+        engine->Class->find_prop_and_validate<UInterfaceProperty>(L"SparkInterface"_fn);
+    static const auto is_spark_enabled_func =
+        spark_interface_prop->get_interface_class()->find_func_and_validate(L"IsSparkEnabled"_fn);
+
+    // Check if we're online, if so allow normal processing
+    if (BoundFunction{is_spark_enabled_func, engine->get<UInterfaceProperty>(spark_interface_prop)}
+            .call<UBoolProperty>()) {
+        return false;
+    }
+
+    static const auto get_timestamp_string_func =
+        hook.obj->Class->find_func_and_validate(L"GetTimestampString"_fn);
+    static const auto default_save_game_manager =
+        find_class(L"WillowSaveGameManager"_fn)->ClassDefaultObject;
+    static const auto time_format_prop =
+        default_save_game_manager->Class->find_prop_and_validate<UStrProperty>(L"TimeFormat"_fn);
+
+    auto timestamp =
+        BoundFunction{get_timestamp_string_func, hook.obj}.call<UStrProperty, UStrProperty>(
+            default_save_game_manager->get<UStrProperty>(time_format_prop));
+
+    static const auto pri_prop =
+        hook.args->type->find_prop_and_validate<UObjectProperty>(L"PRI"_fn);
+    static const auto player_name_prop =
+        pri_prop->get_property_class()->find_prop_and_validate<UStrProperty>(L"PlayerName"_fn);
+
+    auto player_name =
+        hook.args->get<UObjectProperty>(pri_prop)->get<UStrProperty>(player_name_prop);
+    player_name.reserve(player_name.size() + 1 + timestamp.size());
+    player_name += L' ';
+    player_name += timestamp;
+
+    static const auto add_chat_message_internal_func =
+        hook.obj->Class->find_func_and_validate(L"AddChatMessageInternal"_fn);
+    static const auto msg_prop = hook.args->type->find_prop_and_validate<UStrProperty>(L"msg"_fn);
+
+    BoundFunction{add_chat_message_internal_func, hook.obj}.call<void, UStrProperty, UStrProperty>(
+        player_name, hook.args->get<UStrProperty>(msg_prop));
     return true;
 }
 
@@ -148,6 +240,9 @@ bool inject_console_hook(hook_manager::Details& hook) {
 
 void BL2Hook::inject_console(void) {
     hook_manager::add_hook(SAY_BYPASS_FUNC, SAY_BYPASS_TYPE, SAY_BYPASS_ID, &say_bypass_hook);
+    hook_manager::add_hook(SAY_CRASH_FIX_FUNC, SAY_CRASH_FIX_TYPE, SAY_CRASH_FIX_ID,
+                           &say_crash_fix_hook);
+
     hook_manager::add_hook(CONSOLE_COMMAND_FUNC, CONSOLE_COMMAND_TYPE, CONSOLE_COMMAND_ID,
                            &console_command_hook);
     hook_manager::add_hook(INJECT_CONSOLE_FUNC, INJECT_CONSOLE_TYPE, INJECT_CONSOLE_ID,
