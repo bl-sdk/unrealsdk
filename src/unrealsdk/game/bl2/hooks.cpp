@@ -67,7 +67,7 @@ void __fastcall process_event_hook(UObject* obj,
                 func->get_path_name(), obj->get_path_name());
         }
 
-        auto data = hook_manager::impl::preprocess_hook("ProcessEvent", func, obj);
+        auto data = hook_manager::impl::preprocess_hook(L"ProcessEvent", func, obj);
         if (data != nullptr) {
             // Copy args so that hooks can't modify them, for parity with call function
             const WrappedStruct args_base{func, params};
@@ -182,7 +182,7 @@ void __fastcall call_function_hook(UObject* obj,
                                    void* result,
                                    UFunction* func) {
     try {
-        auto data = hook_manager::impl::preprocess_hook("CallFunction", func, obj);
+        auto data = hook_manager::impl::preprocess_hook(L"CallFunction", func, obj);
         if (data != nullptr) {
             WrappedStruct args{func};
             auto original_code = stack->extract_current_args(args);

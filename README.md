@@ -65,6 +65,7 @@ build configurations.
 | `UNREALSDK_UCONSOLE_CONSOLE_COMMAND_VF_INDEX` | Overrides the virtual function index used when hooking `UConsole::ConsoleCommand`.                                                                                                    |
 | `UNREALSDK_UCONSOLE_OUTPUT_TEXT_VF_INDEX`     | Overrides the virtual function index used when calling `UConsole::OutputText`.                                                                                                        |
 | `UNREALSDK_LOCKING_PROCESS_EVENT`             | If defined, locks simultaneous ProcessEvent calls from different threads. This is used both for hooks and for calling unreal functions - external code must take care wrt. deadlocks. |
+| `UNREALSDK_LOG_ALL_CALLS_FILE`                | After enabling `unrealsdk::hook_manager::log_all_calls`, the file to write calls to.                                                                                                  |
 
 You can also define any of these in an env file, which will automatically be loaded when the sdk
 starts (excluding `UNREALSDK_ENV_FILE` of course). This file should contain lines of equals
