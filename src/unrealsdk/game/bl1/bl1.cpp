@@ -21,7 +21,8 @@
 #include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
 #include "unrealsdk/unreal/prop_traits.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING) && defined(UNREALSDK_GAME_BL1)
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING) \
+    && defined(UNREALSDK_GAME_BL1)
 
 using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;
@@ -360,29 +361,11 @@ void BL1Hook::hook(void) {
 
 namespace {
 
-// TODO: These are purely for testing.
-
-bool Hook_StartMenuUp(hook_manager::Details&) {
-    LOG(MISC, "[Hook_StartMenuUp] Invoked!");
+bool Hook_InstantlyLoadProfile(hook_manager::Details& in) {
+    // bIsProfileLoaded is set to true after 30 seconds; This sets it to true once the warp-tunnel
+    //  has finished.
+    in.obj->get<UFunction, BoundFunction>(L"ClientSetProfileLoaded"_fn).call<void>();
     return false;
-}
-
-bool Hook_StartMenuDown(hook_manager::Details&) {
-    LOG(MISC, "[Hook_StartMenuDown] Invoked!");
-    return false;
-}
-
-bool Hook_AlwaysSaveOnQuit(hook_manager::Details& in) {
-    auto dlg_prop = in.args->type->find_prop_and_validate<UObjectProperty>(L"Dlg"_fn);
-    auto dlg = in.args->get<UObjectProperty>(dlg_prop);
-
-    dlg->get<UFunction, BoundFunction>(L"Close"_fn).call<void>();
-
-    in.obj->get<UFunction, BoundFunction>(L"QuitToMenu"_fn).call<void, UBoolProperty>(true);
-
-    in.ret.set<UBoolProperty>(true);
-
-    return true;
 }
 
 }  // namespace
@@ -391,14 +374,9 @@ void BL1Hook::post_init(void) {
     LOG(MISC, "Attaching Hooks!");
     inject_console();
 
-    hook_manager::add_hook(L"WillowGame.WillowGFxMenuScreen:Nav_Up", hook_manager::Type::PRE,
-                           L"Hook_StartMenuUp", &Hook_StartMenuUp);
-
-    hook_manager::add_hook(L"WillowGame.WillowGFxMenuScreen:Nav_Down", hook_manager::Type::PRE,
-                           L"Hook_StartMenuDown", &Hook_StartMenuDown);
-
-    hook_manager::add_hook(L"WillowGame.WillowGFxMenuPause:PromptQuit_Ok", hook_manager::Type::PRE,
-                           L"Hook_AlwaysSaveOnQuit", &Hook_AlwaysSaveOnQuit);
+    hook_manager::add_hook(L"WillowGame.WillowPlayerController:SpawningProcessComplete",
+                           hook_manager::Type::POST, L"Hook_InstantlyLoadProfile",
+                           &Hook_InstantlyLoadProfile);
 }
 
 // ############################################################################//
@@ -791,7 +769,7 @@ bool Hook_InjectConsole(hook_manager::Details& hook) {
 
     auto console = hook.obj->get<UObjectProperty>(L"ViewportConsole"_fn);
     LOG(MISC, "[Hook_InjectConsole] ~ {:p}, '{}'", (void*)console, console->get_path_name());
-    s_ConsoleOutputText = console->get<UFunction, BoundFunction>(L"OutputText"_fn);
+    s_ConsoleOutputText = console->get<UFunction, BoundFunction>(L"OutputTextLine"_fn);
 
     return false;
 }
