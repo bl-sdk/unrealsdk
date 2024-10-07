@@ -56,24 +56,6 @@ struct FMalloc {
 
 FMalloc* gmalloc;
 
-// 8B0D ???????? 8B01 8B50 04
-//    00445911 | 8B0D B43BF701            | mov ecx,dword ptr ds:[1F73BB4]
-//    00445917 | 8B01                     | mov eax,dword ptr ds:[ecx]
-//    00445919 | 8B50 04                  | mov edx,dword ptr ds:[eax+4]
-//    0044591C | 6A 08                    | push 8
-//    0044591E | 68 50010000              | push 150
-//    00445923 | FFD2                     | call edx
-// 1F73BB4 -> 069A77B0 -> 01CC3AD8 -> [007B6EB0 013A8F50 013A8F70 013A8FC0]
-// in vtable[1] we get
-//    013A8F50 | 8B4424 04                | mov eax,dword ptr ss:[esp+4]
-//    013A8F54 | 6A 10                    | push 10
-//    013A8F56 | 50                       | push eax
-//    013A8F57 | FF15 B824A201            | call dword ptr ds:[<_aligned_malloc>]
-//    013A8F5D | 83C4 08                  | add esp,8
-//    013A8F60 | C2 0800                  | ret 8
-
-//    8B 0D ?? ?? ?? ?? 8B 01 8B 50 04
-
 // TODO: This pattern is not unique to GMalloc
 const constinit Pattern<11> GMALLOC_PATTERN{
     "8B 0D {????????}"
@@ -102,22 +84,6 @@ const constinit Pattern<15> GNAMES_SIG{
 //  | LOAD PACKAGE |
 // ############################################################################//
 
-//
-// Candidate Function: 005e1770
-//    005E1770  | 55             | push ebp
-//    005E1771  | 8BEC           | mov ebp,esp
-//    005E1773  | 6A FF          | push FFFFFFFF
-//    005E1775  | 68 B0CD8E01    | push borderlands.18ECDB0
-//    005E177A  | 64:A1 00000000 | mov eax,dword ptr fs:[0]
-//    005E1780  | 50             | push eax
-//    005E1781  | 83EC 28        | sub esp,28
-//    005E1784  | 53             | push ebx
-//    005E1785  | 56             | push esi
-//    005E1786  | 57             | push edi
-//    005E1787  | A1 8069F101    | mov eax,dword ptr ds:[1F16980]
-//    005E178C  | 33C5           | xor eax,ebp
-//    005E178E  | 50             | push eax
-
 using load_package_func = UObject* (*)(const UObject* outer, const wchar_t* name, uint32_t flags);
 load_package_func load_package_ptr;
 
@@ -141,14 +107,14 @@ const constinit Pattern<34> LOAD_PACKAGE_PATTERN{
 // ############################################################################//
 
 const constinit Pattern<34> FNAME_INIT_SIG{
-    "6A FF"              // push FFFFFFFF
-    "68 ?? ?? ?? ??"     // push borderlands.18EB45B
-    "64 A1 00 00 00 00"  // mov eax,dword ptr fs:[0]
-    "50"                 // push eax
-    "81EC 98 0C 00 00"   // sub esp,C98
-    "A1 ?? ?? ?? ??"     // mov eax,dword ptr ds:[1F16980]
-    "33 C4"              // xor eax,esp
-    "898424 940C0000"    // mov dword ptr ss:[esp+C94],eax
+    "6A FF"            // push FFFFFFFF
+    "68 ????????"      // push borderlands.18EB45B
+    "64A1 00000000"    // mov eax,dword ptr fs:[0]
+    "50"               // push eax
+    "81EC 980C0000"    // sub esp,C98
+    "A1 ????????"      // mov eax,dword ptr ds:[1F16980]
+    "33C4"             // xor eax,esp
+    "898424 940C0000"  // mov dword ptr ss:[esp+C94],eax
 };
 
 // NOLINTNEXTLINE(modernize-use-using)
@@ -167,18 +133,18 @@ fname_init_func fname_init_ptr = nullptr;
 // - NOTE -
 // This is inlined so we have to manually re-implement FFrame::Step using GNatives.
 const constinit Pattern<36> FFRAME_STEP_SIG{
-    "74 ??"              // 74 22            | je borderlands.59CEA4
-    "8B45 D4"            // 8B45 D4          | mov eax,dword ptr ss:[ebp-2C]
-    "830D ???????? 02"   // 830D E83BF701 02 | or dword ptr ds:[1F73BE8],2
-    "0FB610"             // 0FB610           | movzx edx,byte ptr ds:[eax]
-    "8B1495 {????????}"  // 8B1495 807AF901  | mov edx,dword ptr ds:[edx*4+1F97A80]
-    "57"                 // 57               | push edi
-    "8D4D BC"            // 8D4D BC          | lea ecx,dword ptr ss:[ebp-44]
-    "40"                 // 40               | inc eax
-    "51"                 // 51               | push ecx
-    "8B4D EC"            // 8B4D EC          | mov ecx,dword ptr ss:[ebp-14]
-    "8945 D4"            // 8945 D4          | mov dword ptr ss:[ebp-2C],eax
-    "FFD2"               // FFD2             | call edx
+    "74 ??"              // je borderlands.59CEA4
+    "8B45 D4"            // mov eax,dword ptr ss:[ebp-2C]
+    "830D ???????? 02"   // or dword ptr ds:[1F73BE8],2
+    "0FB610"             // movzx edx,byte ptr ds:[eax]
+    "8B1495 {????????}"  // mov edx,dword ptr ds:[edx*4+1F97A80]
+    "57"                 // push edi
+    "8D4D BC"            // lea ecx,dword ptr ss:[ebp-44]
+    "40"                 // inc eax
+    "51"                 // push ecx
+    "8B4D EC"            // mov ecx,dword ptr ss:[ebp-14]
+    "8945 D4"            // mov dword ptr ss:[ebp-2C],eax
+    "FFD2"               // call edx
 };
 
 // RET 0x8; Callee cleans up the stack (8 bytes)
@@ -224,23 +190,23 @@ typedef UObject*(__cdecl* construct_obj_func)(UClass* cls,
 construct_obj_func construct_obj_ptr;
 
 const constinit Pattern<49> CONSTRUCT_OBJECT_PATTERN{
-    "6A FF"           // 6A FF          | push FFFFFFFF
-    "68 ????????"     // 68 93D68E01    | push borderlands.18ED693
-    "64A1 00000000"   // 64:A1 00000000 | mov eax,dword ptr fs:[0]
-    "50"              // 50             | push eax
-    "83EC 0C"         // 83EC 0C        | sub esp,C
-    "53"              // 53             | push ebx
-    "55"              // 55             | push ebp
-    "56"              // 56             | push esi
-    "57"              // 57             | push edi
-    "A1 ????????"     // A1 8069F101    | mov eax,dword ptr ds:[1F16980]
-    "33C4"            // 33C4           | xor eax,esp
-    "50"              // 50             | push eax
-    "8D4424 20"       // 8D4424 20      | lea eax,dword ptr ss:[esp+20]
-    "64 A3 00000000"  // 64:A3 00000000 | mov dword ptr fs:[0],eax
-    "8B6C24 54"       // 8B6C24 54      | mov ebp,dword ptr ss:[esp+54]
-    "896C24 14"       // 896C24 14      | mov dword ptr ss:[esp+14],ebp
-    "85ED"            // 85ED           | test ebp,ebp
+    "6A FF"           // push FFFFFFFF
+    "68 ????????"     // push borderlands.18ED693
+    "64A1 00000000"   // mov eax,dword ptr fs:[0]
+    "50"              // push eax
+    "83EC 0C"         // sub esp,C
+    "53"              // push ebx
+    "55"              // push ebp
+    "56"              // push esi
+    "57"              // push edi
+    "A1 ????????"     // mov eax,dword ptr ds:[1F16980]
+    "33C4"            // xor eax,esp
+    "50"              // push eax
+    "8D4424 20"       // lea eax,dword ptr ss:[esp+20]
+    "64 A3 00000000"  // mov dword ptr fs:[0],eax
+    "8B6C24 54"       // mov ebp,dword ptr ss:[esp+54]
+    "896C24 14"       // mov dword ptr ss:[esp+14],ebp
+    "85ED"            // test ebp,ebp
 };
 
 // ############################################################################//
@@ -255,24 +221,24 @@ typedef UObject*(__cdecl* static_find_object_func)(const UClass* cls,
 
 static_find_object_func static_find_object_ptr;
 const constinit Pattern<50> STATIC_FIND_OBJECT_PATTERN{
-    "6A FF"              // 6A FF          | push FFFFFFFF
-    "68 ?? ?? ?? ??"     // 68 90C18E01    | push borderlands.18EC190
-    "64 A1 00 00 00 00"  // 64:A1 00000000 | mov eax,dword ptr fs:[0]
-    "50"                 // 50             | push eax
-    "83 EC 24"           // 83EC 24        | sub esp,24
-    "53"                 // 53             | push ebx
-    "55"                 // 55             | push ebp
-    "56"                 // 56             | push esi
-    "57"                 // 57             | push edi
-    "A1 ?? ?? ?? ??"     // A1 8069F101    | mov eax,dword ptr ds:[1F16980]
-    "33 C4"              // 33C4           | xor eax,esp
-    "50"                 // 50             | push eax
-    "8D 44 24 38"        // 8D4424 38      | lea eax,dword ptr ss:[esp+38]
-    "64 A3 00 00 00 00"  // 64:A3 00000000 | mov dword ptr fs:[0],eax
-    "8B 74 24 4C"        // 8B7424 4C      | mov esi,dword ptr ss:[esp+4C]
-    "8B 7C 24 50"        // 8B7C24 50      | mov edi,dword ptr ss:[esp+50]
-    "8B C6"              // 8BC6           | mov eax,esi
-    "40"                 // 40             | inc eax
+    "6A FF"          // push FFFFFFFF
+    "68 ????????"    // push borderlands.18EC190
+    "64A1 00000000"  // mov eax,dword ptr fs:[0]
+    "50"             // push eax
+    "83EC 24"        // sub esp,24
+    "53"             // push ebx
+    "55"             // push ebp
+    "56"             // push esi
+    "57"             // push edi
+    "A1 ????????"    // mov eax,dword ptr ds:[1F16980]
+    "33 C4"          // xor eax,esp
+    "50"             // push eax
+    "8D4424 38"      // lea eax,dword ptr ss:[esp+38]
+    "64A3 00000000"  // mov dword ptr fs:[0],eax
+    "8B7424 4C"      // mov esi,dword ptr ss:[esp+4C]
+    "8B7C24 50"      // mov edi,dword ptr ss:[esp+50]
+    "8BC6"           // mov eax,esi
+    "40"             // inc eax
 };
 
 // ############################################################################//
@@ -288,22 +254,23 @@ typedef void(__fastcall* process_event_func)(UObject* obj,
 process_event_func process_event_ptr;
 
 const constinit Pattern<43> PROCESS_EVENT_SIG{
-    "55"
-    "8B EC"
-    "6A FF"
-    "68 ?? ?? ?? ??"
-    "64 A1 00 00 00 00"
-    "50"
-    "83 EC 40"
-    "A1 ?? ?? ?? ??"
-    "33 C5"
-    "89 45 F0"
-    "53"
-    "56"
-    "57"
-    "50"
-    "8D 45 F4"
-    "64 A3 00 00 00 00"};
+    "55"             // push ebp
+    "8BEC"           // mov ebp,esp
+    "6A FF"          // push FFFFFFFF
+    "68 ????????"    // push <borderlands.sub_18E9668>
+    "64A1 00000000"  // mov eax,dword ptr fs:[0]
+    "50"             // push eax
+    "83EC 40"        // sub esp,40
+    "A1 ????????"    // mov eax,dword ptr ds:[1F16980]
+    "33C5"           // xor eax,ebp
+    "8945 F0"        // mov dword ptr ss:[ebp-10],eax
+    "53"             // push ebx
+    "56"             // push esi
+    "57"             // push edi
+    "50"             // push eax
+    "8D45 F4"        // lea eax,dword ptr ss:[ebp-C]
+    "64A3 00000000"  // mov dword ptr fs:[0],eax
+};
 
 // ############################################################################//
 //  | CALL FUNCTION |
@@ -318,21 +285,27 @@ typedef void(__fastcall* call_function_func)(UObject* obj,
 call_function_func call_function_ptr;
 
 const constinit Pattern<31> CALL_FUNCTION_SIG{
-    "55"               // 55              | push ebp
-    "8DAC24 FCFBFFFF"  // 8DAC24 FCFBFFFF | lea ebp,dword ptr ss:[esp-404]
-    "81EC 04040000"    // 81EC 04040000   | sub esp,404
-    "6A FF"            // 6A FF           | push FFFFFFFF
-    "68 ????????"      // 68 38968E01     | push borderlands.18E9638
-    "64 A1 00000000"   // 64:A1 00000000  | mov eax,dword ptr fs:[0]
-    "50"               // 50              | push eax
-    "83EC 40"          // 83EC 40         | sub esp,40
+    "55"               // push ebp
+    "8DAC24 FCFBFFFF"  // lea ebp,dword ptr ss:[esp-404]
+    "81EC 04040000"    // sub esp,404
+    "6A FF"            // push FFFFFFFF
+    "68 ????????"      // push borderlands.18E9638
+    "64 A1 00000000"   // mov eax,dword ptr fs:[0]
+    "50"               // push eax
+    "83EC 40"          // sub esp,40
 };
 
 // ############################################################################//
 //  | SAVE PACKAGE FUNCTION |
 // ############################################################################//
 
-// TODO: This is purely for the Unreal Editor; Also not sure on the parameters.
+// - NOTE -
+// This is only for the editor it might be useful much later on but right now I will just leave it
+//  here so that it is known.
+//
+// The parameters into the function are not guaranteed to be correct I have verified that the
+//  UObjects are valid though. Unknown_XY are bitwise anded with constants as well.
+//
 
 // NOLINTNEXTLINE(modernize-use-using)
 typedef UObject* (*save_package)(UObject* InOuter,
@@ -723,11 +696,11 @@ void BL1Hook::u_free(void* data) const {
 namespace {
 
 const constinit Pattern<17> SET_COMMAND_SIG{
-    "75 16"        // 75 16       | jne borderlands.87E1A7
-    "8D4C24 18"    // 8D4C24 18   | lea ecx,dword ptr ss:[esp+18]
-    "68 ????????"  // 68 0089B101 | push borderlands.1B18900
-    "51"           // 51          | push ecx
-    "E8 ????????"  // E8 703CD4FF | call <borderlands.sub_5C1E10>
+    "75 16"        // jne borderlands.87E1A7
+    "8D4C24 18"    // lea ecx,dword ptr ss:[esp+18]
+    "68 ????????"  // push borderlands.1B18900
+    "51"           // push ecx
+    "E8 ????????"  // call <borderlands.sub_5C1E10>
 };
 
 }  // namespace
@@ -752,13 +725,13 @@ void BL1Hook::hexedit_set_command(void) {
 namespace {
 
 const constinit Pattern<29> ARRAY_LIMIT_MESSAGE{
-    "0F8C 7E000000"  // 0F8C 7E000000 | jl borderlands.5E7E64
-    "8B4C24 38"      // 8B4C24 38     | mov ecx,dword ptr ss:[esp+38]
-    "83C7 9D"        // 83C7 9D       | add edi,FFFFFF9D
-    "57"             // 57            | push edi
-    "68 ????????"    // 68 2CF4A701   | push borderlands.1A7F42C
-    "E8 ????????"    // E8 A83CF3FF   | call borderlands.51BAA0
-    "E9 ????????"    // E9 67000000   | jmp borderlands.5E7E64
+    "0F8C 7E000000"  // jl borderlands.5E7E64
+    "8B4C24 38"      // mov ecx,dword ptr ss:[esp+38]
+    "83C7 9D"        // add edi,FFFFFF9D
+    "57"             // push edi
+    "68 ????????"    // push borderlands.1A7F42C
+    "E8 ????????"    // call borderlands.51BAA0
+    "E9 ????????"    // jmp borderlands.5E7E64
 };
 }  // namespace
 
@@ -792,13 +765,13 @@ namespace {
 //
 
 const constinit Pattern<20> ARRAY_LIMIT_SIG{
-    "6A 64"          // 6A 64         | push 64
-    "50"             // 50            | push eax
-    "46"             // 46            | inc esi
-    "E8 ????????"    // E8 A1F9F2FF   | call <borderlands.sub_517770>
-    "83C4 08"        // 83C4 08       | add esp,8
-    "3BF0"           // 3BF0          | cmp esi,eax
-    "0F8C 59FFFFFF"  // 0F8C 59FFFFFF | jl borderlands.5E7D33
+    "6A 64"          // push 64
+    "50"             // push eax
+    "46"             // inc esi
+    "E8 ????????"    // call <borderlands.sub_517770>
+    "83C4 08"        // add esp,8
+    "3BF0"           // cmp esi,eax
+    "0F8C 59FFFFFF"  // jl borderlands.5E7D33
 };
 
 }  // namespace
