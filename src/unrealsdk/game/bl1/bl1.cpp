@@ -56,11 +56,18 @@ struct FMalloc {
 
 FMalloc* gmalloc;
 
-// TODO: This pattern is not unique to GMalloc
-const constinit Pattern<11> GMALLOC_PATTERN{
-    "8B 0D {????????}"
-    "8B 01"
-    "8B 50 04"};
+// - NOTE -
+// This is *unique* to GMalloc for the 141 UDK however its not completely unique. Its just all
+//  other usages are also GMalloc.
+//
+const constinit Pattern<20> GMALLOC_PATTERN{
+    "8B0D {????????}"  // mov ecx,dword ptr ds:[1F73BB4]
+    "8B01"             // mov eax,dword ptr ds:[ecx]
+    "8B50 04"          // mov edx,dword ptr ds:[eax+4]
+    "6A 08"            // push 8
+    "68 E4000000"      // push E4
+    "FFD2"             // call edx
+};
 
 GObjects gobjects_wrapper{};
 
