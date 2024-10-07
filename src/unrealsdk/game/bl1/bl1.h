@@ -48,6 +48,11 @@ namespace unrealsdk::game {
         static void hook_call_function(void);
 
         /**
+         * @brief Hooks `SavePackage` and points it to a custom function.
+         */
+        static void hook_save_package(void);
+
+        /**
          * @brief Finds GObjects, and populates the wrapper member.
          */
         static void find_gobjects(void);

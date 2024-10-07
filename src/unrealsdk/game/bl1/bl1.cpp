@@ -104,26 +104,22 @@ const constinit Pattern<15> GNAMES_SIG{
 
 //
 // Candidate Function: 005e1770
-//    005E1770  | 55                      | push ebp
-//    005E1771  | 8BEC                    | mov ebp,esp
-//    005E1773  | 6A FF                   | push FFFFFFFF
-//    005E1775  | 68 B0CD8E01             | push borderlands.18ECDB0
-//    005E177A  | 64:A1 00000000          | mov eax,dword ptr fs:[0]
-//    005E1780  | 50                      | push eax
-//    005E1781  | 83EC 28                 | sub esp,28
-//    005E1784  | 53                      | push ebx
-//    005E1785  | 56                      | push esi
-//    005E1786  | 57                      | push edi
-//    005E1787  | A1 8069F101             | mov eax,dword ptr ds:[1F16980]
-//    005E178C  | 33C5                    | xor eax,ebp
-//    005E178E  | 50                      | push eax
+//    005E1770  | 55             | push ebp
+//    005E1771  | 8BEC           | mov ebp,esp
+//    005E1773  | 6A FF          | push FFFFFFFF
+//    005E1775  | 68 B0CD8E01    | push borderlands.18ECDB0
+//    005E177A  | 64:A1 00000000 | mov eax,dword ptr fs:[0]
+//    005E1780  | 50             | push eax
+//    005E1781  | 83EC 28        | sub esp,28
+//    005E1784  | 53             | push ebx
+//    005E1785  | 56             | push esi
+//    005E1786  | 57             | push edi
+//    005E1787  | A1 8069F101    | mov eax,dword ptr ds:[1F16980]
+//    005E178C  | 33C5           | xor eax,ebp
+//    005E178E  | 50             | push eax
 
 using load_package_func = UObject* (*)(const UObject* outer, const wchar_t* name, uint32_t flags);
 load_package_func load_package_ptr;
-
-//    Pattern as a single string for easy lookups
-// 55 8B EC 6A FF 68 ?? ?? ?? ?? 64 A1 00 00 00 00 50 83 EC 28 53 56 57 A1 ?? ?? ?? ?? 33 C5 50 8D
-// 45 F4
 
 const constinit Pattern<34> LOAD_PACKAGE_PATTERN{
     "55"              // push ebp
@@ -144,8 +140,6 @@ const constinit Pattern<34> LOAD_PACKAGE_PATTERN{
 //  | FNAME INIT |
 // ############################################################################//
 
-//    Candidate function: 005cef40
-// 6A FF 68 ?? ?? ?? ?? 64 A1 00 00 00 00 50 81EC 98 0C 00 00 A1 ?? ?? ?? ?? 33 C4 898424 940C0000
 const constinit Pattern<34> FNAME_INIT_SIG{
     "6A FF"              // push FFFFFFFF
     "68 ?? ?? ?? ??"     // push borderlands.18EB45B
@@ -157,6 +151,7 @@ const constinit Pattern<34> FNAME_INIT_SIG{
     "898424 940C0000"    // mov dword ptr ss:[esp+C94],eax
 };
 
+// NOLINTNEXTLINE(modernize-use-using)
 typedef void(__thiscall* fname_init_func)(FName* name,
                                           const wchar_t* str,
                                           int32_t number,
@@ -187,6 +182,7 @@ const constinit Pattern<36> FFRAME_STEP_SIG{
 };
 
 // RET 0x8; Callee cleans up the stack (8 bytes)
+// NOLINTNEXTLINE(modernize-use-using)
 typedef void(__stdcall* fframe_step_func)(FFrame*, void*);
 fframe_step_func** fframe_step_gnatives;
 
@@ -216,6 +212,7 @@ const constinit Pattern<19> GET_PATH_NAME_PATTERN{
 //  | CONSTRUCT OBJECT |
 // ############################################################################//
 
+// NOLINTNEXTLINE(modernize-use-using)
 typedef UObject*(__cdecl* construct_obj_func)(UClass* cls,
                                               UObject* outer,
                                               FName name,
@@ -282,6 +279,7 @@ const constinit Pattern<50> STATIC_FIND_OBJECT_PATTERN{
 //  | PROCESS EVENT |
 // ############################################################################//
 
+// NOLINTNEXTLINE(modernize-use-using)
 typedef void(__fastcall* process_event_func)(UObject* obj,
                                              void* /*edx*/,
                                              UFunction* func,
@@ -311,6 +309,7 @@ const constinit Pattern<43> PROCESS_EVENT_SIG{
 //  | CALL FUNCTION |
 // ############################################################################//
 
+// NOLINTNEXTLINE(modernize-use-using)
 typedef void(__fastcall* call_function_func)(UObject* obj,
                                              void* /*edx*/,
                                              FFrame* stack,
@@ -329,6 +328,32 @@ const constinit Pattern<31> CALL_FUNCTION_SIG{
     "83EC 40"          // 83EC 40         | sub esp,40
 };
 
+// ############################################################################//
+//  | SAVE PACKAGE FUNCTION |
+// ############################################################################//
+
+// TODO: This is purely for the Unreal Editor; Also not sure on the parameters.
+
+// NOLINTNEXTLINE(modernize-use-using)
+typedef UObject* (*save_package)(UObject* InOuter,
+                                 UObject* InPackage,
+                                 wchar_t* Filename,
+                                 UObject* InTemplate,
+                                 uint32_t Unknown_00,
+                                 uint32_t Unknown_01,
+                                 uint32_t Unknown_02,
+                                 void* ErrorMessage,
+                                 wchar_t* FileExtension,
+                                 int32_t bSaveAsBinary,
+                                 int32_t bOnlyIfDirty);
+
+save_package save_package_ptr = nullptr;
+
+const constinit Pattern<80> SAVE_PACKAGE_SIG{
+    "6A FF 68 ?? ?? ?? ?? 64 A1 00 00 00 00 50 81 EC 30 09 00 00 A1 ?? ?? ?? ?? 33 C4 89 84 24 2C"
+    " 09 00 00 53 55 56 57 A1 ?? ?? ?? ?? 33 C4 50 8D 84 24 44 09 00 00 64 A3 00 00 00 00 8B 84 24"
+    " 6C 09 00 00 8B BC 24 54 09 00 00 8B AC 24 58 09 00 00"};
+
 }  // namespace
 
 // ############################################################################//
@@ -342,6 +367,7 @@ void BL1Hook::hook(void) {
 
     hook_process_event();
     hook_call_function();
+    // hook_save_package();
 
     find_gobjects();
     find_gnames();
@@ -353,10 +379,10 @@ void BL1Hook::hook(void) {
     find_static_find_object();
     find_load_package();
 
-    // I did a minor search for these for now disabled as they don't seem important rn
-    // hexedit_set_command();
-    // hexedit_array_limit();
-    // hexedit_array_limit_message();
+    // These still need to be validated.
+    hexedit_set_command();
+    hexedit_array_limit();
+    hexedit_array_limit_message();
 }
 
 namespace {
@@ -438,6 +464,17 @@ void BL1Hook::find_static_find_object(void) {
     LOG(MISC, "StaticFindObject: {:p}", reinterpret_cast<void*>(static_find_object_ptr));
 }
 
+namespace {
+
+UObject* Hook_LoadPackage(const UObject* obj, const wchar_t* pkg, uint32_t flags) {
+    std::wstring str{pkg};
+    UObject* result = load_package_ptr(obj, pkg, flags);
+    LOG(MISC, "[LOAD_PACKAGE] ~ {:p}, '{}', {:#06x}, {}", (void*)obj, str, flags,
+        result->get_path_name());
+    return result;
+}
+}  // namespace
+
 void BL1Hook::find_load_package(void) {
     load_package_ptr = LOAD_PACKAGE_PATTERN.sigscan_nullable<load_package_func>();
     LOG(MISC, "LoadPackage: {:p}", reinterpret_cast<void*>(load_package_ptr));
@@ -460,7 +497,7 @@ void __fastcall Hook_ProcessEvent(UObject* obj,
                 func->get_path_name(), obj->get_path_name());
         }
 
-        auto data = hook_manager::impl::preprocess_hook("ProcessEvent", func, obj);
+        auto data = hook_manager::impl::preprocess_hook(L"ProcessEvent", func, obj);
         if (data != nullptr) {
             // Copy args so that hooks can't modify them, for parity with call function
             const WrappedStruct args_base{func, params};
@@ -516,7 +553,7 @@ void __fastcall Hook_CallFunction(UObject* obj,
                                   void* result,
                                   UFunction* func) {
     try {
-        auto data = hook_manager::impl::preprocess_hook("CallFunction", func, obj);
+        auto data = hook_manager::impl::preprocess_hook(L"CallFunction", func, obj);
         if (data != nullptr) {
             WrappedStruct args{func};
             auto original_code = stack->extract_current_args(args);
@@ -569,6 +606,40 @@ void BL1Hook::hook_call_function(void) {
 }
 
 // ############################################################################//
+//  | SAVE PACKAGE |
+// ############################################################################//
+
+// NOTE: Leaving this here for now this is only relevant to the editor however I am unsure on the
+//  input parameters. Even those named are not guaranteed.
+
+namespace {
+UObject* Hook_SavePackage(UObject* InOuter,
+                          UObject* InPackage,
+                          wchar_t* Filename,
+                          UObject* InTemplate,
+                          uint32_t Flags_00,
+                          uint32_t Flags_01,
+                          uint32_t Unknown_02,
+                          void* ErrorMessage,
+                          wchar_t* FileExtension,
+                          int32_t bSaveAsBinary,
+                          int32_t bOnlyIfDirty) {
+    LOG(MISC, "[SAVE_PACKAGE] ~ {:p}, {:p}, {:p}, {:p}", (void*)InOuter, (void*)InPackage,
+        (void*)Filename, (void*)InTemplate);
+
+    UObject* result =
+        save_package_ptr(InOuter, InPackage, Filename, InTemplate, Flags_00, Flags_01, Unknown_02,
+                         ErrorMessage, FileExtension, bSaveAsBinary, bOnlyIfDirty);
+
+    return result;
+}
+}  // namespace
+
+void BL1Hook::hook_save_package(void) {
+    detour(SAVE_PACKAGE_SIG, &Hook_SavePackage, &save_package_ptr, "Save Package");
+}
+
+// ############################################################################//
 //  | BL2 IMPL SAYS NOT IMPLEMENTED |
 // ############################################################################//
 
@@ -585,7 +656,7 @@ void BL1Hook::ftext_as_culture_invariant(unreal::FText*, TemporaryFString&&) con
 }
 
 // ############################################################################//
-//  |  |
+//  | UE CORE STUFF |
 // ############################################################################//
 
 std::wstring BL1Hook::uobject_path_name(const unreal::UObject* obj) const {
@@ -608,7 +679,6 @@ void BL1Hook::fname_init(unreal::FName* name, const wchar_t* str, int32_t number
 }
 
 unreal::UObject* BL1Hook::load_package(const std::wstring& name, uint32_t flags) const {
-    LOG(MISC, "LoadPackage");
     return load_package_ptr(nullptr, name.data(), flags);
 }
 
@@ -621,9 +691,7 @@ UObject* BL1Hook::construct_object(UClass* cls,
                                    const FName& name,
                                    decltype(UObject::ObjectFlags) flags,
                                    UObject* template_obj) const {
-    LOG(MISC, "ConstructObject");
-    return construct_obj_ptr(cls, outer, name, flags, template_obj, nullptr, nullptr, 0 /* false */
-    );
+    return construct_obj_ptr(cls, outer, name, flags, template_obj, nullptr, nullptr, 0);
 }
 
 const unreal::GNames& BL1Hook::gnames(void) const {
@@ -648,24 +716,17 @@ void BL1Hook::u_free(void* data) const {
     gmalloc->vftable->u_free(gmalloc, data);
 }
 
+// ############################################################################//
+//  | HEX EDITS |
+// ############################################################################//
+
 namespace {
-// Match initial jump offset
-const constinit Pattern<28> SET_COMMAND_SIG{
-    "74 1A"        // 74 1A       | je borderlands.5E5505
-    "8B5424 34"    // 8B5424 34   | mov edx,dword ptr ss:[esp+34]
-    "53"           // 53          | push ebx
-    "52"           // 52          | push edx
-    "8BFE"         // 8BFE        | mov edi,esi
-    "E8 ????????"  // E8 68F3FFFF | call borderlands.5E4860
-    "83C4 08"      // 83C4 08     | add esp,8
-    "B8 01000000"  // B8 01000000 | mov eax,1
-    "E9 ????????"  // E9 66110000 | jmp borderlands.5E666B
-};
+
+const constinit Pattern<17> SET_COMMAND_SIG{"75 16 8D 4C 24 18 68 ?? ?? ?? ?? 51 E8 ?? ?? ?? ??"};
+
 }  // namespace
 
 void BL1Hook::hexedit_set_command(void) {
-    // TODO: Not even sure what this is and I really didn't put much effort into finding out.
-    //  Regardless the usage here is one that gets called on console command submission.
     uint8_t* set_command_msg = SET_COMMAND_SIG.sigscan_nullable<uint8_t*>();
 
     if (set_command_msg == nullptr) {
@@ -674,8 +735,9 @@ void BL1Hook::hexedit_set_command(void) {
     }
 
     // NOLINTBEGIN(readability-magic-numbers)
-    unlock_range(set_command_msg, 1);
-    set_command_msg[0] = 0xEB;
+    unlock_range(set_command_msg, 2);
+    set_command_msg[0] = 0x90;
+    set_command_msg[1] = 0x90;
     // NOLINTEND(readability-magic-numbers)
 }
 
@@ -715,14 +777,24 @@ void BL1Hook::hexedit_array_limit_message(void) const {
 }
 
 namespace {
-const constinit Pattern<19> ARRAY_LIMIT_SIG{
-    "0F 8C 7E000000"  // 0F8C 7E000000 | jl borderlands.5E7E64
-    "8b4C24 38"       // 8B4C24 38     | mov ecx,dword ptr ss:[esp+38]
-    "83C7 9D"         // 83C7 9D       | add edi,FFFFFF9D
-    "57"              // 57            | push edi
-    "68 ????????"     // 68 2CF4A701   | push borderlands.1A7F42C
-};
-}
+
+// Since the result of CALL is stored in EAX we can just NOP the CALL itself. Caller still cleans
+//  the stack anyway.
+// 6A 64       PUSH     0x64 (100)
+// 50          PUSH     EAX
+// 46          INC      ESI
+// E8 A1       CALL     ClampToMax_FUN_00517770
+// F9 F2 FF
+// 83 C4 08    ADD      ESP,0x8
+// 3B F0       CMP      ESI,EAX
+// 0F 8C       JL       LAB_005e7d33
+// 59 FF
+// FF FF
+
+const constinit Pattern<20> ARRAY_LIMIT_SIG{
+    "6A 64 50 46 E8 ?? ?? ?? ?? 83 C4 08 3B F0 0F 8C 59 FF FF FF"};
+
+}  // namespace
 
 void BL1Hook::hexedit_array_limit(void) {
     auto array_limit = ARRAY_LIMIT_SIG.sigscan_nullable<uint8_t*>();
@@ -732,8 +804,21 @@ void BL1Hook::hexedit_array_limit(void) {
         LOG(MISC, "Array Limit: {:p}", reinterpret_cast<void*>(array_limit));
 
         // NOLINTBEGIN(readability-magic-numbers)
-        unlock_range(array_limit, 1);
-        array_limit[0] = 0xEB;
+        auto* call_instruction = array_limit + 4;
+
+        if (call_instruction[0] != 0xE8) {
+            LOG(ERROR, "[ARRAY_LIMIT] ~ Instruction at {:p} + 0x04 is {:02X}", (void*)array_limit,
+                *call_instruction);
+            return;
+        }
+
+        // Patching out the CALL ?? ?? ?? ?? to 5 NOP instructions
+        unlock_range(call_instruction, 5);
+        call_instruction[0] = 0x90;
+        call_instruction[1] = 0x90;
+        call_instruction[2] = 0x90;
+        call_instruction[3] = 0x90;
+        call_instruction[4] = 0x90;
         // NOLINTEND(readability-magic-numbers)
     }
 }
@@ -745,8 +830,6 @@ void BL1Hook::hexedit_array_limit(void) {
 namespace {
 
 bool Hook_RemoveSayFromConsoleCommand(unrealsdk::hook_manager::Details& in) {
-    LOG(MISC, "[Hook_RemoveSayFromConsoleCommand] ~ Executing");
-
     static const auto console_command_func =
         in.obj->Class->find_func_and_validate(L"ConsoleCommand"_fn);
 
@@ -763,7 +846,6 @@ bool Hook_RemoveSayFromConsoleCommand(unrealsdk::hook_manager::Details& in) {
 BoundFunction s_ConsoleOutputText{};
 
 bool Hook_InjectConsole(hook_manager::Details& hook) {
-    LOG(MISC, "[Hook_InjectConsole] ~ Executing");
     hook_manager::remove_hook(L"WillowGame.WillowGameViewportClient:PostRender",
                               hook_manager::Type::PRE, L"Hook_InjectConsole");
 
@@ -775,8 +857,6 @@ bool Hook_InjectConsole(hook_manager::Details& hook) {
 }
 
 bool Hook_ConsoleCommandImpl(hook_manager::Details& hook) {
-    LOG(MISC, "[Hook_ConsoleCommandImpl] ~ Executing");
-
     const auto command_property =
         hook.args->type->find_prop_and_validate<UStrProperty>(L"Command"_fn);
 
@@ -855,18 +935,28 @@ void BL1Hook::uconsole_output_text(const std::wstring& str) const {
 }
 
 void BL1Hook::inject_console(void) {
-    LOG(MISC, "Hooking Engine.Console:ShippingConsoleCommand");
-    hook_manager::add_hook(L"Engine.Console:ShippingConsoleCommand",
-                           unrealsdk::hook_manager::Type::PRE, L"Hook_RemoveSayFromConsoleCommand",
-                           &Hook_RemoveSayFromConsoleCommand);
+    // clang-format off
+    hook_manager::add_hook(
+        L"Engine.Console:ShippingConsoleCommand",
+        unrealsdk::hook_manager::Type::PRE,
+        L"Hook_RemoveSayFromConsoleCommand",
+        &Hook_RemoveSayFromConsoleCommand
+    );
 
-    LOG(MISC, "Hooking Engine.Console:ConsoleCommand");
-    hook_manager::add_hook(L"Engine.Console:ConsoleCommand", hook_manager::Type::PRE,
-                           L"Hook_ConsoleCommandImpl", &Hook_ConsoleCommandImpl);
+    hook_manager::add_hook(
+        L"Engine.Console:ConsoleCommand",
+        hook_manager::Type::PRE,
+        L"Hook_ConsoleCommandImpl",
+        &Hook_ConsoleCommandImpl
+    );
 
-    LOG(MISC, "Hooking WillowGame.WillowGameViewportClient:PostRender");
-    hook_manager::add_hook(L"WillowGame.WillowGameViewportClient:PostRender",
-                           hook_manager::Type::PRE, L"Hook_InjectConsole", &Hook_InjectConsole);
+    hook_manager::add_hook(
+        L"WillowGame.WillowGameViewportClient:PostRender",
+        hook_manager::Type::PRE,
+        L"Hook_InjectConsole",
+        &Hook_InjectConsole
+    );
+    // clang-format on
 }
 
 }  // namespace unrealsdk::game
