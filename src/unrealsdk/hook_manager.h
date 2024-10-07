@@ -60,6 +60,7 @@ using Callback = DLLSafeCallback::InnerFunc;
 
 /**
  * @brief Toggles logging all unreal function calls. Best used in short bursts for debugging.
+ * @note This writes to it's own dedicated file, rather than going through the logging system.
  *
  * @param should_log True to turn on logging all calls, false to turn it off.
  */
@@ -141,7 +142,7 @@ to work out if to early exit again. If it does, it can spend a bit longer extrac
  * @param obj The object which called the function.
  * @return A pointer to the relevant hook list, or nullptr if no hooks match.
  */
-const List* preprocess_hook(std::string_view source,
+const List* preprocess_hook(std::wstring_view source,
                             const unreal::UFunction* func,
                             const unreal::UObject* obj);
 

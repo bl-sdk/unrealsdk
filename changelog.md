@@ -10,7 +10,20 @@
 
   [4e17d06d](https://github.com/bl-sdk/unrealsdk/commit/4e17d06d),
   [270ef4bf](https://github.com/bl-sdk/unrealsdk/commit/270ef4bf)
-  
+
+- Changed `unrealsdk::hook_manager::log_all_calls` to write to a dedicated file.
+
+  [270ef4bf](https://github.com/bl-sdk/unrealsdk/commit/270ef4bf)
+
+- Fixed missing all `CallFunction` based hooks in TPS - notably including the say bypass.
+
+  [011fd8a2](https://github.com/bl-sdk/unrealsdk/commit/270ef4bf)
+
+- Added the offline mode say crash fix for BL2+TPS as a base sdk hook.
+
+  [2d9a36c7](https://github.com/bl-sdk/unrealsdk/commit/270ef4bf)
+
+
 ## v1.3.0
 - Added a `WeakPointer` wrapper class with better ergonomics, including an emulated implementation
   when built under UE3.
