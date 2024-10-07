@@ -722,7 +722,13 @@ void BL1Hook::u_free(void* data) const {
 
 namespace {
 
-const constinit Pattern<17> SET_COMMAND_SIG{"75 16 8D 4C 24 18 68 ?? ?? ?? ?? 51 E8 ?? ?? ?? ??"};
+const constinit Pattern<17> SET_COMMAND_SIG{
+    "75 16"        // 75 16       | jne borderlands.87E1A7
+    "8D4C24 18"    // 8D4C24 18   | lea ecx,dword ptr ss:[esp+18]
+    "68 ????????"  // 68 0089B101 | push borderlands.1B18900
+    "51"           // 51          | push ecx
+    "E8 ????????"  // E8 703CD4FF | call <borderlands.sub_5C1E10>
+};
 
 }  // namespace
 
@@ -734,6 +740,8 @@ void BL1Hook::hexedit_set_command(void) {
         return;
     }
 
+    LOG(INFO, "Set Command: {:p}", reinterpret_cast<void*>(set_command_msg));
+
     // NOLINTBEGIN(readability-magic-numbers)
     unlock_range(set_command_msg, 2);
     set_command_msg[0] = 0x90;
@@ -743,8 +751,6 @@ void BL1Hook::hexedit_set_command(void) {
 
 namespace {
 
-// Just like in BL2 the jump offset is preserved for the initial jump since otherwise we would
-//  jump into arbitrary space.
 const constinit Pattern<29> ARRAY_LIMIT_MESSAGE{
     "0F8C 7E000000"  // 0F8C 7E000000 | jl borderlands.5E7E64
     "8B4C24 38"      // 8B4C24 38     | mov ecx,dword ptr ss:[esp+38]
@@ -757,13 +763,14 @@ const constinit Pattern<29> ARRAY_LIMIT_MESSAGE{
 }  // namespace
 
 void BL1Hook::hexedit_array_limit_message(void) const {
-    // TODO: Verify that this works as expected.
     uint8_t* array_limit_msg = ARRAY_LIMIT_MESSAGE.sigscan_nullable<uint8_t*>();
 
     if (array_limit_msg == nullptr) {
         LOG(ERROR, "Failed to find array limit message signature.");
         return;
     }
+
+    LOG(MISC, "Array Limit Message: {:p}", reinterpret_cast<void*>(array_limit_msg));
 
     // NOLINTBEGIN(readability-magic-numbers)
     unlock_range(array_limit_msg, 6);
@@ -778,21 +785,21 @@ void BL1Hook::hexedit_array_limit_message(void) const {
 
 namespace {
 
-// Since the result of CALL is stored in EAX we can just NOP the CALL itself. Caller still cleans
-//  the stack anyway.
-// 6A 64       PUSH     0x64 (100)
-// 50          PUSH     EAX
-// 46          INC      ESI
-// E8 A1       CALL     ClampToMax_FUN_00517770
-// F9 F2 FF
-// 83 C4 08    ADD      ESP,0x8
-// 3B F0       CMP      ESI,EAX
-// 0F 8C       JL       LAB_005e7d33
-// 59 FF
-// FF FF
+// - NOTE -
+// In BL2 this seems to be inlined however for BL1 its not so we will NOP the CALL and its 4 byte
+// address. The caller cleans the stack so need to worry about that. Might also be a good idea to
+// move the signature forward to the CALL so we don't need to index weirdly.
+//
 
 const constinit Pattern<20> ARRAY_LIMIT_SIG{
-    "6A 64 50 46 E8 ?? ?? ?? ?? 83 C4 08 3B F0 0F 8C 59 FF FF FF"};
+    "6A 64"          // 6A 64         | push 64
+    "50"             // 50            | push eax
+    "46"             // 46            | inc esi
+    "E8 ????????"    // E8 A1F9F2FF   | call <borderlands.sub_517770>
+    "83C4 08"        // 83C4 08       | add esp,8
+    "3BF0"           // 3BF0          | cmp esi,eax
+    "0F8C 59FFFFFF"  // 0F8C 59FFFFFF | jl borderlands.5E7D33
+};
 
 }  // namespace
 
