@@ -36,7 +36,7 @@ const constinit Pattern<19> PROCESS_EVENT_SIG{
 
 void process_event_hook(UObject* obj, UFunction* func, void* params) {
     try {
-        auto data = hook_manager::impl::preprocess_hook("ProcessEvent", func, obj);
+        auto data = hook_manager::impl::preprocess_hook(L"ProcessEvent", func, obj);
         if (data != nullptr) {
             // Copy args so that hooks can't modify them, for parity with call function
             const WrappedStruct args_base{func, params};
@@ -163,7 +163,7 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
         implementation simpler.
         */
 
-        auto data = hook_manager::impl::preprocess_hook("CallFunction", func, obj);
+        auto data = hook_manager::impl::preprocess_hook(L"CallFunction", func, obj);
         if (data != nullptr) {
             WrappedStruct args{func};
             auto original_code = stack->extract_current_args(args);
