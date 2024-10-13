@@ -5,6 +5,7 @@
 
 #include "unrealsdk/game/abstract_hook.h"
 #include "unrealsdk/game/selector.h"
+#include "unrealsdk/env.h"
 
 #if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING) \
     && defined(UNREALSDK_GAME_BL1)
@@ -12,6 +13,10 @@
 namespace unrealsdk::game {
 
 class BL1Hook : public AbstractHook {
+
+   public:
+    static const constexpr env::env_var_key KEY_LOG_LOAD_PACKAGE = "UNREALSDK_BL1_LOG_LOAD_PKG";
+
    protected:
     /**
      * @brief Hex edits out the `obj dump` array limit message.

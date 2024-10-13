@@ -76,11 +76,6 @@ UObject* BL1Hook::construct_object(UClass* cls,
 
 #pragma region PathName
 
-// UObject::PathName is exposed to UnrealScript, we *can* get away with just calling it.
-// That has a decent bit of overhead however, especially if process event is locking, and this
-// function is used to tell if to call a hook, it's called all the time.
-// Stick with a native function call for speed.
-
 namespace {
 
 #if defined(__MINGW32__)
@@ -131,9 +126,6 @@ std::wstring BL1Hook::uobject_path_name(const UObject* obj) const {
 // ############################################################################//
 
 #pragma region FindObject
-
-// Again UObject::FindObject is exposed to UnrealScript. We don't care as much about performance
-// here, but may as well still use a native call, was easy enough to find.
 
 namespace {
 
@@ -206,31 +198,22 @@ const constinit Pattern<34> LOAD_PACKAGE_PATTERN{
 
 }  // namespace
 
-#define UNREALSDK_BL1_LOG_LOAD_PACKAGE
-
-#if defined(UNREALSDK_BL1_LOG_LOAD_PACKAGE)
-
 namespace {
 UObject* bl1_load_package_detour(const UObject* outer, const wchar_t* name, uint32_t flags) {
-    LOG(INFO, L"[LOAD_PACKAGE] ~ {:p}, '{}', {:#08x}", (void*)outer, name, flags);
+    LOG(INFO, L"[LOAD_PACKAGE] ~ {:p}, '{}', {:#010x}", (void*)outer, name, flags);
     return load_package_ptr(outer, name, flags);
 }
 }  // namespace
 
 void BL1Hook::find_load_package(void) {
-    detour(LOAD_PACKAGE_PATTERN, &bl1_load_package_detour, &load_package_ptr,
-           "bl1_load_package_detour");
+    if (env::defined(KEY_LOG_LOAD_PACKAGE)) {
+        detour(LOAD_PACKAGE_PATTERN, &bl1_load_package_detour, &load_package_ptr,
+               "bl1_load_package_detour");
+    } else {
+        load_package_ptr = LOAD_PACKAGE_PATTERN.sigscan_nullable<load_package_func>();
+    }
     LOG(MISC, "LoadPackage: {:p}", reinterpret_cast<void*>(load_package_ptr));
 }
-
-#else
-
-void BL1Hook::find_load_package(void) {
-    load_package_ptr = LOAD_PACKAGE_PATTERN.sigscan_nullable<load_package_func>();
-    LOG(MISC, "LoadPackage: {:p}", reinterpret_cast<void*>(load_package_ptr));
-}
-
-#endif
 
 [[nodiscard]] UObject* BL1Hook::load_package(const std::wstring& name, uint32_t flags) const {
     return load_package_ptr(nullptr, name.data(), flags);
