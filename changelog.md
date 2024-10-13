@@ -1,6 +1,6 @@
 # Changelog
 
-## Upcoming
+## v1.4.0
 - Fixed that UE3 `WeakPointer`s would always return null, due to an incorrect offset in the
   `UObject` header layout.
 
