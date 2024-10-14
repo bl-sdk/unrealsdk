@@ -17,17 +17,18 @@ using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
-// TODO: Verify
-
-namespace {
-
 // ############################################################################//
 //  | CUSTOM COMMANDS |
 // ############################################################################//
 
-// TODO: namespace these
+namespace bl1::cmd {
+
 void sset_command_impl(const wchar_t* args, size_t, size_t);
 void sgetnativefunc_command_impl(const wchar_t* args, size_t, size_t);
+
+}  // namespace bl1::cmd
+
+namespace {
 
 // ############################################################################//
 //  | DEFAULT CONSOLE HOOKS |
@@ -172,8 +173,8 @@ void BL1Hook::inject_console(void) {
     );
     // clang-format on
 
-    commands::add_command(L"sset", &sset_command_impl);
-    commands::add_command(L"sgetnativefunc", &sgetnativefunc_command_impl);
+    commands::add_command(L"sset", &bl1::cmd::sset_command_impl);
+    commands::add_command(L"sgetnativefunc", &bl1::cmd::sgetnativefunc_command_impl);
 }
 
 void BL1Hook::uconsole_output_text(const std::wstring& str) const {
@@ -194,6 +195,12 @@ bool BL1Hook::is_console_ready(void) const {
 
 namespace {
 
+// NOTE: src->get(prop) gives linker errors; we only need the value pointer here.
+void* uproperty_get_value_ptr(UProperty* prop, UObject* src, int32_t index = 0) {
+    return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(src) + prop->Offset_Internal
+                                   + prop->ElementSize * index);
+}
+
 void uconsole_write(const std::wstring& text) {
     console_output_text.call<void, UStrProperty>(text);
 }
@@ -204,18 +211,18 @@ void* uproperty_import_text(UProperty* prop,
                             int32_t flags,
                             UObject* src,
                             void* err) {
-    // These are mostly speculative
+    // These are mostly speculative; I would hope the bitflags are the same...
     constexpr auto INDEX_PRE_PROP_CHANGED = 0x11;
     constexpr auto INDEX_POST_PROP_CHANGED = 0x13;
     constexpr auto INDEX_IMPORT_TEXT = 0x54;
-    constexpr auto FLAG_DONT_NOTIFY_OBJECT = 0x200;
+    constexpr auto RF_NeedInitialisation = 0x200;
 
     typedef void(__fastcall * uprop_changed)(UObject*, void*, UProperty*);
     typedef void*(__fastcall * uprop_import_text)(UProperty*, void*, const wchar_t*, void*, int32_t,
                                                   UObject*, void*);
 
     // Pre OnChange?
-    if ((src->ObjectFlags & FLAG_DONT_NOTIFY_OBJECT) == 0) {
+    if ((src->ObjectFlags & RF_NeedInitialisation) == 0) {
         reinterpret_cast<uprop_changed>(src->vftable[INDEX_PRE_PROP_CHANGED])(src, nullptr, prop);
     }
 
@@ -223,8 +230,24 @@ void* uproperty_import_text(UProperty* prop,
     uprop_import_text func = reinterpret_cast<uprop_import_text>(prop->vftable[INDEX_IMPORT_TEXT]);
     void* result = func(prop, nullptr, value, write_to, flags, src, err);
 
+    // - NOTE -
+    // ```C
+    // if ((*(uint *)&piVar2->ObjectFlags & 0x4000) == 0) {
+    // ...
+    // if ((((*(uint *)&piVar2->ObjectFlags & lower_bits | this_upper_bits & upper_bits) == 0) &&
+    //     ((lower_bits & upper_bits) != 0xffffffff)) || ((this_upper_bits & 0x20000000) != 0)) {
+    // ```
+    // This snippet would eventually cause a reload/reset on the object to defaults stored in the
+    //  .upk we don't want that because we have just modified it and would like to keep our changes.
+    //  So adding 0x4000 to the src->ObjectFlags stops 'src' from being reset. This probably
+    //  introduces new issues or quirks though. Note that this snippet only flags the object for
+    //  reloading.
+    //
+    // Ref: 0x005f988a,
+    src->ObjectFlags |= 0x4000; // RF_NewerVersionExists
+
     // Post OnChange?
-    if ((src->ObjectFlags & FLAG_DONT_NOTIFY_OBJECT) == 0) {
+    if ((src->ObjectFlags & RF_NeedInitialisation) == 0) {
         reinterpret_cast<uprop_changed>(src->vftable[INDEX_POST_PROP_CHANGED])(src, nullptr, prop);
     }
 
@@ -237,15 +260,7 @@ void* uproperty_import_text(UProperty* prop,
 //  | CUSTOM CONSOLE COMMANDS |
 // ############################################################################//
 
-namespace {
-
-// NOTE: src->get(prop) gives linker errors; we only need the value pointer here.
-void* uproperty_get_value_ptr(UProperty* prop, UObject* src, int32_t index = 0) {
-    return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(src) + prop->Offset_Internal
-                                   + prop->ElementSize * index);
-}
-
-void sset_command_impl(const wchar_t* line, size_t, size_t) {
+void bl1::cmd::sset_command_impl(const wchar_t* line, size_t, size_t) {
     std::wstringstream ss{line};
 
     // sset CLASS NAME PROPERTY VALUE
@@ -283,7 +298,7 @@ void sset_command_impl(const wchar_t* line, size_t, size_t) {
     uproperty_import_text(prop, value.c_str(), value_ptr, 1, found, nullptr);
 }
 
-void sgetnativefunc_command_impl(const wchar_t* line, size_t, size_t) {
+void bl1::cmd::sgetnativefunc_command_impl(const wchar_t* line, size_t, size_t) {
     // - NOTE -
     // I don't expect this one to be used a lot its mostly for finding addresses of functions in
     // disassembly. The text output might not be useful since you can just add a breakpoint here
@@ -323,8 +338,6 @@ void sgetnativefunc_command_impl(const wchar_t* line, size_t, size_t) {
     uconsole_write(msg);
     LOG(MISC, "[CONSOLE] ~ {}", msg);
 }
-
-}  // namespace
 
 }  // namespace unrealsdk::game
 
