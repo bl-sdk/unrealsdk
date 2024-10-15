@@ -206,7 +206,7 @@ UObject* bl1_load_package_detour(const UObject* outer, const wchar_t* name, uint
 }  // namespace
 
 void BL1Hook::find_load_package(void) {
-    if (env::defined(KEY_LOG_LOAD_PACKAGE)) {
+    if (env::defined(KEY_LOG_LOAD_PKG)) {
         detour(LOAD_PACKAGE_PATTERN, &bl1_load_package_detour, &load_package_ptr,
                "bl1_load_package_detour");
     } else {

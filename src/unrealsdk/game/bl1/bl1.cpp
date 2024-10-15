@@ -35,6 +35,10 @@ void BL1Hook::hook(void) {
     hook_process_event();
     hook_call_function();
 
+    if (env::defined(KEY_LOG_SAVE_PKG)) {
+        hook_save_package();
+    }
+
     find_gobjects();
     find_gnames();
     find_fname_init();
@@ -148,48 +152,46 @@ namespace {
 // This is an function editor it might be useful much later on but right now I will leave it here
 //  so that it is known.
 //
-// The parameters into the function are not guaranteed to be correct I have verified that the
-//  UObjects are valid though. Unknown_XY are bitwise anded with constants as well.
-//
 
 // NOLINTNEXTLINE(modernize-use-using)
-typedef UObject* (*save_package_func)(UObject* InOuter,
-                                      UObject* InPackage,
-                                      wchar_t* Filename,
-                                      UObject* InTemplate,
-                                      uint32_t Unknown_00,
-                                      uint32_t Unknown_01,
-                                      uint32_t Unknown_02,
-                                      void* ErrorMessage,
-                                      wchar_t* FileExtension,
-                                      int32_t bSaveAsBinary,
-                                      int32_t bOnlyIfDirty);
+typedef int32_t (*save_package_func)(UObject* InOuter,
+                                     UObject* Base,
+                                     int64_t TopLevelFlags,
+                                     wchar_t* Filename,
+                                     void* Error, // non-null
+                                     void* Conform,
+                                     bool bForceByteSwapping,
+                                     bool bWarnOfLongFilename,
+                                     uint32_t SaveFlags,
+                                     UObject* TargetPlatform,  // ?
+                                     void* FinalTimeStamp,
+                                     int Unknown_00 /* pointer? */);
 
 save_package_func save_package_ptr = nullptr;
 
-const constinit Pattern<80> SAVE_PACKAGE_SIG{
-    "6A FF 68 ?? ?? ?? ?? 64 A1 00 00 00 00 50 81 EC 30 09 00 00 A1 ?? ?? ?? ?? 33 C4 89 84 24 2C"
-    " 09 00 00 53 55 56 57 A1 ?? ?? ?? ?? 33 C4 50 8D 84 24 44 09 00 00 64 A3 00 00 00 00 8B 84 24"
-    " 6C 09 00 00 8B BC 24 54 09 00 00 8B AC 24 58 09 00 00"};
+const constinit Pattern<51> SAVE_PACKAGE_SIG{
+    "55 8D AC 24 D4 F3 FF FF 81 EC 2C 0C 00 00 6A FF 68 ?? ?? ?? ?? 64 A1 00 00 00 00 50 81 EC A0"
+    "03 00 00 A1 ?? ?? ?? ?? 33 C5 89 85 28 0C 00 00 53 56 57 50"};
 
-UObject* hook_save_package_detour(UObject* InOuter,
-                                  UObject* InPackage,
-                                  wchar_t* Filename,
-                                  UObject* InTemplate,
-                                  uint32_t Flags_00,
-                                  uint32_t Flags_01,
-                                  uint32_t Unknown_02,
-                                  void* ErrorMessage,
-                                  wchar_t* FileExtension,
-                                  int32_t bSaveAsBinary,
-                                  int32_t bOnlyIfDirty) {
-    LOG(MISC, "[SAVE_PACKAGE] ~ {:p}, {:p}, {:p}, {:p}", (void*)InOuter, (void*)InPackage,
-        (void*)Filename, (void*)InTemplate);
+int32_t hook_save_package_detour(UObject* InOuter,
+                                 UObject* Base,
+                                 int64_t TopLevelFlags,
+                                 wchar_t* Filename,
+                                 void* Error,
+                                 void* Conform,
+                                 bool bForceByteSwapping,
+                                 bool bWarnOfLongFilename,
+                                 uint32_t SaveFlags,
+                                 UObject* TargetPlatform,
+                                 void* FinalTimeStamp,
+                                 int Unknown_00) {
+    LOG(MISC, L"Saving Package: {:p}, {:p}, {:#016x}, {:#08x}, '{}'",
+        reinterpret_cast<void*>(InOuter), reinterpret_cast<void*>(Base), TopLevelFlags, SaveFlags,
+        Filename);
 
-    UObject* result =
-        save_package_ptr(InOuter, InPackage, Filename, InTemplate, Flags_00, Flags_01, Unknown_02,
-                         ErrorMessage, FileExtension, bSaveAsBinary, bOnlyIfDirty);
-
+    int32_t result = save_package_ptr(InOuter, Base, TopLevelFlags, Filename, Error, Conform,
+                                      bForceByteSwapping, bWarnOfLongFilename, SaveFlags,
+                                      TargetPlatform, FinalTimeStamp, Unknown_00);
     return result;
 }
 

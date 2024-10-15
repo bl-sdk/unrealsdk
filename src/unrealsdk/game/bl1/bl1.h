@@ -15,7 +15,8 @@ namespace unrealsdk::game {
 class BL1Hook : public AbstractHook {
 
    public:
-    static const constexpr env::env_var_key KEY_LOG_LOAD_PACKAGE = "UNREALSDK_BL1_LOG_LOAD_PKG";
+    static const constexpr env::env_var_key KEY_LOG_LOAD_PKG = "UNREALSDK_BL1_LOG_LOAD_PKG";
+    static const constexpr env::env_var_key KEY_LOG_SAVE_PKG = "UNREALSDK_BL1_LOG_SAVE_PKG";
 
    protected:
     /**
