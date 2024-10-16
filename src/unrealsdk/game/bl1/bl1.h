@@ -3,9 +3,9 @@
 
 #include "unrealsdk/pch.h"
 
+#include "unrealsdk/env.h"
 #include "unrealsdk/game/abstract_hook.h"
 #include "unrealsdk/game/selector.h"
-#include "unrealsdk/env.h"
 
 #if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING) \
     && defined(UNREALSDK_GAME_BL1)
@@ -13,10 +13,10 @@
 namespace unrealsdk::game {
 
 class BL1Hook : public AbstractHook {
-
    public:
     static const constexpr env::env_var_key KEY_LOG_LOAD_PKG = "UNREALSDK_BL1_LOG_LOAD_PKG";
     static const constexpr env::env_var_key KEY_LOG_SAVE_PKG = "UNREALSDK_BL1_LOG_SAVE_PKG";
+    static const constexpr env::env_var_key KEY_LOG_EXTENDED_DBG = "UNREALSDK_BL1_LOG_EXTENDED_DBG";
 
    protected:
     /**

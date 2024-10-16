@@ -26,6 +26,7 @@ namespace unrealsdk::game {
 // These could be defined in the class but since they are only used here this will do for now.
 namespace {
 void hook_save_package(void);
+void hook_resolve_error(void);
 void inject_qol_hooks(void);
 }  // namespace
 
@@ -37,6 +38,10 @@ void BL1Hook::hook(void) {
 
     if (env::defined(KEY_LOG_SAVE_PKG)) {
         hook_save_package();
+    }
+
+    if (env::defined(KEY_LOG_EXTENDED_DBG)) {
+        hook_resolve_error();
     }
 
     find_gobjects();
@@ -158,7 +163,7 @@ typedef int32_t (*save_package_func)(UObject* InOuter,
                                      UObject* Base,
                                      int64_t TopLevelFlags,
                                      wchar_t* Filename,
-                                     void* Error, // non-null
+                                     void* Error,  // non-null
                                      void* Conform,
                                      bool bForceByteSwapping,
                                      bool bWarnOfLongFilename,
@@ -197,6 +202,39 @@ int32_t hook_save_package_detour(UObject* InOuter,
 
 void hook_save_package(void) {
     detour(SAVE_PACKAGE_SIG, &hook_save_package_detour, &save_package_ptr, "bl1_hook_save_package");
+}
+
+}  // namespace
+
+// ############################################################################//
+//  | EXTENDED DEBUGGING |
+// ############################################################################//
+
+namespace {
+
+// - NOTE -
+// I've seen this function get called with static strings quite a fair bit in ghidra could be useful
+// for identifying soft/critical errors.
+//
+
+const constinit Pattern<28> EXTENDED_DEBUGGING_SIG{
+    "51 8B 44 24 14 8B 4C 24 10 8B 54 24 0C 56 8B 74 24 0C 6A 00 50 51 52 68 ?? ?? ?? ??"};
+
+// NOLINTNEXTLINE(modernize-use-using)
+typedef wchar_t**(__cdecl* resolve_error)(wchar_t**, wchar_t*, wchar_t*, int32_t);
+
+resolve_error resolve_error_ptr = nullptr;
+
+wchar_t** resolve_error_detour(wchar_t** obj, wchar_t* error, wchar_t* ctx, int32_t flags) {
+    wchar_t** msg = resolve_error_ptr(obj, error, ctx, flags);
+    // [RESOLVE_ERR] Core::ObjectNotFound | 0x0 'Object not found ...'
+    LOG(WARNING, L"[RESOLVE_ERR] {}::{} | {:#08x} '{}'", ctx, error, flags, *msg);
+    return msg;
+}
+
+void hook_resolve_error(void) {
+    detour(EXTENDED_DEBUGGING_SIG, &resolve_error_detour, &resolve_error_ptr,
+           "bl1_hook_raise_error");
 }
 
 }  // namespace
