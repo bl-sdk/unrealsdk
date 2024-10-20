@@ -1,5 +1,10 @@
 # Changelog
 
+## Upcoming
+- `unrealsdk::hook_manager::inject_next_call` is now thread local.
+
+  [427c8734](https://github.com/bl-sdk/unrealsdk/commit/427c8734)
+
 ## v1.4.0
 - Fixed that UE3 `WeakPointer`s would always return null, due to an incorrect offset in the
   `UObject` header layout.

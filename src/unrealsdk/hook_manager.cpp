@@ -86,7 +86,7 @@ struct List {
 
 namespace {
 
-bool should_inject_next_call = false;
+thread_local bool should_inject_next_call = false;
 
 bool should_log_all_calls = false;
 std::unique_ptr<std::wostream> log_all_calls_stream;
