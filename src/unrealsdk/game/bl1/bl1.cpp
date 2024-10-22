@@ -25,13 +25,37 @@ namespace unrealsdk::game {
 
 // These could be defined in the class but since they are only used here this will do for now.
 namespace {
+static std::atomic_bool bl1_has_initialised{false};
+
 void hook_save_package(void);
 void hook_resolve_error(void);
 void inject_qol_hooks(void);
+void hook_init_func(void);
 }  // namespace
 
 void BL1Hook::hook(void) {
     hook_antidebug();
+
+    if (!env::defined(KEY_DO_NOT_WAIT_FOR_INIT)) {
+        hook_init_func();
+        // Shouldn't take longer than 60s tbh but just incase someones pc is exceptionally slow.
+        const float MAX_WAIT_TIME = env::get_numeric(KEY_MAX_WAIT_TIME, 120.0F);
+        using Clock = std::chrono::steady_clock;
+        auto start = Clock::now();
+
+        // Wait until the game has initialised or until we timeout
+        while (!bl1_has_initialised.load(std::memory_order_relaxed)) {
+            // yielding is an option but this is probably better
+            std::this_thread::sleep_for(std::chrono::milliseconds{100});
+
+            float elapsed = std::chrono::duration<float>(Clock::now() - start).count();
+            if (elapsed > MAX_WAIT_TIME) {
+                LOG(INFO,
+                    "bl1sdk is aborting initialisation as it has taken too long to initialise.");
+                return;
+            }
+        }
+    }
 
     hook_process_event();
     hook_call_function();
@@ -256,6 +280,41 @@ void inject_qol_hooks(void) {
     hook_manager::add_hook(L"WillowGame.WillowPlayerController:SpawningProcessComplete",
                            hook_manager::Type::POST, L"bl1_hook_instantly_load_profile",
                            &hook_instantly_load_profile);
+}
+
+const constinit Pattern<45> INIT_FUNC_SIG{
+    "6A FF"          // push FFFFFFFF
+    "68 ????????"    // push <borderlands.sub_1991338>
+    "64A1 00000000"  // mov eax,dword ptr fs:[0]
+    "50"             // push eax
+    "83EC 3C"        // sub esp,3C
+    "53"             // push ebx
+    "55"             // push ebp
+    "56"             // push esi
+    "57"             // push edi
+    "A1 ????????"    // mov eax,dword ptr ds:[1F16980]
+    "33C4"           // xor eax,esp
+    "50"             // push eax
+    "8D4424 50"      // lea eax,dword ptr ss:[esp+50]
+    "64A3 00000000"  // mov dword ptr fs:[0],eax
+    "8BD9"           // mov ebx,ecx
+    "EB 0E"          // jmp borderlands.13ADAC9
+    "4D"             // dec ebp
+    "61"             // popad
+};
+
+// Not sure if this is a __thiscall or an actual __fastcall; ecx is used.
+typedef void(__fastcall* init_function)(void* ecx, void* edx);
+
+init_function init_func_ptr = nullptr;
+
+void __fastcall detour_init_func(void* ecx, void* edx) {
+    init_func_ptr(ecx, edx);
+    bl1_has_initialised.store(true, std::memory_order_relaxed);
+}
+
+void hook_init_func(void) {
+    detour(INIT_FUNC_SIG, &detour_init_func, &init_func_ptr, "bl1_hook_init_func");
 }
 
 }  // namespace

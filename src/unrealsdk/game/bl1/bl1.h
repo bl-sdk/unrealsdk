@@ -18,6 +18,11 @@ class BL1Hook : public AbstractHook {
     static const constexpr env::env_var_key KEY_LOG_SAVE_PKG = "UNREALSDK_BL1_LOG_SAVE_PKG";
     static const constexpr env::env_var_key KEY_LOG_EXTENDED_DBG = "UNREALSDK_BL1_LOG_EXTENDED_DBG";
 
+    // I can't see this one ever being used tbh
+    static const constexpr env::env_var_key KEY_DO_NOT_WAIT_FOR_INIT =
+        "UNREALSDK_BL1_DO_NOT_WAIT_FOR_INIT";
+    static const constexpr env::env_var_key KEY_MAX_WAIT_TIME = "UNREALSDK_BL1_MAX_INIT_WAIT_TIME";
+
    protected:
     /**
      * @brief Hex edits out the `obj dump` array limit message.
