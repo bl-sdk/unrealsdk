@@ -182,7 +182,14 @@ void BL1Hook::uconsole_output_text(const std::wstring& str) const {
         return;
     }
 
-    console_output_text.call<void, UStrProperty>(str);
+    if (env::defined(KEY_LOCKING_CONSOLE_WRITE)) {
+        static std::mutex s_Mutex{};
+        std::unique_lock guard{s_Mutex};
+        console_output_text.call<void, UStrProperty>(str);
+
+    } else {
+        console_output_text.call<void, UStrProperty>(str);
+    }
 }
 
 bool BL1Hook::is_console_ready(void) const {
@@ -244,7 +251,7 @@ void* uproperty_import_text(UProperty* prop,
     //  reloading.
     //
     // Ref: 0x005f988a,
-    src->ObjectFlags |= 0x4000; // RF_NewerVersionExists
+    src->ObjectFlags |= 0x4000;  // RF_NewerVersionExists
 
     // Post OnChange?
     if ((src->ObjectFlags & RF_NeedInitialisation) == 0) {

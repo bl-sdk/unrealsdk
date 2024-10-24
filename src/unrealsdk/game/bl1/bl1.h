@@ -22,6 +22,8 @@ class BL1Hook : public AbstractHook {
     static const constexpr env::env_var_key KEY_DO_NOT_WAIT_FOR_INIT =
         "UNREALSDK_BL1_DO_NOT_WAIT_FOR_INIT";
     static const constexpr env::env_var_key KEY_MAX_WAIT_TIME = "UNREALSDK_BL1_MAX_INIT_WAIT_TIME";
+    static const constexpr env::env_var_key KEY_LOCKING_CONSOLE_WRITE =
+        "UNREALSDK_BL1_LOCKING_CONSOLE_WRITE";
 
    protected:
     /**
