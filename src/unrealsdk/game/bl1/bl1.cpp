@@ -250,7 +250,7 @@ resolve_error resolve_error_ptr = nullptr;
 wchar_t** resolve_error_detour(wchar_t** obj, wchar_t* error, wchar_t* ctx, int32_t flags) {
     wchar_t** msg = resolve_error_ptr(obj, error, ctx, flags);
     // [RESOLVE_ERR] Core::ObjectNotFound | 0x0 'Object not found ...'
-    LOG(WARNING, L"[RESOLVE_ERR] {}::{} | {:#08x} '{}'", ctx, error, flags, *msg);
+    // LOG(WARNING, L"[RESOLVE_ERR] {}::{} | {:#08x} '{}'", ctx, error, flags, *msg);
     return msg;
 }
 
