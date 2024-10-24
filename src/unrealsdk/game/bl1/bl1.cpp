@@ -29,7 +29,6 @@ static std::atomic_bool bl1_has_initialised{false};
 
 void hook_save_package(void);
 void hook_resolve_error(void);
-void inject_qol_hooks(void);
 void hook_init_func(void);
 }  // namespace
 
@@ -86,7 +85,6 @@ void BL1Hook::hook(void) {
 void BL1Hook::post_init(void) {
     LOG(MISC, "Attaching Hooks!");
     inject_console();
-    inject_qol_hooks();
 }
 
 // ############################################################################//
@@ -269,19 +267,6 @@ void hook_resolve_error(void) {
 
 namespace {
 
-bool hook_instantly_load_profile(hook_manager::Details& in) {
-    // bIsProfileLoaded is set to true after 30 seconds; This sets it to true once the warp-tunnel
-    //  has finished. This allows you to instantly save on quit rather than having to wait 30s.
-    in.obj->get<UFunction, BoundFunction>(L"ClientSetProfileLoaded"_fn).call<void>();
-    return false;
-}
-
-void inject_qol_hooks(void) {
-    hook_manager::add_hook(L"WillowGame.WillowPlayerController:SpawningProcessComplete",
-                           hook_manager::Type::POST, L"bl1_hook_instantly_load_profile",
-                           &hook_instantly_load_profile);
-}
-
 const constinit Pattern<45> INIT_FUNC_SIG{
     "6A FF"          // push FFFFFFFF
     "68 ????????"    // push <borderlands.sub_1991338>
@@ -310,6 +295,7 @@ init_function init_func_ptr = nullptr;
 
 void __fastcall detour_init_func(void* ecx, void* edx) {
     init_func_ptr(ecx, edx);
+    // When this is true the unrealscript game engine has been created
     bl1_has_initialised.store(true, std::memory_order_relaxed);
 }
 
