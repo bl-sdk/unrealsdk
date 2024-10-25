@@ -267,7 +267,39 @@ void hook_resolve_error(void) {
 
 namespace {
 
-const constinit Pattern<45> INIT_FUNC_SIG{
+// - NOTE -
+// The init function is only used to delay initialisation of the SDK to ensure that we can proceed
+// with injection at the right time. However, the Steams version of this function is different
+// the core functionality though is the same. So we will try the UDK version and then the Steam
+// version. If both fail then we won't crash but it will be a 'Silent' error for most users which
+// is not ideal.
+
+const constinit Pattern<64> INIT_FUNC_STEAM_SIG{
+    "6A FF"          // push FFFFFFFF
+    "68 ????????"    // push borderlands.198D998
+    "64A1 00000000"  // mov eax,dword ptr fs:[0]
+    "50"             // push eax
+    "83EC 3C"        // sub esp,3C
+    "53"             // push ebx
+    "55"             // push ebp
+    "56"             // push esi
+    "57"             // push edi
+    "A1 ????????"    // mov eax,dword ptr ds:[1F131C0]
+    "33C4"           // xor eax,esp
+    "50"             // push eax
+    "8D4424 50"      // lea eax,dword ptr ss:[esp+50]
+    "64A3 00000000"  // mov dword ptr fs:[0],eax
+    "8BD9"           // mov ebx,ecx
+    "68 ????????"    // push borderlands.1CC3E78
+    "E8 ????????"    // call borderlands.5C20F0
+    "50"             // push eax
+    "E8 ????????"    // call borderlands.5C2A80
+    "83C4 08"        // add esp,8
+    "85C0"           // test eax,eax
+    "74 ??"          // je borderlands.138F06A
+};
+
+const constinit Pattern<45> INIT_FUNC_141_UDK_SIG{
     "6A FF"          // push FFFFFFFF
     "68 ????????"    // push <borderlands.sub_1991338>
     "64A1 00000000"  // mov eax,dword ptr fs:[0]
@@ -283,7 +315,7 @@ const constinit Pattern<45> INIT_FUNC_SIG{
     "8D4424 50"      // lea eax,dword ptr ss:[esp+50]
     "64A3 00000000"  // mov dword ptr fs:[0],eax
     "8BD9"           // mov ebx,ecx
-    "EB 0E"          // jmp borderlands.13ADAC9
+    "EB ??"          // jmp borderlands.13ADAC9
     "4D"             // dec ebp
     "61"             // popad
 };
@@ -300,7 +332,14 @@ void __fastcall detour_init_func(void* ecx, void* edx) {
 }
 
 void hook_init_func(void) {
-    detour(INIT_FUNC_SIG, &detour_init_func, &init_func_ptr, "bl1_hook_init_func");
+    uintptr_t udk_addr = INIT_FUNC_141_UDK_SIG.sigscan_nullable();
+    if (udk_addr == uintptr_t{0}) {
+        LOG(INFO, "Attempting to hook Steam init function...");
+        detour(INIT_FUNC_STEAM_SIG, &detour_init_func, &init_func_ptr, "bl1_hook_init_func");
+    } else {
+        LOG(INFO, "Attempting to hook UDK init function...");
+        detour(udk_addr, &detour_init_func, &init_func_ptr, "bl1_hook_init_func");
+    }
 }
 
 }  // namespace
