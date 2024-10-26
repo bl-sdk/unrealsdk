@@ -332,13 +332,47 @@ void __fastcall detour_init_func(void* ecx, void* edx) {
 }
 
 void hook_init_func(void) {
-    uintptr_t udk_addr = INIT_FUNC_141_UDK_SIG.sigscan_nullable();
-    if (udk_addr == uintptr_t{0}) {
-        LOG(INFO, "Attempting to hook Steam init function...");
-        detour(INIT_FUNC_STEAM_SIG, &detour_init_func, &init_func_ptr, "bl1_hook_init_func");
-    } else {
-        LOG(INFO, "Attempting to hook UDK init function...");
-        detour(udk_addr, &detour_init_func, &init_func_ptr, "bl1_hook_init_func");
+    // - NOTE -
+    // This is like this because the Steam version has different loading logic which causes the
+    // offsets to not be found. Now fundementally this is a problem of microseconds, as in, by
+    // compiling in debug mode the hook will work all the time. So, the optimisations provided in
+    // release mode are to cause the hooks to fail. So to stop this we will try to hook more
+    // than once with a small delay between each attempt. We could disable optimisations here but
+    // thats just stupid lol.
+    //
+    // This way also has the added benefit of working even if you launch the game from outside of
+    // Steam however I still wouldn't recommend it.
+    //
+    constexpr size_t MAX_ATTEMPTS = 10;
+    constexpr size_t DEFAULT_DELAY = 100;
+    constexpr uintptr_t INVALID_ADDR{0};
+
+    for (size_t i = 0; i < MAX_ATTEMPTS; ++i) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_DELAY));
+        uintptr_t udk_addr = INIT_FUNC_141_UDK_SIG.sigscan_nullable();
+        uintptr_t steam_addr = INIT_FUNC_STEAM_SIG.sigscan_nullable();
+
+        // This should never happen but if it does we will want to know
+        if (udk_addr != INVALID_ADDR && steam_addr != INVALID_ADDR) {
+            LOG(ERROR,
+                "Found the UDK init function signature and the Steam init function..."
+                " That shouldn't be possible...");
+            continue;
+        }
+
+        // Hook UDK
+        if (udk_addr != INVALID_ADDR) {
+            LOG(INFO, "Found UDK Init function at {:#016x} after {} attempts", udk_addr, i);
+            detour(udk_addr, &detour_init_func, &init_func_ptr, "bl1_hook_init_func");
+            return;
+        }
+
+        // Hook Steam
+        if (steam_addr != INVALID_ADDR) {
+            LOG(INFO, "Found Steam Init function at {:#016x} after {} attempts", steam_addr, i);
+            detour(steam_addr, &detour_init_func, &init_func_ptr, "bl1_hook_init_func");
+            return;
+        }
     }
 }
 
