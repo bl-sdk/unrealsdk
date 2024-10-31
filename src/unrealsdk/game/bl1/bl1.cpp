@@ -12,20 +12,14 @@
 using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;
 
-// - NOTE -
-// The offsets are for the BL1 1.4.1 UDK version of the game. I did a quick scan for the
-// ProccessEvent pattern in the Steam version and it did find the correct function however I
-// didn't check anymore than that; other than to see if FFrame::Step was also inlined, it is.
-//
-// I have done no work and put no effort into seeing if anything here can be used for the Enhanced
-// version of the game.
-//
-
 namespace unrealsdk::game {
 
 // These could be defined in the class but since they are only used here this will do for now.
 namespace {
 static std::atomic_bool bl1_has_initialised{false};
+
+using Clock = std::chrono::steady_clock;
+static Clock::time_point init_start{};
 
 void hook_save_package(void);
 void hook_resolve_error(void);
@@ -33,13 +27,13 @@ void hook_init_func(void);
 }  // namespace
 
 void BL1Hook::hook(void) {
+    init_start = Clock::now();
     hook_antidebug();
 
     if (!env::defined(KEY_DO_NOT_WAIT_FOR_INIT)) {
         hook_init_func();
         // Shouldn't take longer than 60s tbh but just incase someones pc is exceptionally slow.
         const float MAX_WAIT_TIME = env::get_numeric(KEY_MAX_WAIT_TIME, 120.0F);
-        using Clock = std::chrono::steady_clock;
         auto start = Clock::now();
 
         // Wait until the game has initialised or until we timeout
@@ -270,9 +264,7 @@ namespace {
 // - NOTE -
 // The init function is only used to delay initialisation of the SDK to ensure that we can proceed
 // with injection at the right time. However, the Steams version of this function is different
-// the core functionality though is the same. So we will try the UDK version and then the Steam
-// version. If both fail then we won't crash but it will be a 'Silent' error for most users which
-// is not ideal.
+// the core functionality though is the same.
 
 const constinit Pattern<64> INIT_FUNC_STEAM_SIG{
     "6A FF"          // push FFFFFFFF
@@ -326,6 +318,8 @@ typedef void(__fastcall* init_function)(void* ecx, void* edx);
 init_function init_func_ptr = nullptr;
 
 void __fastcall detour_init_func(void* ecx, void* edx) {
+    auto elapsed = std::chrono::duration<float>(Clock::now() - init_start).count();
+    LOG(INFO, "Init function called {:.6f}s after initialisation", elapsed);
     init_func_ptr(ecx, edx);
     // When this is true the unrealscript game engine has been created
     bl1_has_initialised.store(true, std::memory_order_relaxed);
@@ -333,44 +327,37 @@ void __fastcall detour_init_func(void* ecx, void* edx) {
 
 void hook_init_func(void) {
     // - NOTE -
-    // This is like this because the Steam version has different loading logic which causes the
-    // offsets to not be found. Now fundementally this is a problem of microseconds, as in, by
-    // compiling in debug mode the hook will work all the time. So, the optimisations provided in
-    // release mode are to cause the hooks to fail. So to stop this we will try to hook more
-    // than once with a small delay between each attempt. We could disable optimisations here but
-    // thats just stupid lol.
+    // We have around 1 to 2 seconds to hook this function before we miss our chance.
     //
-    // This way also has the added benefit of working even if you launch the game from outside of
-    // Steam however I still wouldn't recommend it.
-    //
-    constexpr size_t MAX_ATTEMPTS = 10;
-    constexpr size_t DEFAULT_DELAY = 100;
-    constexpr uintptr_t INVALID_ADDR{0};
+    constexpr uintptr_t INVALID_ADDRESS{0};
 
-    for (size_t i = 0; i < MAX_ATTEMPTS; ++i) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_DELAY));
-        uintptr_t udk_addr = INIT_FUNC_141_UDK_SIG.sigscan_nullable();
-        uintptr_t steam_addr = INIT_FUNC_STEAM_SIG.sigscan_nullable();
+    // Note: The time requested is still constrained to the OS; i.e., min on windows is 16ms
+    auto delay = std::chrono::milliseconds{
+        std::max(env::get_numeric(BL1Hook::KEY_INIT_FUNC_POLL_RATE, 20), 10)};
+    const auto max_attempts = 5000LL / delay.count();
+    LOG(INFO, "Attempting to hook init function with polling rate: {}ms", delay.count());
 
-        // This should never happen but if it does we will want to know
-        if (udk_addr != INVALID_ADDR && steam_addr != INVALID_ADDR) {
-            LOG(ERROR,
-                "Found the UDK init function signature and the Steam init function..."
-                " That shouldn't be possible...");
-            continue;
-        }
+    // Will try for a bit
+    for (int i = 0; i < max_attempts; ++i) {
+        std::this_thread::sleep_for(delay);
 
-        // Hook UDK
-        if (udk_addr != INVALID_ADDR) {
-            LOG(INFO, "Found UDK Init function at {:#016x} after {} attempts", udk_addr, i);
-            detour(udk_addr, &detour_init_func, &init_func_ptr, "bl1_hook_init_func");
+        // Steam
+        uintptr_t addr = INIT_FUNC_STEAM_SIG.sigscan_nullable();
+        if (addr != INVALID_ADDRESS) {
+            bool ok = detour(addr, &detour_init_func, &init_func_ptr, "bl1_hook_steam_init_func");
+            if (!ok) {
+                continue;
+            }
             return;
         }
 
-        // Hook Steam
-        if (steam_addr != INVALID_ADDR) {
-            LOG(INFO, "Found Steam Init function at {:#016x} after {} attempts", steam_addr, i);
-            detour(steam_addr, &detour_init_func, &init_func_ptr, "bl1_hook_init_func");
+        // UDK 141
+        addr = INIT_FUNC_141_UDK_SIG.sigscan_nullable();
+        if (addr != INVALID_ADDRESS) {
+            bool ok = detour(addr, &detour_init_func, &init_func_ptr, "bl1_hook_udk_init_func");
+            if (!ok) {
+                continue;
+            }
             return;
         }
     }

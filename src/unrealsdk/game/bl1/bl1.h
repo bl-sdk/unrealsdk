@@ -25,6 +25,10 @@ class BL1Hook : public AbstractHook {
     static const constexpr env::env_var_key KEY_LOCKING_CONSOLE_WRITE =
         "UNREALSDK_BL1_LOCKING_CONSOLE_WRITE";
 
+    // Polling rate in milliseconds
+    static const constexpr env::env_var_key KEY_INIT_FUNC_POLL_RATE =
+        "UNREALSDK_BL1_INIT_FUNC_POLL_RATE";
+
    protected:
     /**
      * @brief Hex edits out the `obj dump` array limit message.
