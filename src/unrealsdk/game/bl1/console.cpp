@@ -183,8 +183,8 @@ void BL1Hook::uconsole_output_text(const std::wstring& str) const {
     }
 
     if (env::defined(KEY_LOCKING_CONSOLE_WRITE)) {
-        static std::mutex s_Mutex{};
-        std::unique_lock guard{s_Mutex};
+        static std::recursive_mutex s_Mutex{};
+        std::lock_guard<std::recursive_mutex> guard{s_Mutex};
         console_output_text.call<void, UStrProperty>(str);
 
     } else {
