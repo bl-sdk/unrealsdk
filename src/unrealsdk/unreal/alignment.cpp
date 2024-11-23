@@ -1,6 +1,6 @@
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/env.h"
+#include "unrealsdk/config.h"
 #include "unrealsdk/unreal/alignment.h"
 
 namespace unrealsdk::unreal {
@@ -15,7 +15,7 @@ const constexpr auto SMALL_ALIGNMENT = 8;
 }  // namespace
 
 uint32_t get_malloc_alignment(size_t len) {
-    static auto override = env::get_numeric<uint32_t>(env::ALLOC_ALIGNMENT);
+    static auto override = config::get().alloc_alignment;
     if (override != 0) {
         return override;
     }

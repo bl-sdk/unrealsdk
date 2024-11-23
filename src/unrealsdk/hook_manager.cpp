@@ -1,6 +1,6 @@
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/env.h"
+#include "unrealsdk/config.h"
 #include "unrealsdk/hook_manager.h"
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/classes/uobject.h"
@@ -99,8 +99,7 @@ void log_all_calls(bool should_log) {
     if (should_log) {
         const std::lock_guard<std::mutex> lock(log_all_calls_stream_mutex);
         log_all_calls_stream = std::make_unique<std::wofstream>(
-            utils::get_this_dll().parent_path()
-                / env::get(env::LOG_ALL_CALLS_FILE, env::defaults::LOG_ALL_CALLS_FILE),
+            utils::get_this_dll().parent_path() / config::get().log_all_calls_file,
             std::ofstream::trunc);
     }
 

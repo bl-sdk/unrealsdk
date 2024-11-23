@@ -1,7 +1,7 @@
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/commands.h"
-#include "unrealsdk/env.h"
+#include "unrealsdk/config.h"
 #include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/hook_manager.h"
 #include "unrealsdk/unreal/classes/properties/copyable_property.h"
@@ -229,7 +229,7 @@ bool inject_console_hook(hook_manager::Details& hook) {
     if (existing_console_key != L"None"_fn || existing_console_key == L"Undefine"_fn) {
         LOG(MISC, "Console key is already set to '{}'", existing_console_key);
     } else {
-        auto wanted_console_key = env::get(env::CONSOLE_KEY, env::defaults::CONSOLE_KEY);
+        std::string wanted_console_key{config::get().console_key};
         console->set<UNameProperty>(L"ConsoleKey"_fn, FName{wanted_console_key});
 
         LOG(MISC, "Set console key to '{}'", wanted_console_key);

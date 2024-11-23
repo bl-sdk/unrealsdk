@@ -1,6 +1,6 @@
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/env.h"
+#include "unrealsdk/config.h"
 #include "unrealsdk/unreal/structs/fstring.h"
 #include "unrealsdk/unreal/structs/ftext.h"
 #include "unrealsdk/unrealsdk.h"
@@ -37,8 +37,9 @@ FText::operator std::wstring() const {
     return std::wstring{this->operator std::wstring_view()};
 }
 FText::operator std::wstring_view() const {
-    static auto idx = env::get_numeric<size_t>(env::FTEXT_GET_DISPLAY_STRING_VF_INDEX,
-                                               env::defaults::FTEXT_GET_DISPLAY_STRING_VF_INDEX);
+    static auto idx = config::get().ftext_get_display_string_vf_index >= 0
+                          ? config::get().ftext_get_display_string_vf_index
+                          : 2;
 
     auto text_data = this->data.obj;
     if (text_data == nullptr) {
