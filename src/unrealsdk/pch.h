@@ -32,6 +32,7 @@
 #include <charconv>
 #include <chrono>
 #include <condition_variable>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <cwctype>
