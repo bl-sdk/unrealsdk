@@ -1,0 +1,48 @@
+# This file shows all settings which the sdk uses. All values are set to their defaults
+
+# Note that not all settings are used under all build configurations - for example UE3 doesn't
+# support FText, so `ftext_get_display_string_vf_index` is of course unused.
+
+[unrealsdk]
+# If true, creates an external console window mirroring what is written to the game's console.
+# Always enabled in debug builds.
+external_console = false
+
+# The file to write log messages to, relative to the dll.
+log_file = "unrealsdk.log"
+# The default logging level used in the unreal console.
+console_log_level = "INFO"
+
+# If set, overrides the executable name used for game detection in the shared module.
+exe_override = ""
+
+# If not 0, changes the size the `UProperty` class is assumed to have.
+uproperty_size = 0
+# If not 0, changes the alignment used when calling the unreal memory allocation functions.
+alloc_alignment = 0;
+
+# The default console key set when one is not already bound. If a key is already bound via standard
+# unreal facilities, this is ignored.
+console_key = "Tilde"
+# If positive, overrides the virtual function index used when hooking `UConsole::ConsoleCommand`.
+uconsole_console_command_vf_index = -1
+# If positive, overrides the virtual function index used when calling `UConsole::OutputText`.
+uconsole_output_text_vf_index = -1
+
+# If positive, overrides the virtual function index used when calling `TReferenceController::DestroyObject`.
+treference_controller_destroy_obj_vf_index = -1
+# If positive, overrides the virtual function index used when calling `TReferenceController::~TReferenceController`.
+treference_controller_destructor_vf_index = -1
+
+# If positive, overrides the virtual function index used when calling `FText::GetDisplayString`.
+ftext_get_display_string_vf_index = -1
+
+# If true, locks simultaneous ProcessEvent calls from different threads. This is used both for hooks
+# and for calling unreal functions.
+# When true, if external code must take care with it's own locks. If external code attempts to
+# acquire a lock inside a hook, while at the same time trying to call an unreal function on the
+# thread which holds that lock, the system will deadlock.
+locking_process_event = false
+
+# After enabling `unrealsdk::hook_manager::log_all_calls`, the file to calls are logged to.
+log_all_calls_file = "unrealsdk.calls.tsv"

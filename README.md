@@ -3,22 +3,23 @@
 
 A library to help interact with unreal engine objects from another module in the same address space.
 
+What makes this library different?
+- All property accesses are performed and validated at runtime. There's no need to dump an SDK, and 
+  it's automatically compatible with any game updates adding new fields.
+- No dependencies on Epic, so actually open source, all code independently reverse engineered.
+- Supports multiple different compilers, cross compiling from Linux is a first class target.
+
+Why shouldn't you use this library?
+- Very limited support for different Unreal Engine versions, it's primarily focused on the
+  Borderlands series.
+- Some more complex property types (e.g. maps) are not supported, since they each need to be
+  manually implemented.
+- Only supports Windows executables (though will work under Proton).
+
 # Usage Overview
-To start, you need to initialize the sdk. This is called with a reference to an `AbstractHook` - the
-sdk can work with multiple (somewhat similar) UE versions from a single binary, so you need to tell
-it how exactly to hook everything. The easiest way is to let it autodetect.
-
-```cpp
-unrealsdk::init(unrealsdk::game::select_based_on_executable);
-```
-If this doesn't work correctly, you can always implement your own version (and then merge it back
-into this project).
-
-If you link against the sdk as a shared library, it automatically initializes like this for you.
-
-After initializing, you probably want to setup some hooks. The sdk can run callbacks whenever an
-unreal function is hooked, allowing you to interact with it's args, and mess with it's execution.
-Exact hook semantics are better documented in the `hook_manager.h` header.
+Standard usage involves setting up hooks. The sdk can run callbacks whenever a given unreal function
+is called, allowing you to interact with it's args, and mess with it's execution. Exact hook
+semantics are better documented in the `hook_manager.h` header.
 
 ```cpp
 bool on_main_menu(unrealsdk::hook_manager::Details& hook) {
@@ -31,11 +32,9 @@ unrealsdk::hook_manager::add_hook(L"WillowGame.FrontendGFxMovie:Start",
                                   &on_main_menu);
 ```
 
-Once your hook runs, you start having access to unreal objects. You can generally interact with any
-unreal value (such as the properties on an object) through the templated `get` and `set` functions.
-These functions take the expected property type as a template arg (and will throw exceptions if it
-doesn't appear to line up). All property accesses are evaluated at runtime, meaning you don't need
-to generate an sdk specific to your game.
+Once your hook runs, you start having access to unreal objects. You can interact with unreal values
+through the `get` and `set` functions. These functions take the expected property type as a template
+arg, and will throw exceptions if it doesn't appear to line up.
 
 ```cpp
 auto paused = hook.args->get<UBoolProperty>(L"StartPaused"_fn);
@@ -48,46 +47,15 @@ auto op_string = hook.obj->get<UFunction, BoundFunction>(L"BuildOverpowerPromptS
                     .call<UStrProperty, UIntProperty, UIntProperty>(1, 10);
 ```
 
-# Environment Variables
-A few environment variables adjust the sdk's behaviour. Note that not all variables are used in all
-build configurations.
+# Integrating the SDK into your project
+So there are a few extra steps to integrate the sdk into your project before you can start using
+hooks like above.
 
-| Environment Variable                          | Usage                                                                                                                                                                                 |
-| :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `UNREALSDK_ENV_FILE`                          | A file containing environment variables to load, relative to the dll. Defaults to `unrealsdk.env`. More below.                                                                        |
-| `UNREALSDK_EXTERNAL_CONSOLE`                  | If defined, creates an external console window mirroring what is written to the game's console. Always enabled in debug builds.                                                       |
-| `UNREALSDK_LOG_FILE`                          | The file to write log messages to, relative to the dll. Defaults to `unrealsdk.log`.                                                                                                  |
-| `UNREALSDK_LOG_LEVEL`                         | Changes the default logging level used in the unreal console. May use either the level names or their numerical values.                                                               |
-| `UNREALSDK_GAME_OVERRIDE`                     | Override the executable name used for game detection.                                                                                                                                 |
-| `UNREALSDK_UPROPERTY_SIZE`                    | Changes the size the `UProperty` class is assumed to have.                                                                                                                            |
-| `UNREALSDK_ALLOC_ALIGNMENT`                   | Changes the alignment used when calling the unreal memory allocation functions.                                                                                                       |
-| `UNREALSDK_CONSOLE_KEY`                       | Changes the default console key which is set when one is not already bound.                                                                                                           |
-| `UNREALSDK_UCONSOLE_CONSOLE_COMMAND_VF_INDEX` | Overrides the virtual function index used when hooking `UConsole::ConsoleCommand`.                                                                                                    |
-| `UNREALSDK_UCONSOLE_OUTPUT_TEXT_VF_INDEX`     | Overrides the virtual function index used when calling `UConsole::OutputText`.                                                                                                        |
-| `UNREALSDK_LOCKING_PROCESS_EVENT`             | If defined, locks simultaneous ProcessEvent calls from different threads. This is used both for hooks and for calling unreal functions - external code must take care wrt. deadlocks. |
-| `UNREALSDK_LOG_ALL_CALLS_FILE`                | After enabling `unrealsdk::hook_manager::log_all_calls`, the file to write calls to.                                                                                                  |
+The SDK requires at least C++20. This is primarily for templated lambdas - you may still be able to
+use it if your compiler doesn't yet fully support it (e.g. it falls back to fmtlib if `std::format`
+is not available).
 
-You can also define any of these in an env file, which will automatically be loaded when the sdk
-starts (excluding `UNREALSDK_ENV_FILE` of course). This file should contain lines of equals
-separated key-value pairs, noting that whitespace is *not* stripped (outside of the trailing
-newline). A line is ignored if it does not contain an equals sign, or if it defines a variable which
-already exists.
-
-```ini
-UNREALSDK_LOG_LEVEL=MISC
-UNREALSDK_CONSOLE_KEY=Quote
-```
-
-You can also use this file to load environment variables for other plugins (assuming they don't
-check them too early), it's not limited to just those used by the sdk.
-
-# Linking Against the SDK
-The sdk requires at least C++20, primarily for templated lambdas. It also makes great use of
-`std::format`, though if this is not available it tries to fall back to using fmtlib. Linking
-against the sdk thus requires your own projects to use at least C++20 too.
-
-To link against the sdk, simply clone the repo (including submodules), add it as a subdirectory,
-and link against the `unrealsdk` target.
+The recommended way to link against the sdk is as a submodule.
 
 ```
 git clone --recursive https://github.com/bl-sdk/unrealsdk.git
@@ -98,35 +66,70 @@ target_link_libraries(MyProject PRIVATE unrealsdk)
 ```
 
 You can configure the sdk by setting a few variables before including it:
-- `UNREALSDK_UE_VERSION` - The unreal engine version to build the SDK for. One of `UE3` or `UE4`.
+- `UNREALSDK_UE_VERSION` - The unreal engine version to build the SDK for, one of `UE3` or `UE4`.
   These versions are different enough that supporting them from a single binary is difficult.
 - `UNREALSDK_ARCH` - The architecture to build the sdk for. One of `x86` or `x64`. Will be double
   checked at compile time.
 - `UNREALSDK_SHARED` - If set, compiles as a shared library instead of as an object.
 
-## Shared Library
-The sdk contains a decent amount of internal state, meaning it's not possible to inject twice into
-the same process. At it's simplest, any detours on unreal functions will change their signatures, so
-a second instance won't be able to find them again. If two programs both want to use the sdk in the
-same game process, they will have to link against the shared library.
+If you want to be able to run multiple projects using the sdk in the same game process, you *must*
+compile it as a shared library, there's a decent amount of internal state preventing initializing it
+twice.
 
-The included shared library initializes based on executable. If you need custom initialization, you
-can create your own shared library by linking against the object library and defining the
-`UNREALSDK_SHARED` and `UNREALSDK_EXPORTING` macros.
+If you're linking against a static library, the easiest way to initialize it is:
+```cpp
+unrealsdk::init(unrealsdk::game::select_based_on_executable);
+```
+If you're linking against the shared library, it's automatically initialized in a thread. You'll
+instead need to blocking wait on it finishing before continuing.
+```cpp
+while (!unrealsdk::is_initialized()) {}
+```
+
+At this point the SDK is ready, you can start setting your hooks.
+
+You may want to further wait on the console being hooked, so that your log messages appear in the
+game's console. They will still be written to the log file before this point.
+```cpp
+LOG(INFO, "Some log message");  // Only in the log file
+while (!unrealsdk::is_console_ready()) {}
+LOG(INFO, "Some log message");  // Both in the log file and console
+```
+
+## Configuration
+There are a few pieces of sdk behaviour you can configure, via an `unrealsdk.toml`. By default this
+should be placed next to the dll, though you can also specify a custom location via the
+`UNREALSDK_CONFIG_FILE` environment variable.
+
+Since it's somewhat expected your project may have to ship with some default settings, an
+`unrealsdk.user.toml` can also be used to add some user specific settings. The two files are merged,
+fixing conflicts as follows:
+- If a value is a table in both files, it's recursively merged
+- Otherwise, whatever value is in the user file overwrites the base file.
+
+See [`unrealsdk.toml.example`](unrealsdk.toml.example) for a full description of what settings are
+supported.
+
+<br>
+
+All the sdk's settings are under the top level `unrealsdk` table. In your own projects you may add
+additional settings to the same file, under a different header. The sdk exposes a few functions to
+let you read some basic values without needing to parse the files again.
+```cpp
+auto val = unrealsdk::config::get_str("my_project.my_field");
+if (val.has_value()) {
+    do_something(*val);
+}
+```
 
 ## Cross-Compiler ABI
 One of the goals of the shared library implementation is have a stable cross-compiler ABI - i.e.
 allowing developing one program while also running another which you downloaded a precompiled
 version of.
 
-In order to do this, the exported functions try to use a pure C interface. Since the sdk heavily
-relies on C++ features (e.g. all the templates), it's impractical to export everything this way.
-Instead, it only exports the bare minimum functions which interact with internal state. Some of
-these rely on private wrapper functions, which do things like decompose strings into pointer and
-length, not everything's exposed in the headers.
-
-There is one assumption we rely on for these exported functions to work properly, where we can't
-quite stick with pure C:
+In order to do this, the sdk uses a number of private exported functions (those in the headers are
+automatically converted), which try to keep to a pure C interface. There is one assumption we still
+rely on however, where we can't quite stick with pure C:
 
 - Both dlls share the same exception ABI. While none of the exported functions intentionally throw,
   it's impossible to completely avoid an exception travelling between modules - we can't stop a
@@ -137,10 +140,9 @@ This turns out to be a bit of a problem - MSVC and GNU have different exception 
 both. Practically, this means when cross compiling, you should either compile everything from
 scratch, or setup Clang to build with the MSVC ABI. [See this blog post for more info](https://apple1417.dev/posts/2023-05-18-debugging-proton).
 
-# Running Builds
-As previously mentioned, the sdk can be configured to create a shared library. This is useful when
-developing for the sdk itself, it's the minimal configuration to get it running. The CMake presets
-are set up to build this.
+# Running the SDK by itself
+The shared library is also useful when developing for the sdk itself, since it's the minimal
+configuration to get it running. The CMake presets are set up to build this.
 
 Note that you will need to use some game specific plugin loader to get the dll loaded. It is not set
 up to alias any system dlls (since when actually using it as a library you don't want that), you
