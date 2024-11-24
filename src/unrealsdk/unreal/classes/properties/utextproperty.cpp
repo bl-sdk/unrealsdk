@@ -1,6 +1,5 @@
 #include "unrealsdk/pch.h"
 #include "unrealsdk/unreal/classes/properties/utextproperty.h"
-#include "unrealsdk/env.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/structs/fstring.h"
 #include "unrealsdk/unreal/structs/ftext.h"

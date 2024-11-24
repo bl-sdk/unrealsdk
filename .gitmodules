@@ -4,6 +4,9 @@
 [submodule "libs/fmt"]
 	path = libs/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "libs/tomlplusplus"]
+	path = libs/tomlplusplus
+	url = https://github.com/marzer/tomlplusplus.git
 [submodule "common_cmake"]
 	path = common_cmake
 	url = ../../bl-sdk/common_cmake.git
