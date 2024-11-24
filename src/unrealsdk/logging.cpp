@@ -1,6 +1,6 @@
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/env.h"
+#include "unrealsdk/config.h"
 #include "unrealsdk/logging.h"
 #include "unrealsdk/unrealsdk.h"
 #include "unrealsdk/utils.h"
@@ -145,7 +145,7 @@ Level get_level_from_string(std::string_view str) {
         return Level::INVALID;
     }
 
-    // Start by matching first character
+    // Doing it properly is a bit more complex, just check the first char
     switch (std::toupper(str[0])) {
         case 'E':
             return Level::ERROR;
@@ -158,22 +158,8 @@ Level get_level_from_string(std::string_view str) {
         case 'M':
             return Level::MISC;
         default:
-            break;
+            return Level::INVALID;
     }
-
-    // Otherwise try parse as an int
-    uint32_t int_level = 0;
-    auto res = std::from_chars(str.data(), str.data() + str.size(), int_level);
-    if (res.ec == std::errc()) {
-        return Level::INVALID;
-    }
-    // If within range
-    if (static_cast<decltype(int_level)>(Level::MIN) <= int_level
-        && int_level <= static_cast<decltype(int_level)>(Level::MAX)) {
-        return static_cast<Level>(int_level);
-    }
-
-    return Level::INVALID;
 }
 #endif
 
@@ -345,9 +331,12 @@ void init(const std::filesystem::path& file, bool unreal_console) {
     std::thread(logger_thread).detach();
 
     if (unreal_console) {
-        auto env_level = get_level_from_string(env::get(env::LOG_LEVEL));
-        if (env_level != Level::INVALID) {
-            unreal_console_level = env_level;
+        auto config_level_str = config::get_str("unrealsdk.console_log_level");
+        if (config_level_str.has_value()) {
+            auto config_level = get_level_from_string(*config_level_str);
+            if (config_level != Level::INVALID) {
+                unreal_console_level = config_level;
+            }
         }
     } else {
         unreal_console_level = Level::INVALID;
@@ -363,7 +352,7 @@ void init(const std::filesystem::path& file, bool unreal_console) {
     impl::add_callback(&builtin_logger);
 
 #ifdef NDEBUG
-    if (env::defined(env::EXTERNAL_CONSOLE))
+    if (config::get_bool("unrealsdk.external_console").value_or(false))
 #endif
     {
         if (AllocConsole() != 0) {

@@ -55,6 +55,7 @@ set(GIT_POST_CONFIGURE_FILE "${CONFIGURE_FILES_DIR}/unrealsdk/git.inl")
 include(common_cmake/git_watcher.cmake)
 
 add_subdirectory(libs/minhook)
+add_subdirectory(libs/tomlplusplus)
 if(NOT supports_format)
     add_subdirectory(libs/fmt)
 endif()
@@ -63,13 +64,14 @@ endif()
 if((NOT CMAKE_HOST_WIN32)
     AND (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     AND (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
-    # Disable minhook intrinsics - MSVC implicitly defines intrinsics, but Clang does not, so we get
+    # Disable some intrinsics - MSVC implicitly defines intrinsics, but Clang does not, so we get
     # a linking error otherwise
     target_compile_definitions(minhook PRIVATE MINHOOK_DISABLE_INTRINSICS)
+    target_compile_definitions(_unrealsdk_interface INTERFACE TOML_ENABLE_SIMD=0)
 endif()
 
 target_include_directories(_unrealsdk_interface INTERFACE "src" ${CONFIGURE_FILES_DIR})
-target_link_libraries(_unrealsdk_interface INTERFACE minhook)
+target_link_libraries(_unrealsdk_interface INTERFACE minhook tomlplusplus::tomlplusplus)
 if(NOT ${supports_format})
     target_link_libraries(_unrealsdk_interface INTERFACE fmt)
 endif()
