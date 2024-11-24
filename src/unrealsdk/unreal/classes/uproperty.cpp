@@ -1,6 +1,6 @@
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/env.h"
+#include "unrealsdk/config.h"
 #include "unrealsdk/unreal/classes/uclass.h"
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/structs/fname.h"
@@ -17,8 +17,9 @@ size_t UProperty::class_size(void) {
         return size;
     }
 
-    size = env::get_numeric<size_t>(env::UPROPERTY_SIZE);
-    if (size != 0) {
+    auto config_size = config::get_int("unrealsdk.uproperty_size");
+    if (config_size.has_value()) {
+        size = (size_t)*config_size;
         return size;
     }
 

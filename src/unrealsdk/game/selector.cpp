@@ -1,6 +1,6 @@
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/env.h"
+#include "unrealsdk/config.h"
 #include "unrealsdk/game/abstract_hook.h"
 #include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/game/bl3/bl3.h"
@@ -54,8 +54,8 @@ std::unique_ptr<AbstractHook> find_correct_hook(std::string_view executable) {
 }  // namespace
 
 std::unique_ptr<AbstractHook> select_based_on_executable(void) {
-    auto executable = env::get(env::GAME_OVERRIDE, utils::get_executable().filename().string());
-    return find_correct_hook(executable);
+    auto executable_filename = utils::get_executable().filename().string();
+    return find_correct_hook(config::get_str("exe_override").value_or(executable_filename));
 }
 
 }  // namespace unrealsdk::game

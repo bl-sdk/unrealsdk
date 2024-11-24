@@ -1,6 +1,17 @@
 # Changelog
 
 ## Upcoming
+
+- Completely reworked the configuration system.
+
+  Environment variables and the `unrealsdk.env` are no longer used, due to issues with them not fully
+  propagating within the same process. The new configuration now uses an `unrealsdk.toml` instead.
+  
+  Also added support for a user specific override file - `unrealsdk.user.toml`. This allows projects
+  to ship their own `unrealsdk.toml`, without overwriting user's settings on update.
+
+  [4daecbde](https://github.com/bl-sdk/unrealsdk/commit/4daecbde)
+
 - `unrealsdk::hook_manager::inject_next_call` is now thread local.
 
   [427c8734](https://github.com/bl-sdk/unrealsdk/commit/427c8734)
