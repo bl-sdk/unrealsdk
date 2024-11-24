@@ -37,9 +37,7 @@ FText::operator std::wstring() const {
     return std::wstring{this->operator std::wstring_view()};
 }
 FText::operator std::wstring_view() const {
-    static auto idx = config::get().ftext_get_display_string_vf_index >= 0
-                          ? config::get().ftext_get_display_string_vf_index
-                          : 2;
+    static auto idx = config::get_int("unrealsdk.ftext_get_display_string_vf_index").value_or(2);
 
     auto text_data = this->data.obj;
     if (text_data == nullptr) {

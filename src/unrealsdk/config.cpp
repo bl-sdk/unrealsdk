@@ -20,26 +20,24 @@
 namespace unrealsdk::config {
 
 #pragma region Config file loading
-#ifndef UNREALSDK_IMPORTING
 
 namespace {
 
 const constexpr auto CONFIG_FILE_ENV_VAR = "UNREALSDK_CONFIG_FILE";
 const constexpr auto DEFAULT_CONFIG_FILE_NAME = "unrealsdk.toml";
 
+#ifndef UNREALSDK_IMPORTING
 toml::table merged_raw_config{};
-Config config{};
+#endif
 
 }  // namespace
 
-namespace {
+std::filesystem::path get_base_config_file_path(void) {
+    static std::optional<std::filesystem::path> path = std::nullopt;
+    if (path.has_value()) {
+        return *path;
+    }
 
-/**
- * @brief Get the path of the base config file.
- *
- * @return The config file path.
- */
-std::filesystem::path get_config_file_path(void) {
     std::string filename = DEFAULT_CONFIG_FILE_NAME;
 
     auto num_chars = GetEnvironmentVariableA(CONFIG_FILE_ENV_VAR, nullptr, 0);
@@ -56,8 +54,23 @@ std::filesystem::path get_config_file_path(void) {
         }
     }
 
-    return utils::get_this_dll().parent_path() / filename;
+    path = utils::get_this_dll().parent_path() / filename;
+    return *path;
 }
+
+std::filesystem::path get_user_config_file_path(void) {
+    static std::optional<std::filesystem::path> path = std::nullopt;
+    if (path.has_value()) {
+        return *path;
+    }
+
+    auto base_path = get_base_config_file_path();
+    path = base_path.replace_extension(".user" + base_path.extension().string());
+    return *path;
+}
+
+#ifndef UNREALSDK_IMPORTING
+namespace {
 
 /**
  * @brief Recursively merges two toml tables.
@@ -80,114 +93,63 @@ void recursive_merge_table(toml::table& base, const toml::table& overrides) {
     });
 }
 
-/**
- * @brief Loads and merges the config files into `merged_raw_config`.
- */
-void load_raw_config(void) {
-    auto base_config_path = get_config_file_path();
+}  // namespace
 
-    bool loaded_base_config = false;
-    if (std::filesystem::exists(base_config_path)) {
-        auto base_config = toml::parse_file(base_config_path.string());
-        if (base_config.succeeded()) {
-            merged_raw_config = std::move(base_config.table());
-            loaded_base_config = true;
-        } else {
-            LOG(ERROR, "Failed to load {}", base_config_path.string());
-
-            std::stringstream stream;
-            stream << base_config.error();
-            std::string line;
-            while (std::getline(stream, line)) {
-                LOG(ERROR, "{}", line);
-            }
-
-            // Continue anyway - maybe we can load the user config
+void load(void) {
+    auto load_config_file = [](const std::filesystem::path&& path) -> std::optional<toml::table> {
+        if (!std::filesystem::exists(path)) {
+            return std::nullopt;
         }
-    }
 
-    auto user_config_path =
-        base_config_path.replace_extension(".user" + base_config_path.extension().string());
-    if (!std::filesystem::exists(user_config_path)) {
-        return;
-    }
+        auto config = toml::parse_file(path.string());
+        if (config.succeeded()) {
+            return config.table();
+        }
 
-    auto user_config = toml::parse_file(user_config_path.string());
-    if (user_config.failed()) {
-        LOG(ERROR, "Failed to load {}", user_config_path.string());
+        LOG(ERROR, "Failed to load {}", path.string());
 
         std::stringstream stream;
-        stream << user_config.error();
+        stream << config.error();
         std::string line;
         while (std::getline(stream, line)) {
             LOG(ERROR, "{}", line);
         }
 
-        // Either both failed, in which case we can just keep the default constructed table, or the
-        // base config succeeded, but this one failed, in which case there's nothing to merge
+        return std::nullopt;
+    };
+
+    auto base_config = load_config_file(get_base_config_file_path());
+    auto user_config = load_config_file(get_user_config_file_path());
+
+    if (!base_config.has_value()) {
+        if (user_config.has_value()) {
+            // Only user config got loaded
+            merged_raw_config = std::move(*user_config);
+            return;
+        }
+        // No config files got loaded, use the default constructed empty dict
+        return;
+    }
+    if (!user_config.has_value()) {
+        // Only base config got loaded
+        merged_raw_config = std::move(*base_config);
         return;
     }
 
-    if (!loaded_base_config) {
-        // If only the user config succeeded, there's nothing to merge, just load it directly
-        merged_raw_config = std::move(user_config.table());
-        return;
-    }
-
-    // We managed to parse both config files, merge them
-    recursive_merge_table(merged_raw_config, user_config.table());
+    // Both configs were loaded, we need to merge them
+    merged_raw_config = std::move(*base_config);
+    recursive_merge_table(merged_raw_config, *user_config);
 }
-
-}  // namespace
-
-/**
- * @brief Helper macro to do a basic load into the config struct.
- *
- * @param name The name of the field to load.
- */
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BASIC_LOAD_CONFIG(name)                                     \
-    do {                                                            \
-        auto val = unrealsdk[#name].value<decltype(config.name)>(); \
-        if (val.has_value()) {                                      \
-            config.name = *val;                                     \
-        }                                                           \
-    } while (0)
-
-// NOLINTNEXTLINE(readability-function-cognitive-complexity)
-void load(void) {
-    load_raw_config();
-
-    auto unrealsdk = merged_raw_config["unrealsdk"];
-
-    BASIC_LOAD_CONFIG(external_console);
-    BASIC_LOAD_CONFIG(log_file);
-    BASIC_LOAD_CONFIG(console_log_level);
-    BASIC_LOAD_CONFIG(exe_override);
-    BASIC_LOAD_CONFIG(uproperty_size);
-    BASIC_LOAD_CONFIG(alloc_alignment);
-    BASIC_LOAD_CONFIG(console_key);
-    BASIC_LOAD_CONFIG(uconsole_console_command_vf_index);
-    BASIC_LOAD_CONFIG(uconsole_output_text_vf_index);
-    BASIC_LOAD_CONFIG(treference_controller_destroy_obj_vf_index);
-    BASIC_LOAD_CONFIG(treference_controller_destructor_vf_index);
-    BASIC_LOAD_CONFIG(ftext_get_display_string_vf_index);
-    BASIC_LOAD_CONFIG(locking_process_event);
-    BASIC_LOAD_CONFIG(log_all_calls_file);
-}
-
-#undef BASIC_LOAD_CONFIG
 
 #endif
+
 #pragma endregion
 
 // =================================================================================================
 
 #pragma region C API Wrappers
 
-UNREALSDK_CAPI([[nodiscard]] const Config*, config_get) {
-    return &config;
-}
+#ifdef UNREALSDK_EXPORTING
 
 UNREALSDK_CAPI([[nodiscard]] bool,
                config_get_bool,
@@ -230,9 +192,26 @@ UNREALSDK_CAPI([[nodiscard]] bool,
     return true;
 }
 
-const Config& get(void) {
-    return *UNREALSDK_MANGLE(config_get)();
-}
+#endif  // defined(UNREALSDK_EXPORTING)
+
+#ifdef UNREALSDK_IMPORTING
+
+UNREALSDK_CAPI([[nodiscard]] bool,
+               config_get_bool,
+               const char* path,
+               size_t path_size,
+               bool* value);
+UNREALSDK_CAPI([[nodiscard]] bool,
+               config_get_int,
+               const char* path,
+               size_t path_size,
+               int64_t* value);
+UNREALSDK_CAPI([[nodiscard]] bool,
+               config_get_str,
+               const char* path,
+               size_t path_size,
+               const char** value,
+               size_t* value_size);
 
 std::optional<bool> get_bool(std::string_view path) {
     bool value{};
@@ -256,6 +235,20 @@ std::optional<std::string_view> get_str(std::string_view path) {
     }
     return std::nullopt;
 }
+
+#else  // defined(UNREALSDK_IMPORTING)
+
+std::optional<bool> get_bool(std::string_view path) {
+    return merged_raw_config.at_path(path).value<bool>();
+}
+std::optional<int64_t> get_int(std::string_view path) {
+    return merged_raw_config.at_path(path).value<int64_t>();
+}
+std::optional<std::string_view> get_str(std::string_view path) {
+    return merged_raw_config.at_path(path).value<std::string_view>();
+}
+
+#endif  // defined(UNREALSDK_IMPORTING)
 
 #pragma endregion
 

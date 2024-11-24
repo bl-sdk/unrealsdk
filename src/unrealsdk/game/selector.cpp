@@ -54,10 +54,8 @@ std::unique_ptr<AbstractHook> find_correct_hook(std::string_view executable) {
 }  // namespace
 
 std::unique_ptr<AbstractHook> select_based_on_executable(void) {
-    auto executable = config::get().exe_override.empty()
-                          ? utils::get_executable().filename().string()
-                          : std::string{config::get().exe_override};
-    return find_correct_hook(executable);
+    auto executable_filename = utils::get_executable().filename().string();
+    return find_correct_hook(config::get_str("exe_override").value_or(executable_filename));
 }
 
 }  // namespace unrealsdk::game

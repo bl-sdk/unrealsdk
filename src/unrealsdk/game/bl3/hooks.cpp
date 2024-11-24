@@ -101,7 +101,7 @@ static_assert(std::is_same_v<decltype(process_event_hook), decltype(locking_proc
 bool locking(void) {
     // Basically just a function so we can be sure this static is initialized late - LTO hopefully
     // takes care of it
-    static auto locking = config::get().locking_process_event;
+    static auto locking = config::get_bool("unrealsdk.locking_process_event").value_or(false);
     return locking;
 }
 

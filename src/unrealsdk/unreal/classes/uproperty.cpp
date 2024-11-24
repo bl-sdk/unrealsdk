@@ -17,8 +17,9 @@ size_t UProperty::class_size(void) {
         return size;
     }
 
-    size = config::get().uproperty_size;
-    if (size != 0) {
+    auto config_size = config::get_int("unrealsdk.uproperty_size");
+    if (config_size.has_value()) {
+        size = (size_t)*config_size;
         return size;
     }
 

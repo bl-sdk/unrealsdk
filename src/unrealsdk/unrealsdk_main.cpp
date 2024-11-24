@@ -52,7 +52,8 @@ bool init(const std::function<std::unique_ptr<game::AbstractHook>(void)>& game_g
     }
 
     config::load();
-    logging::init(utils::get_this_dll().parent_path() / config::get().log_file);
+    logging::init(utils::get_this_dll().parent_path()
+                  / config::get_str("unrealsdk.log_file").value_or("unrealsdk.log"));
 
     auto version = unrealsdk::get_version_string();
     LOG(INFO, "{}", version);

@@ -99,7 +99,8 @@ void log_all_calls(bool should_log) {
     if (should_log) {
         const std::lock_guard<std::mutex> lock(log_all_calls_stream_mutex);
         log_all_calls_stream = std::make_unique<std::wofstream>(
-            utils::get_this_dll().parent_path() / config::get().log_all_calls_file,
+            utils::get_this_dll().parent_path()
+                / config::get_str("unrealsdk.log_all_calls_file").value_or("unrealsdk.calls.tsv"),
             std::ofstream::trunc);
     }
 

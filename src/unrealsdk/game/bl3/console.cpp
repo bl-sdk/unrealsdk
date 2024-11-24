@@ -140,9 +140,9 @@ bool inject_console_hook(hook_manager::Details& hook) {
 
     console->set<UObjectProperty>(L"ConsoleTargetPlayer"_fn, local_player);
 
-    static auto console_command_vf_idx = config::get().uconsole_console_command_vf_index >= 0
-                                             ? config::get().uconsole_console_command_vf_index
-                                             : 81;  // NOLINT(readability-magic-numbers)
+    static auto console_command_vf_idx =
+        config::get_int("unrealsdk.uconsole_console_command_vf_index")
+            .value_or(81);  // NOLINT(readability-magic-numbers)
 
     memory::detour(console->vftable[console_command_vf_idx], console_command_hook,
                    &console_command_ptr, "ConsoleCommand");
@@ -166,7 +166,8 @@ bool inject_console_hook(hook_manager::Details& hook) {
 
             console_key = existing_console_key;
         } else {
-            std::string wanted_console_key{config::get().console_key};
+            std::string wanted_console_key{
+                config::get_str("unrealsdk.console_key").value_or("Tilde")};
             console_key = FName{wanted_console_key};
 
             inner_obj->get<UStructProperty>(L"ConsoleKey"_fn)
@@ -192,9 +193,8 @@ void BL3Hook::inject_console(void) {
 }
 
 void BL3Hook::uconsole_output_text(const std::wstring& str) const {
-    static auto idx = config::get().uconsole_output_text_vf_index >= 0
-                          ? config::get().uconsole_output_text_vf_index
-                          : 83;  // NOLINT(readability-magic-numbers)
+    static auto idx = config::get_int("unrealsdk.uconsole_output_text_vf_index")
+                          .value_or(81);  // NOLINT(readability-magic-numbers)
 
     if (console == nullptr) {
         return;

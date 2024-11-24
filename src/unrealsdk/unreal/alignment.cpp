@@ -15,9 +15,9 @@ const constexpr auto SMALL_ALIGNMENT = 8;
 }  // namespace
 
 uint32_t get_malloc_alignment(size_t len) {
-    static auto override = config::get().alloc_alignment;
-    if (override != 0) {
-        return override;
+    static auto override = config::get_int("unrealsdk.alloc_alignment");
+    if (override.has_value()) {
+        return (uint32_t)*override;
     }
 
     return len >= LARGE_ALIGNMENT_THRESHOLD ? LARGE_ALIGNMENT : SMALL_ALIGNMENT;

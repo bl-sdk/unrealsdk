@@ -331,9 +331,12 @@ void init(const std::filesystem::path& file, bool unreal_console) {
     std::thread(logger_thread).detach();
 
     if (unreal_console) {
-        auto env_level = get_level_from_string(config::get().console_log_level);
-        if (env_level != Level::INVALID) {
-            unreal_console_level = env_level;
+        auto config_level_str = config::get_str("unrealsdk.console_log_level");
+        if (config_level_str.has_value()) {
+            auto config_level = get_level_from_string(*config_level_str);
+            if (config_level != Level::INVALID) {
+                unreal_console_level = config_level;
+            }
         }
     } else {
         unreal_console_level = Level::INVALID;
@@ -349,7 +352,7 @@ void init(const std::filesystem::path& file, bool unreal_console) {
     impl::add_callback(&builtin_logger);
 
 #ifdef NDEBUG
-    if (config::get().external_console)
+    if (config::get_bool("unrealsdk.external_console").value_or(false))
 #endif
     {
         if (AllocConsole() != 0) {
