@@ -51,7 +51,7 @@ const constinit Pattern<29> ARRAY_LIMIT_MESSAGE{
 // ############################################################################//
 
 void BL1Hook::hexedit_set_command(void) {
-    uint8_t* set_command_msg = SET_COMMAND_SIG.sigscan_nullable<uint8_t*>();
+    auto* set_command_msg = SET_COMMAND_SIG.sigscan_nullable<uint8_t*>();
 
     if (set_command_msg == nullptr) {
         LOG(ERROR, "Failed to find set command message signature.");
@@ -102,7 +102,7 @@ void BL1Hook::hexedit_array_limit(void) {
 }
 
 void BL1Hook::hexedit_array_limit_message(void) const {
-    uint8_t* array_limit_msg = ARRAY_LIMIT_MESSAGE.sigscan_nullable<uint8_t*>();
+    auto* array_limit_msg = ARRAY_LIMIT_MESSAGE.sigscan_nullable<uint8_t*>();
 
     if (array_limit_msg == nullptr) {
         LOG(ERROR, "Failed to find array limit message signature.");

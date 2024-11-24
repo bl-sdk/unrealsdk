@@ -3,7 +3,6 @@
 #include "unrealsdk/game/bl1/bl1.h"
 
 #include "unrealsdk/commands.h"
-#include "unrealsdk/env.h"
 #include "unrealsdk/hook_manager.h"
 #include "unrealsdk/unreal/classes/properties/copyable_property.h"
 #include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
@@ -136,7 +135,7 @@ bool inject_console_hook(hook_manager::Details& hook) {
     if (existing_console_key != L"None"_fn || existing_console_key == L"Undefine"_fn) {
         LOG(MISC, "Console key is already set to '{}'", existing_console_key);
     } else {
-        auto wanted_console_key = env::get(env::CONSOLE_KEY, env::defaults::CONSOLE_KEY);
+        auto wanted_console_key = bl1_cfg::console_key();
         console->set<UNameProperty>(L"ConsoleKey"_fn, FName{wanted_console_key});
 
         LOG(MISC, "Set console key to '{}'", wanted_console_key);
@@ -182,7 +181,7 @@ void BL1Hook::uconsole_output_text(const std::wstring& str) const {
         return;
     }
 
-    if (env::defined(KEY_LOCKING_CONSOLE_WRITE)) {
+    if (bl1_cfg::is_locking_console_write()) {
         static std::recursive_mutex s_Mutex{};
         std::lock_guard<std::recursive_mutex> guard{s_Mutex};
         console_output_text.call<void, UStrProperty>(str);
@@ -234,7 +233,7 @@ void* uproperty_import_text(UProperty* prop,
     }
 
     // UProperty::ImportText(...)
-    uprop_import_text func = reinterpret_cast<uprop_import_text>(prop->vftable[INDEX_IMPORT_TEXT]);
+    auto func = reinterpret_cast<uprop_import_text>(prop->vftable[INDEX_IMPORT_TEXT]);
     void* result = func(prop, nullptr, value, write_to, flags, src, err);
 
     // - NOTE -

@@ -3,7 +3,7 @@
 
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/env.h"
+#include "unrealsdk/game/bl1/bl1_config.h"
 #include "unrealsdk/game/abstract_hook.h"
 #include "unrealsdk/game/selector.h"
 
@@ -13,21 +13,6 @@
 namespace unrealsdk::game {
 
 class BL1Hook : public AbstractHook {
-   public:
-    static const constexpr env::env_var_key KEY_LOG_LOAD_PKG = "UNREALSDK_BL1_LOG_LOAD_PKG";
-    static const constexpr env::env_var_key KEY_LOG_SAVE_PKG = "UNREALSDK_BL1_LOG_SAVE_PKG";
-    static const constexpr env::env_var_key KEY_LOG_EXTENDED_DBG = "UNREALSDK_BL1_LOG_EXTENDED_DBG";
-
-    // I can't see this one ever being used tbh
-    static const constexpr env::env_var_key KEY_DO_NOT_WAIT_FOR_INIT =
-        "UNREALSDK_BL1_DO_NOT_WAIT_FOR_INIT";
-    static const constexpr env::env_var_key KEY_MAX_WAIT_TIME = "UNREALSDK_BL1_MAX_INIT_WAIT_TIME";
-    static const constexpr env::env_var_key KEY_LOCKING_CONSOLE_WRITE =
-        "UNREALSDK_BL1_LOCKING_CONSOLE_WRITE";
-
-    // Polling rate in milliseconds
-    static const constexpr env::env_var_key KEY_INIT_FUNC_POLL_RATE =
-        "UNREALSDK_BL1_INIT_FUNC_POLL_RATE";
 
    protected:
     /**
@@ -38,7 +23,7 @@ class BL1Hook : public AbstractHook {
     /**
      * @brief Finds `FName::Init`, and sets up such that `fname_init` may be called.
      */
-    void find_fname_init(void);
+    static void find_fname_init(void);
 
     /**
      * @brief Hooks the antidebug functions and disables them.

@@ -16,64 +16,59 @@ namespace unrealsdk::game {
 
 // These could be defined in the class but since they are only used here this will do for now.
 namespace {
-static std::atomic_bool bl1_has_initialised{false};
+
+std::atomic_bool bl1_has_initialised{false};
 
 using Clock = std::chrono::steady_clock;
-static Clock::time_point init_start{};
 
 void hook_save_package(void);
 void hook_resolve_error(void);
-void hook_init_func(void);
+bool hook_init_func(void);
 }  // namespace
 
 void BL1Hook::hook(void) {
-    init_start = Clock::now();
     hook_antidebug();
 
-    if (!env::defined(KEY_DO_NOT_WAIT_FOR_INIT)) {
-        hook_init_func();
-        // Shouldn't take longer than 60s tbh but just incase someones pc is exceptionally slow.
-        const float MAX_WAIT_TIME = env::get_numeric(KEY_MAX_WAIT_TIME, 120.0F);
-        auto start = Clock::now();
-
-        // Wait until the game has initialised or until we timeout
-        while (!bl1_has_initialised.load(std::memory_order_relaxed)) {
-            // yielding is an option but this is probably better
-            std::this_thread::sleep_for(std::chrono::milliseconds{100});
-
-            float elapsed = std::chrono::duration<float>(Clock::now() - start).count();
-            if (elapsed > MAX_WAIT_TIME) {
-                LOG(INFO,
-                    "bl1sdk is aborting initialisation as it has taken too long to initialise.");
-                return;
-            }
-        }
+    if (!hook_init_func()) {
+        return;
     }
 
     hook_process_event();
     hook_call_function();
 
-    if (env::defined(KEY_LOG_SAVE_PKG)) {
+    if (bl1_cfg::is_log_save_package()) {
         hook_save_package();
     }
 
-    if (env::defined(KEY_LOG_EXTENDED_DBG)) {
+    // A lot of these types of functions don't belong here and can be implemented as native python
+    //  modules. That will happen eventually.
+    if (false) {
         hook_resolve_error();
     }
 
-    find_gobjects();
-    find_gnames();
+    // Grabbing these asap seems fine
     find_fname_init();
     find_fframe_step();
-    find_gmalloc();
     find_construct_object();
     find_get_path_name();
     find_static_find_object();
     find_load_package();
 
+    // idk if these are required or if they are correct
     hexedit_set_command();
     hexedit_array_limit();
     hexedit_array_limit_message();
+
+    // This ensures that the unrealscript is initialised when we exit/return
+    while (!bl1_has_initialised.load(std::memory_order_relaxed)) {
+        std::this_thread::sleep_for(std::chrono::milliseconds{50});
+    }
+
+    // Delayed until after initialisation to ensure we grab valid data; Should be able to avoid this
+    // and grab earlier if we grab a pointer to the global not the value held by the global.
+    find_gobjects();
+    find_gnames();
+    find_gmalloc();
 }
 
 void BL1Hook::post_init(void) {
@@ -232,6 +227,7 @@ namespace {
 // I've seen this function get called with static strings quite a fair bit in ghidra could be useful
 // for identifying soft/critical errors.
 //
+// Disabled for now; -Ry
 
 const constinit Pattern<28> EXTENDED_DEBUGGING_SIG{
     "51 8B 44 24 14 8B 4C 24 10 8B 54 24 0C 56 8B 74 24 0C 6A 00 50 51 52 68 ?? ?? ?? ??"};
@@ -318,27 +314,31 @@ typedef void(__fastcall* init_function)(void* ecx, void* edx);
 init_function init_func_ptr = nullptr;
 
 void __fastcall detour_init_func(void* ecx, void* edx) {
-    auto elapsed = std::chrono::duration<float>(Clock::now() - init_start).count();
-    LOG(INFO, "Init function called {:.6f}s after initialisation", elapsed);
+    using std::chrono::duration;
+    auto start = Clock::now();
+    LOG(INFO, "Init function called");
     init_func_ptr(ecx, edx);
+    LOG(INFO, "Init function took {}s to execute", duration<float>(Clock::now() - start).count());
+
     // When this is true the unrealscript game engine has been created
     bl1_has_initialised.store(true, std::memory_order_relaxed);
 }
 
-void hook_init_func(void) {
+bool hook_init_func(void) {
     // - NOTE -
-    // We have around 1 to 2 seconds to hook this function before we miss our chance.
+    // I don't think is actually has to be in a loop.
     //
     constexpr uintptr_t INVALID_ADDRESS{0};
+    constexpr float INIT_FUNC_TIMEOUT_SECONDS{15.0F};
 
     // Note: The time requested is still constrained to the OS; i.e., min on windows is 16ms
-    auto delay = std::chrono::milliseconds{
-        std::max(env::get_numeric(BL1Hook::KEY_INIT_FUNC_POLL_RATE, 20), 10)};
-    const auto max_attempts = 5000LL / delay.count();
+    // this should just be 'as fast as possible' so 20ms for all systems should suffice.
+    auto delay = std::chrono::milliseconds{bl1_cfg::init_func_poll_rate_ms()};
     LOG(INFO, "Attempting to hook init function with polling rate: {}ms", delay.count());
 
-    // Will try for a bit
-    for (int i = 0; i < max_attempts; ++i) {
+    auto start = Clock::now();
+
+    while (true) {
         std::this_thread::sleep_for(delay);
 
         // Steam
@@ -348,7 +348,7 @@ void hook_init_func(void) {
             if (!ok) {
                 continue;
             }
-            return;
+            return true;
         }
 
         // UDK 141
@@ -358,7 +358,14 @@ void hook_init_func(void) {
             if (!ok) {
                 continue;
             }
-            return;
+            return true;
+        }
+
+        // This should never really be hit adding it just incase though
+        using std::chrono::duration;
+        if (duration<float>(Clock::now() - start).count() > INIT_FUNC_TIMEOUT_SECONDS) {
+            LOG(ERROR, "It has taken too long to hook the init function; Aborting...");
+            return false;
         }
     }
 }
