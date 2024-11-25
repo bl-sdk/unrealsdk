@@ -99,16 +99,18 @@ LOG(INFO, "Some log message");  // Both in the log file and console
 ## Configuration
 There are a few pieces of sdk behaviour you can configure, via an `unrealsdk.toml`. By default this
 should be placed next to the dll, though you can also specify a custom location via the
-`UNREALSDK_CONFIG_FILE` environment variable.
+`UNREALSDK_CONFIG_FILE` environment variable. You are not expect to provide a full configuration,
+some settings change behaviour simply by being defined, you should only set the ones you need. If
+the defaults work you may not even need a config file to begin with.
 
 Since it's somewhat expected your project may have to ship with some default settings, an
-`unrealsdk.user.toml` can also be used to add some user specific settings. The two files are merged,
-fixing conflicts as follows:
-- If a value is a table in both files, it's recursively merged
-- Otherwise, whatever value is in the user file overwrites the base file.
+`unrealsdk.user.toml` can also be used to add some user specific settings. The values in the user
+file overwrite those from the base, unless both values are tables, in which case they're merged
+recursively.
 
-See [`unrealsdk.toml.example`](unrealsdk.toml.example) for a full description of what settings are
-supported.
+[`supported_settings.toml`](supported_settings.toml) has full descriptions of all supported
+settings. *Do not* try make a copy of this file as the basis of your config, some of the values
+within it are intentionally bogus, as there's no sane default, and using them will likely crashes.
 
 <br>
 

@@ -1,6 +1,15 @@
 # This file shows all settings which the sdk uses.
-# Note that not all settings are used under all build configurations - for example UE3 doesn't
-# support FText, so `ftext_get_display_string_vf_index` is of course unused.
+
+# DO NOT make a copy of this file as the basis of your config. Some values are intentionally bogus
+# as there's no sane default to set them to (e.g. virtual function indexes), and will likely cause
+# crashes if used.
+
+# You are not expected to provide all settings, you should only set those you need. Some settings
+# will change behaviour simply by being defined. For example, if `uproperty_size` is set, the sdk
+# will not attempt to auto detect it, and will instead assume the provided value is accurate.
+
+# Not all settings are used under all build configurations - for example UE3 doesn't support FText,
+# so `ftext_get_display_string_vf_index` is of course unused.
 
 [unrealsdk]
 # If true, creates an external console window mirroring what is written to the game's console.
