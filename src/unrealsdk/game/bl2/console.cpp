@@ -45,6 +45,11 @@ const std::wstring SAY_CRASH_FIX_ID = L"unrealsdk_bl2_say_crash_fix";
 // We could combine this with the say bypass, but by keeping them separate it'll let users disable
 // one if they really want to
 const std::wstring CONSOLE_COMMAND_FUNC = L"Engine.Console:ConsoleCommand";
+// This is the actual end point of all console commands, the above function normally calls through
+// into this one - but we needed to hook it to be able to manage the console history. If something
+/// directly calls `PC.ConsoleCommand("my_cmd")`, we need this hook to be able to catch it.
+const std::wstring PC_CONSOLE_COMMAND_FUNC = L"Engine.PlayerController:ConsoleCommand";
+
 const constexpr auto CONSOLE_COMMAND_TYPE = hook_manager::Type::PRE;
 const std::wstring CONSOLE_COMMAND_ID = L"unrealsdk_bl2_console_command";
 
@@ -73,6 +78,7 @@ bool say_bypass_hook(hook_manager::Details& hook) {
     static const auto command_property =
         hook.args->type->find_prop_and_validate<UStrProperty>(L"Command"_fn);
 
+    // Since these are different functions, we can't just forward the args struct, have to copy it
     hook.obj->get<UFunction, BoundFunction>(console_command_func)
         .call<void, UStrProperty>(hook.args->get<UStrProperty>(command_property));
     return true;
@@ -234,9 +240,26 @@ bool console_command_hook(hook_manager::Details& hook) {
     return true;
 }
 
-// Would prefer to call a native function where possible, however best I can tell, OutputText is
-// actually implemented directly in unrealscript (along most of the console mechanics).
-BoundFunction console_output_text{};
+bool pc_console_command_hook(hook_manager::Details& hook) {
+    static const auto command_property =
+        hook.args->type->find_prop_and_validate<UStrProperty>(L"Command"_fn);
+
+    auto line = hook.args->get<UStrProperty>(command_property);
+
+    auto [callback, cmd_len] = commands::impl::find_matching_command(line);
+    if (callback == nullptr) {
+        return false;
+    }
+
+    // This hook does not go to console, so there's no extra processing to be done, we can just run
+    // the callback immediately
+    try {
+        callback->operator()(line.c_str(), line.size(), cmd_len);
+    } catch (const std::exception& ex) {
+        LOG(ERROR, "An exception occurred while running a console command: {}", ex.what());
+    }
+    return true;
+}
 
 bool inject_console_hook(hook_manager::Details& hook) {
     hook_manager::remove_hook(INJECT_CONSOLE_FUNC, INJECT_CONSOLE_TYPE, INJECT_CONSOLE_ID);
@@ -269,6 +292,9 @@ void BL2Hook::inject_console(void) {
 
     hook_manager::add_hook(CONSOLE_COMMAND_FUNC, CONSOLE_COMMAND_TYPE, CONSOLE_COMMAND_ID,
                            &console_command_hook);
+    hook_manager::add_hook(PC_CONSOLE_COMMAND_FUNC, CONSOLE_COMMAND_TYPE, CONSOLE_COMMAND_ID,
+                           &pc_console_command_hook);
+
     hook_manager::add_hook(INJECT_CONSOLE_FUNC, INJECT_CONSOLE_TYPE, INJECT_CONSOLE_ID,
                            &inject_console_hook);
 }
