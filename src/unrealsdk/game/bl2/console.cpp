@@ -52,6 +52,10 @@ const std::wstring INJECT_CONSOLE_FUNC = L"WillowGame.WillowGameViewportClient:P
 const constexpr auto INJECT_CONSOLE_TYPE = hook_manager::Type::PRE;
 const std::wstring INJECT_CONSOLE_ID = L"unrealsdk_bl2_inject_console";
 
+// Would prefer to call a native function where possible, however best I can tell, OutputText is
+// actually implemented directly in unrealscript (along most of the console mechanics).
+BoundFunction console_output_text{};
+
 bool say_bypass_hook(hook_manager::Details& hook) {
     /*
     This is a native function so we don't have exact source, but we expect it's essentially:
@@ -201,7 +205,25 @@ bool console_command_hook(hook_manager::Details& hook) {
         hook.obj->get<UFunction, BoundFunction>(save_config_func).call<void>();
     }
 
-    LOG(INFO, L">>> {} <<<", line);
+    /*
+    This is a little awkward.
+    Since we can't let execution though to the unreal function, we're responsible for printing the
+    executed command line.
+
+    We do this via output text directly, rather than the LOG macro, so that it's not affected by the
+    console log level, and so that it happens immediately (the LOG macro is queued, and can get out
+    of order with respect to native engine messages).
+
+    However, for custom console commands it's also nice to see what the command was in the log file,
+    since you'll see all their output too.
+
+    We don't really expose a "write to log file only", since it's not usually something useful, so
+    as a compromise just use the LOG macro on the lowest possible log level, and assume the lowest
+    people practically set their console log level to is dev warning.
+    */
+    auto msg = unrealsdk::fmt::format(L">>> {} <<<", line);
+    console_output_text.call<void, UStrProperty>(msg);
+    LOG(MIN, L"{}", msg);
 
     try {
         callback->operator()(line.c_str(), line.size(), cmd_len);

@@ -38,6 +38,22 @@ const constexpr auto MAX_HISTORY_ENTRIES = 50;
 
 UObject* console = nullptr;
 
+void static_uconsole_output_text(const std::wstring& str) {
+    static auto idx = config::get_int("unrealsdk.uconsole_output_text_vf_index")
+                          .value_or(81);  // NOLINT(readability-magic-numbers)
+
+    if (console == nullptr) {
+        return;
+    }
+
+    // UConsole::OutputText does not print anything on a completely empty line - we would prefer to
+    // call UConsole::OutputTextLine, but that got completely inlined
+    // If we have an empty string, replace with with a single newline.
+    static const std::wstring newline = L"\n";
+    TemporaryFString fstr{str.empty() ? newline : str};
+    console->call_virtual_function<void, TemporaryFString*>(idx, &fstr);
+}
+
 using console_command_func = void(UObject* console_obj, UnmanagedFString* raw_line);
 console_command_func* console_command_ptr;
 
@@ -105,7 +121,25 @@ void console_command_hook(UObject* console_obj, UnmanagedFString* raw_line) {
                 // just this, and we'll see if people actually complain
             }
 
-            LOG(INFO, L">>> {} <<<", line);
+            /*
+            This is a little awkward.
+            Since we can't let execution though to the unreal function, we're responsible for
+            printing the executed command line.
+
+            We do this via output text directly, rather than the LOG macro, so that it's not
+            affected by the console log level, and so that it happens immediately (the LOG macro is
+            queued, and can get out of order with respect to native engine messages).
+
+            However, for custom console commands it's also nice to see what the command was in the
+            log file, since you'll see all their output too.
+
+            We don't really expose a "write to log file only", since it's not usually something
+            useful, so as a compromise just use the LOG macro on the lowest possible log level, and
+            assume the lowest people practically set their console log level to is dev warning.
+            */
+            auto msg = unrealsdk::fmt::format(L">>> {} <<<", line);
+            static_uconsole_output_text(msg);
+            LOG(MIN, L"{}", msg);
 
             try {
                 callback->operator()(line.c_str(), line.size(), cmd_len);
@@ -193,19 +227,7 @@ void BL3Hook::inject_console(void) {
 }
 
 void BL3Hook::uconsole_output_text(const std::wstring& str) const {
-    static auto idx = config::get_int("unrealsdk.uconsole_output_text_vf_index")
-                          .value_or(81);  // NOLINT(readability-magic-numbers)
-
-    if (console == nullptr) {
-        return;
-    }
-
-    // UConsole::OutputText does not print anything on a completely empty line - we would prefer to
-    // call UConsole::OutputTextLine, but that got completely inlined
-    // If we have an empty string, replace with with a single newline.
-    static const std::wstring newline = L"\n";
-    TemporaryFString fstr{str.empty() ? newline : str};
-    console->call_virtual_function<void, TemporaryFString*>(idx, &fstr);
+    static_uconsole_output_text(str);
 }
 
 bool BL3Hook::is_console_ready(void) const {
