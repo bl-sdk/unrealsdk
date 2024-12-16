@@ -3,6 +3,7 @@
 #include "unrealsdk/config.h"
 #include "unrealsdk/game/bl3/bl3.h"
 #include "unrealsdk/hook_manager.h"
+#include "unrealsdk/locks.h"
 #include "unrealsdk/memory.h"
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/classes/uobject.h"
@@ -81,10 +82,8 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
     process_event_ptr(obj, func, params);
 }
 
-std::recursive_mutex process_event_mutex{};
-
 void locking_process_event_hook(UObject* obj, UFunction* func, void* params) {
-    const std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
+    const locks::FunctionCall lock{};
     process_event_hook(obj, func, params);
 }
 
@@ -93,32 +92,20 @@ static_assert(std::is_same_v<decltype(process_event_hook), process_event_func>,
 static_assert(std::is_same_v<decltype(process_event_hook), decltype(locking_process_event_hook)>,
               "process_event signature is incorrect");
 
-/**
- * @brief Checks if we should use a locking process event implementation.
- *
- * @return True if we should use locks.
- */
-bool locking(void) {
-    // Basically just a function so we can be sure this static is initialized late - LTO hopefully
-    // takes care of it
-    static auto locking = config::get_bool("unrealsdk.locking_process_event").value_or(false);
-    return locking;
-}
-
 }  // namespace
 
 void BL3Hook::hook_process_event(void) {
-    detour(PROCESS_EVENT_SIG, locking() ? locking_process_event_hook : process_event_hook,
+    detour(PROCESS_EVENT_SIG,
+           // If we don't need locks, it's slightly more efficient to detour directly to the
+           // non-locking version
+           locks::FunctionCall::enabled() ? locking_process_event_hook : process_event_hook,
            &process_event_ptr, "ProcessEvent");
 }
 
 void BL3Hook::process_event(UObject* object, UFunction* func, void* params) const {
-    if (locking()) {
-        const std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
-        process_event_hook(object, func, params);
-    } else {
-        process_event_hook(object, func, params);
-    }
+    // When we call it manually, always call the locking version, it will pass right through if
+    // locks are disabled
+    locking_process_event_hook(object, func, params);
 }
 
 namespace {
@@ -213,13 +200,23 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
 
     call_function_ptr(obj, stack, result, func);
 }
+
+void locking_call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* func) {
+    const locks::FunctionCall lock{};
+    call_function_hook(obj, stack, result, func);
+}
+
 static_assert(std::is_same_v<decltype(call_function_hook), call_function_func>,
+              "call_function signature is incorrect");
+static_assert(std::is_same_v<decltype(locking_call_function_hook), call_function_func>,
               "call_function signature is incorrect");
 
 }  // namespace
 
 void BL3Hook::hook_call_function(void) {
-    detour(CALL_FUNCTION_SIG, call_function_hook, &call_function_ptr, "CallFunction");
+    detour(CALL_FUNCTION_SIG,
+           locks::FunctionCall::enabled() ? locking_call_function_hook : call_function_hook,
+           &call_function_ptr, "CallFunction");
 }
 
 }  // namespace unrealsdk::game
