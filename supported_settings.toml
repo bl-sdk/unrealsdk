@@ -45,11 +45,12 @@ treference_controller_destructor_vf_index = -1
 # Overrides the virtual function index used when calling `FText::GetDisplayString`.
 ftext_get_display_string_vf_index = -1
 
-# If true, locks simultaneous ProcessEvent calls from different threads. This is used both for hooks
-# and for calling unreal functions.
+# If true, locks simultaneous unreal function calls from different threads. This lock is held both
+# during hooks and when you manually call unreal functions.
 # When true, if external code must take care with it's own locks. If external code attempts to
 # acquire a lock inside a hook, while at the same time trying to call an unreal function on the
 # thread which holds that lock, the system will deadlock.
+locking_function_calls = false
 locking_process_event = false
 
 # After enabling `unrealsdk::hook_manager::log_all_calls`, the file to calls are logged to.
