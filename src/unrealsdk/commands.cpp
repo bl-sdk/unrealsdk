@@ -29,7 +29,7 @@ UNREALSDK_CAPI(bool, add_command, const wchar_t* cmd, size_t size, DLLSafeCallba
         return false;
     }
 
-    commands.emplace(lower_cmd, callback);
+    commands.emplace(std::move(lower_cmd), callback);
     return true;
 }
 #endif
@@ -44,8 +44,9 @@ UNREALSDK_CAPI(bool, has_command, const wchar_t* cmd, size_t size);
 #endif
 #ifndef UNREALSDK_IMPORTING
 UNREALSDK_CAPI(bool, has_command, const wchar_t* cmd, size_t size) {
-    const std::wstring_view view{cmd, size};
-    return commands.contains(view);
+    std::wstring lower_cmd(size, '\0');
+    std::transform(cmd, cmd + size, lower_cmd.begin(), &std::towlower);
+    return commands.contains(lower_cmd);
 }
 #endif
 
@@ -58,8 +59,9 @@ UNREALSDK_CAPI(bool, remove_command, const wchar_t* cmd, size_t size);
 #endif
 #ifndef UNREALSDK_IMPORTING
 UNREALSDK_CAPI(bool, remove_command, const wchar_t* cmd, size_t size) {
-    const std::wstring_view view{cmd, size};
-    auto iter = commands.find(view);
+    std::wstring lower_cmd(size, '\0');
+    std::transform(cmd, cmd + size, lower_cmd.begin(), &std::towlower);
+    auto iter = commands.find(lower_cmd);
 
     if (iter == commands.end()) {
         return false;

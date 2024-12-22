@@ -16,6 +16,29 @@
 
   [427c8734](https://github.com/bl-sdk/unrealsdk/commit/427c8734)
 
+- Fixed that `unrealsdk::commands::has_command` and `unrealsdk::commands::remove_command` were case
+  sensitive, while `unrealsdk::commands::add_command` and the callbacks were not. Commands should be
+  now be case insensitive everywhere.
+
+  [b641706d](https://github.com/bl-sdk/unrealsdk/commit/b641706d)
+
+- Fixed that the executed command message of custom sdk commands would not appear in console if you
+  increased the minimum log level, and that they may have appeared out of order with respects to
+  native engine messages.
+
+  [b652da13](https://github.com/bl-sdk/unrealsdk/commit/b652da13)
+
+- Added an additional console command hook in BL2, to cover commands not run directly via console.
+
+  [1200fca4](https://github.com/bl-sdk/unrealsdk/commit/1200fca4)
+
+- Renamed the `unrealsdk.locking_process_event` (previously `UNREALSDK_LOCKING_PROCESS_EVENT`)
+  setting to `unrealsdk.locking_function_calls`, and expanded it's scope to cover all function
+  calls. This fixes a few more possibilities for lockups.
+
+  [bebaeab4](https://github.com/bl-sdk/unrealsdk/commit/bebaeab4)
+
+
 ## v1.4.0
 - Fixed that UE3 `WeakPointer`s would always return null, due to an incorrect offset in the
   `UObject` header layout.
