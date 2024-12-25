@@ -51,7 +51,6 @@ ftext_get_display_string_vf_index = -1
 # acquire a lock inside a hook, while at the same time trying to call an unreal function on the
 # thread which holds that lock, the system will deadlock.
 locking_function_calls = false
-locking_process_event = false
 
 # After enabling `unrealsdk::hook_manager::log_all_calls`, the file to calls are logged to.
 log_all_calls_file = "unrealsdk.calls.tsv"
