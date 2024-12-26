@@ -1,6 +1,6 @@
 # Changelog
 
-## Upcoming
+## v1.5.0
 
 - Completely reworked the configuration system.
 
