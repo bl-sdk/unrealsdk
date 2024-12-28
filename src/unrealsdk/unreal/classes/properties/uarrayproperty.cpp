@@ -41,9 +41,14 @@ void PropTraits<UArrayProperty>::set(const UArrayProperty* prop,
                                  + (std::string)inner->Name);
     }
 
-    cast(inner, [prop, addr, &value]<typename T>(const T* inner) {
-        auto arr = reinterpret_cast<TArray<void>*>(addr);
+    auto arr = reinterpret_cast<TArray<void>*>(addr);
+    if (arr->data != nullptr && arr->data == value.base.get()->data) {
+        LOG(DEV_WARNING, L"Refusing to set array property {} to itself, at address {:p}",
+            prop->get_path_name(), reinterpret_cast<void*>(addr));
+        return;
+    }
 
+    cast(inner, [prop, &arr, &value]<typename T>(const T* inner) {
         auto new_size = value.size();
         arr->resize(new_size, prop->ElementSize);
 
