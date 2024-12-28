@@ -271,7 +271,7 @@ bool inject_console_hook(hook_manager::Details& hook) {
     console_output_text = console->get<UFunction, BoundFunction>(L"OutputTextLine"_fn);
 
     auto existing_console_key = console->get<UNameProperty>(L"ConsoleKey"_fn);
-    if (existing_console_key != L"None"_fn || existing_console_key == L"Undefine"_fn) {
+    if (existing_console_key != L"None"_fn && existing_console_key != L"Undefine"_fn) {
         LOG(MISC, "Console key is already set to '{}'", existing_console_key);
     } else {
         std::string wanted_console_key{config::get_str("unrealsdk.console_key").value_or("Tilde")};

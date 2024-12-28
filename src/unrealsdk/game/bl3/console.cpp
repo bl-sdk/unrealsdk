@@ -195,7 +195,7 @@ bool inject_console_hook(hook_manager::Details& hook) {
             inner_obj->get<UStructProperty>(L"ConsoleKey"_fn).get<UNameProperty>(L"KeyName"_fn);
         FName console_key{0, 0};
 
-        if (existing_console_key != L"None"_fn || existing_console_key == L"Undefine"_fn) {
+        if (existing_console_key != L"None"_fn && existing_console_key != L"Undefine"_fn) {
             LOG(MISC, "Console key is already set to {}", existing_console_key);
 
             console_key = existing_console_key;
