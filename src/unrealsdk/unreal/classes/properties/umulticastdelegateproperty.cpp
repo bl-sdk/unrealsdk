@@ -28,10 +28,17 @@ void PropTraits<UMulticastDelegateProperty>::set(const UMulticastDelegatePropert
                                  + (std::string)prop->get_signature()->Name);
     }
 
+    auto arr = reinterpret_cast<TArray<FScriptDelegate>*>(addr);
+    if (arr->data != nullptr && arr->data == value.base.get()->data) {
+        LOG(DEV_WARNING,
+            L"Refusing to set multicast delegate property {} to itself, at address {:p}",
+            prop->get_path_name(), reinterpret_cast<void*>(addr));
+        return;
+    }
+
     // Can just memcpy the array contents
     static_assert(std::is_trivially_copyable_v<FScriptDelegate>);
 
-    auto arr = reinterpret_cast<TArray<FScriptDelegate>*>(addr);
     arr->resize(value.base->size());
     memcpy(arr->data, value.base->data, value.base->size() * sizeof(*arr->data));
 }
