@@ -1,6 +1,15 @@
 # Changelog
 
-## v1.5.1
+## v1.6.0
+
+- Handled `UStruct` differing in size between BL2 and TPS.
+
+  This affects all members on it's subclasses - `UClass::ClassDefaultObject`, `UClass::Interfaces`,
+  `UFunction::FunctionFlags`, `UFunction::NumParams`, `UFunction::ParamsSize`,
+  `UFunction::ReturnValueOffset`, and `UScriptStruct::StructFlags` have all now changed to methods
+  which return a reference.
+
+  [70854d65](https://github.com/bl-sdk/unrealsdk/commit/70854d65)
 
 - Fixed all BL3 console output being treated as console commands instead.
 
