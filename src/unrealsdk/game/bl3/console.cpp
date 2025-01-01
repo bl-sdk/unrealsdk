@@ -167,7 +167,7 @@ bool inject_console_hook(hook_manager::Details& hook) {
     console = viewport->get(console_property);
 
     if (console == nullptr) {
-        auto default_console = console_property->get_property_class()->ClassDefaultObject;
+        auto default_console = console_property->get_property_class()->ClassDefaultObject();
         console = unrealsdk::construct_object(default_console->Class, default_console->Outer);
         viewport->set<UObjectProperty>(L"ViewportConsole"_fn, console);
     }
