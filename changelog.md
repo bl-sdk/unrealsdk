@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.5.1
+
+- Fixed all BL3 console output being treated as console commands instead.
+
+  [1432408f](https://github.com/bl-sdk/unrealsdk/commit/1432408f)
+
 ## v1.5.0
 
 - Completely reworked the configuration system.
