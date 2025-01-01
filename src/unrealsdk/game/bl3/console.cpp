@@ -40,7 +40,7 @@ UObject* console = nullptr;
 
 void static_uconsole_output_text(const std::wstring& str) {
     static auto idx = config::get_int("unrealsdk.uconsole_output_text_vf_index")
-                          .value_or(81);  // NOLINT(readability-magic-numbers)
+                          .value_or(83);  // NOLINT(readability-magic-numbers)
 
     if (console == nullptr) {
         return;
