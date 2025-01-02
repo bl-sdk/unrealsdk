@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.6.1
+
+- Handled `UClass::Interfaces` also having a different offset between BL2 and TPS.
+
+  [287c5802](https://github.com/bl-sdk/unrealsdk/commit/287c5802)
+
 ## v1.6.0
 
 - Handled `UStruct` differing in size between BL2 and TPS.
