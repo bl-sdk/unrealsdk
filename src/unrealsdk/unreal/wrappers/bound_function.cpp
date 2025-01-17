@@ -47,14 +47,14 @@ UNREALSDK_CAPI(void, bound_function_call_with_params, const BoundFunction* self,
 UNREALSDK_CAPI(void, bound_function_call_with_params, const BoundFunction* self, void* params) {
     const locks::FunctionCall lock{};
 
-    auto original_flags = self->func->FunctionFlags;
-    self->func->FunctionFlags |= UFunction::FUNC_NATIVE;
+    auto original_flags = self->func->FunctionFlags();
+    self->func->FunctionFlags() |= UFunction::FUNC_NATIVE;
 
     // Calling process event itself does hold the lock, but we also need to guard messing with the
     // function flags
     unrealsdk::internal::process_event(self->object, self->func, params);
 
-    self->func->FunctionFlags = original_flags;
+    self->func->FunctionFlags() = original_flags;
 }
 
 #endif

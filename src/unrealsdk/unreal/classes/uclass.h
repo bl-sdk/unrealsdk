@@ -30,20 +30,13 @@ class UClass : public UStruct {
 
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
+   private:
 #ifdef UE4
-   private:
     uint8_t UnknownData00[0x70];
-
-   public:
-    UObject* ClassDefaultObject;
-
-   private:
+    UObject* ClassDefaultObject_internal;
     uint8_t UnknownData01[0xA0];
-
-   public:
-    TArray<FImplementedInterface> Interfaces;
+    TArray<FImplementedInterface> Interfaces_internal;
 #else
-   private:
     // Misc Fields I found within this block in BL2, but which we don't care about enough for me to
     //  find in UE4, or to want to increase the compile times by including
 
@@ -53,16 +46,16 @@ class UClass : public UStruct {
     // 0x10C: TArray<FName> AutoExpandCategories;
 
     uint8_t UnknownData00[0xCC];
-
-   public:
-    UObject* ClassDefaultObject;
-
-   private:
+    UObject* ClassDefaultObject_internal;
     uint8_t UnknownData01[0x48];
+    TArray<FImplementedInterface> Interfaces_internal;
+#endif
 
    public:
-    TArray<FImplementedInterface> Interfaces;
-#endif
+    decltype(ClassDefaultObject_internal)& ClassDefaultObject(void);
+    [[nodiscard]] const decltype(ClassDefaultObject_internal)& ClassDefaultObject(void) const;
+    decltype(Interfaces_internal)& Interfaces(void);
+    [[nodiscard]] const decltype(Interfaces_internal)& Interfaces(void) const;
 
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 

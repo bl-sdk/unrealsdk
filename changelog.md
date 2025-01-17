@@ -1,6 +1,27 @@
 # Changelog
 
-## Upcoming
+## v1.6.1
+
+- Handled `UClass::Interfaces` also having a different offset between BL2 and TPS.
+
+  [287c5802](https://github.com/bl-sdk/unrealsdk/commit/287c5802)
+
+## v1.6.0
+
+- Handled `UStruct` differing in size between BL2 and TPS.
+
+  This affects all members on it's subclasses - `UClass::ClassDefaultObject`, `UClass::Interfaces`,
+  `UFunction::FunctionFlags`, `UFunction::NumParams`, `UFunction::ParamsSize`,
+  `UFunction::ReturnValueOffset`, and `UScriptStruct::StructFlags` have all now changed to methods
+  which return a reference.
+
+  [70854d65](https://github.com/bl-sdk/unrealsdk/commit/70854d65)
+
+- Fixed all BL3 console output being treated as console commands instead.
+
+  [1432408f](https://github.com/bl-sdk/unrealsdk/commit/1432408f)
+
+## v1.5.0
 
 - Completely reworked the configuration system.
 
@@ -38,6 +59,15 @@
 
   [bebaeab4](https://github.com/bl-sdk/unrealsdk/commit/bebaeab4)
 
+
+- Trying to set a struct, array, or multicast delegate to itself is now a no-op, and prints a
+  warning.
+
+  [8a98db1f](https://github.com/bl-sdk/unrealsdk/commit/8a98db1f)
+
+- The console key will now also be overwritten if it was previously set to `Undefine`.
+
+  [631fa41e](https://github.com/bl-sdk/unrealsdk/commit/631fa41e)
 
 ## v1.4.0
 - Fixed that UE3 `WeakPointer`s would always return null, due to an incorrect offset in the

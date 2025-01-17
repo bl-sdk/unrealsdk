@@ -29,13 +29,12 @@ class UFunction : public UStruct {
 
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
-#ifdef UE4
-    uint32_t FunctionFlags;
-    uint8_t NumParams;
-    uint16_t ParamsSize;
-    uint16_t ReturnValueOffset;
-
    private:
+#ifdef UE4
+    uint32_t FunctionFlags_internal;
+    uint8_t NumParams_internal;
+    uint16_t ParamsSize_internal;
+    uint16_t ReturnValueOffset_internal;
     uint16_t RPCId;
     uint16_t RPCResponseId;
     UProperty* FirstPropertyToInit;
@@ -43,25 +42,27 @@ class UFunction : public UStruct {
     int32_t EventGraphCallOffset;
     void* Func;
 #else
-    uint32_t FunctionFlags;
-
-   private:
+    uint32_t FunctionFlags_internal;
     uint16_t iNative;
     uint16_t RepOffset;
     FName FriendlyName;
     uint8_t OperPrecedence;
-
-   public:
-    uint8_t NumParams;
-    uint16_t ParamsSize;
-    uint16_t ReturnValueOffset;
-
-   private:
+    uint8_t NumParams_internal;
+    uint16_t ParamsSize_internal;
+    uint16_t ReturnValueOffset_internal;
     uint8_t UnknownData00[0x6];
     void* Func;
 #endif
-
    public:
+    decltype(FunctionFlags_internal)& FunctionFlags(void);
+    [[nodiscard]] const decltype(FunctionFlags_internal)& FunctionFlags(void) const;
+    decltype(NumParams_internal)& NumParams(void);
+    [[nodiscard]] const decltype(NumParams_internal)& NumParams(void) const;
+    decltype(ParamsSize_internal)& ParamsSize(void);
+    [[nodiscard]] const decltype(ParamsSize_internal)& ParamsSize(void) const;
+    decltype(ReturnValueOffset_internal)& ReturnValueOffset(void);
+    [[nodiscard]] const decltype(ReturnValueOffset_internal)& ReturnValueOffset(void) const;
+
     /**
      * @brief Finds the return param for this function (if it exists).
      *

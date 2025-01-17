@@ -125,7 +125,7 @@ bool say_crash_fix_hook(hook_manager::Details& hook) {
     static const auto get_timestamp_string_func =
         hook.obj->Class->find_func_and_validate(L"GetTimestampString"_fn);
     static const auto default_save_game_manager =
-        find_class(L"WillowSaveGameManager"_fn)->ClassDefaultObject;
+        find_class(L"WillowSaveGameManager"_fn)->ClassDefaultObject();
     static const auto time_format_prop =
         default_save_game_manager->Class->find_prop_and_validate<UStrProperty>(L"TimeFormat"_fn);
 
@@ -271,7 +271,7 @@ bool inject_console_hook(hook_manager::Details& hook) {
     console_output_text = console->get<UFunction, BoundFunction>(L"OutputTextLine"_fn);
 
     auto existing_console_key = console->get<UNameProperty>(L"ConsoleKey"_fn);
-    if (existing_console_key != L"None"_fn || existing_console_key == L"Undefine"_fn) {
+    if (existing_console_key != L"None"_fn && existing_console_key != L"Undefine"_fn) {
         LOG(MISC, "Console key is already set to '{}'", existing_console_key);
     } else {
         std::string wanted_console_key{config::get_str("unrealsdk.console_key").value_or("Tilde")};

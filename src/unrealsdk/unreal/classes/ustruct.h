@@ -80,11 +80,50 @@ class UStruct : public UField {
     uint8_t UnknownData02[0x10];
 
     TArray<UObject*> ScriptObjectReferences;
-#endif
 
-    // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
+    // See the description in 'uproperty.h', we have the same issue here. `UnknownData02` is 0x10 in
+    // BL2, but 0x4 in TPS. Since we need it this time, we also make provisions for setters.
+
+    /**
+     * @brief Gets the size of this class.
+     *
+     * @return The size of this class.
+     */
+    [[nodiscard]] static size_t class_size(void);
+
+#endif
+   protected:
+    /**
+     * @brief Reads a field on a UStruct subclass, taking into account it's variable length.
+     *
+     * @tparam SubType The subclass of UStruct to read the field off of (should be picked up
+     *                 automatically).
+     * @tparam FieldType The type of the field being read (should be picked up automatically).
+     * @param field Pointer to member of the field to read.
+     * @return A reference to the field.
+     */
+    template <typename SubType,
+              typename FieldType,
+              typename = std::enable_if_t<std::is_base_of_v<UStruct, SubType>>>
+    [[nodiscard]] const FieldType& get_field(FieldType SubType::*field) const {
+#ifdef UE4
+        return reinterpret_cast<const SubType*>(this)->*field;
+#else
+        return *reinterpret_cast<FieldType*>(
+            reinterpret_cast<uintptr_t>(&(reinterpret_cast<const SubType*>(this)->*field))
+            - sizeof(UStruct) + UStruct::class_size());
+#endif
+    }
+    template <typename SubType,
+              typename FieldType,
+              typename = std::enable_if_t<std::is_base_of_v<UStruct, SubType>>>
+    FieldType& get_field(FieldType SubType::*field) {
+        return const_cast<FieldType&>(const_cast<const UStruct*>(this)->get_field(field));
+    }
 
    public:
+    // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
+
 #pragma region Iterators
     struct FieldIterator {
         using iterator_category = std::forward_iterator_tag;

@@ -19,8 +19,16 @@ class UScriptStruct : public UStruct {
     UScriptStruct& operator=(UScriptStruct&&) = delete;
     ~UScriptStruct() = delete;
 
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    uint32_t StructFlags;
+    // NOLINTBEGIN(readability-identifier-naming)
+
+   private:
+    uint32_t StructFlags_internal;
+
+   public:
+    decltype(StructFlags_internal)& StructFlags(void);
+    [[nodiscard]] const decltype(StructFlags_internal)& StructFlags(void) const;
+
+    // NOLINTEND(readability-identifier-naming)
 };
 
 template <>
