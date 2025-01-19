@@ -6,6 +6,7 @@
 namespace unrealsdk::unreal {
 
 class UStruct;
+class UProperty;
 
 namespace impl {
 
@@ -29,19 +30,28 @@ class UnrealPointerControl {
                       && alignof(std::atomic<size_t>) == alignof(size_t),
                   "atomic size_t may not be safe to cross dll boundaries");
 
-   public:
-    // The only way get a pointer owned by the sdk (excluding calling u_malloc) is by making a new
-    // struct - we have a specific constructor on the just for it.
-    // Structs need to run custom deleter. Because all sdk-owned pointers are structs, the only
-    // deleter metadata we need is the struct type, we can get away with just storing that.
-    // If we add we add more ways to allocate new memory, this will have to turn into a more
-    // comprehensive custom deleter.
-    const UStruct* deleter_struct;
+    // We need a bit of metadata for UnrealPointer::release to know how to safely delete us.
+    enum class PointerType : uint8_t {
+        STRUCT,
+        PROPERTY,
+    } pointer_type;
 
+    // Deliberately putting pointer type first so the padding's here, in the middle, meaning this
+    // type ends up naturally aligned. Yes this is probably a bit fragile.
+
+    union {
+        const UStruct* struct_type;
+        const UProperty* prop;
+    } metadata;
+
+   public:
     /**
-     * @brief Construct a new control block.
+     * @brief Constructs a new control block.
      */
-    UnrealPointerControl(const UStruct* deleter_struct) : refs(0), deleter_struct(deleter_struct) {}
+    UnrealPointerControl(const UStruct* struct_type)
+        : refs(0), pointer_type(PointerType::STRUCT), metadata{.struct_type = struct_type} {}
+    UnrealPointerControl(const UProperty* prop)
+        : refs(0), pointer_type(PointerType::PROPERTY), metadata{.prop = prop} {}
 
     /**
      * @brief Destroys the control block.
@@ -62,6 +72,11 @@ class UnrealPointerControl {
      * @return The new reference count.
      */
     virtual size_t dec_ref(void);
+
+    /**
+     * @brief Destroys the object this control block is for.
+     */
+    void destroy_object(void);
 
     UnrealPointerControl(const UnrealPointerControl& other) = delete;
     UnrealPointerControl(UnrealPointerControl&& other) noexcept = delete;
@@ -119,11 +134,22 @@ class UnrealPointer {
     UnrealPointer(std::nullptr_t) : control(nullptr), ptr(nullptr) {}
 
     /**
-     * @brief Constructs a pointer to a new block of memory holding a specific struct.
+     * @brief Constructs a pointer to a new, owned, block of memory holding a specific struct.
      *
-     * @param struct_type The type of struct to construct.
+     * @param struct_type The struct to hold.
      */
-    explicit UnrealPointer(const UStruct* struct_type);
+    explicit UnrealPointer(const UStruct* struct_type)
+        requires std::is_void_v<T>;
+
+    /**
+     * @brief Constructs a pointer to a new, owned, block of memory holding a single property.
+     * @note The pointer is offset by -prop->Offset_Internal, which allows passing it directly to
+     *       get_property/set_property.
+     *
+     * @param prop The property to hold.
+     */
+    explicit UnrealPointer(const UProperty* prop)
+        requires std::is_void_v<T>;
 
     /**
      * @brief Construct a new pointer pointing at memory owned by another pointer.
@@ -189,9 +215,10 @@ class UnrealPointer {
      *
      * @return The value the pointer points to
      */
-    template <typename U = T,
-              typename = std::enable_if_t<std::is_same_v<U, T> && std::negation_v<std::is_void<U>>>>
-    U& operator*() const noexcept {
+    template <typename U = T>
+    U& operator*() const noexcept
+        requires std::is_same_v<U, T> && std::negation_v<std::is_void<U>>
+    {
         return *this->ptr;
     }
     T* operator->() const noexcept { return this->ptr; }
