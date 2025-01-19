@@ -32,6 +32,12 @@ class UStruct : public UField {
 
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
+    // - NOTE: Merge Conflicts (ustruct.h and uclass.h)
+    // Commit: 7803d86de171a5e19e66688074d8809329e42bb8
+    // Manually resolved; only tested compilation for BL1, UE3, and UE4 but no more than that.
+    // ; 2025/01/19 (YYYY/MM/DD)
+    // - - -
+
 #ifdef UE4
     /* Struct this inherits from, may be null */
     UStruct* SuperField;
