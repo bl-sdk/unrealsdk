@@ -5,28 +5,19 @@
 
 #include "unrealsdk/unreal/class_name.h"
 #include "unrealsdk/unreal/prop_traits.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer.h"
+#include "unrealsdk/unreal/wrappers/unreal_pointer_funcs.h"
 #include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
 
 class UProperty;
 
-class PropertyProxy {
+struct PropertyProxy {
    public:
     UProperty* prop;
+    UnrealPointer<void> ptr;
 
-   private:
-    void* value;
-    bool been_set;
-
-    /**
-     * @brief Get the address access to the value should use.
-     *
-     * @return The address access to the value should use.
-     */
-    [[nodiscard]] uintptr_t get_value_addr(void) const;
-
-   public:
     /**
      * @brief Constructs a new property proxy.
      *
@@ -35,7 +26,7 @@ class PropertyProxy {
      */
     PropertyProxy(UProperty* prop);
     PropertyProxy(const PropertyProxy& other);
-    PropertyProxy(PropertyProxy&& other) noexcept;
+    PropertyProxy(PropertyProxy&& other) noexcept = default;
 
     /**
      * @brief Assigns to the property proxy.
@@ -45,12 +36,12 @@ class PropertyProxy {
      * @return A reference to this property proxy.
      */
     PropertyProxy& operator=(const PropertyProxy& other);
-    PropertyProxy& operator=(PropertyProxy&& other) noexcept;
+    PropertyProxy& operator=(PropertyProxy&& other) noexcept = default;
 
     /**
      * @brief Destroy the property proxy.
      */
-    ~PropertyProxy();
+    ~PropertyProxy() = default;
 
     /**
      * @brief Checks if we have a value stored.
@@ -68,12 +59,13 @@ class PropertyProxy {
      */
     template <typename T>
     [[nodiscard]] typename PropTraits<T>::Value get(size_t idx = 0) const {
-        if (!this->been_set) {
+        if (!this->has_value()) {
             throw std::runtime_error(
                 "Tried to get value of a property proxy which is yet to be set!");
         }
 
-        return get_property<T>(validate_type<T>(this->prop), idx, this->get_value_addr());
+        return get_property<T>(validate_type<T>(this->prop), idx,
+                               reinterpret_cast<uintptr_t>(this->ptr.get()), this->ptr);
     }
 
     /**
@@ -81,20 +73,23 @@ class PropertyProxy {
      *
      * @tparam T The property type.
      * @param idx The fixed array index to get the value at. Defaults to 0.
-     * @param value The new stored value.
+     * @param new_value The new stored value.
      */
     template <typename T>
-    void set(const typename PropTraits<T>::Value& value) {
-        this->set<T>(0, value);
+    void set(const typename PropTraits<T>::Value& new_value) {
+        this->set<T>(0, new_value);
     }
     template <typename T>
-    void set(size_t idx, const typename PropTraits<T>::Value& value) {
+    void set(size_t idx, const typename PropTraits<T>::Value& new_value) {
         if (this->prop == nullptr) {
-            throw std::runtime_error("Property does not exist!");
+            throw std::runtime_error("Cannot set null property!");
         }
 
-        set_property<T>(validate_type<T>(this->prop), idx, this->get_value_addr(), value);
-        this->been_set = true;
+        if (!this->has_value()) {
+            this->ptr = UnrealPointer<void>{this->prop};
+        }
+        set_property<T>(validate_type<T>(this->prop), idx,
+                        reinterpret_cast<uintptr_t>(this->ptr.get()), new_value);
     }
 
     /**
@@ -102,12 +97,15 @@ class PropertyProxy {
      */
     void destroy(void);
 
+    // The following functions aren't too useful for user code, but sdk internals still find them
+    // handy to have available.
+
     /**
      * @brief Copies the stored property to another address.
      *
      * @param addr The address to copy to.
      */
-    void copy_to(uintptr_t addr);
+    void copy_to(uintptr_t addr) const;
 
     /**
      * @brief Copies the value of another address to the stored property.
