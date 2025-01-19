@@ -125,7 +125,7 @@ template <typename InputType,
           bool check_inherited_types,
           typename ClassTuple,
           size_t i>
-void cast_impl(const InputType* obj,
+void cast_impl(InputType* obj,
                const UStruct* working_class,
                const Function& func,
                const Fallback& fallback) {
@@ -149,12 +149,17 @@ void cast_impl(const InputType* obj,
         using cls = std::tuple_element_t<i, ClassTuple>;
 
         // If this class inherits from the input type
-        if constexpr (std::is_base_of_v<InputType, cls>
-                      && (include_input_type || !std::is_same_v<InputType, cls>)) {
+        if constexpr (std::is_base_of_v<std::remove_const_t<InputType>, cls>
+                      && (include_input_type
+                          || !std::is_same_v<std::remove_const_t<InputType>, cls>)) {
             // If the class name matches
             if (working_class->Name == cls_fname<cls>()) {
                 // Run the callback
-                return func.template operator()<cls>(reinterpret_cast<const cls*>(obj));
+                if constexpr (std::is_const_v<InputType>) {
+                    return func.template operator()<cls>(reinterpret_cast<const cls*>(obj));
+                } else {
+                    return func.template operator()<cls>(reinterpret_cast<cls*>(obj));
+                }
             }
         }
 
@@ -222,10 +227,11 @@ struct cast_options {
  *
  * @tparam Options The options to use for this cast.
  * @tparam InputType The type of the input object, the least derived type which may be cast to.
- * @tparam Function The type of the callback function. The signature should be `void(const T* obj)`,
- *                  where `T` is a template arg which will derive from (or be equal to) `InputType`.
+ * @tparam Function The type of the callback function. The signature should be `void(T* obj)` (or
+ *                  `void(const T* obj)` if `InputType` is const), where `T` is a template arg which
+ *                  will derive from (or be equal to) `std::remove_const_t<InputType>`.
  * @tparam Fallback The fallback function's type, only templated for auto deduction. The signature
-                    should be `void(const InputType* obj)`.
+                    should be `void(InputType* obj)` or `void(const InputType* obj)`.
  * @param obj The object to cast.
  * @param func The templated callback function to call.
  * @param fallback A function to call when casting fails. Defaults to throwing a runtime error.
@@ -233,11 +239,10 @@ struct cast_options {
 template <typename Options = cast_options<>,
           typename InputType,
           typename Function,
-          typename Fallback = std::function<void(const InputType*)>,
-          typename = std::enable_if_t<std::is_base_of_v<UObject, InputType>>>
-void cast(const InputType* obj,
-          const Function& func,
-          const Fallback& fallback = default_cast_fallback) {
+          typename Fallback = std::function<void(InputType*)>>
+void cast(InputType* obj, const Function& func, const Fallback& fallback = default_cast_fallback)
+    requires(std::is_base_of_v<UObject, InputType>)
+{
     if (obj == nullptr) {
         throw std::invalid_argument("Tried to cast null object!");
     }
