@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.7.0
+
+- `unrealsdk::unreal::cast` now copies the const-ness of its input object to its callbacks.
+
+  [779d75ea](https://github.com/bl-sdk/unrealsdk/commit/779d75ea)
+
+- Reworked `PropertyProxy` to be based on `UnrealPointer` (and reworked it too). This fixes some
+  issues with ownership and possible use after frees.
+  
+  *This breaks binary compatibility*, though existing code should work pretty much as is after a
+  recompile.
+  
+  [49bff4a4](https://github.com/bl-sdk/unrealsdk/commit/49bff4a4)
+
 ## v1.6.1
 
 - Handled `UClass::Interfaces` also having a different offset between BL2 and TPS.
