@@ -11,6 +11,12 @@
 namespace unrealsdk::unreal {
 
 void copy_struct(uintptr_t dest, const WrappedStruct& src) {
+    if (dest == reinterpret_cast<uintptr_t>(src.base.get())) {
+        LOG(DEV_WARNING, "Refusing to copy struct of type {} to itself, at address {:p}",
+            src.type->Name, src.base.get());
+        return;
+    }
+
     for (const auto& prop : src.type->properties()) {
         cast(prop, [dest, &src]<typename T>(const T* prop) {
             for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {

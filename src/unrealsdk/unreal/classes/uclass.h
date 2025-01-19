@@ -30,18 +30,12 @@ class UClass : public UStruct {
 
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
+    private:
 #ifdef UE4
-   private:
     uint8_t UnknownData00[0x70];
-
-   public:
-    UObject* ClassDefaultObject;
-
-   private:
+    UObject* ClassDefaultObject_internal;
     uint8_t UnknownData01[0xA0];
-
-   public:
-    TArray<FImplementedInterface> Interfaces;
+    TArray<FImplementedInterface> Interfaces_internal;
 #else
 
 #if !defined(UNREALSDK_GAME_BL1)
@@ -58,13 +52,13 @@ class UClass : public UStruct {
     uint8_t UnknownData00[0xCC];
 
    public:
-    UObject* ClassDefaultObject;
+    UObject* ClassDefaultObject_internal;
 
    private:
     uint8_t UnknownData01[0x48];
 
    public:
-    TArray<FImplementedInterface> Interfaces;
+    TArray<FImplementedInterface> Interfaces_internal;
 
 #else // defined(UNREALSDK_GAME_BL1)
 
@@ -72,13 +66,19 @@ class UClass : public UStruct {
 
    public:
     uint8_t UnknownData00[0xC0];
-    UObject* ClassDefaultObject; // 340b
+    UObject* ClassDefaultObject_internal; // 340b
     uint8_t UnknownData01[0x48];
-    TArray<FImplementedInterface> Interfaces; //  416b
+    TArray<FImplementedInterface> Interfaces_internal; //  416b
 
 #endif
 
 #endif
+
+   public:
+    decltype(ClassDefaultObject_internal)& ClassDefaultObject(void);
+    [[nodiscard]] const decltype(ClassDefaultObject_internal)& ClassDefaultObject(void) const;
+    decltype(Interfaces_internal)& Interfaces(void);
+    [[nodiscard]] const decltype(Interfaces_internal)& Interfaces(void) const;
 
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 

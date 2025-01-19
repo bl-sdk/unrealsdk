@@ -40,7 +40,7 @@ UObject* console = nullptr;
 
 void static_uconsole_output_text(const std::wstring& str) {
     static auto idx = config::get_int("unrealsdk.uconsole_output_text_vf_index")
-                          .value_or(81);  // NOLINT(readability-magic-numbers)
+                          .value_or(83);  // NOLINT(readability-magic-numbers)
 
     if (console == nullptr) {
         return;
@@ -167,7 +167,7 @@ bool inject_console_hook(hook_manager::Details& hook) {
     console = viewport->get(console_property);
 
     if (console == nullptr) {
-        auto default_console = console_property->get_property_class()->ClassDefaultObject;
+        auto default_console = console_property->get_property_class()->ClassDefaultObject();
         console = unrealsdk::construct_object(default_console->Class, default_console->Outer);
         viewport->set<UObjectProperty>(L"ViewportConsole"_fn, console);
     }
@@ -195,7 +195,7 @@ bool inject_console_hook(hook_manager::Details& hook) {
             inner_obj->get<UStructProperty>(L"ConsoleKey"_fn).get<UNameProperty>(L"KeyName"_fn);
         FName console_key{0, 0};
 
-        if (existing_console_key != L"None"_fn || existing_console_key == L"Undefine"_fn) {
+        if (existing_console_key != L"None"_fn && existing_console_key != L"Undefine"_fn) {
             LOG(MISC, "Console key is already set to {}", existing_console_key);
 
             console_key = existing_console_key;
