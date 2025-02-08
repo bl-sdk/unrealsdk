@@ -8,6 +8,12 @@
 
 using namespace unrealsdk::memory;
 
+// - NOTE -
+// I genuinely have no idea what these do and if they were required or not lol. They don't seem to
+// have any negative impact at runtime so fundamentally they should/might be correct. I was just
+// using the BL2 implementation as a checklist and these were trivial to find & patch.
+//
+
 namespace unrealsdk::game {
 
 // ############################################################################//
@@ -85,8 +91,8 @@ void BL1Hook::hexedit_array_limit(void) {
 
         // Should *never* be true
         if (call_instruction[0] != 0xE8) {
-            LOG(ERROR, "[ARRAY_LIMIT] ~ Instruction at {:p} + 0x04 is {:02X}", (void*)array_limit,
-                *call_instruction);
+            LOG(ERROR, "[ARRAY_LIMIT] ~ Instruction at {:p} + 0x04 is {:02X}",
+                static_cast<void*>(array_limit), *call_instruction);
             return;
         }
 
