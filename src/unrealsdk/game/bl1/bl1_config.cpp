@@ -20,11 +20,9 @@ using TomlKeyType = std::string_view;
 
 // USDK
 constexpr TomlKeyType CONSOLE_KEY            = "unrealsdk.console_key";
-constexpr TomlKeyType LOCKING_PROCESS_EVENT  = "unrealsdk.locking_process_event";
 
 // BL1SDK
 constexpr TomlKeyType LOG_LOAD_PACKAGE       = "unrealsdk.bl1.log_load_package";
-constexpr TomlKeyType LOG_SAVE_PACKAGE       = "unrealsdk.bl1.log_save_package";
 constexpr TomlKeyType LOCKING_CONSOLE_WRITE  = "unrealsdk.bl1.locking_console_write";
 
 constexpr TomlKeyType INIT_FUNC_POLL_RATE_MS = "unrealsdk.bl1.init_func_poll_rate_ms";
@@ -39,15 +37,11 @@ constexpr int64_t     DEFAULT_POLL_RATE_MS   = 20;
 // ############################################################################//
 
 std::string console_key(void) {
-    return std::string{config::get_str("unrealsdk.console_key").value_or("Tilde")};
+    return std::string{config::get_str(CONSOLE_KEY).value_or("Tilde")};
 }
 
 bool is_locking_console_write(void) {
     return config::get_bool(LOCKING_CONSOLE_WRITE).value_or(false);
-}
-
-bool is_locking_process_event(void) {
-    return config::get_bool(LOCKING_PROCESS_EVENT).value_or(false);
 }
 
 bool is_log_load_package(void) {

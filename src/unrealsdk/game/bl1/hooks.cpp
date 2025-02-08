@@ -2,7 +2,9 @@
 
 #include "unrealsdk/game/bl1/bl1.h"
 
+#include <corecrt_io.h>
 #include "unrealsdk/hook_manager.h"
+#include "unrealsdk/locks.h"
 #include "unrealsdk/memory.h"
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/structs/fframe.h"
@@ -16,10 +18,12 @@ using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
+////////////////////////////////////////////////////////////////////////////////
+// | PROCESS EVENT HOOK |
+////////////////////////////////////////////////////////////////////////////////
+
 namespace {
 
-// This function is actually thiscall, but MSVC won't let us declare static thiscall functions
-// As a workaround, declare it fastcall, and add a dummy edx arg.
 // NOLINTNEXTLINE(modernize-use-using)
 typedef void(__fastcall* process_event_func)(UObject* obj,
                                              void* /*edx*/,
@@ -70,8 +74,7 @@ void __fastcall process_event_hook(UObject* obj,
                                        .ret = {func->find_return_param()},
                                        .func = {.func = func, .object = obj}};
 
-            const bool block_execution =
-                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
+            const bool block_execution = run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
 
             if (!block_execution) {
                 process_event_ptr(obj, edx, func, params, null);
@@ -81,7 +84,7 @@ void __fastcall process_event_hook(UObject* obj,
                 hook.ret.copy_to(reinterpret_cast<uintptr_t>(params));
             }
 
-            if (!hook_manager::impl::has_post_hooks(*data)) {
+            if (!has_post_hooks(*data)) {
                 return;
             }
 
@@ -90,11 +93,10 @@ void __fastcall process_event_hook(UObject* obj,
             }
 
             if (!block_execution) {
-                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST, hook);
+                run_hooks_of_type(*data, hook_manager::Type::POST, hook);
             }
 
-            hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST_UNCONDITIONAL,
-                                                  hook);
+            run_hooks_of_type(*data, hook_manager::Type::POST_UNCONDITIONAL, hook);
 
             return;
         }
@@ -105,14 +107,12 @@ void __fastcall process_event_hook(UObject* obj,
     process_event_ptr(obj, edx, func, params, null);
 }
 
-std::recursive_mutex process_event_mutex{};
-
 void __fastcall locking_process_event_hook(UObject* obj,
                                            void* edx,
                                            UFunction* func,
                                            void* params,
                                            void* null) {
-    const std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
+    const locks::FunctionCall lock{};
     process_event_hook(obj, edx, func, params, null);
 }
 
@@ -121,33 +121,21 @@ static_assert(std::is_same_v<decltype(&process_event_hook), process_event_func>,
 static_assert(std::is_same_v<decltype(&process_event_hook), decltype(&locking_process_event_hook)>,
               "process_event signature is incorrect");
 
-/**
- * @brief Checks if we should use a locking process event implementation.
- *
- * @return True if we should use locks.
- */
-bool locking(void) {
-    // Basically just a function so we can be sure this static is initialized late - LTO hopefully
-    // takes care of it
-    static auto locking = bl1_cfg::is_locking_process_event();
-    return locking;
-}
-
 }  // namespace
 
 void BL1Hook::hook_process_event(void) {
-    detour(PROCESS_EVENT_SIG, locking() ? locking_process_event_hook : process_event_hook,
+    bool locking = locks::FunctionCall::enabled();
+    detour(PROCESS_EVENT_SIG, locking ? locking_process_event_hook : process_event_hook,
            &process_event_ptr, "ProcessEvent");
 }
 
 void BL1Hook::process_event(UObject* object, UFunction* func, void* params) const {
-    if (locking()) {
-        const std::lock_guard<std::recursive_mutex> lock{process_event_mutex};
-        process_event_hook(object, nullptr, func, params, nullptr);
-    } else {
-        process_event_hook(object, nullptr, func, params, nullptr);
-    }
+    locking_process_event_hook(object, nullptr, func, params, nullptr);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// | CALL FUNCTION HOOK |
+////////////////////////////////////////////////////////////////////////////////
 
 namespace {
 
@@ -186,8 +174,7 @@ void __fastcall call_function_hook(UObject* obj,
                                        .ret = {func->find_return_param()},
                                        .func = {.func = func, .object = obj}};
 
-            const bool block_execution =
-                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
+            const bool block_execution = run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
 
             if (block_execution) {
                 stack->Code++;
@@ -202,7 +189,7 @@ void __fastcall call_function_hook(UObject* obj,
                                  - hook.ret.prop->Offset_Internal);
             }
 
-            if (!hook_manager::impl::has_post_hooks(*data)) {
+            if (!has_post_hooks(*data)) {
                 return;
             }
 
@@ -212,11 +199,10 @@ void __fastcall call_function_hook(UObject* obj,
             }
 
             if (!block_execution) {
-                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST, hook);
+                run_hooks_of_type(*data, hook_manager::Type::POST, hook);
             }
 
-            hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST_UNCONDITIONAL,
-                                                  hook);
+            run_hooks_of_type(*data, hook_manager::Type::POST_UNCONDITIONAL, hook);
 
             return;
         }
@@ -227,13 +213,24 @@ void __fastcall call_function_hook(UObject* obj,
     call_function_ptr(obj, edx, stack, result, func);
 }
 
+void __fastcall locking_call_function_hook(UObject* obj,
+                                           void* edx,
+                                           FFrame* stack,
+                                           void* result,
+                                           UFunction* func) {
+    const locks::FunctionCall lock{};
+    call_function_hook(obj, edx, stack, result, func);
+}
+
 static_assert(std::is_same_v<decltype(&call_function_hook), call_function_func>,
               "call_function signature is incorrect");
 
 }  // namespace
 
 void BL1Hook::hook_call_function(void) {
-    detour(CALL_FUNCTION_SIG, call_function_hook, &call_function_ptr, "CallFunction");
+    bool locking = locks::FunctionCall::enabled();
+    detour(CALL_FUNCTION_SIG, locking ? locking_call_function_hook : call_function_hook,
+           &call_function_ptr, "CallFunction");
 }
 
 }  // namespace unrealsdk::game
