@@ -58,9 +58,15 @@ const constinit Pattern<20> GMALLOC_PATTERN{
 // ############################################################################//
 
 void BL1Hook::find_gmalloc(void) {
-    // Using plain `sigscan` since there's an extra level of indirection here, want to make sure to
-    // print an error before we potentially dereference it
+    // TODO: I would prefer to create FMalloc if it is null since all usages are wrapped in an
+    // if null then create block. However, with the delayed hooking via the init function this will
+    // always be non-null.
+
     gmalloc = *read_offset<FMalloc**>(GMALLOC_PATTERN.sigscan("GMalloc"));
+    if (!gmalloc) {
+        // This happens if we try to hook it too early.
+        throw std::runtime_error("GMalloc is null");
+    }
     LOG(MISC, "GMalloc: {:p}", reinterpret_cast<void*>(gmalloc));
 }
 
