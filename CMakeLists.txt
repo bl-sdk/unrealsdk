@@ -32,17 +32,6 @@ if(MINGW)
     target_compile_options(_unrealsdk_interface INTERFACE -Werror)
 endif()
 
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-try_compile(supports_format
-    SOURCE_FROM_CONTENT test.cpp "  \
-    #include <version>\n            \
-    #ifndef __cpp_lib_format\n      \
-        #error\n                    \
-    #endif                          \
-    "
-    CXX_STANDARD 20
-)
-
 set(CONFIGURE_FILES_DIR "${CMAKE_CURRENT_BINARY_DIR}/configure")
 
 configure_file(
@@ -56,9 +45,6 @@ include(common_cmake/git_watcher.cmake)
 
 add_subdirectory(libs/minhook)
 add_subdirectory(libs/tomlplusplus)
-if(NOT supports_format)
-    add_subdirectory(libs/fmt)
-endif()
 
 # If using the clang windows cross compilation toolchain
 if((NOT CMAKE_HOST_WIN32)
@@ -72,9 +58,6 @@ endif()
 
 target_include_directories(_unrealsdk_interface INTERFACE "src" ${CONFIGURE_FILES_DIR})
 target_link_libraries(_unrealsdk_interface INTERFACE minhook tomlplusplus::tomlplusplus)
-if(NOT ${supports_format})
-    target_link_libraries(_unrealsdk_interface INTERFACE fmt)
-endif()
 
 target_compile_definitions(_unrealsdk_interface INTERFACE
     "${UNREALSDK_UE_VERSION}"

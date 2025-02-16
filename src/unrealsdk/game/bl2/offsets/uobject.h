@@ -24,40 +24,26 @@ namespace unrealsdk::game::bl2 {
 #endif
 // NOLINTBEGIN(readability-identifier-naming)
 
-class UObject {
-   public:
-    UObject() = delete;
-    UObject(const UObject&) = delete;
-    UObject(UObject&&) = delete;
-    UObject& operator=(const UObject&) = delete;
-    UObject& operator=(UObject&&) = delete;
-    ~UObject() = delete;
-
-   private:
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+struct UObject {
     uintptr_t* vftable;
     void* HashNext;
 
-   public:
     uint64_t ObjectFlags;
 
-   private:
     void* HashOuterNext;
     void* StateFrame;
     unreal::UObject* _Linker;
     void* _LinkerIndex;
 
-   public:
     int32_t InternalIndex;
 
-   private:
     int32_t NetIndex;
 
-   public:
     UObject* Outer;
     unreal::FName Name;
     unreal::UClass* Class;
 
-   private:
     unreal::UObject* ObjectArchetype;
 };
 

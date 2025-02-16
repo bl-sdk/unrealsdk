@@ -48,7 +48,6 @@
 #include <ranges>
 #include <sstream>
 #include <stdexcept>
-#include <stdfloat>
 #include <string>
 #include <string_view>
 #include <thread>

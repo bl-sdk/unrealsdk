@@ -81,7 +81,7 @@ using copy_cv = std::conditional_t<
 // Calling the macro
 UNREALSDK_DEFINE_FIELDS_HEADER(UObject, UOBJECT_FIELDS);
 
-// Creates a class aproximately like the following:
+// Creates a class approximately like the following:
 struct Offsets {
     offset_type Class;
     offset_type Outer;
@@ -109,7 +109,7 @@ template <typename T>
 auto cls = obj->Class()->find(L"MyField"_fn);
 obj->Class() = some_other_class;
 
-// Storing the reference returned from these functions has the exact same sematics as taking a
+// Storing the reference returned from these functions has the exact same semantics as taking a
 // member reference - i.e. don't do it, it's only valid for the parent object's lifetime.
 
 #endif

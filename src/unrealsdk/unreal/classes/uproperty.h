@@ -119,7 +119,7 @@ class UProperty : public UField {
     template <typename PropertyType,
               typename FieldType,
               typename = std::enable_if_t<std::is_base_of_v<UProperty, PropertyType>>>
-    FieldType read_field(FieldType PropertyType::*field) const {
+    FieldType read_field(FieldType PropertyType::* field) const {
 #ifdef UE4
         return reinterpret_cast<const PropertyType*>(this)->*field;
 #else

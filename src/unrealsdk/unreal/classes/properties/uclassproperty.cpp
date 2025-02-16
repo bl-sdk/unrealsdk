@@ -28,7 +28,8 @@ void PropTraits<UClassProperty>::set(const UClassProperty* prop,
         }
         auto meta_cls = prop->get_meta_class();
         if (!value->inherits(meta_cls)) {
-            throw std::runtime_error("Class does not inherit from " + (std::string)meta_cls->Name());
+            throw std::runtime_error("Class does not inherit from "
+                                     + (std::string)meta_cls->Name());
         }
     }
 

@@ -220,7 +220,7 @@ void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr, const unreal::UObject* o
 
 /**
  * @brief Get the offsets list for the currently hooked game.
- * @note This is valid to call during initalization.
+ * @note This is valid to call during initialization.
  *
  * @return A reference to the offsets list.
  */

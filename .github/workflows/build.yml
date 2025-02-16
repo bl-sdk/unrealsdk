@@ -7,8 +7,8 @@ on: [
 ]
 
 env:
-  LLVM_MINGW_VERSION: llvm-mingw-20240619-msvcrt-ubuntu-20.04-x86_64
-  LLVM_MINGW_DOWNLOAD: https://github.com/mstorsjo/llvm-mingw/releases/download/20240619/llvm-mingw-20240619-msvcrt-ubuntu-20.04-x86_64.tar.xz
+  LLVM_MINGW_VERSION: llvm-mingw-20250114-msvcrt-ubuntu-20.04-x86_64
+  LLVM_MINGW_DOWNLOAD: https://github.com/mstorsjo/llvm-mingw/releases/download/20250114/llvm-mingw-20250114-msvcrt-ubuntu-20.04-x86_64.tar.xz
 
 jobs:
   build-windows:
@@ -52,8 +52,7 @@ jobs:
       run: cmake --build out/build/${{ matrix.preset }}
 
   build-ubuntu:
-    # Require at least 24 for the mingw build
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
@@ -144,7 +143,6 @@ jobs:
 
     steps:
     - name: Setup Clang
-      if: startswith(matrix.preset, 'clang')
       uses: egor-tensin/setup-clang@v1
 
     - name: Setup CMake and Ninja
@@ -188,7 +186,6 @@ jobs:
 
     steps:
     - name: Setup Clang
-      if: startswith(matrix.preset, 'clang')
       uses: egor-tensin/setup-clang@v1
 
     - name: Checkout repository
