@@ -25,7 +25,7 @@ void PropTraits<UMulticastDelegateProperty>::set(const UMulticastDelegatePropert
                                                  const Value& value) {
     if (value.signature != prop->get_signature()) {
         throw std::runtime_error("Multicast delegate signature doesn't match existing signature of "
-                                 + (std::string)prop->get_signature()->Name);
+                                 + (std::string)prop->get_signature()->Name());
     }
 
     auto arr = reinterpret_cast<TArray<FScriptDelegate>*>(addr);

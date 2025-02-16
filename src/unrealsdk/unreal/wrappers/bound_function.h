@@ -162,7 +162,7 @@ class BoundFunction {
         if (params.type != this->func) {
             throw std::runtime_error(
                 "Tried to call function with pre-filled parameters of incorrect type: "
-                + (std::string)params.type->Name);
+                + (std::string)params.type->Name());
         }
 
         this->call_with_params(params.base.get());

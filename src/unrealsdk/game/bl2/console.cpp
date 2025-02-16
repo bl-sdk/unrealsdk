@@ -74,7 +74,7 @@ bool say_bypass_hook(hook_manager::Details& hook) {
     */
 
     static const auto console_command_func =
-        hook.obj->Class->find_func_and_validate(L"ConsoleCommand"_fn);
+        hook.obj->Class()->find_func_and_validate(L"ConsoleCommand"_fn);
     static const auto command_property =
         hook.args->type->find_prop_and_validate<UStrProperty>(L"Command"_fn);
 
@@ -111,7 +111,7 @@ bool say_crash_fix_hook(hook_manager::Details& hook) {
     static const auto engine =
         unrealsdk::find_object(L"WillowGameEngine", L"Transient.WillowGameEngine_0");
     static const auto spark_interface_prop =
-        engine->Class->find_prop_and_validate<UInterfaceProperty>(L"SparkInterface"_fn);
+        engine->Class()->find_prop_and_validate<UInterfaceProperty>(L"SparkInterface"_fn);
     static const auto is_spark_enabled_func =
         spark_interface_prop->get_interface_class()->find_func_and_validate(L"IsSparkEnabled"_fn);
 
@@ -123,11 +123,11 @@ bool say_crash_fix_hook(hook_manager::Details& hook) {
     }
 
     static const auto get_timestamp_string_func =
-        hook.obj->Class->find_func_and_validate(L"GetTimestampString"_fn);
+        hook.obj->Class()->find_func_and_validate(L"GetTimestampString"_fn);
     static const auto default_save_game_manager =
         find_class(L"WillowSaveGameManager"_fn)->ClassDefaultObject();
     static const auto time_format_prop =
-        default_save_game_manager->Class->find_prop_and_validate<UStrProperty>(L"TimeFormat"_fn);
+        default_save_game_manager->Class()->find_prop_and_validate<UStrProperty>(L"TimeFormat"_fn);
 
     auto timestamp = BoundFunction{.func = get_timestamp_string_func, .object = hook.obj}
                          .call<UStrProperty, UStrProperty>(
@@ -145,7 +145,7 @@ bool say_crash_fix_hook(hook_manager::Details& hook) {
     player_name += timestamp;
 
     static const auto add_chat_message_internal_func =
-        hook.obj->Class->find_func_and_validate(L"AddChatMessageInternal"_fn);
+        hook.obj->Class()->find_func_and_validate(L"AddChatMessageInternal"_fn);
     static const auto msg_prop = hook.args->type->find_prop_and_validate<UStrProperty>(L"msg"_fn);
 
     BoundFunction{.func = add_chat_message_internal_func, .object = hook.obj}
@@ -159,18 +159,18 @@ bool console_command_hook(hook_manager::Details& hook) {
         hook.args->type->find_prop_and_validate<UStrProperty>(L"Command"_fn);
 
     static const auto history_prop =
-        hook.obj->Class->find_prop_and_validate<UStrProperty>(L"History"_fn);
+        hook.obj->Class()->find_prop_and_validate<UStrProperty>(L"History"_fn);
     static const auto history_top_prop =
-        hook.obj->Class->find_prop_and_validate<UIntProperty>(L"HistoryTop"_fn);
+        hook.obj->Class()->find_prop_and_validate<UIntProperty>(L"HistoryTop"_fn);
     static const auto history_bot_prop =
-        hook.obj->Class->find_prop_and_validate<UIntProperty>(L"HistoryBot"_fn);
+        hook.obj->Class()->find_prop_and_validate<UIntProperty>(L"HistoryBot"_fn);
     static const auto history_cur_prop =
-        hook.obj->Class->find_prop_and_validate<UIntProperty>(L"HistoryCur"_fn);
+        hook.obj->Class()->find_prop_and_validate<UIntProperty>(L"HistoryCur"_fn);
 
     static const UFunction* purge_command_func =
-        hook.obj->Class->find_func_and_validate(L"PurgeCommandFromHistory"_fn);
+        hook.obj->Class()->find_func_and_validate(L"PurgeCommandFromHistory"_fn);
     static const UFunction* save_config_func =
-        hook.obj->Class->find_func_and_validate(L"SaveConfig"_fn);
+        hook.obj->Class()->find_func_and_validate(L"SaveConfig"_fn);
 
     auto line = hook.args->get<UStrProperty>(command_property);
 

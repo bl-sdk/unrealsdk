@@ -26,11 +26,11 @@ size_t UProperty::class_size(void) {
     // Rather than bother with a findobject call, we can recover UProperty from any arbitrary object
     // UObject always has properties on it, we don't need to worry about what class we get
     auto obj = *unrealsdk::gobjects().begin();
-    auto prop = obj->Class->PropertyLink;
+    auto prop = obj->Class()->PropertyLink;
 
     const UStruct* cls = nullptr;
-    for (auto superfield : prop->Class->superfields()) {
-        if (superfield->Name == L"Property"_fn) {
+    for (auto superfield : prop->Class()->superfields()) {
+        if (superfield->Name() == L"Property"_fn) {
             cls = superfield;
             break;
         }

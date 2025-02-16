@@ -227,13 +227,13 @@ const List* preprocess_hook(std::wstring_view source, const UFunction* func, con
     }
 
     // Check if anything matches the function FName
-    auto fname_iter = hooks.find(func->Name);
+    auto fname_iter = hooks.find(func->Name());
     if (fname_iter == hooks.end()) {
         return nullptr;
     }
     auto& path_name_map = fname_iter->second;
     if (path_name_map.empty()) {
-        hooks.erase(func->Name);
+        hooks.erase(func->Name());
         return nullptr;
     }
 

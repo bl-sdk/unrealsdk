@@ -23,7 +23,7 @@ PropertyProxy::PropertyProxy(const PropertyProxy& other) : prop(other.prop), ptr
 PropertyProxy& PropertyProxy::operator=(const PropertyProxy& other) {
     if (other.prop != this->prop) {
         throw std::runtime_error("Property proxy is not instance of "
-                                 + (std::string)this->prop->Name);
+                                 + (std::string)this->prop->Name());
     }
     if (this->prop != nullptr) {
         cast(this->prop, [this, &other]<typename T>(const T* prop) {

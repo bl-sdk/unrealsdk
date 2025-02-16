@@ -12,8 +12,8 @@ class NamedClassCache : public NamedObjectCache<UClass> {
         // We can't exactly do a find class lookup here
         // Instead, just follow the class chain off of an arbitrary object
         // UClass is the only object whose class is itself
-        auto cls = (*unrealsdk::gobjects().begin())->Class;
-        for (; cls->Class != cls; cls = cls->Class) {}
+        auto cls = (*unrealsdk::gobjects().begin())->Class();
+        for (; cls->Class() != cls; cls = cls->Class()) {}
         return cls;
     }
 };

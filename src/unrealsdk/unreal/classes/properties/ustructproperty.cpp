@@ -25,7 +25,8 @@ void PropTraits<UStructProperty>::set(const UStructProperty* prop,
                                       const Value& value) {
     auto this_struct = prop->get_inner_struct();
     if (value.type != this_struct) {
-        throw std::runtime_error("Struct is not an instance of " + (std::string)this_struct->Name);
+        throw std::runtime_error("Struct is not an instance of "
+                                 + (std::string)this_struct->Name());
     }
     copy_struct(addr, value);
 }

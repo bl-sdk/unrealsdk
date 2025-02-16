@@ -14,12 +14,12 @@ WeakPointer::WeakPointer(const UObject* obj) : WeakPointer() {
 WeakPointer& WeakPointer::operator=(const UObject* obj) {
     this->obj_addr = reinterpret_cast<uintptr_t>(obj);
     if (obj != nullptr) {
-        this->index = obj->InternalIndex;
+        this->index = obj->InternalIndex();
 
-        this->outer_addr = reinterpret_cast<uintptr_t>(obj->Outer);
+        this->outer_addr = reinterpret_cast<uintptr_t>(obj->Outer());
         this->vftable_addr = reinterpret_cast<uintptr_t>(obj->vftable);
-        this->class_addr = reinterpret_cast<uintptr_t>(obj->Class);
-        this->name = obj->Name;
+        this->class_addr = reinterpret_cast<uintptr_t>(obj->Class());
+        this->name = obj->Name();
     }
     return *this;
 }
@@ -37,9 +37,10 @@ UObject* WeakPointer::operator*(void) const {
         return nullptr;
     }
 
-    if (this->outer_addr != reinterpret_cast<uintptr_t>(obj->Outer)
+    if (this->outer_addr != reinterpret_cast<uintptr_t>(obj->Outer())
         || this->vftable_addr != reinterpret_cast<uintptr_t>(obj->vftable)
-        || this->class_addr != reinterpret_cast<uintptr_t>(obj->Class) || this->name != obj->Name) {
+        || this->class_addr != reinterpret_cast<uintptr_t>(obj->Class())
+        || this->name != obj->Name()) {
         return nullptr;
     }
 

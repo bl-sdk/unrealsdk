@@ -37,7 +37,7 @@ void PropTraits<UInterfaceProperty>::set(const UInterfaceProperty* prop,
         FImplementedInterface impl{};
         if (!value->is_implementation(prop_iface, &impl)) {
             throw std::runtime_error("Object is not implementation of "
-                                     + (std::string)prop_iface->Name);
+                                     + (std::string)prop_iface->Name());
         }
         pointer_offset = impl.get_pointer_offset();
     }

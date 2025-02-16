@@ -45,7 +45,7 @@ class NamedObjectCache {
      * @return The cached value.
      */
     virtual CacheType add_to_cache(ObjectType* obj) {
-        cache[obj->Name] = obj;
+        cache[obj->Name()] = obj;
         return obj;
     }
 

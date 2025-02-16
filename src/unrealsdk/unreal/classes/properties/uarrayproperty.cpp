@@ -38,7 +38,7 @@ void PropTraits<UArrayProperty>::set(const UArrayProperty* prop,
     }
     if (value.type != inner) {
         throw std::runtime_error("Array does not contain fields of type "
-                                 + (std::string)inner->Name);
+                                 + (std::string)inner->Name());
     }
 
     auto arr = reinterpret_cast<TArray<void>*>(addr);

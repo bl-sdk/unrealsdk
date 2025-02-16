@@ -40,9 +40,9 @@ const TPersistentObjectPtr<T>* get_addr_from(const WrappedStruct& wrapped_struct
 
 template <typename T>
 const TPersistentObjectPtr<T>* get_addr_from_array(const WrappedArray& array, size_t idx) {
-    if (!array.type->Class->inherits(find_class<USoftObjectProperty>())) {
+    if (!array.type->Class()->inherits(find_class<USoftObjectProperty>())) {
         throw std::invalid_argument("WrappedArray property was of invalid type "
-                                    + (std::string)array.type->Class->Name);
+                                    + (std::string)array.type->Class()->Name());
     }
     if (idx >= (size_t)array.base->count) {
         throw std::out_of_range("WrappedArray index out of range");
@@ -55,7 +55,7 @@ const TPersistentObjectPtr<T>* get_addr_from_array(const WrappedArray& array, si
 }  // namespace
 
 const FSoftObjectPath* FSoftObjectPath::get_from(const UObject* obj, FName name, size_t idx) {
-    return get_from(obj, obj->Class->find_prop_and_validate<USoftObjectProperty>(name), idx);
+    return get_from(obj, obj->Class()->find_prop_and_validate<USoftObjectProperty>(name), idx);
 }
 const FSoftObjectPath* FSoftObjectPath::get_from(const WrappedStruct& wrapped_struct,
                                                  FName name,
@@ -79,7 +79,7 @@ const FSoftObjectPath* FSoftObjectPath::get_from_array(const WrappedArray& array
 }
 
 const FLazyObjectPath* FLazyObjectPath::get_from(const UObject* obj, FName name, size_t idx) {
-    return get_from(obj, obj->Class->find_prop_and_validate<ULazyObjectProperty>(name), idx);
+    return get_from(obj, obj->Class()->find_prop_and_validate<ULazyObjectProperty>(name), idx);
 }
 const FLazyObjectPath* FLazyObjectPath::get_from(const WrappedStruct& wrapped_struct,
                                                  FName name,

@@ -24,11 +24,11 @@ void PropTraits<UClassProperty>::set(const UClassProperty* prop,
     if (value != nullptr) {
         auto prop_cls = prop->get_property_class();
         if (!value->is_instance(prop_cls)) {
-            throw std::runtime_error("Object is not instance of " + (std::string)prop_cls->Name);
+            throw std::runtime_error("Object is not instance of " + (std::string)prop_cls->Name());
         }
         auto meta_cls = prop->get_meta_class();
         if (!value->inherits(meta_cls)) {
-            throw std::runtime_error("Class does not inherit from " + (std::string)meta_cls->Name);
+            throw std::runtime_error("Class does not inherit from " + (std::string)meta_cls->Name());
         }
     }
 

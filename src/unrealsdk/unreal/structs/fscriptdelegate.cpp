@@ -37,7 +37,7 @@ void FScriptDelegate::set_object(UObject* obj) {
         return std::nullopt;
     }
 
-    return BoundFunction{.func = obj->Class->find_func_and_validate(this->func_name),
+    return BoundFunction{.func = obj->Class()->find_func_and_validate(this->func_name),
                          .object = obj};
 }
 
@@ -49,7 +49,7 @@ void FScriptDelegate::bind(const std::optional<BoundFunction>& func) {
     }
 
     this->set_object(func->object);
-    this->func_name = func->func->Name;
+    this->func_name = func->func->Name();
 }
 
 void FScriptDelegate::validate_signature(const std::optional<BoundFunction>& func,
@@ -64,11 +64,11 @@ void FScriptDelegate::validate_signature(const std::optional<BoundFunction>& fun
     {
         UFunction* func_from_find = nullptr;
         try {
-            func_from_find = func->object->Class->find_func_and_validate(func->func->Name);
+            func_from_find = func->object->Class()->find_func_and_validate(func->func->Name());
         } catch (const std::invalid_argument&) {
             throw std::invalid_argument(std::format(
                 "Could not convert function to delegate: could not find function with name '{}'",
-                func->func->Name));
+                func->func->Name()));
         }
         if (func_from_find != func->func) {
             throw std::invalid_argument(utils::narrow(std::format(
@@ -97,13 +97,13 @@ void FScriptDelegate::validate_signature(const std::optional<BoundFunction>& fun
 
         auto [func_diff, sig_diff] = std::ranges::mismatch(
             func_props, sig_props,
-            [](UProperty* func, UProperty* sig) { return func->Class == sig->Class; });
+            [](UProperty* func, UProperty* sig) { return func->Class() == sig->Class(); });
 
         if (func_diff != func_props.end() && sig_diff != sig_props.end()) {
             throw std::invalid_argument(std::format(
                 "Function signature does not match delegate: function's {} {} != delegate's {} {}",
-                (*func_diff)->Class->Name, (*func_diff)->Name, (*sig_diff)->Class->Name,
-                (*sig_diff)->Name));
+                (*func_diff)->Class()->Name(), (*func_diff)->Name(), (*sig_diff)->Class()->Name(),
+                (*sig_diff)->Name()));
         }
         if (func_diff != func_props.end() && sig_diff == sig_props.end()) {
             throw std::invalid_argument(

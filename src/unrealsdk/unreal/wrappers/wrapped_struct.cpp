@@ -13,7 +13,7 @@ namespace unrealsdk::unreal {
 void copy_struct(uintptr_t dest, const WrappedStruct& src) {
     if (dest == reinterpret_cast<uintptr_t>(src.base.get())) {
         LOG(DEV_WARNING, "Refusing to copy struct of type {} to itself, at address {:p}",
-            src.type->Name, src.base.get());
+            src.type->Name(), src.base.get());
         return;
     }
 
@@ -39,7 +39,7 @@ void destroy_struct(const UStruct* type, uintptr_t addr) {
             // on trying to destroy the rest
             // Log it to dev warning - don't want to use error to not freak out casusal users, this
             // should only really happen if a dev is messing with unsupported property types.
-            LOG(DEV_WARNING, "Error while destroying '{}' struct: {}", type->Name, ex.what());
+            LOG(DEV_WARNING, "Error while destroying '{}' struct: {}", type->Name(), ex.what());
         }
     }
 }
@@ -60,7 +60,7 @@ WrappedStruct::WrappedStruct(WrappedStruct&& other) noexcept
 
 WrappedStruct& WrappedStruct::operator=(const WrappedStruct& other) {
     if (other.type != this->type) {
-        throw std::runtime_error("Struct is not an instance of " + (std::string)this->type->Name);
+        throw std::runtime_error("Struct is not an instance of " + (std::string)this->type->Name());
     }
     if (this->base != nullptr && other.base != nullptr) {
         copy_struct(reinterpret_cast<uintptr_t>(this->base.get()), other);

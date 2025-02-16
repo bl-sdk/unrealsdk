@@ -70,7 +70,7 @@ class WrappedArray {
      */
     template <typename T>
     void validate_access(size_t idx) const {
-        auto property_class = this->type->Class->Name;
+        auto property_class = this->type->Class()->Name();
         if (property_class != cls_fname<T>()) {
             throw std::invalid_argument("WrappedArray property was of invalid type "
                                         + (std::string)property_class);

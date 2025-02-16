@@ -54,11 +54,11 @@ std::wstring UObject::get_path_name(void) const {
 #endif
 
 bool UObject::is_instance(const UClass* cls) const {
-    return this->Class->inherits(cls);
+    return this->Class()->inherits(cls);
 }
 
 bool UObject::is_implementation(const UClass* iface, FImplementedInterface* impl_out) const {
-    return this->Class->implements(iface, impl_out);
+    return this->Class()->implements(iface, impl_out);
 }
 
 template <>
@@ -81,7 +81,7 @@ BoundFunction UObject::get<UFunction, BoundFunction>(const UFunction* prop, size
 }
 template <>
 BoundFunction UObject::get<UFunction, BoundFunction>(const FName& name, size_t idx) const {
-    return this->get<UFunction, BoundFunction>(this->Class->find_func_and_validate(name), idx);
+    return this->get<UFunction, BoundFunction>(this->Class()->find_func_and_validate(name), idx);
 }
 
 }  // namespace unrealsdk::unreal

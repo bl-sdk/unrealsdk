@@ -35,7 +35,7 @@ decltype(UClass::Interfaces_internal)& UClass::Interfaces(void) {
 [[nodiscard]] const decltype(UClass::Interfaces_internal)& UClass::Interfaces(void) const {
     static const auto use_tps_offset =
         unrealsdk::config::get_bool("unrealsdk.__force_uclass_interfaces_tps_offset")
-            .value_or(this->Class->get_struct_size() == UCLASS_SIZE_TPS);
+            .value_or(this->Class()->get_struct_size() == UCLASS_SIZE_TPS);
 
     if (use_tps_offset) {
         return *reinterpret_cast<decltype(UClass::Interfaces_internal)*>(

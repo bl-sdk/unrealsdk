@@ -32,13 +32,13 @@ size_t UStruct::class_size(void) {
 
     // First, find UClass
     auto obj = *unrealsdk::gobjects().begin();
-    const UClass* class_cls = obj->Class;
-    for (; class_cls->Class != class_cls; class_cls = class_cls->Class) {}
+    const UClass* class_cls = obj->Class();
+    for (; class_cls->Class() != class_cls; class_cls = class_cls->Class()) {}
 
     // Then look through it's superfields for UStruct
     const UStruct* struct_cls = nullptr;
     for (auto superfield : class_cls->superfields()) {
-        if (superfield->Name == L"Struct"_fn) {
+        if (superfield->Name() == L"Struct"_fn) {
             struct_cls = superfield;
             break;
         }
@@ -183,7 +183,7 @@ size_t UStruct::get_struct_size(void) const {
 
 UField* UStruct::find(const FName& name) const {
     for (auto field : this->fields()) {
-        if (field->Name == name) {
+        if (field->Name() == name) {
             return field;
         }
     }
@@ -193,7 +193,7 @@ UField* UStruct::find(const FName& name) const {
 
 UProperty* UStruct::find_prop(const FName& name) const {
     for (auto prop : this->properties()) {
-        if (prop->Name == name) {
+        if (prop->Name() == name) {
             return prop;
         }
     }
