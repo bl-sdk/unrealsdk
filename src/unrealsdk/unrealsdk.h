@@ -26,6 +26,12 @@ struct TemporaryFString;
 
 }  // namespace unrealsdk::unreal
 
+namespace unrealsdk::unreal::offsets {
+
+struct OffsetList;
+
+}
+
 namespace unrealsdk {
 
 #ifndef UNREALSDK_IMPORTING
@@ -211,6 +217,14 @@ void ftext_as_culture_invariant(unreal::FText* text, unreal::TemporaryFString&& 
  */
 void fsoftobjectptr_assign(unreal::FSoftObjectPtr* ptr, const unreal::UObject* obj);
 void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr, const unreal::UObject* obj);
+
+/**
+ * @brief Get the offsets list for the currently hooked game.
+ * @note This is valid to call during initalization.
+ *
+ * @return A reference to the offsets list.
+ */
+[[nodiscard]] const unreal::offsets::OffsetList& get_offsets(void);
 
 }  // namespace internal
 

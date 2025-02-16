@@ -104,6 +104,10 @@ void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr, const unreal::UObject* o
     UNREALSDK_MANGLE(flazyobjectptr_assign)(ptr, obj);
 }
 
+[[nodiscard]] const offsets::OffsetList& get_offsets() {
+    return *UNREALSDK_MANGLE(get_offsets)();
+}
+
 }  // namespace internal
 
 }  // namespace unrealsdk

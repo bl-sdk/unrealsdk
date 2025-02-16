@@ -10,6 +10,7 @@ namespace. It is included directly in the other two files.
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/unreal/classes/uobject.h"
+#include "unrealsdk/unreal/offset_list.h"
 
 namespace unrealsdk::unreal {
 
@@ -64,6 +65,7 @@ UNREALSDK_CAPI([[nodiscard]] wchar_t*, uobject_path_name, const UObject* obj, si
 UNREALSDK_CAPI(void, ftext_as_culture_invariant, FText* text, TemporaryFString&& str);
 UNREALSDK_CAPI(void, fsoftobjectptr_assign, FSoftObjectPtr* ptr, const unreal::UObject* obj);
 UNREALSDK_CAPI(void, flazyobjectptr_assign, FLazyObjectPtr* ptr, const unreal::UObject* obj);
+UNREALSDK_CAPI([[nodiscard]] const offsets::OffsetList*, get_offsets);
 
 }  // namespace internal
 

@@ -4,12 +4,16 @@
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/classes/ustruct_funcs.h"
+#include "unrealsdk/unreal/offset_list.h"
+#include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/structs/fname.h"
 #include "unrealsdk/unreal/wrappers/bound_function.h"
 #include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
+
+UNREALSDK_DEFINE_FIELDS_SOURCE_FILE(UObject, UNREALSDK_UOBJECT_FIELDS);
 
 #ifdef UNREALSDK_INTERNAL_PATH_NAME
 

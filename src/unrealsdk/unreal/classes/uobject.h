@@ -4,6 +4,7 @@
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/unreal/class_traits.h"
+#include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/structs/fname.h"
 
@@ -31,36 +32,43 @@ class UObject {
     // NOLINTBEGIN(readability-identifier-naming)
 
 #if UE4
+    using object_flags_type = uint32_t;
+#else
+    using object_flags_type = uint64_t;
+#endif
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UOBJECT_FIELDS(X)   \
+    X(object_flags_type, ObjectFlags) \
+    X(int32_t, InternalIndex)         \
+    X(UClass*, Class)                 \
+    X(FName, Name)                    \
+    X(UObject*, Outer)
+
+    UNREALSDK_DEFINE_FIELDS_HEADER(UObject, UNREALSDK_UOBJECT_FIELDS);
+
+#if UE4
+    uintptr_t* vftable;
     int32_t ObjectFlags;
     int32_t InternalIndex;
     UClass* Class;
     FName Name;
     UObject* Outer;
 #else
+
    private:
+    // TODO: remove
     void* HashNext;
-
-   public:
-    uint64_t ObjectFlags;
-
-   private:
+    uint64_t ObjectFlags_member;
     void* HashOuterNext;
     void* StateFrame;
     class UObject* _Linker;
     void* _LinkerIndex;
-
-   public:
-    int InternalIndex;
-
-   private:
+    int InternalIndex_member;
     int NetIndex;
-
-   public:
-    UObject* Outer;
-    FName Name;
-    UClass* Class;
-
-   private:
+    UObject* Outer_member;
+    FName Name_member;
+    UClass* Class_member;
     UObject* ObjectArchetype;
 
    public:

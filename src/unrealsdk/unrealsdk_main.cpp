@@ -196,6 +196,10 @@ UNREALSDK_CAPI(void, flazyobjectptr_assign, FLazyObjectPtr* ptr, const unreal::U
     hook_instance->flazyobjectptr_assign(ptr, obj);
 }
 
+UNREALSDK_CAPI([[nodiscard]] const offsets::OffsetList*, get_offsets) {
+    return &hook_instance->get_offsets();
+}
+
 }  // namespace internal
 
 }  // namespace unrealsdk

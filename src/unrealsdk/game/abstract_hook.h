@@ -22,6 +22,12 @@ struct TemporaryFString;
 
 }  // namespace unrealsdk::unreal
 
+namespace unrealsdk::unreal::offsets {
+
+struct OffsetList;
+
+}  // namespace unrealsdk::unreal::offsets
+
 namespace unrealsdk::game {
 
 #pragma region Hook Classes
@@ -81,6 +87,7 @@ struct AbstractHook {
                                        const unreal::UObject* obj) const = 0;
     virtual void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr,
                                        const unreal::UObject* obj) const = 0;
+    [[nodiscard]] virtual const unreal::offsets::OffsetList& get_offsets(void) const = 0;
 };
 
 #pragma endregion
