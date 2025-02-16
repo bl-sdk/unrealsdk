@@ -160,8 +160,8 @@ using StringViewMap = std::unordered_map<Key, T, StringViewHash<Key>, std::equal
 
 // Custom wstring formatter, which calls narrow
 template <>
-struct unrealsdk::fmt::formatter<std::wstring> : unrealsdk::fmt::formatter<std::string> {
-    auto format(const std::wstring& str, unrealsdk::fmt::format_context& ctx) const {
+struct std::formatter<std::wstring> : std::formatter<std::string> {
+    auto format(const std::wstring& str, std::format_context& ctx) const {
         return formatter<std::string>::format(unrealsdk::utils::narrow(str), ctx);
     }
 };

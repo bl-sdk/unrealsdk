@@ -2,7 +2,7 @@
 #define UNREALSDK_LOGGING_H
 
 // Because this file in included in the pch, we can't include the pch here instead of these
-#include "unrealsdk/format.h"
+#include <format>
 
 namespace unrealsdk::logging {
 
@@ -92,9 +92,8 @@ void remove_callback(log_callback callback);
  * @param ... The format string + it's contents.
  */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG(level, ...)                                          \
-    unrealsdk::logging::log((unrealsdk::logging::Level::level),  \
-                            unrealsdk::fmt::format(__VA_ARGS__), \
+#define LOG(level, ...)                                                                   \
+    unrealsdk::logging::log((unrealsdk::logging::Level::level), std::format(__VA_ARGS__), \
                             {(const char*)(__FUNCTION__), sizeof(__FUNCTION__) - 1}, (__LINE__))
 
 #endif /* UNREALSDK_LOGGING_H */

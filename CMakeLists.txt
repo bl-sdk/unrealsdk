@@ -8,7 +8,7 @@ set(UNREALSDK_SHARED False CACHE BOOL "If set, compiles as a shared library inst
 
 add_library(_unrealsdk_interface INTERFACE)
 
-target_compile_features(_unrealsdk_interface INTERFACE cxx_std_20)
+target_compile_features(_unrealsdk_interface INTERFACE cxx_std_23)
 set_target_properties(_unrealsdk_interface PROPERTIES
     COMPILE_WARNING_AS_ERROR True
     INTERPROCEDURAL_OPTIMIZATION True

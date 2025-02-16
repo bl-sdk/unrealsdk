@@ -227,7 +227,7 @@ bool console_command_hook(hook_manager::Details& hook) {
     as a compromise just use the LOG macro on the lowest possible log level, and assume the lowest
     people practically set their console log level to is dev warning.
     */
-    auto msg = unrealsdk::fmt::format(L">>> {} <<<", line);
+    auto msg = std::format(L">>> {} <<<", line);
     console_output_text.call<void, UStrProperty>(msg);
     LOG(MIN, L"{}", msg);
 

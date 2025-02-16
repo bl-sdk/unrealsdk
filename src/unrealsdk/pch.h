@@ -36,6 +36,7 @@
 #include <cstring>
 #include <cwctype>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -47,6 +48,7 @@
 #include <ranges>
 #include <sstream>
 #include <stdexcept>
+#include <stdfloat>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -55,10 +57,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
-
-// This file is just a forwarder for whichever formatting library is configured, it doesn't define
-// anything itself, so is fine to include here
-#include "unrealsdk/format.h"
 
 // This file is mostly just here so that the `LOG` macro is automatically available everywhere
 // It only includes library headers, so is also ok to include
@@ -73,11 +71,7 @@ using std::uint32_t;
 using std::uint64_t;
 using std::uint8_t;
 
-#if __cplusplus > 202002L
-using std::float32_t;
-using std::float64_t;
-#else
-
+// Awaiting better compiler support to replace these with std::float32_t
 // NOLINTBEGIN(readability-magic-numbers)
 static_assert(std::numeric_limits<float>::is_iec559 && std::numeric_limits<float>::digits == 24,
               "float is not ieee 32-bit");
@@ -87,8 +81,6 @@ static_assert(std::numeric_limits<double>::is_iec559 && std::numeric_limits<doub
 
 using float32_t = float;
 using float64_t = double;
-
-#endif
 
 #ifdef ARCH_X64
 static_assert(sizeof(uintptr_t) == sizeof(uint64_t),

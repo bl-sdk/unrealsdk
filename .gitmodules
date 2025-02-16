@@ -1,9 +1,6 @@
 [submodule "libs/minhook"]
 	path = libs/minhook
 	url = https://github.com/TsudaKageyu/minhook.git
-[submodule "libs/fmt"]
-	path = libs/fmt
-	url = https://github.com/fmtlib/fmt.git
 [submodule "libs/tomlplusplus"]
 	path = libs/tomlplusplus
 	url = https://github.com/marzer/tomlplusplus.git

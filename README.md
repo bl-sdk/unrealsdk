@@ -51,9 +51,7 @@ auto op_string = hook.obj->get<UFunction, BoundFunction>(L"BuildOverpowerPromptS
 So there are a few extra steps to integrate the sdk into your project before you can start using
 hooks like above.
 
-The SDK requires at least C++20. This is primarily for templated lambdas - you may still be able to
-use it if your compiler doesn't yet fully support it (e.g. it falls back to fmtlib if `std::format`
-is not available).
+The SDK requires at least C++23.
 
 The recommended way to link against the sdk is as a submodule.
 

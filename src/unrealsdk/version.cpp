@@ -22,13 +22,12 @@ namespace {
 #include "unrealsdk/git.inl"
 
 const constexpr auto GIT_HASH_CHARS = 8;
-const std::string VERSION_STR =
-    unrealsdk::fmt::format("unrealsdk v{}.{}.{} ({}{})",
-                           VERSION_MAJOR,
-                           VERSION_MINOR,
-                           VERSION_PATCH,
-                           std::string(GIT_HEAD_SHA1).substr(0, GIT_HASH_CHARS),
-                           GIT_IS_DIRTY ? ", dirty" : "");
+const std::string VERSION_STR = std::format("unrealsdk v{}.{}.{} ({}{})",
+                                            VERSION_MAJOR,
+                                            VERSION_MINOR,
+                                            VERSION_PATCH,
+                                            std::string(GIT_HEAD_SHA1).substr(0, GIT_HASH_CHARS),
+                                            GIT_IS_DIRTY ? ", dirty" : "");
 #endif
 }  // namespace
 

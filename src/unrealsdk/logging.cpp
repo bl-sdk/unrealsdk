@@ -224,7 +224,7 @@ constexpr auto LEVEL_WIDTH = 4;
  * @return The formatted message
  */
 std::string format_message(const LogMessage& msg) {
-    return unrealsdk::fmt::format(
+    return std::format(
         "{1:>{0}%F %T}Z {3:>{2}}@{5:<{4}d} {7:>{6}}| {8}\n", DATE_WIDTH + sizeof(' ') + TIME_WIDTH,
         time_from_unix_ms(msg.unix_time_ms), LOCATION_WIDTH,
         truncate_leading_chunks(msg.location, "\\/:", LOCATION_WIDTH), LINE_WIDTH, msg.line,
@@ -237,9 +237,9 @@ std::string format_message(const LogMessage& msg) {
  * @return The header.
  */
 std::string get_header(void) {
-    return unrealsdk::fmt::format("{1:<{0}} {3:<{2}} {5:>{4}}@{7:<{6}} {9:>{8}}| \n", DATE_WIDTH,
-                                  "date", TIME_WIDTH + sizeof('Z'), "time", LOCATION_WIDTH,
-                                  "location", LINE_WIDTH, "line", LEVEL_WIDTH, "v");
+    return std::format("{1:<{0}} {3:<{2}} {5:>{4}}@{7:<{6}} {9:>{8}}| \n", DATE_WIDTH, "date",
+                       TIME_WIDTH + sizeof('Z'), "time", LOCATION_WIDTH, "location", LINE_WIDTH,
+                       "line", LEVEL_WIDTH, "v");
 }
 
 #endif
