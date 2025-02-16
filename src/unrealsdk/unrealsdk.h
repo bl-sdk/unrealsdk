@@ -3,7 +3,6 @@
 
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/structs/fname.h"
 
 namespace unrealsdk::game {
@@ -18,6 +17,7 @@ class GNames;
 class GObjects;
 class UClass;
 class UFunction;
+class UObject;
 struct FFrame;
 struct FLazyObjectPtr;
 struct FSoftObjectPtr;
@@ -121,7 +121,7 @@ void u_free(void* data);
 [[nodiscard]] unreal::UObject* construct_object(unreal::UClass* cls,
                                                 unreal::UObject* outer,
                                                 const unreal::FName& name = {0, 0},
-                                                decltype(unreal::UObject::ObjectFlags) flags = 0,
+                                                uint64_t flags = 0,
                                                 unreal::UObject* template_obj = nullptr);
 
 /**

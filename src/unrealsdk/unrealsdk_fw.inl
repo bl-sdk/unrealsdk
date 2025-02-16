@@ -41,7 +41,7 @@ UNREALSDK_CAPI([[nodiscard]] UObject*,
                UClass* cls,
                UObject* outer,
                const FName* name = nullptr,
-               decltype(UObject::ObjectFlags) flags = 0,
+               uint64_t flags = 0,
                UObject* template_obj = nullptr);
 UNREALSDK_CAPI([[nodiscard]] UObject*,
                find_object,

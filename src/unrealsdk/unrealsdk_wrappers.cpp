@@ -43,7 +43,7 @@ void u_free(void* data) {
 UObject* construct_object(UClass* cls,
                           UObject* outer,
                           const FName& name,
-                          decltype(UObject::ObjectFlags) flags,
+                          uint64_t flags,
                           UObject* template_obj) {
     return UNREALSDK_MANGLE(construct_object)(cls, outer, &name, flags, template_obj);
 }

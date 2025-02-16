@@ -3,7 +3,6 @@
 
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/structs/fname.h"
 
 #ifndef UNREALSDK_IMPORTING
@@ -14,6 +13,7 @@ class GNames;
 class GObjects;
 class UClass;
 class UFunction;
+class UObject;
 struct FFrame;
 struct FLazyObjectPtr;
 struct FSoftObjectPtr;
@@ -61,7 +61,7 @@ struct AbstractHook {
         unreal::UClass* cls,
         unreal::UObject* outer,
         const unreal::FName& name,
-        decltype(unreal::UObject::ObjectFlags) flags,
+        uint64_t flags,
         unreal::UObject* template_obj) const = 0;
     [[nodiscard]] virtual unreal::UObject* find_object(unreal::UClass* cls,
                                                        const std::wstring& name) const = 0;

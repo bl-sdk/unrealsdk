@@ -109,7 +109,7 @@ class BL2Hook : public AbstractHook {
     [[nodiscard]] unreal::UObject* construct_object(unreal::UClass* cls,
                                                     unreal::UObject* outer,
                                                     const unreal::FName& name,
-                                                    decltype(unreal::UObject::ObjectFlags) flags,
+                                                    uint64_t flags,
                                                     unreal::UObject* template_obj) const override;
     [[nodiscard]] unreal::UObject* find_object(unreal::UClass* cls,
                                                const std::wstring& name) const override;

@@ -55,8 +55,11 @@ void BL3Hook::find_construct_object(void) {
 UObject* BL3Hook::construct_object(UClass* cls,
                                    UObject* outer,
                                    const FName& name,
-                                   decltype(UObject::ObjectFlags) flags,
+                                   uint64_t flags,
                                    UObject* template_obj) const {
+    if (flags > std::numeric_limits<uint32_t>::max()) {
+        throw std::out_of_range("construct_object flags out of range, only 32-bits are supported")
+    }
     return construct_obj_ptr(cls, outer, name, flags, 0, template_obj, 0 /* false */, nullptr,
                              0 /* false */);
 }

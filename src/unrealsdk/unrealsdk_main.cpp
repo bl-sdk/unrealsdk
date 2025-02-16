@@ -123,7 +123,7 @@ UNREALSDK_CAPI([[nodiscard]] UObject*,
                UClass* cls,
                UObject* outer,
                const FName* name,
-               decltype(UObject::ObjectFlags) flags,
+               uint64_t flags,
                UObject* template_obj) {
     FName local_name{0, 0};
     if (name != nullptr) {

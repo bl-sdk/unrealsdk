@@ -63,7 +63,7 @@ void BL2Hook::find_construct_object(void) {
 UObject* BL2Hook::construct_object(UClass* cls,
                                    UObject* outer,
                                    const FName& name,
-                                   decltype(UObject::ObjectFlags) flags,
+                                   uint64_t flags,
                                    UObject* template_obj) const {
     return construct_obj_ptr(cls, outer, name, flags, template_obj, nullptr, nullptr,
                              0 /* false */);
