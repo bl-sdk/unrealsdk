@@ -23,7 +23,7 @@ FEditPropertyChain::FEditPropertyChain(const std::vector<UProperty*>& chain)
         idx++;
     }
 
-    if (chain.size() > 0) {
+    if (!chain.empty()) {
         this->head = &this->nodes.front();
         this->tail = &this->nodes.back();
     }

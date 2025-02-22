@@ -119,7 +119,7 @@ void UObject::post_edit_change_chain_property(UProperty* prop,
 
 void UObject::post_edit_change_chain_property(UProperty* prop,
                                               std::initializer_list<UProperty*> chain) const {
-    std::vector<UProperty*> vector_chain{chain};
+    const std::vector<UProperty*> vector_chain{chain};
     this->post_edit_change_chain_property(prop, vector_chain);
 }
 
