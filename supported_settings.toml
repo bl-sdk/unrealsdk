@@ -56,3 +56,8 @@ locking_function_calls = false
 
 # After enabling `unrealsdk::hook_manager::log_all_calls`, the file to calls are logged to.
 log_all_calls_file = "unrealsdk.calls.tsv"
+
+# Overrides the virtual function index used when calling `UObject::PostEditChangeProperty`.
+uobject_post_edit_change_property_vf_index = -1
+# Overrides the virtual function index used when calling `UObject::PostEditChangeChainProperty`.
+uobject_post_edit_change_chain property_vf_index = -1

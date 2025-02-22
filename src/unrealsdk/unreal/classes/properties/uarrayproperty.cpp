@@ -37,8 +37,9 @@ void PropTraits<UArrayProperty>::set(const UArrayProperty* prop,
             "Array has static array inner property - unsure how to handle, aborting!");
     }
     if (value.type != inner) {
-        throw std::runtime_error("Array does not contain fields of type "
-                                 + (std::string)inner->Name);
+        throw std::runtime_error(utils::narrow(
+            unrealsdk::fmt::format(L"Array fields have incompatible type, expected {}, got {}",
+                                   inner->get_path_name(), value.type->get_path_name())));
     }
 
     auto arr = reinterpret_cast<TArray<void>*>(addr);

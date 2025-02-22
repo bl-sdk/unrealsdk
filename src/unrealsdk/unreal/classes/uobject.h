@@ -15,6 +15,7 @@ namespace unrealsdk::unreal {
 
 struct FImplementedInterface;
 class UClass;
+class UProperty;
 
 class UObject {
    public:
@@ -79,8 +80,21 @@ class UObject {
      */
     template <typename R, typename... Args>
     R call_virtual_function(size_t index, Args... args) const {
-        return reinterpret_cast<R (*)(const UObject*, Args...)>(this->vftable[index])(this,
-                                                                                      args...);
+#ifdef ARCH_X86
+#if defined(__MINGW32__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"  // thiscall on non-class
+#endif
+        // NOLINTNEXTLINE(modernize-use-using) - need a typedef for the __thiscall
+        typedef R(__thiscall * func_ptr)(const UObject*, Args...);
+#if defined(__MINGW32__)
+#pragma GCC diagnostic pop
+#endif
+#else
+        using func_ptr = R (*)(const UObject*, Args...);
+#endif
+
+        return reinterpret_cast<func_ptr>(this->vftable[index])(this, args...);
     }
 
     /**
@@ -146,6 +160,20 @@ class UObject {
      */
     [[nodiscard]] bool is_implementation(const UClass* iface,
                                          FImplementedInterface* impl_out = nullptr) const;
+
+    /**
+     * @brief Notifies the engine that we've made an external change to a property.
+     *
+     * @param name The name of the property which was changed.
+     * @param prop The property which was changed.
+     * @param chain The chain of properties to follow, if the change was within a struct.
+     */
+    void post_edit_change_property(const FName& name) const;
+    void post_edit_change_property(UProperty* prop) const;
+    void post_edit_change_chain_property(UProperty* prop,
+                                         const std::vector<UProperty*>& chain) const;
+    void post_edit_change_chain_property(UProperty* prop,
+                                         std::initializer_list<UProperty*> chain) const;
 };
 
 template <>
