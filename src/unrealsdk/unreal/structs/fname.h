@@ -83,7 +83,9 @@ struct hash<unrealsdk::unreal::FName> {
     size_t operator()(const unrealsdk::unreal::FName& name) const {
         static_assert(sizeof(unrealsdk::unreal::FName) == sizeof(uint64_t),
                       "FName is not same size as a uint64");
-        return hash<uint64_t>()(*reinterpret_cast<const uint64_t*>(&name));
+        uint64_t val{};
+        memcpy(&val, &name, sizeof(name));
+        return hash<uint64_t>()(val);
     }
 };
 

@@ -1,6 +1,6 @@
 {
   "template": "git@github.com:bl-sdk/common_dotfiles.git",
-  "commit": "6b31480199099e9957b18918373a75d979951919",
+  "commit": "fb30097e1f28ac03961cc0b4d16168e939a43260",
   "checkout": null,
   "context": {
     "cookiecutter": {
@@ -15,7 +15,8 @@
       "__project_slug": "unrealsdk",
       "include_cpp": true,
       "include_py": false,
-      "_template": "git@github.com:bl-sdk/common_dotfiles.git"
+      "_template": "git@github.com:bl-sdk/common_dotfiles.git",
+      "_commit": "fb30097e1f28ac03961cc0b4d16168e939a43260"
     }
   },
   "directory": null

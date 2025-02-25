@@ -57,76 +57,38 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        preset: [
-          "clang-cross-ue3-x86-release",
-          "clang-cross-ue4-x64-release",
-          "llvm-mingw-ue3-x86-release",
-          "llvm-mingw-ue4-x64-release",
-          "mingw-ue3-x86-release",
-          "mingw-ue4-x64-release",
-        ]
+        toolchain:
+          - preset: clang-cross-ue3-x86-release
+            container: clang-cross
+          - preset: clang-cross-ue4-x64-release
+            container: clang-cross
+          - preset: llvm-mingw-ue3-x86-release
+            container: llvm-mingw
+          - preset: llvm-mingw-ue4-x64-release
+            container: llvm-mingw
+          - preset: mingw-ue3-x86-release
+            container: mingw
+          - preset: mingw-ue4-x64-release
+            container: mingw
 
     steps:
-    - name: Setup CMake and Ninja
-      uses: lukka/get-cmake@latest
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: Setup LLVM MinGW
-      if: startswith(matrix.preset, 'llvm-mingw')
-      run: |
-        wget -nv ${{ env.LLVM_MINGW_DOWNLOAD }}
-        tar -xf ${{ env.LLVM_MINGW_VERSION }}.tar.xz -C ~/
-        echo $(readlink -f ~/${{ env.LLVM_MINGW_VERSION }}/bin) >> $GITHUB_PATH
+      - name: Build
+        uses: devcontainers/ci@v0.3
+        with:
+          cacheFrom: ghcr.io/bl-sdk/${{ matrix.toolchain.container }}:latest
+          configFile: .devcontainer/${{ matrix.toolchain.container }}/devcontainer.json
+          push: never
+          # The git watcher cmake thinks something's unsafe? Doesn't happen to me locally.
+          runCmd: |
+            git config --global --add safe.directory `pwd`
+            cmake . --preset ${{ matrix.toolchain.preset }} -G Ninja
+            cmake --build out/build/${{ matrix.toolchain.preset }}
 
-    - name: Setup MinGW
-      if: startswith(matrix.preset, 'mingw')
-      uses: egor-tensin/setup-mingw@v2
-      with:
-        platform: ${{ fromJSON('["x86", "x64"]')[contains(matrix.preset, 'x64')] }}
-
-    - name: Setup Clang
-      if: startswith(matrix.preset, 'clang-cross')
-      uses: egor-tensin/setup-clang@v1
-
-    - name: Restore win sdk cache
-      if: startswith(matrix.preset, 'clang-cross')
-      uses: actions/cache@v4
-      id: cache-win-sdk
-      with:
-        path: ~/win-sdk
-        key: ${{ runner.os }}-win-sdk
-
-    - name: Setup msitools
-      if: startswith(matrix.preset, 'clang-cross') && steps.cache-win-sdk.outputs.cache-hit != 'true'
-      uses: awalsh128/cache-apt-pkgs-action@latest
-      with:
-        packages: msitools
-        version: ${{ runner.os }}-msitools
-
-    - name: Setup win sdk
-      if: startswith(matrix.preset, 'clang-cross') && steps.cache-win-sdk.outputs.cache-hit != 'true'
-      run: |
-        git clone https://github.com/mstorsjo/msvc-wine.git
-        msvc-wine/vsdownload.py --accept-license --dest ~/win-sdk Microsoft.VisualStudio.Workload.VCTools
-        msvc-wine/install.sh ~/win-sdk
-        rm -r msvc-wine
-
-    - name: Checkout repository and submodules
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
-
-    - name: Configure CMake
-      working-directory: ${{ env.GITHUB_WORKSPACE }}
-      # The extra msvc wine arg won't do anything if we're not cross compiling
-      run: >
-        cmake .
-        --preset ${{ matrix.preset }}
-        -G Ninja
-        -DMSVC_WINE_ENV_SCRIPT=$(readlink -f ~)/win-sdk/bin/${{ fromJSON('["x86", "x64"]')[contains(matrix.preset, 'x64')] }}/msvcenv.sh
-
-    - name: Build
-      working-directory: ${{ env.GITHUB_WORKSPACE }}
-      run: cmake --build out/build/${{ matrix.preset }}
 
 # ==============================================================================
 
