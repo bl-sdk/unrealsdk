@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.8.0
+
+- Added support for sending property changed events, via `UObject::post_edit_change_property` and
+  `UObject::post_edit_change_chain_property`.
+  
+  [a6040da4](https://github.com/bl-sdk/unrealsdk/commit/a6040da4)
+
+- Made the error message when assigning incompatible array types more clear.
+
+  See also https://github.com/bl-sdk/unrealsdk/issues/60 .
+
+  [6222756c](https://github.com/bl-sdk/unrealsdk/commit/6222756c)
+
 ## 1.7.0
 
 - `unrealsdk::unreal::cast` now copies the const-ness of its input object to its callbacks.

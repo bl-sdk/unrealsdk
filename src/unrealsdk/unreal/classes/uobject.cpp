@@ -1,13 +1,16 @@
 #include "unrealsdk/pch.h"
 
+#include "unrealsdk/config.h"
 #include "unrealsdk/unreal/classes/uclass.h"
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/classes/uobject.h"
+#include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/classes/ustruct_funcs.h"
 #include "unrealsdk/unreal/offset_list.h"
 #include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/structs/fname.h"
+#include "unrealsdk/unreal/structs/fpropertychangeevent.h"
 #include "unrealsdk/unreal/wrappers/bound_function.h"
 #include "unrealsdk/unrealsdk.h"
 
@@ -82,6 +85,46 @@ BoundFunction UObject::get<UFunction, BoundFunction>(const UFunction* prop, size
 template <>
 BoundFunction UObject::get<UFunction, BoundFunction>(const FName& name, size_t idx) const {
     return this->get<UFunction, BoundFunction>(this->Class()->find_func_and_validate(name), idx);
+}
+
+void UObject::post_edit_change_property(const FName& name) const {
+    this->post_edit_change_property(this->Class()->find_prop(name));
+}
+void UObject::post_edit_change_property(UProperty* prop) const {
+    FPropertyChangedEvent event{prop};
+
+#ifdef UE3
+    constexpr auto default_idx = 19;
+#else
+    constexpr auto default_idx = 78;
+#endif
+    static auto idx =
+        config::get_int<size_t>("unrealsdk.uobject_post_edit_change_property_vf_index")
+            .value_or(default_idx);
+
+    this->call_virtual_function<void, FPropertyChangedEvent*>(idx, &event);
+}
+
+void UObject::post_edit_change_chain_property(UProperty* prop,
+                                              const std::vector<UProperty*>& chain) const {
+    FEditPropertyChain edit_chain{chain};
+    FPropertyChangedChainEvent event{prop, &edit_chain};
+
+#ifdef UE3
+    constexpr auto default_idx = 18;
+#else
+    constexpr auto default_idx = 77;
+#endif
+    static auto idx =
+        config::get_int<size_t>("unrealsdk.uobject_post_edit_change_chain_property_vf_index")
+            .value_or(default_idx);  // NOLINT(readability-magic-numbers)
+    this->call_virtual_function<void, FPropertyChangedEvent*>(idx, &event);
+}
+
+void UObject::post_edit_change_chain_property(UProperty* prop,
+                                              std::initializer_list<UProperty*> chain) const {
+    const std::vector<UProperty*> vector_chain{chain};
+    this->post_edit_change_chain_property(prop, vector_chain);
 }
 
 }  // namespace unrealsdk::unreal
