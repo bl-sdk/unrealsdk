@@ -49,12 +49,14 @@ class UObject {
     UNREALSDK_DEFINE_FIELDS_HEADER(UObject, UNREALSDK_UOBJECT_FIELDS);
 
 #if UE4
-    uintptr_t* vftable;
-    int32_t ObjectFlags;
-    int32_t InternalIndex;
-    UClass* Class;
-    FName Name;
-    UObject* Outer;
+   private:
+    int32_t ObjectFlags_member;
+    int32_t InternalIndex_member;
+    UClass* Class_member;
+    FName Name_member;
+    UObject* Outer_member;
+
+   public:
 #else
 
    private:

@@ -163,12 +163,12 @@ bool inject_console_hook(hook_manager::Details& hook) {
     auto local_player = hook.obj->get<UObjectProperty>(L"Player"_fn);
     auto viewport = local_player->get<UObjectProperty>(L"ViewportClient"_fn);
     auto console_property =
-        viewport->Class->find_prop_and_validate<UObjectProperty>(L"ViewportConsole"_fn);
+        viewport->Class()->find_prop_and_validate<UObjectProperty>(L"ViewportConsole"_fn);
     console = viewport->get(console_property);
 
     if (console == nullptr) {
         auto default_console = console_property->get_property_class()->ClassDefaultObject();
-        console = unrealsdk::construct_object(default_console->Class, default_console->Outer);
+        console = unrealsdk::construct_object(default_console->Class(), default_console->Outer());
         viewport->set<UObjectProperty>(L"ViewportConsole"_fn, console);
     }
 
@@ -187,7 +187,7 @@ bool inject_console_hook(hook_manager::Details& hook) {
     // just search through gobjects for the default object ¯\_(ツ)_/¯
     auto input_settings_fn = L"InputSettings"_fn;
     for (const auto& inner_obj : gobjects()) {
-        if (inner_obj->Class->Name != input_settings_fn) {
+        if (inner_obj->Class()->Name() != input_settings_fn) {
             continue;
         }
 

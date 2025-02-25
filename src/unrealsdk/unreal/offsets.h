@@ -30,6 +30,16 @@ using copy_cv = std::conditional_t<
             reinterpret_cast<uintptr_t>(&self) + Offsets::get(&Offsets::name));      \
     }
 
+#ifdef __MINGW32__
+#define UNREALSDK_OFFSETS__OFFSETOF_PRAGMA_PUSH \
+    _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Winvalid-offsetof\"")
+#define UNREALSDK_OFFSETS__OFFSETOF_PRAGMA_POP _Pragma("GCC diagnostic pop")
+
+#else
+#define UNREALSDK_OFFSETS__OFFSETOF_PRAGMA_PUSH
+#define UNREALSDK_OFFSETS__OFFSETOF_PRAGMA_POP
+#endif
+
 /**
  * @brief Header file macro to defines all the machinery for variable offset fields.
  * @note Should be placed within the class definition.
@@ -45,8 +55,10 @@ using copy_cv = std::conditional_t<
         X_MACRO(UNREALSDK_OFFSETS__DEFINE_OFFSET_MEMBERS)              \
         template <typename T>                                          \
         static constexpr Offsets from() {                              \
+            UNREALSDK_OFFSETS__OFFSETOF_PRAGMA_PUSH                    \
             X_MACRO(UNREALSDK_OFFSETS__OFFSETOF_ASSERTS);              \
             return {X_MACRO(UNREALSDK_OFFSETS__OFFSETOF)};             \
+            UNREALSDK_OFFSETS__OFFSETOF_PRAGMA_POP                     \
         }                                                              \
         static unrealsdk::unreal::offsets::offset_type get(            \
             unrealsdk::unreal::offsets::offset_type Offsets::* field); \

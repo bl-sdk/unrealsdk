@@ -103,7 +103,7 @@ void GObjects::set_weak_object(FWeakObjectPtr* ptr, const UObject* obj) const {
     if (obj == nullptr) {
         *ptr = {};
     } else {
-        ptr->object_index = obj->InternalIndex;
+        ptr->object_index = obj->InternalIndex();
 
         auto obj_item = this->internal->ObjObjects.at(ptr->object_index);
         auto serial_number = obj_item->SerialNumber.load();

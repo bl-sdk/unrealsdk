@@ -26,24 +26,31 @@ namespace unrealsdk::game::bl2 {
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 struct UObject {
+   private:
     uintptr_t* vftable;
     void* HashNext;
 
+   public:
     uint64_t ObjectFlags;
 
+   private:
     void* HashOuterNext;
     void* StateFrame;
     unreal::UObject* _Linker;
     void* _LinkerIndex;
 
+   public:
     int32_t InternalIndex;
 
+   private:
     int32_t NetIndex;
 
-    UObject* Outer;
+   public:
+    unreal::UObject* Outer;
     unreal::FName Name;
     unreal::UClass* Class;
 
+   private:
     unreal::UObject* ObjectArchetype;
 };
 
