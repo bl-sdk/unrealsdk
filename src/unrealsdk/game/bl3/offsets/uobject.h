@@ -15,10 +15,18 @@ class UClass;
 
 namespace unrealsdk::game::bl3 {
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-private-field"
+#endif
 // NOLINTBEGIN(readability-identifier-naming)
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 struct UObject {
+   private:
+    uintptr_t* vftable;
+
+   public:
     int32_t ObjectFlags;
     int32_t InternalIndex;
     unreal::UClass* Class;
@@ -27,6 +35,9 @@ struct UObject {
 };
 
 // NOLINTEND(readability-identifier-naming)
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 }  // namespace unrealsdk::game::bl3
 
