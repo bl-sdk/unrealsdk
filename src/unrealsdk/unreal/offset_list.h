@@ -2,6 +2,7 @@
 #define UNREALSDK_UNREAL_OFFSET_LIST_H
 
 #include "unrealsdk/pch.h"
+#include "unrealsdk/unreal/classes/ufield.h"
 #include "unrealsdk/unreal/classes/uobject.h"
 
 namespace unrealsdk::unreal::offsets {
@@ -13,7 +14,9 @@ namespace unrealsdk::unreal::offsets {
 #endif
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
-#define UNREALSDK__DYNAMIC_OFFSET_TYPES(X) X(UObject)
+#define UNREALSDK__DYNAMIC_OFFSET_TYPES(X) \
+    X(UObject)                             \
+    X(UField)
 
 #define UNREALSDK_OFFSETS__DEFINE_OFFSET_LIST_MEMBERS(name) name::Offsets name;
 #define UNREALSDK_OFFSETS__NESTED_FROM(name) name::Offsets::from<typename T::name>(),

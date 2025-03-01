@@ -69,7 +69,7 @@ UStruct::FieldIterator::reference UStruct::FieldIterator::operator*() const {
 
 UStruct::FieldIterator& UStruct::FieldIterator::operator++() {
     if (this->field != nullptr) {
-        this->field = this->field->Next;
+        this->field = this->field->Next();
     }
     while (this->field == nullptr && this->this_struct != nullptr) {
         this->this_struct = this->this_struct->SuperField;
