@@ -20,7 +20,7 @@ PropTraits<UArrayProperty>::Value PropTraits<UArrayProperty>::get(
     uintptr_t addr,
     const UnrealPointer<void>& parent) {
     auto inner = prop->get_inner();
-    if (prop->ArrayDim > 1) {
+    if (prop->ArrayDim() > 1) {
         throw std::runtime_error(
             "Array has static array inner property - unsure how to handle, aborting!");
     }
@@ -32,7 +32,7 @@ void PropTraits<UArrayProperty>::set(const UArrayProperty* prop,
                                      uintptr_t addr,
                                      const Value& value) {
     auto inner = prop->get_inner();
-    if (prop->ArrayDim > 1) {
+    if (prop->ArrayDim() > 1) {
         throw std::runtime_error(
             "Array has static array inner property - unsure how to handle, aborting!");
     }
@@ -51,11 +51,11 @@ void PropTraits<UArrayProperty>::set(const UArrayProperty* prop,
 
     cast(inner, [prop, &arr, &value]<typename T>(const T* inner) {
         auto new_size = value.size();
-        arr->resize(new_size, prop->ElementSize);
+        arr->resize(new_size, prop->ElementSize());
 
         for (size_t i = 0; i < new_size; i++) {
             set_property<T>(inner, 0,
-                            reinterpret_cast<uintptr_t>(arr->data) + (inner->ElementSize * i),
+                            reinterpret_cast<uintptr_t>(arr->data) + (inner->ElementSize() * i),
                             value.get_at<T>(i));
         }
     });
@@ -63,7 +63,7 @@ void PropTraits<UArrayProperty>::set(const UArrayProperty* prop,
 
 void PropTraits<UArrayProperty>::destroy(const UArrayProperty* prop, uintptr_t addr) {
     auto inner = prop->get_inner();
-    if (prop->ArrayDim > 1) {
+    if (prop->ArrayDim() > 1) {
         throw std::runtime_error(
             "Array has static array inner property - unsure how to handle, aborting!");
     }
@@ -72,8 +72,8 @@ void PropTraits<UArrayProperty>::destroy(const UArrayProperty* prop, uintptr_t a
 
     cast(inner, [arr]<typename T>(const T* inner) {
         for (size_t i = 0; i < arr->size(); i++) {
-            destroy_property<T>(inner, 0,
-                                reinterpret_cast<uintptr_t>(arr->data) + (inner->ElementSize * i));
+            destroy_property<T>(
+                inner, 0, reinterpret_cast<uintptr_t>(arr->data) + (inner->ElementSize() * i));
         }
     });
 

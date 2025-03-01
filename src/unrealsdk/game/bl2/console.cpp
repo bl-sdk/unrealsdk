@@ -196,7 +196,7 @@ bool console_command_hook(hook_manager::Details& hook) {
         hook.obj->set<UStrProperty>(history_prop, history_top, line);
 
         // Increment top
-        history_top = (history_top + 1) % history_prop->ArrayDim;
+        history_top = (history_top + 1) % history_prop->ArrayDim();
         hook.obj->set<UIntProperty>(history_top_prop, history_top);
         // And set current
         hook.obj->set<UIntProperty>(history_cur_prop, history_top);
@@ -205,7 +205,7 @@ bool console_command_hook(hook_manager::Details& hook) {
         auto history_bot = hook.obj->get<UIntProperty>(history_bot_prop);
         if ((history_bot == -1) || history_bot == history_top) {
             hook.obj->set<UIntProperty>(history_bot_prop,
-                                        (history_bot + 1) % history_prop->ArrayDim);
+                                        (history_bot + 1) % history_prop->ArrayDim());
         }
 
         hook.obj->get<UFunction, BoundFunction>(save_config_func).call<void>();

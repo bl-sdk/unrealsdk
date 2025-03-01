@@ -122,7 +122,7 @@ UStruct::PropertyIterator::reference UStruct::PropertyIterator::operator*() cons
 }
 
 UStruct::PropertyIterator& UStruct::PropertyIterator::operator++() {
-    prop = prop->PropertyLinkNext;
+    prop = prop->PropertyLinkNext();
     return *this;
 }
 UStruct::PropertyIterator UStruct::PropertyIterator::operator++(int) {

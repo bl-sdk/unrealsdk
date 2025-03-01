@@ -1,6 +1,7 @@
 #include "unrealsdk/pch.h"
 #include "unrealsdk/game/bl2/offsets/ufield.h"
 #include "unrealsdk/game/bl2/offsets/uobject.h"
+#include "unrealsdk/game/tps/offsets/uproperty.h"
 #include "unrealsdk/game/tps/offsets/ustruct.h"
 #include "unrealsdk/game/tps/tps.h"
 #include "unrealsdk/unreal/classes/ufield.h"
@@ -18,6 +19,7 @@ struct OffsetClasses {
     using UObject = bl2::UObject;
     using UField = bl2::UField;
     using UStruct = tps::UStruct;
+    using UProperty = tps::UProperty;
 };
 
 const auto OFFSETS = OffsetList::from<OffsetClasses>();

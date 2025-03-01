@@ -12,7 +12,7 @@ WrappedArray::WrappedArray(const UProperty* type,
                            TArray<void>* base,
                            const UnrealPointer<void>& parent)
     : type(type), base(parent, base) {
-    if (type->ArrayDim > 1) {
+    if (type->ArrayDim() > 1) {
         throw std::runtime_error(
             "Array has static array inner property - unsure how to handle, aborting!");
     }
@@ -30,7 +30,7 @@ void WrappedArray::reserve(size_t new_cap) const {
     if (new_cap < this->size()) {
         throw std::invalid_argument("Can't decrease array capacity below it's current size.");
     }
-    this->base->reserve(new_cap, this->type->ElementSize);
+    this->base->reserve(new_cap, this->type->ElementSize());
 }
 
 void WrappedArray::resize(size_t new_size) {
@@ -42,13 +42,13 @@ void WrappedArray::resize(size_t new_size) {
         }
     });
 
-    this->base->resize(new_size, this->type->ElementSize);
+    this->base->resize(new_size, this->type->ElementSize());
 
     // 0-initialize any new entries
     if (new_size > old_size) {
         auto data_ptr = reinterpret_cast<uintptr_t>(this->base->data);
-        auto start = data_ptr + (old_size * this->type->ElementSize);
-        auto length = (new_size - old_size) * this->type->ElementSize;
+        auto start = data_ptr + (old_size * this->type->ElementSize());
+        auto length = (new_size - old_size) * this->type->ElementSize();
         memset(reinterpret_cast<void*>(start), 0, length);
     }
 }

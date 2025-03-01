@@ -94,7 +94,7 @@ class WrappedArray {
         this->validate_access<T>(idx);
         return get_property<T>(
             reinterpret_cast<const T*>(this->type), 0,
-            reinterpret_cast<uintptr_t>(this->base->data) + (this->type->ElementSize * idx),
+            reinterpret_cast<uintptr_t>(this->base->data) + (this->type->ElementSize() * idx),
             this->base);
     }
 
@@ -110,7 +110,8 @@ class WrappedArray {
         this->validate_access<T>(idx);
         set_property<T>(
             reinterpret_cast<const T*>(this->type), 0,
-            reinterpret_cast<uintptr_t>(this->base->data) + (this->type->ElementSize * idx), value);
+            reinterpret_cast<uintptr_t>(this->base->data) + (this->type->ElementSize() * idx),
+            value);
     }
 
     /**
@@ -124,7 +125,7 @@ class WrappedArray {
         this->validate_access<T>(idx);
         destroy_property<T>(
             reinterpret_cast<const T*>(this->type), 0,
-            reinterpret_cast<uintptr_t>(this->base->data) + (this->type->ElementSize * idx));
+            reinterpret_cast<uintptr_t>(this->base->data) + (this->type->ElementSize() * idx));
     }
 };
 

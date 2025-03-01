@@ -103,7 +103,7 @@ void console_command_hook(UObject* console_obj, UnmanagedFString* raw_line) {
                     // anything, just lower the count
                     if (dropped_idx != (history_size - 1)) {
                         auto data = reinterpret_cast<uintptr_t>(history_buffer.base->data);
-                        auto element_size = history_buffer.type->ElementSize;
+                        auto element_size = history_buffer.type->ElementSize();
 
                         auto dest = data + (dropped_idx * element_size);
                         auto remaining_size = (history_size - dropped_idx) * element_size;

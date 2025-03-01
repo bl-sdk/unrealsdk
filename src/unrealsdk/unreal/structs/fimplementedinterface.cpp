@@ -9,7 +9,7 @@ size_t FImplementedInterface::get_pointer_offset() const {
 #if UE4
     return this->isNative ? 0 : this->PointerOffset;
 #else
-    return this->VFTableProperty == nullptr ? 0 : this->VFTableProperty->Offset_Internal;
+    return this->VFTableProperty == nullptr ? 0 : this->VFTableProperty->Offset_Internal();
 #endif
 }
 

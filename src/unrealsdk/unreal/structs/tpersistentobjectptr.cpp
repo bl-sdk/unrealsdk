@@ -17,24 +17,24 @@ template <typename T>
 const TPersistentObjectPtr<T>* get_addr_from(const UObject* obj,
                                              const UObjectProperty* prop,
                                              size_t idx) {
-    if (idx >= (size_t)prop->ArrayDim) {
+    if (idx >= (size_t)prop->ArrayDim()) {
         throw std::out_of_range("Property index out of range");
     }
 
     auto addr =
-        reinterpret_cast<uintptr_t>(obj) + prop->Offset_Internal + (idx * prop->ElementSize);
+        reinterpret_cast<uintptr_t>(obj) + prop->Offset_Internal() + (idx * prop->ElementSize());
     return reinterpret_cast<TPersistentObjectPtr<T>*>(addr);
 }
 template <typename T>
 const TPersistentObjectPtr<T>* get_addr_from(const WrappedStruct& wrapped_struct,
                                              const UObjectProperty* prop,
                                              size_t idx) {
-    if (idx >= (size_t)prop->ArrayDim) {
+    if (idx >= (size_t)prop->ArrayDim()) {
         throw std::out_of_range("Property index out of range");
     }
 
-    auto addr = reinterpret_cast<uintptr_t>(wrapped_struct.base.get()) + prop->Offset_Internal
-                + (idx * prop->ElementSize);
+    auto addr = reinterpret_cast<uintptr_t>(wrapped_struct.base.get()) + prop->Offset_Internal()
+                + (idx * prop->ElementSize());
     return reinterpret_cast<TPersistentObjectPtr<T>*>(addr);
 }
 
@@ -48,7 +48,7 @@ const TPersistentObjectPtr<T>* get_addr_from_array(const WrappedArray& array, si
         throw std::out_of_range("WrappedArray index out of range");
     }
 
-    auto addr = reinterpret_cast<uintptr_t>(array.base->data) + (array.type->ElementSize * idx);
+    auto addr = reinterpret_cast<uintptr_t>(array.base->data) + (array.type->ElementSize() * idx);
     return reinterpret_cast<TPersistentObjectPtr<T>*>(addr);
 }
 

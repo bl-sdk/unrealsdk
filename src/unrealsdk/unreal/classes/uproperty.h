@@ -54,26 +54,38 @@ class UProperty : public UField {
 
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
-#ifdef UE4
-    int32_t ArrayDim;
-    int32_t ElementSize;
-    uint64_t PropertyFlags;
+#if UE4
+    using property_flags_type = uint64_t;
+#else
+    using property_flags_type = uint32_t;
+#endif
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UPROPERTY_FIELDS(X)     \
+    X(int32_t, ArrayDim)                  \
+    X(int32_t, ElementSize)               \
+    X(property_flags_type, PropertyFlags) \
+    X(int32_t, Offset_Internal)           \
+    X(UProperty*, PropertyLinkNext)
+
+    UNREALSDK_DEFINE_FIELDS_HEADER(UProperty, UNREALSDK_UPROPERTY_FIELDS);
+
+#ifdef UE4
    private:
+    int32_t ArrayDim_member;
+    int32_t ElementSize_member;
+    uint64_t PropertyFlags_member;
+
     uint16_t RepIndex;
     uint8_t BlueprintReplicationCondition;
 
-   public:
-    int32_t Offset_Internal;
+    int32_t Offset_Internal_member;
 
-   private:
     FName RepNotifyFunc;
 
-   public:
     /** In memory only: Linked list of properties from most-derived to base **/
-    UProperty* PropertyLinkNext;
+    UProperty* PropertyLinkNext_member;
 
-   private:
     /** In memory only: Linked list of object reference properties from most-derived to base **/
     UProperty* NextRef;
     /** In memory only: Linked list of properties requiring destruction. Note this does not include
@@ -82,19 +94,16 @@ class UProperty : public UField {
     /** In memory only: Linked list of properties requiring post constructor initialization.**/
     UProperty* PostConstructLinkNext;  // 0x0030(0x0040) MISSED OFFSET
 #else
-
-    int32_t ArrayDim;
-    int32_t ElementSize;
-    uint32_t PropertyFlags;
-
    private:
+    int32_t ArrayDim_member;
+    int32_t ElementSize_member;
+    uint32_t PropertyFlags_member;
+
     uint8_t UnknownData00[0x14];
 
-   public:
-    int32_t Offset_Internal;
-    UProperty* PropertyLinkNext;
+    int32_t Offset_Internal_member;
+    UProperty* PropertyLinkNext_member;
 
-   private:
     uint8_t UnknownData01[0x18];
 
     /**

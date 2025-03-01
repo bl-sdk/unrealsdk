@@ -2,6 +2,7 @@
 #include "unrealsdk/game/bl3/bl3.h"
 #include "unrealsdk/game/bl3/offsets/ufield.h"
 #include "unrealsdk/game/bl3/offsets/uobject.h"
+#include "unrealsdk/game/bl3/offsets/uproperty.h"
 #include "unrealsdk/game/bl3/offsets/ustruct.h"
 #include "unrealsdk/unreal/classes/ufield.h"
 #include "unrealsdk/unreal/offset_list.h"
@@ -18,6 +19,7 @@ struct OffsetClasses {
     using UObject = bl3::UObject;
     using UField = bl3::UField;
     using UStruct = bl3::UStruct;
+    using UProperty = bl3::UProperty;
 };
 
 const auto OFFSETS = OffsetList::from<OffsetClasses>();

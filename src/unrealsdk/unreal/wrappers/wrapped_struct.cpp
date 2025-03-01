@@ -19,7 +19,7 @@ void copy_struct(uintptr_t dest, const WrappedStruct& src) {
 
     for (const auto& prop : src.type->properties()) {
         cast(prop, [dest, &src]<typename T>(const T* prop) {
-            for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
+            for (size_t i = 0; i < (size_t)prop->ArrayDim(); i++) {
                 set_property<T>(prop, i, dest, src.get<T>(prop, i));
             }
         });
@@ -30,7 +30,7 @@ void destroy_struct(const UStruct* type, uintptr_t addr) {
     for (const auto& prop : type->properties()) {
         try {
             cast(prop, [addr]<typename T>(const T* prop) {
-                for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
+                for (size_t i = 0; i < (size_t)prop->ArrayDim(); i++) {
                     destroy_property<T>(prop, i, addr);
                 }
             });
@@ -81,12 +81,12 @@ WrappedStruct WrappedStruct::copy_params_only(void) const {
 
     auto dest = reinterpret_cast<uintptr_t>(new_struct.base.get());
     for (const auto& prop : this->type->properties()) {
-        if ((prop->PropertyFlags & UProperty::PROP_FLAG_PARAM) == 0) {
+        if ((prop->PropertyFlags() & UProperty::PROP_FLAG_PARAM) == 0) {
             continue;
         }
 
         cast(prop, [dest, this]<typename T>(const T* prop) {
-            for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
+            for (size_t i = 0; i < (size_t)prop->ArrayDim(); i++) {
                 set_property<T>(prop, i, dest, this->get<T>(prop, i));
             }
         });
