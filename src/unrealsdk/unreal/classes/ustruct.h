@@ -30,15 +30,24 @@ class UStruct : public UField {
     UStruct& operator=(UStruct&&) = delete;
     ~UStruct() = delete;
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_USTRUCT_FIELDS(X) \
+    X(UStruct*, SuperField)         \
+    X(UField*, Children)            \
+    X(UProperty*, PropertyLink)
+
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    UNREALSDK_DEFINE_FIELDS_HEADER(UStruct, UNREALSDK_USTRUCT_FIELDS);
+
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
 #ifdef UE4
-    /* Struct this inherits from, may be null */
-    UStruct* SuperField;
-    /* Pointer to start of linked list of child fields */
-    UField* Children;
-
    private:
+    /* Struct this inherits from, may be null */
+    UStruct* SuperField_member;
+    /* Pointer to start of linked list of child fields */
+    UField* Children_member;
+
     /* Total size of all UProperties, the allocated structure may be larger due to alignment */
     int32_t PropertySize;
     /* Alignment of structure in memory, structure will be at least this large */
@@ -46,11 +55,9 @@ class UStruct : public UField {
     /* Script bytecode associated with this object */
     TArray<uint8_t> Script;
 
-   public:
     /* In memory only: Linked list of properties from most-derived to base */
-    UProperty* PropertyLink;
+    UProperty* PropertyLink_member;
 
-   private:
     /* In memory only: Linked list of object reference properties from most-derived to base */
     UProperty* RefLink;
     /* In memory only: Linked list of properties requiring destruction. Note this does not include
@@ -65,18 +72,14 @@ class UStruct : public UField {
    private:
     uint8_t UnknownData00[0x8];
 
-   public:
-    UStruct* SuperField;
-    UField* Children;
+    UStruct* SuperField_member;
+    UField* Children_member;
 
-   private:
     uint16_t PropertySize;
     uint8_t UnknownData01[0x1A];
 
-   public:
-    UProperty* PropertyLink;
+    UProperty* PropertyLink_member;
 
-   private:
     uint8_t UnknownData02[0x10];
 
     TArray<UObject*> ScriptObjectReferences;

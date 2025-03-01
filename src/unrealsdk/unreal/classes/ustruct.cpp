@@ -6,11 +6,15 @@
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/classes/ustruct.h"
+#include "unrealsdk/unreal/offset_list.h"
+#include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/wrappers/bound_function.h"
 #include "unrealsdk/unreal/wrappers/gobjects.h"
 #include "unrealsdk/utils.h"
 
 namespace unrealsdk::unreal {
+
+UNREALSDK_DEFINE_FIELDS_SOURCE_FILE(UStruct, UNREALSDK_USTRUCT_FIELDS);
 
 #ifdef UE3
 
@@ -72,10 +76,10 @@ UStruct::FieldIterator& UStruct::FieldIterator::operator++() {
         this->field = this->field->Next();
     }
     while (this->field == nullptr && this->this_struct != nullptr) {
-        this->this_struct = this->this_struct->SuperField;
+        this->this_struct = this->this_struct->SuperField();
 
         if (this->this_struct != nullptr) {
-            this->field = this->this_struct->Children;
+            this->field = this->this_struct->Children();
         }
     }
 
@@ -95,7 +99,7 @@ bool UStruct::FieldIterator::operator!=(const UStruct::FieldIterator& rhs) const
 };
 
 utils::IteratorProxy<UStruct::FieldIterator> UStruct::fields(void) const {
-    FieldIterator begin{this, this->Children};
+    FieldIterator begin{this, this->Children()};
 
     // If we start out pointing at null (because this struct has no direct children), increment once
     //  to find the actual first field
@@ -135,7 +139,7 @@ bool UStruct::PropertyIterator::operator!=(const UStruct::PropertyIterator& rhs)
 };
 
 utils::IteratorProxy<UStruct::PropertyIterator> UStruct::properties(void) const {
-    return {{this->PropertyLink}, {}};
+    return {{this->PropertyLink()}, {}};
 }
 
 #pragma endregion
@@ -151,7 +155,7 @@ UStruct::SuperFieldIterator::reference UStruct::SuperFieldIterator::operator*() 
 }
 
 UStruct::SuperFieldIterator& UStruct::SuperFieldIterator::operator++() {
-    this->this_struct = this->this_struct->SuperField;
+    this->this_struct = this->this_struct->SuperField();
     return *this;
 }
 UStruct::SuperFieldIterator UStruct::SuperFieldIterator::operator++(int) {

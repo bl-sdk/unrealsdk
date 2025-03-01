@@ -78,7 +78,7 @@ void set_param(WrappedStruct& params,
  */
 template <typename... Ts>
 void write_params(WrappedStruct& params, const typename PropTraits<Ts>::Value&... args) {
-    UProperty* prop = params.type->PropertyLink;
+    UProperty* prop = params.type->PropertyLink();
     if (prop != nullptr && (prop->PropertyFlags & UProperty::PROP_FLAG_PARAM) == 0) {
         prop = impl::get_next_param(prop);
     }

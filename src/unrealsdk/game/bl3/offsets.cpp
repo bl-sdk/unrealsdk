@@ -1,6 +1,8 @@
 #include "unrealsdk/pch.h"
 #include "unrealsdk/game/bl3/bl3.h"
+#include "unrealsdk/game/bl3/offsets/ufield.h"
 #include "unrealsdk/game/bl3/offsets/uobject.h"
+#include "unrealsdk/game/bl3/offsets/ustruct.h"
 #include "unrealsdk/unreal/classes/ufield.h"
 #include "unrealsdk/unreal/offset_list.h"
 
@@ -14,7 +16,8 @@ namespace {
 
 struct OffsetClasses {
     using UObject = bl3::UObject;
-    using UField = generic::UField<bl3::UObject>;
+    using UField = bl3::UField;
+    using UStruct = bl3::UStruct;
 };
 
 const auto OFFSETS = OffsetList::from<OffsetClasses>();

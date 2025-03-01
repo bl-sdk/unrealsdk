@@ -16,6 +16,7 @@ class TPSHook : public BL2Hook {
 
    public:
     void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const override;
+    [[nodiscard]] const unreal::offsets::OffsetList& get_offsets(void) const override;
 };
 
 template <>

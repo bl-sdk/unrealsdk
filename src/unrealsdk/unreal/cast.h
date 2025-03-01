@@ -133,11 +133,11 @@ void cast_impl(InputType* obj,
     if constexpr (i >= std::tuple_size_v<ClassTuple>) {
         // But we're supposed to check inherited types, and we have a super field
         if constexpr (check_inherited_types) {
-            if (working_class->SuperField != nullptr) {
+            if (working_class->SuperField() != nullptr) {
                 // Jump back to the start of the tuple, but use the super field
                 return cast_impl<InputType, Function, Fallback, include_input_type,
                                  check_inherited_types, ClassTuple, 0>(
-                    obj, working_class->SuperField, func, fallback);
+                    obj, working_class->SuperField(), func, fallback);
             }
         }
 

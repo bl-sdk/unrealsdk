@@ -30,7 +30,7 @@ using copy_cv = std::conditional_t<
             reinterpret_cast<uintptr_t>(&self) + Offsets::get(&Offsets::name));      \
     }
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(__clang__)
 #define UNREALSDK_OFFSETS__OFFSETOF_PRAGMA_PUSH \
     _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Winvalid-offsetof\"")
 #define UNREALSDK_OFFSETS__OFFSETOF_PRAGMA_POP _Pragma("GCC diagnostic pop")
