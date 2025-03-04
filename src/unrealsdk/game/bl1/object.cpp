@@ -5,8 +5,7 @@
 #include "unrealsdk/memory.h"
 #include "unrealsdk/unreal/structs/fstring.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING) \
-    && defined(UNREALSDK_GAME_BL1)
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::unreal;
 using namespace unrealsdk::memory;
@@ -62,7 +61,7 @@ void BL1Hook::find_construct_object(void) {
 UObject* BL1Hook::construct_object(UClass* cls,
                                    UObject* outer,
                                    const FName& name,
-                                   decltype(UObject::ObjectFlags) flags,
+                                   uint64_t flags,
                                    UObject* template_obj) const {
     return construct_obj_ptr(cls, outer, name, flags, template_obj, nullptr, nullptr,
                              0 /* false */);
@@ -198,20 +197,8 @@ const constinit Pattern<34> LOAD_PACKAGE_PATTERN{
 
 }  // namespace
 
-namespace {
-UObject* bl1_load_package_detour(const UObject* outer, const wchar_t* name, uint32_t flags) {
-    LOG(INFO, L"[LOAD_PACKAGE] ~ {:p}, '{}', {:#010x}", (void*)outer, name, flags);
-    return load_package_ptr(outer, name, flags);
-}
-}  // namespace
-
 void BL1Hook::find_load_package(void) {
-    if (bl1_cfg::is_log_load_package()) {
-        detour(LOAD_PACKAGE_PATTERN, &bl1_load_package_detour, &load_package_ptr,
-               "bl1_load_package_detour");
-    } else {
-        load_package_ptr = LOAD_PACKAGE_PATTERN.sigscan_nullable<load_package_func>();
-    }
+    load_package_ptr = LOAD_PACKAGE_PATTERN.sigscan_nullable<load_package_func>();
     LOG(MISC, "LoadPackage: {:p}", reinterpret_cast<void*>(load_package_ptr));
 }
 

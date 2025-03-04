@@ -4,8 +4,7 @@
 #include "unrealsdk/memory.h"
 #include "unrealsdk/unreal/alignment.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING) \
-    && defined(UNREALSDK_GAME_BL1)
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;
@@ -63,7 +62,7 @@ void BL1Hook::find_gmalloc(void) {
     // always be non-null.
 
     gmalloc = *read_offset<FMalloc**>(GMALLOC_PATTERN.sigscan("GMalloc"));
-    if (!gmalloc) {
+    if (gmalloc == nullptr) {
         // This happens if we try to hook it too early.
         throw std::runtime_error("GMalloc is null");
     }

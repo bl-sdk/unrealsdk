@@ -3,14 +3,16 @@
 #include "unrealsdk/game/bl1/bl1.h"
 
 #include "unrealsdk/commands.h"
+#include "unrealsdk/config.h"
 #include "unrealsdk/hook_manager.h"
 #include "unrealsdk/unreal/classes/properties/copyable_property.h"
 #include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
 #include "unrealsdk/unreal/classes/properties/ustrproperty.h"
+#include "unrealsdk/unreal/classes/uobject.h"
+#include "unrealsdk/unreal/classes/uobject_funcs.h"
 #include "unrealsdk/unreal/find_class.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING) \
-    && defined(UNREALSDK_GAME_BL1)
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::unreal;
 
@@ -31,7 +33,7 @@ BoundFunction console_output_text{};
 
 bool say_bypass_hook(const hook_manager::Details& hook) {
     static const auto console_command_func =
-        hook.obj->Class->find_func_and_validate(L"ConsoleCommand"_fn);
+        hook.obj->Class()->find_func_and_validate(L"ConsoleCommand"_fn);
     static const auto command_property =
         hook.args->type->find_prop_and_validate<UStrProperty>(L"Command"_fn);
 
@@ -45,18 +47,18 @@ bool console_command_hook(const hook_manager::Details& hook) {
         hook.args->type->find_prop_and_validate<UStrProperty>(L"Command"_fn);
 
     static const auto history_prop =
-        hook.obj->Class->find_prop_and_validate<UStrProperty>(L"History"_fn);
+        hook.obj->Class()->find_prop_and_validate<UStrProperty>(L"History"_fn);
     static const auto history_top_prop =
-        hook.obj->Class->find_prop_and_validate<UIntProperty>(L"HistoryTop"_fn);
+        hook.obj->Class()->find_prop_and_validate<UIntProperty>(L"HistoryTop"_fn);
     static const auto history_bot_prop =
-        hook.obj->Class->find_prop_and_validate<UIntProperty>(L"HistoryBot"_fn);
+        hook.obj->Class()->find_prop_and_validate<UIntProperty>(L"HistoryBot"_fn);
     static const auto history_cur_prop =
-        hook.obj->Class->find_prop_and_validate<UIntProperty>(L"HistoryCur"_fn);
+        hook.obj->Class()->find_prop_and_validate<UIntProperty>(L"HistoryCur"_fn);
 
     static const UFunction* purge_command_func =
-        hook.obj->Class->find_func_and_validate(L"PurgeCommandFromHistory"_fn);
+        hook.obj->Class()->find_func_and_validate(L"PurgeCommandFromHistory"_fn);
     static const UFunction* save_config_func =
-        hook.obj->Class->find_func_and_validate(L"SaveConfig"_fn);
+        hook.obj->Class()->find_func_and_validate(L"SaveConfig"_fn);
 
     auto line = hook.args->get<UStrProperty>(command_property);
 
@@ -82,7 +84,7 @@ bool console_command_hook(const hook_manager::Details& hook) {
         hook.obj->set<UStrProperty>(history_prop, history_top, line);
 
         // Increment top
-        history_top = (history_top + 1) % history_prop->ArrayDim;
+        history_top = (history_top + 1) % history_prop->ArrayDim();
         hook.obj->set<UIntProperty>(history_top_prop, history_top);
         // And set current
         hook.obj->set<UIntProperty>(history_cur_prop, history_top);
@@ -91,7 +93,7 @@ bool console_command_hook(const hook_manager::Details& hook) {
         auto history_bot = hook.obj->get<UIntProperty>(history_bot_prop);
         if ((history_bot == -1) || history_bot == history_top) {
             hook.obj->set<UIntProperty>(history_bot_prop,
-                                        (history_bot + 1) % history_prop->ArrayDim);
+                                        (history_bot + 1) % history_prop->ArrayDim());
         }
 
         hook.obj->get<UFunction, BoundFunction>(save_config_func).call<void>();
@@ -166,7 +168,7 @@ bool inject_console_hook(const hook_manager::Details& hook) {
     if (existing_console_key != L"None"_fn || existing_console_key == L"Undefine"_fn) {
         LOG(MISC, "Console key is already set to '{}'", existing_console_key);
     } else {
-        auto wanted_console_key = bl1_cfg::console_key();
+        std::string wanted_console_key{config::get_str("unrealsdk.console_key").value_or("Tilde")};
         console->set<UNameProperty>(L"ConsoleKey"_fn, FName{wanted_console_key});
 
         LOG(MISC, "Set console key to '{}'", wanted_console_key);

@@ -2,7 +2,6 @@
 
 #include "unrealsdk/game/bl1/bl1.h"
 
-#include <corecrt_io.h>
 #include "unrealsdk/hook_manager.h"
 #include "unrealsdk/locks.h"
 #include "unrealsdk/memory.h"
@@ -10,8 +9,7 @@
 #include "unrealsdk/unreal/structs/fframe.h"
 #include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING) \
-    && defined(UNREALSDK_GAME_BL1)
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;
@@ -186,7 +184,7 @@ void __fastcall call_function_hook(UObject* obj,
             if (hook.ret.has_value()) {
                 // Result is a pointer directly to where the property should go, remove the offset
                 hook.ret.copy_to(reinterpret_cast<uintptr_t>(result)
-                                 - hook.ret.prop->Offset_Internal);
+                                 - hook.ret.prop->Offset_Internal());
             }
 
             if (!has_post_hooks(*data)) {
@@ -195,7 +193,7 @@ void __fastcall call_function_hook(UObject* obj,
 
             if (hook.ret.prop != nullptr && !hook.ret.has_value() && !block_execution) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(result)
-                                   - hook.ret.prop->Offset_Internal);
+                                   - hook.ret.prop->Offset_Internal());
             }
 
             if (!block_execution) {

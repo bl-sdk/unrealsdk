@@ -4,11 +4,9 @@
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/game/abstract_hook.h"
-#include "unrealsdk/game/bl1/bl1_config.h"
 #include "unrealsdk/game/selector.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING) \
-    && defined(UNREALSDK_GAME_BL1)
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
 namespace unrealsdk::game {
 
@@ -108,7 +106,7 @@ class BL1Hook : public AbstractHook {
     [[nodiscard]] unreal::UObject* construct_object(unreal::UClass* cls,
                                                     unreal::UObject* outer,
                                                     const unreal::FName& name,
-                                                    decltype(unreal::UObject::ObjectFlags) flags,
+                                                    uint64_t flags,
                                                     unreal::UObject* template_obj) const override;
     [[nodiscard]] unreal::UObject* find_object(unreal::UClass* cls,
                                                const std::wstring& name) const override;
@@ -128,6 +126,7 @@ class BL1Hook : public AbstractHook {
                                const unreal::UObject* obj) const override;
     void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr,
                                const unreal::UObject* obj) const override;
+    [[nodiscard]] const unreal::offsets::OffsetList& get_offsets(void) const override;
 };
 
 template <>

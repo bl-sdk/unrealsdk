@@ -29,11 +29,7 @@ using all_known_games = std::tuple<BL3Hook>;
 #error No known games for UE4 x86
 #else
 
-#if !defined(UNREALSDK_GAME_BL1)
-using all_known_games = std::tuple<BL2Hook, TPSHook>;
-#else
-using all_known_games = std::tuple<BL1Hook>;
-#endif  // else defined(UNREALSDK_GAME_BL1)
+using all_known_games = std::tuple<BL1Hook, BL2Hook, TPSHook>;
 
 #endif  // else !UE4
 #endif  // else !ARCH_X64

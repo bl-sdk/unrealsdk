@@ -6,8 +6,7 @@
 #include "unrealsdk/unreal/wrappers/gnames.h"
 #include "unrealsdk/unreal/wrappers/gobjects.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING) \
-    && defined(UNREALSDK_GAME_BL1)
+#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;
