@@ -2,6 +2,7 @@
 
 #include "unrealsdk/config.h"
 #include "unrealsdk/game/abstract_hook.h"
+#include "unrealsdk/game/bl1/bl1.h"
 #include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/game/bl3/bl3.h"
 #include "unrealsdk/game/tps/tps.h"
@@ -27,9 +28,15 @@ using all_known_games = std::tuple<BL3Hook>;
 #ifdef UE4
 #error No known games for UE4 x86
 #else
+
+#if !defined(UNREALSDK_GAME_BL1)
 using all_known_games = std::tuple<BL2Hook, TPSHook>;
-#endif
-#endif
+#else
+using all_known_games = std::tuple<BL1Hook>;
+#endif // else defined(UNREALSDK_GAME_BL1)
+
+#endif // else !UE4
+#endif // else !ARCH_X64
 
 /**
  * @brief Recursive helper function to find the right game hook.

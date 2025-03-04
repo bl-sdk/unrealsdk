@@ -30,13 +30,23 @@ class UClass : public UStruct {
 
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
-   private:
+    // - NOTE: Merge Conflicts (ustruct.h and uclass.h)
+    // Commit: 7803d86de171a5e19e66688074d8809329e42bb8
+    // Manually resolved; only tested compilation for BL1, UE3, and UE4 but no more than that.
+    // ; 2025/01/19 (YYYY/MM/DD)
+    // - - -
+
+    private:
 #ifdef UE4
     uint8_t UnknownData00[0x70];
     UObject* ClassDefaultObject_internal;
     uint8_t UnknownData01[0xA0];
     TArray<FImplementedInterface> Interfaces_internal;
 #else
+
+#if !defined(UNREALSDK_GAME_BL1)
+
+   private:
     // Misc Fields I found within this block in BL2, but which we don't care about enough for me to
     //  find in UE4, or to want to increase the compile times by including
 
@@ -46,9 +56,28 @@ class UClass : public UStruct {
     // 0x10C: TArray<FName> AutoExpandCategories;
 
     uint8_t UnknownData00[0xCC];
+
+   public:
     UObject* ClassDefaultObject_internal;
+
+   private:
     uint8_t UnknownData01[0x48];
+
+   public:
     TArray<FImplementedInterface> Interfaces_internal;
+
+#else // defined(UNREALSDK_GAME_BL1)
+
+    // NOTE: I don't know if the class has changed size; Will do a scan in ghidra for 1AC
+
+   public:
+    uint8_t UnknownData00[0xC0];
+    UObject* ClassDefaultObject_internal; // 340b
+    uint8_t UnknownData01[0x48];
+    TArray<FImplementedInterface> Interfaces_internal; //  416b
+
+#endif
+
 #endif
 
    public:

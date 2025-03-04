@@ -51,6 +51,10 @@ class UFunction : public UStruct {
     uint16_t ParamsSize_internal;
     uint16_t ReturnValueOffset_internal;
     uint8_t UnknownData00[0x6];
+
+#if defined(UNREALSDK_GAME_BL1)
+   public: // Used in a console command to get address of function
+#endif
     void* Func;
 #endif
    public:
