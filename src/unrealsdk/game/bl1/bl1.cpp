@@ -113,6 +113,11 @@ void BL1Hook::fframe_step(unreal::FFrame* frame, unreal::UObject* /*obj*/, void*
 //  | FNAME INIT |
 // ############################################################################//
 
+#if defined(__MINGW32__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"  // thiscall on non-class
+#endif
+
 namespace {
 
 const constinit Pattern<34> FNAME_INIT_SIG{
@@ -145,6 +150,10 @@ void BL1Hook::find_fname_init(void) {
 void BL1Hook::fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const {
     fname_init_ptr(name, str, number, 1, 1);
 }
+
+#if defined(__MINGW32__)
+#pragma GCC diagnostic pop
+#endif
 
 // ############################################################################//
 //  | CUSTOM HOOKS |
@@ -204,6 +213,7 @@ const constinit Pattern<45> INIT_FUNC_141_UDK_SIG{
 };
 
 // Not sure if this is a __thiscall or an actual __fastcall; ecx is used.
+// NOLINTNEXTLINE(modernize-use-using)
 typedef void(__fastcall* init_function)(void* ecx, void* edx);
 
 init_function init_func_ptr = nullptr;

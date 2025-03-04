@@ -122,8 +122,8 @@ static_assert(std::is_same_v<decltype(&process_event_hook), decltype(&locking_pr
 }  // namespace
 
 void BL1Hook::hook_process_event(void) {
-    bool locking = locks::FunctionCall::enabled();
-    detour(PROCESS_EVENT_SIG, locking ? locking_process_event_hook : process_event_hook,
+    detour(PROCESS_EVENT_SIG,
+           locks::FunctionCall::enabled() ? locking_process_event_hook : process_event_hook,
            &process_event_ptr, "ProcessEvent");
 }
 
@@ -226,8 +226,8 @@ static_assert(std::is_same_v<decltype(&call_function_hook), call_function_func>,
 }  // namespace
 
 void BL1Hook::hook_call_function(void) {
-    bool locking = locks::FunctionCall::enabled();
-    detour(CALL_FUNCTION_SIG, locking ? locking_call_function_hook : call_function_hook,
+    detour(CALL_FUNCTION_SIG,
+           locks::FunctionCall::enabled() ? locking_call_function_hook : call_function_hook,
            &call_function_ptr, "CallFunction");
 }
 
