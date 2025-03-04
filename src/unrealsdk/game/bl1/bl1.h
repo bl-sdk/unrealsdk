@@ -3,8 +3,8 @@
 
 #include "unrealsdk/pch.h"
 
-#include "unrealsdk/game/bl1/bl1_config.h"
 #include "unrealsdk/game/abstract_hook.h"
+#include "unrealsdk/game/bl1/bl1_config.h"
 #include "unrealsdk/game/selector.h"
 
 #if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING) \
@@ -13,7 +13,6 @@
 namespace unrealsdk::game {
 
 class BL1Hook : public AbstractHook {
-
    protected:
     /**
      * @brief Hex edits out the `obj dump` array limit message.

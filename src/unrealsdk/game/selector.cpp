@@ -33,10 +33,10 @@ using all_known_games = std::tuple<BL3Hook>;
 using all_known_games = std::tuple<BL2Hook, TPSHook>;
 #else
 using all_known_games = std::tuple<BL1Hook>;
-#endif // else defined(UNREALSDK_GAME_BL1)
+#endif  // else defined(UNREALSDK_GAME_BL1)
 
-#endif // else !UE4
-#endif // else !ARCH_X64
+#endif  // else !UE4
+#endif  // else !ARCH_X64
 
 /**
  * @brief Recursive helper function to find the right game hook.

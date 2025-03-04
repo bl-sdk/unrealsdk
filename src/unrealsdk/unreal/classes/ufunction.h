@@ -53,7 +53,7 @@ class UFunction : public UStruct {
     uint8_t UnknownData00[0x6];
 
 #if defined(UNREALSDK_GAME_BL1)
-   public: // Used in a console command to get address of function
+   public:  // Used in a console command to get address of function
 #endif
     void* Func;
 #endif

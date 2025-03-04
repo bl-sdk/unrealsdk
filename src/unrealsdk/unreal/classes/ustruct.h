@@ -93,16 +93,16 @@ class UStruct : public UField {
 
     TArray<UObject*> ScriptObjectReferences;
 
-#else // defined(UNREALSDK_GAME_BL1)
+#else  // defined(UNREALSDK_GAME_BL1)
 
    public:
     uint8_t UnknownData00[0x08];
-    UField* Children;                   // 76b
-    uint16_t PropertySize;              // 80b
-    uint8_t UnknownData01[0x1C + 0x02]; // +2 explicit padding
-    UProperty* PropertyLink;            // 112b
+    UField* Children;                    // 76b
+    uint16_t PropertySize;               // 80b
+    uint8_t UnknownData01[0x1C + 0x02];  // +2 explicit padding
+    UProperty* PropertyLink;             // 112b
     uint8_t UnknownData02[0x10];
-    TArray<UObject*> ScriptObjectReferences; // 132b
+    TArray<UObject*> ScriptObjectReferences;  // 132b
     uint8_t UnknownData03[0x04];
 
 #endif
@@ -119,7 +119,7 @@ class UStruct : public UField {
      */
     [[nodiscard]] static size_t class_size(void);
 
-protected:
+   protected:
     /**
      * @brief Reads a field on a UStruct subclass, taking into account it's variable length.
      *
