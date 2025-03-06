@@ -26,8 +26,6 @@ exe_override = ""
 
 # Changes the size the `UProperty` class is assumed to have.
 uproperty_size = -1
-# Changes the size the `UStruct` class is assumed to have.
-ustruct_size = -1
 # Changes the alignment used when calling the unreal memory allocation functions.
 alloc_alignment = -1
 

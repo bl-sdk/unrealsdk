@@ -1,15 +1,10 @@
-#include "unrealsdk/pch.h"
 #include "unrealsdk/unreal/classes/uscriptstruct.h"
-#include "unrealsdk/unreal/classes/ustruct.h"
+#include "unrealsdk/unreal/offset_list.h"
+#include "unrealsdk/unreal/offsets.h"
+#include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
 
-decltype(UScriptStruct::StructFlags_internal)& UScriptStruct::StructFlags(void) {
-    return this->get_field(&UScriptStruct::StructFlags_internal);
-}
-[[nodiscard]] const decltype(UScriptStruct::StructFlags_internal)& UScriptStruct::StructFlags(
-    void) const {
-    return this->get_field(&UScriptStruct::StructFlags_internal);
-}
+UNREALSDK_DEFINE_FIELDS_SOURCE_FILE(UScriptStruct, UNREALSDK_USCRIPTSTRUCT_FIELDS);
 
-}  // namespace unrealsdk::unreal
+}

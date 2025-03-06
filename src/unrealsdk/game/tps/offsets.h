@@ -20,7 +20,9 @@ namespace unrealsdk::game::tps {
 //             readability-identifier-naming,
 //             readability-magic-numbers)
 
-using UObject = bl2::UObject;
+class UClass;
+
+using UObject = bl2::generic::UObject<UClass>;
 using UField = bl2::UField;
 
 class UProperty : public UField {
@@ -60,6 +62,23 @@ class UStruct : public UField {
 
     unreal::TArray<UObject*> ScriptObjectReferences;
 };
+
+class UClass : public UStruct {
+   private:
+    uint8_t UnknownData00[0xCC];
+
+   public:
+    UObject* ClassDefaultObject;
+
+   private:
+    uint8_t UnknownData01[0x14];
+
+   public:
+    unreal::TArray<unreal::FImplementedInterface> Interfaces;
+};
+
+using UScriptStruct = unreal::offsets::generic::UScriptStruct<UStruct>;
+using UFunction = bl2::generic::UFunction<UStruct>;
 
 // NOLINTEND(cppcoreguidelines-pro-type-member-init,
 //           readability-identifier-naming,

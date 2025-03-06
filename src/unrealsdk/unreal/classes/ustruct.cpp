@@ -16,51 +16,6 @@ namespace unrealsdk::unreal {
 
 UNREALSDK_DEFINE_FIELDS_SOURCE_FILE(UStruct, UNREALSDK_USTRUCT_FIELDS);
 
-#ifdef UE3
-
-size_t UStruct::class_size(void) {
-    static size_t size = 0;
-    if (size != 0) {
-        return size;
-    }
-
-    auto config_size = config::get_int("unrealsdk.ustruct_size");
-    if (config_size.has_value()) {
-        size = (size_t)*config_size;
-        return size;
-    }
-
-    // Rather than bother with a find object/class, we can recover UStruct from any arbitrary object
-    // This just avoids extra dependencies, especially since theoretically find class might depend
-    // on this
-
-    // First, find UClass
-    auto obj = *unrealsdk::gobjects().begin();
-    const UClass* class_cls = obj->Class();
-    for (; class_cls->Class() != class_cls; class_cls = class_cls->Class()) {}
-
-    // Then look through it's superfields for UStruct
-    const UStruct* struct_cls = nullptr;
-    for (auto superfield : class_cls->superfields()) {
-        if (superfield->Name() == L"Struct"_fn) {
-            struct_cls = superfield;
-            break;
-        }
-    }
-
-    // If we couldn't find the class, default to our actual size
-    if (struct_cls == nullptr) {
-        size = sizeof(UStruct);
-        LOG(WARNING, "Couldn't find UStruct class size, defaulting to: {:#x}", size);
-    } else {
-        size = struct_cls->get_struct_size();
-        LOG(MISC, "UStruct class size: {:#x}", size);
-    }
-    return size;
-}
-
-#endif
-
 #pragma region Field Iterator
 
 UStruct::FieldIterator::FieldIterator(void) : this_struct(nullptr), field(nullptr) {}

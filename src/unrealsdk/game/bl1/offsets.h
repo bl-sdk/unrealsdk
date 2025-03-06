@@ -3,9 +3,16 @@
 
 #include "unrealsdk/pch.h"
 #include "unrealsdk/game/bl2/offsets.h"
+#include "unrealsdk/unreal/classes/uscriptstruct.h"
 #include "unrealsdk/unreal/offsets.h"
 
 #if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
+
+namespace unrealsdk::unreal {
+
+struct FImplementedInterface;
+
+}
 
 namespace unrealsdk::game::bl1 {
 
@@ -21,8 +28,9 @@ namespace unrealsdk::game::bl1 {
 //             readability-magic-numbers)
 
 class UStruct;
+class UClass;
 
-using UObject = bl2::UObject;
+using UObject = bl2::generic::UObject<UClass>;
 
 class UField : public UObject {
    public:
@@ -72,6 +80,23 @@ class UStruct : public UField {
    private:
     uint8_t UnknownData03[0x04];
 };
+
+class UClass : public UStruct {
+   private:
+    uint8_t UnknownData00[0xC0];
+
+   public:
+    UObject* ClassDefaultObject;
+
+   private:
+    uint8_t UnknownData01[0x48];
+
+   public:
+    unreal::TArray<unreal::FImplementedInterface> Interfaces;
+};
+
+using UScriptStruct = unreal::offsets::generic::UScriptStruct<UStruct>;
+using UFunction = bl2::generic::UFunction<UStruct>;
 
 // NOLINTEND(cppcoreguidelines-pro-type-member-init,
 //           readability-identifier-naming,

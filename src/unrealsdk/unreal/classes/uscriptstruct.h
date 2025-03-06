@@ -10,6 +10,17 @@ namespace unrealsdk::unreal {
 #pragma pack(push, 0x4)
 #endif
 
+namespace offsets::generic {
+
+template <typename T>
+class UScriptStruct : public T {
+   public:
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    uint32_t StructFlags;
+};
+
+}  // namespace offsets::generic
+
 class UScriptStruct : public UStruct {
    public:
     UScriptStruct() = delete;
@@ -19,16 +30,15 @@ class UScriptStruct : public UStruct {
     UScriptStruct& operator=(UScriptStruct&&) = delete;
     ~UScriptStruct() = delete;
 
-    // NOLINTBEGIN(readability-identifier-naming)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_USCRIPTSTRUCT_FIELDS(X) X(uint32_t, StructFlags)
+
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    UNREALSDK_DEFINE_FIELDS_HEADER(UScriptStruct, UNREALSDK_USCRIPTSTRUCT_FIELDS);
 
    private:
+    // NOLINTNEXTLINE(readability-identifier-naming)
     uint32_t StructFlags_internal;
-
-   public:
-    decltype(StructFlags_internal)& StructFlags(void);
-    [[nodiscard]] const decltype(StructFlags_internal)& StructFlags(void) const;
-
-    // NOLINTEND(readability-identifier-naming)
 };
 
 template <>

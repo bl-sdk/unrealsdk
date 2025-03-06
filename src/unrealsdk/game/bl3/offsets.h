@@ -3,6 +3,7 @@
 
 #include "unrealsdk/pch.h"
 #include "unrealsdk/unreal/classes/ufield.h"
+#include "unrealsdk/unreal/classes/uscriptstruct.h"
 #include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/structs/fname.h"
 #include "unrealsdk/unreal/structs/tarray.h"
@@ -11,7 +12,7 @@
 
 namespace unrealsdk::unreal {
 
-class UClass;  // TODO
+struct FImplementedInterface;
 
 }  // namespace unrealsdk::unreal
 
@@ -25,14 +26,16 @@ namespace unrealsdk::game::bl3 {
 //             readability-identifier-naming,
 //             readability-magic-numbers)
 
-struct UObject {
+class UClass;
+
+class UObject {
    private:
     uintptr_t* vftable;
 
    public:
     int32_t ObjectFlags;
     int32_t InternalIndex;
-    unreal::UClass* Class;  // TODO
+    UClass* Class;
     unreal::FName Name;
     UObject* Outer;
 };
@@ -64,7 +67,7 @@ class UProperty : public UField {
     UProperty* PostConstructLinkNext;
 };
 
-class UStruct : public bl3::UField {
+class UStruct : public UField {
    public:
     UStruct* SuperField;
     UField* Children;
@@ -82,6 +85,38 @@ class UStruct : public bl3::UField {
     UProperty* DestructorLink;
     UProperty* PostConstructLink;
     unreal::TArray<UObject*> ScriptObjectReferences;
+};
+
+class UClass : public UStruct {
+   private:
+    uint8_t UnknownData00[0x70];
+
+   public:
+    UObject* ClassDefaultObject;
+
+   private:
+    uint8_t UnknownData01[0xA0];
+
+   public:
+    TArray<FImplementedInterface> Interfaces;
+};
+
+using UScriptStruct = unreal::offsets::generic::UScriptStruct<UStruct>;
+
+class UFunction : public UStruct {
+   public:
+    uint32_t FunctionFlags;
+    uint8_t NumParams;
+    uint16_t ParamsSize;
+    uint16_t ReturnValueOffset;
+
+   private:
+    uint16_t RPCId;
+    uint16_t RPCResponseId;
+    UProperty* FirstPropertyToInit;
+    UFunction* EventGraphFunction;
+    int32_t EventGraphCallOffset;
+    void* Func;
 };
 
 // NOLINTEND(cppcoreguidelines-pro-type-member-init,

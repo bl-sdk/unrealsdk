@@ -27,6 +27,16 @@ class UFunction : public UStruct {
     UFunction& operator=(UFunction&&) = delete;
     ~UFunction() = delete;
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UFUNCTION_FIELDS(X) \
+    X(uint32_t, FunctionFlags)        \
+    X(uint8_t, NumParams)             \
+    X(uint16_t, ParamsSize)           \
+    X(uint16_t, ReturnValueOffset)
+
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    UNREALSDK_DEFINE_FIELDS_HEADER(UFunction, UNREALSDK_UFUNCTION_FIELDS);
+
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
    private:
@@ -51,22 +61,10 @@ class UFunction : public UStruct {
     uint16_t ParamsSize_internal;
     uint16_t ReturnValueOffset_internal;
     uint8_t UnknownData00[0x6];
-
-#if defined(UNREALSDK_GAME_BL1)
-   public:  // Used in a console command to get address of function
-#endif
     void* Func;
+
 #endif
    public:
-    decltype(FunctionFlags_internal)& FunctionFlags(void);
-    [[nodiscard]] const decltype(FunctionFlags_internal)& FunctionFlags(void) const;
-    decltype(NumParams_internal)& NumParams(void);
-    [[nodiscard]] const decltype(NumParams_internal)& NumParams(void) const;
-    decltype(ParamsSize_internal)& ParamsSize(void);
-    [[nodiscard]] const decltype(ParamsSize_internal)& ParamsSize(void) const;
-    decltype(ReturnValueOffset_internal)& ReturnValueOffset(void);
-    [[nodiscard]] const decltype(ReturnValueOffset_internal)& ReturnValueOffset(void) const;
-
     /**
      * @brief Finds the return param for this function (if it exists).
      *
