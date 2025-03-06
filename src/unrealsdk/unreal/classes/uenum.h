@@ -1,5 +1,5 @@
-#ifndef UNREALSDK_UNREAL_CLASSES_UENUM_H
-#define UNREALSDK_UNREAL_CLASSES_UENUM_H
+#ifndef PYUNREALSDK_LIBS_UNREALSDK_SRC_UNREALSDK_UNREAL_CLASSES_UENUM_H
+#define PYUNREALSDK_LIBS_UNREALSDK_SRC_UNREALSDK_UNREAL_CLASSES_UENUM_H
 
 #include "unrealsdk/pch.h"
 #include "unrealsdk/unreal/class_traits.h"
@@ -44,9 +44,9 @@ class UEnum : public UField {
 
    public:
     /**
-     * @brief Get the enum values which have assigned names.
+     * @brief Get the values of an enum which have assigned names.
      *
-     * @return A map of integer values to their associated name.
+     * @return A map of names to their associated integer values.
      */
     [[nodiscard]] std::unordered_map<FName, uint64_t> get_names(void) const;
 };
@@ -66,4 +66,4 @@ struct ClassTraits<UEnum> {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREALSDK_UNREAL_CLASSES_UENUM_H */
+#endif /* PYUNREALSDK_LIBS_UNREALSDK_SRC_UNREALSDK_UNREAL_CLASSES_UENUM_H */

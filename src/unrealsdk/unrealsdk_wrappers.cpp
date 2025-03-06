@@ -108,6 +108,21 @@ void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr, const unreal::UObject* o
     return *UNREALSDK_MANGLE(get_offsets)();
 }
 
+[[nodiscard]] unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> uenum_get_names(
+    const unreal::UEnum* uenum) {
+    auto ret = UNREALSDK_MANGLE(uenum_get_names)(uenum);
+
+    unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> names{nullptr, 0, 0};
+    std::swap(names.count, ret.count);
+    std::swap(names.max, ret.max);
+
+    // different types so can't std::swap
+    names.data = reinterpret_cast<unreal::TPair<unreal::FName, uint64_t>*>(ret.data);
+    ret.data = nullptr;
+
+    return names;
+}
+
 }  // namespace internal
 
 }  // namespace unrealsdk

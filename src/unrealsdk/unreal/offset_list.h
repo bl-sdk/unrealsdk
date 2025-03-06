@@ -3,6 +3,7 @@
 
 #include "unrealsdk/pch.h"
 #include "unrealsdk/unreal/classes/uclass.h"
+#include "unrealsdk/unreal/classes/uconst.h"
 #include "unrealsdk/unreal/classes/ufield.h"
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/classes/uobject.h"
@@ -26,7 +27,8 @@ namespace unrealsdk::unreal::offsets {
     X(UProperty)                           \
     X(UClass)                              \
     X(UScriptStruct)                       \
-    X(UFunction)
+    X(UFunction)                           \
+    X(UConst)
 
 #define UNREALSDK_OFFSETS__DEFINE_OFFSET_LIST_MEMBERS(name) unrealsdk::unreal::name::Offsets name;
 #define UNREALSDK_OFFSETS__NESTED_FROM_TYPE(name) \

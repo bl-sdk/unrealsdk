@@ -79,6 +79,8 @@ class UClass : public UStruct {
 
 using UScriptStruct = unreal::offsets::generic::UScriptStruct<UStruct>;
 using UFunction = bl2::generic::UFunction<UStruct>;
+using UConst = bl2::UConst;
+using UEnum = bl2::UEnum;
 
 // NOLINTEND(cppcoreguidelines-pro-type-member-init,
 //           readability-identifier-naming,

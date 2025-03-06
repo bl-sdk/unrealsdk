@@ -2,11 +2,14 @@
 #define UNREALSDK_GAME_BL3_OFFSETS_H
 
 #include "unrealsdk/pch.h"
+#include "unrealsdk/unreal/classes/uconst.h"
 #include "unrealsdk/unreal/classes/ufield.h"
 #include "unrealsdk/unreal/classes/uscriptstruct.h"
 #include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/structs/fname.h"
+#include "unrealsdk/unreal/structs/fstring.h"
 #include "unrealsdk/unreal/structs/tarray.h"
+#include "unrealsdk/unreal/structs/tpair.h"
 
 #if defined(UE4) && defined(ARCH_X64) && !defined(UNREALSDK_IMPORTING)
 
@@ -98,7 +101,7 @@ class UClass : public UStruct {
     uint8_t UnknownData01[0xA0];
 
    public:
-    TArray<FImplementedInterface> Interfaces;
+    unreal::TArray<unreal::FImplementedInterface> Interfaces;
 };
 
 using UScriptStruct = unreal::offsets::generic::UScriptStruct<UStruct>;
@@ -117,6 +120,18 @@ class UFunction : public UStruct {
     UFunction* EventGraphFunction;
     int32_t EventGraphCallOffset;
     void* Func;
+};
+
+using UConst = unreal::offsets::generic::UConst<UField>;
+
+class UEnum : public UField {
+   private:
+    unreal::UnmanagedFString CppType;
+    unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> Names;
+    int64_t CppForm;
+
+   public:
+    [[nodiscard]] unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> get_names(void) const;
 };
 
 // NOLINTEND(cppcoreguidelines-pro-type-member-init,

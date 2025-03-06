@@ -4,6 +4,7 @@
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/unreal/structs/fname.h"
+#include "unrealsdk/unreal/structs/tarray.h"
 
 namespace unrealsdk::game {
 
@@ -16,6 +17,7 @@ namespace unrealsdk::unreal {
 class GNames;
 class GObjects;
 class UClass;
+class UEnum;
 class UFunction;
 class UObject;
 struct FFrame;
@@ -23,6 +25,9 @@ struct FLazyObjectPtr;
 struct FSoftObjectPtr;
 struct FText;
 struct TemporaryFString;
+
+template <typename KeyType, typename ValueType>
+struct TPair;
 
 }  // namespace unrealsdk::unreal
 
@@ -225,6 +230,15 @@ void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr, const unreal::UObject* o
  * @return A reference to the offsets list.
  */
 [[nodiscard]] const unreal::offsets::OffsetList& get_offsets(void);
+
+/**
+ * @brief Get the values of an enum which have assigned names.
+ *
+ * @param uenum The unreal enum to get values from.
+ * @return An array of name-value pairs.
+ */
+[[nodiscard]] unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> uenum_get_names(
+    const unreal::UEnum* uenum);
 
 }  // namespace internal
 

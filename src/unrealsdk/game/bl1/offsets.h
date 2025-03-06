@@ -3,6 +3,7 @@
 
 #include "unrealsdk/pch.h"
 #include "unrealsdk/game/bl2/offsets.h"
+#include "unrealsdk/unreal/classes/uconst.h"
 #include "unrealsdk/unreal/classes/uscriptstruct.h"
 #include "unrealsdk/unreal/offsets.h"
 
@@ -97,6 +98,8 @@ class UClass : public UStruct {
 
 using UScriptStruct = unreal::offsets::generic::UScriptStruct<UStruct>;
 using UFunction = bl2::generic::UFunction<UStruct>;
+using UConst = unreal::offsets::generic::UConst<UField>;
+using UEnum = bl2::generic::UEnum<UField>;
 
 // NOLINTEND(cppcoreguidelines-pro-type-member-init,
 //           readability-identifier-naming,

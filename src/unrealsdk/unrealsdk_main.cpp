@@ -200,6 +200,20 @@ UNREALSDK_CAPI([[nodiscard]] const offsets::OffsetList*, get_offsets) {
     return &hook_instance->get_offsets();
 }
 
+UNREALSDK_CAPI([[nodiscard]] UEnumGetNamesCRet, uenum_get_names, const unreal::UEnum* uenum) {
+    auto names = hook_instance->uenum_get_names(uenum);
+
+    UEnumGetNamesCRet ret{nullptr, 0, 0};
+    std::swap(ret.count, names.count);
+    std::swap(ret.max, names.max);
+
+    // different types so can't std::swap
+    ret.data = names.data;
+    names.data = nullptr;
+
+    return ret;
+}
+
 }  // namespace internal
 
 }  // namespace unrealsdk

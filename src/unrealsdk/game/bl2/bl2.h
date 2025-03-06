@@ -130,6 +130,8 @@ class BL2Hook : public AbstractHook {
     void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr,
                                const unreal::UObject* obj) const override;
     [[nodiscard]] const unreal::offsets::OffsetList& get_offsets(void) const override;
+    [[nodiscard]] unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> uenum_get_names(
+        const unreal::UEnum* uenum) const override;
 };
 
 template <>
