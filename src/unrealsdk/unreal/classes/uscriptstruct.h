@@ -9,6 +9,10 @@ namespace unrealsdk::unreal {
 #if defined(_MSC_VER) && defined(ARCH_X86)
 #pragma pack(push, 0x4)
 #endif
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-private-field"
+#endif
 
 namespace offsets::generic {
 
@@ -46,6 +50,9 @@ struct ClassTraits<UScriptStruct> {
     static inline const wchar_t* const NAME = L"ScriptStruct";
 };
 
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 #if defined(_MSC_VER) && defined(ARCH_X86)
 #pragma pack(pop)
 #endif

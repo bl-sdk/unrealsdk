@@ -203,7 +203,7 @@ UNREALSDK_CAPI([[nodiscard]] const offsets::OffsetList*, get_offsets) {
 UNREALSDK_CAPI([[nodiscard]] UEnumGetNamesCRet, uenum_get_names, const unreal::UEnum* uenum) {
     auto names = hook_instance->uenum_get_names(uenum);
 
-    UEnumGetNamesCRet ret{nullptr, 0, 0};
+    UEnumGetNamesCRet ret{.data = nullptr, .count = 0, .max = 0};
     std::swap(ret.count, names.count);
     std::swap(ret.max, names.max);
 

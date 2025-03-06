@@ -112,7 +112,8 @@ void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr, const unreal::UObject* o
     const unreal::UEnum* uenum) {
     auto ret = UNREALSDK_MANGLE(uenum_get_names)(uenum);
 
-    unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> names{nullptr, 0, 0};
+    unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> names{
+        .data = nullptr, .count = 0, .max = 0};
     std::swap(names.count, ret.count);
     std::swap(names.max, ret.max);
 
