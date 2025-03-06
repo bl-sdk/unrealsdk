@@ -1,9 +1,6 @@
 #include "unrealsdk/pch.h"
+#include "unrealsdk/game/bl1/offsets.h"
 #include "unrealsdk/game/bl1/bl1.h"
-#include "unrealsdk/game/bl2/offsets/ufield.h"
-#include "unrealsdk/game/bl2/offsets/uobject.h"
-#include "unrealsdk/game/bl2/offsets/uproperty.h"
-#include "unrealsdk/game/bl2/offsets/ustruct.h"
 #include "unrealsdk/unreal/classes/ufield.h"
 #include "unrealsdk/unreal/offset_list.h"
 
@@ -12,23 +9,16 @@
 using namespace unrealsdk::unreal::offsets;
 
 namespace unrealsdk::game {
-
+namespace bl1 {
 namespace {
 
-struct OffsetClasses {
-    // TODO
-    using UObject = bl2::UObject;
-    using UField = bl2::UField;
-    using UStruct = bl2::UStruct;
-    using UProperty = bl2::UProperty;
-};
+constexpr auto OFFSETS = OFFSET_LIST_FROM_NAMESPACE();
 
-const auto OFFSETS = OffsetList::from<OffsetClasses>();
-
-}  // namespace
+}
+}  // namespace bl1
 
 [[nodiscard]] const unreal::offsets::OffsetList& BL1Hook::get_offsets(void) const {
-    return OFFSETS;
+    return bl1::OFFSETS;
 }
 
 }  // namespace unrealsdk::game

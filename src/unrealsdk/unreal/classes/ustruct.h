@@ -41,12 +41,6 @@ class UStruct : public UField {
 
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
-    // - NOTE: Merge Conflicts (ustruct.h and uclass.h)
-    // Commit: 7803d86de171a5e19e66688074d8809329e42bb8
-    // Manually resolved; only tested compilation for BL1, UE3, and UE4 but no more than that.
-    // ; 2025/01/19 (YYYY/MM/DD)
-    // - - -
-
 #ifdef UE4
    private:
     /* Struct this inherits from, may be null */
@@ -76,8 +70,6 @@ class UStruct : public UField {
     TArray<UObject*> ScriptObjectReferences;
 #else
 
-#if !defined(UNREALSDK_GAME_BL1)
-
    private:
     uint8_t UnknownData00[0x8];
 
@@ -92,20 +84,6 @@ class UStruct : public UField {
     uint8_t UnknownData02[0x10];
 
     TArray<UObject*> ScriptObjectReferences;
-
-#else  // defined(UNREALSDK_GAME_BL1)
-
-   public:
-    uint8_t UnknownData00[0x08];
-    UField* Children;                    // 76b
-    uint16_t PropertySize;               // 80b
-    uint8_t UnknownData01[0x1C + 0x02];  // +2 explicit padding
-    UProperty* PropertyLink;             // 112b
-    uint8_t UnknownData02[0x10];
-    TArray<UObject*> ScriptObjectReferences;  // 132b
-    uint8_t UnknownData03[0x04];
-
-#endif
 
 #endif
 

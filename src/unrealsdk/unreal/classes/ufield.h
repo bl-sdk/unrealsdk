@@ -35,8 +35,6 @@ class UField : public UObject {
     UField& operator=(UField&&) = delete;
     ~UField() = delete;
 
-#if !defined(UNREALSDK_GAME_BL1)
-
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREALSDK_UFIELD_FIELDS(X) X(UField*, Next)
 
@@ -46,14 +44,6 @@ class UField : public UObject {
    private:
     // NOLINTNEXTLINE(readability-identifier-naming)
     UField* Next_member;
-
-#else  // defined(UNREALSDK_GAME_BL1)
-
-   public:
-    UStruct* SuperField;
-    UField* Next;
-
-#endif
 };
 
 template <>
