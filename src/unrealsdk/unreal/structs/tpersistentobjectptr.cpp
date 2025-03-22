@@ -17,7 +17,7 @@ template <typename T>
 const TPersistentObjectPtr<T>* get_addr_from(const UObject* obj,
                                              const UObjectProperty* prop,
                                              size_t idx) {
-    if (idx >= (size_t)prop->ArrayDim) {
+    if (std::cmp_greater_equal(idx, prop->ArrayDim)) {
         throw std::out_of_range("Property index out of range");
     }
 
@@ -29,7 +29,7 @@ template <typename T>
 const TPersistentObjectPtr<T>* get_addr_from(const WrappedStruct& wrapped_struct,
                                              const UObjectProperty* prop,
                                              size_t idx) {
-    if (idx >= (size_t)prop->ArrayDim) {
+    if (std::cmp_greater_equal(idx, prop->ArrayDim)) {
         throw std::out_of_range("Property index out of range");
     }
 
@@ -44,7 +44,7 @@ const TPersistentObjectPtr<T>* get_addr_from_array(const WrappedArray& array, si
         throw std::invalid_argument("WrappedArray property was of invalid type "
                                     + (std::string)array.type->Class->Name);
     }
-    if (idx >= (size_t)array.base->count) {
+    if (std::cmp_greater_equal(idx, array.base->count)) {
         throw std::out_of_range("WrappedArray index out of range");
     }
 

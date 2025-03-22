@@ -89,7 +89,7 @@ namespace {
 thread_local bool should_inject_next_call = false;
 
 bool should_log_all_calls = false;
-std::unique_ptr<std::wostream> log_all_calls_stream;
+std::wofstream log_all_calls_stream{};
 std::mutex log_all_calls_stream_mutex{};
 
 std::unordered_map<FName, utils::StringViewMap<std::wstring, List>> hooks{};
@@ -98,17 +98,17 @@ void log_all_calls(bool should_log) {
     // Only keep this file stream open while we need it
     if (should_log) {
         const std::lock_guard<std::mutex> lock(log_all_calls_stream_mutex);
-        log_all_calls_stream = std::make_unique<std::wofstream>(
+        log_all_calls_stream.open(
             utils::get_this_dll().parent_path()
                 / config::get_str("unrealsdk.log_all_calls_file").value_or("unrealsdk.calls.tsv"),
-            std::ofstream::trunc);
+            std::wofstream::trunc);
     }
 
     should_log_all_calls = should_log;
 
     if (!should_log) {
         const std::lock_guard<std::mutex> lock(log_all_calls_stream_mutex);
-        log_all_calls_stream = nullptr;
+        log_all_calls_stream.close();
     }
 }
 
@@ -219,11 +219,14 @@ const List* preprocess_hook(std::wstring_view source, const UFunction* func, con
     std::wstring func_name{};
 
     if (should_log_all_calls) {
-        func_name = func->get_path_name();
-        auto obj_name = obj->get_path_name();
+        // Extra safety check
+        if (log_all_calls_stream.is_open()) {
+            func_name = func->get_path_name();
+            auto obj_name = obj->get_path_name();
 
-        const std::lock_guard<std::mutex> lock(log_all_calls_stream_mutex);
-        *log_all_calls_stream << source << L'\t' << func_name << L'\t' << obj_name << L'\n';
+            const std::lock_guard<std::mutex> lock(log_all_calls_stream_mutex);
+            log_all_calls_stream << source << L'\t' << func_name << L'\t' << obj_name << L'\n';
+        }
     }
 
     // Check if anything matches the function FName
