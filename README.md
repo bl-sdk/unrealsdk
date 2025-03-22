@@ -142,13 +142,24 @@ This turns out to be a bit of a problem - MSVC and GNU have different exception 
 both. Practically, this means when cross compiling, you should either compile everything from
 scratch, or setup Clang to build with the MSVC ABI. [See this blog post for more info](https://apple1417.dev/posts/2023-05-18-debugging-proton).
 
-# Running the SDK by itself
+# Building the SDK by itself
 The shared library is also useful when developing for the sdk itself, since it's the minimal
-configuration to get it running. The CMake presets are set up to build this.
+configuration to get it running. The CMake presets are set up to build this. There are currently
+five supported toolchains, each of which have a few different sdk configurations:
 
-Note that you will need to use some game specific plugin loader to get the dll loaded. It is not set
-up to alias any system dlls (since when actually using it as a library you don't want that), you
-can't just call it `d3d9.dll` and assume your game will load fine.
+- MSVC
+- Clang (Windows)
+- Clang (Cross Compile) <sup>*</sup>
+- MinGW <sup>*</sup>
+- LLVM MinGW <sup>*</sup>
+
+The toolchains with an asterix are all cross compiling toolchains. These all also have an associated
+dev container, which is the recommended way of building them. The `clang-cross-*` presets in
+particular hardcode a path assuming they're running in the container.
+
+Note that you will need to use some game specific plugin loader to get the `unrealsdk.dll` loaded.
+It is not set up to alias any system dlls (since when actually using it as a library you don't want
+that), you can't just rename it to `d3d9.dll` and assume your game will load fine.
 
 To build:
 

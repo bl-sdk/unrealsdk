@@ -40,6 +40,9 @@
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
       },
+      "environment": {
+        "MSVC_WINE_ENV_SCRIPT": "/win-sdk/bin/x86/msvcenv.sh"
+      },
       "toolchainFile": "common_cmake/clang-cross-x86.cmake"
     },
     {
@@ -49,6 +52,9 @@
         "type": "notEquals",
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
+      },
+      "environment": {
+        "MSVC_WINE_ENV_SCRIPT": "/win-sdk/bin/x64/msvcenv.sh"
       },
       "toolchainFile": "common_cmake/clang-cross-x64.cmake"
     },
