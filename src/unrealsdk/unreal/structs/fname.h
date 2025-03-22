@@ -63,7 +63,7 @@ struct FName {
  * @param str The string to create a name of.
  * @param len The length of the string.
  */
-FName operator"" _fn(const wchar_t* str, size_t len);
+FName operator""_fn(const wchar_t* str, size_t len);
 
 }  // namespace unrealsdk::unreal
 
