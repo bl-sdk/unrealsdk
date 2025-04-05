@@ -13,6 +13,11 @@
 
   [6222756c](https://github.com/bl-sdk/unrealsdk/commit/6222756c)
 
+- Fixed checking the setting `exe_override` rather than the full `unrealsdk.exe_override`, like how
+  it was documented / originally intended.
+
+  [3010f486](https://github.com/bl-sdk/unrealsdk/commit/3010f486)
+
 ## 1.7.0
 
 - `unrealsdk::unreal::cast` now copies the const-ness of its input object to its callbacks.
