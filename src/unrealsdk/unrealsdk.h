@@ -76,6 +76,7 @@ bool init(const std::function<std::unique_ptr<game::AbstractHook>(void)>& game_g
 
 /**
  * @brief Calls unreal's malloc function.
+ * @note This memory is guaranteed to be zero'd.
  *
  * @tparam T The type to cast the return to.
  * @param len The amount of bytes to allocate.
@@ -89,6 +90,7 @@ template <typename T>
 
 /**
  * @brief Calls unreal's realloc function.
+ * @note This *does not* zero bytes after the original allocation.
  *
  * @tparam T The type to cast the return to.
  * @param original The original memory to re-allocate.
