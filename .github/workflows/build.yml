@@ -6,10 +6,6 @@ on: [
   workflow_dispatch
 ]
 
-env:
-  LLVM_MINGW_VERSION: llvm-mingw-20240619-msvcrt-ubuntu-20.04-x86_64
-  LLVM_MINGW_DOWNLOAD: https://github.com/mstorsjo/llvm-mingw/releases/download/20240619/llvm-mingw-20240619-msvcrt-ubuntu-20.04-x86_64.tar.xz
-
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -44,16 +40,13 @@ jobs:
         submodules: recursive
 
     - name: Configure CMake
-      working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: cmake . --preset ${{ matrix.preset }}
 
     - name: Build
-      working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: cmake --build out/build/${{ matrix.preset }}
 
   build-ubuntu:
-    # Require at least 24 for the mingw build
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
@@ -78,6 +71,13 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build
         uses: devcontainers/ci@v0.3
         with:
@@ -87,6 +87,9 @@ jobs:
           # The git watcher cmake thinks something's unsafe? Doesn't happen to me locally.
           runCmd: |
             git config --global --add safe.directory `pwd`
+
+            set -e
+
             cmake . --preset ${{ matrix.toolchain.preset }} -G Ninja
             cmake --build out/build/${{ matrix.toolchain.preset }}
 
@@ -106,7 +109,6 @@ jobs:
 
     steps:
     - name: Setup Clang
-      if: startswith(matrix.preset, 'clang')
       uses: egor-tensin/setup-clang@v1
 
     - name: Setup CMake and Ninja
@@ -122,7 +124,6 @@ jobs:
         submodules: recursive
 
     - name: Configure CMake
-      working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: cmake . --preset ${{ matrix.preset }} -DCMAKE_DISABLE_PRECOMPILE_HEADERS=On
 
     - name: Remove `.modmap`s from compile commands
@@ -133,7 +134,6 @@ jobs:
           -Path "out\build\${{ matrix.preset }}\compile_commands.json"
 
     - name: Run clang-tidy
-      working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: |
         python (Get-Command run-clang-tidy).Source                              `
           -p "out\build\${{ matrix.preset }}"                                   `
@@ -150,7 +150,6 @@ jobs:
 
     steps:
     - name: Setup Clang
-      if: startswith(matrix.preset, 'clang')
       uses: egor-tensin/setup-clang@v1
 
     - name: Checkout repository

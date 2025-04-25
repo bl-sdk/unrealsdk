@@ -105,7 +105,7 @@ class UStruct : public UField {
     template <typename SubType,
               typename FieldType,
               typename = std::enable_if_t<std::is_base_of_v<UStruct, SubType>>>
-    [[nodiscard]] const FieldType& get_field(FieldType SubType::*field) const {
+    [[nodiscard]] const FieldType& get_field(FieldType SubType::* field) const {
 #ifdef UE4
         return reinterpret_cast<const SubType*>(this)->*field;
 #else
@@ -117,7 +117,7 @@ class UStruct : public UField {
     template <typename SubType,
               typename FieldType,
               typename = std::enable_if_t<std::is_base_of_v<UStruct, SubType>>>
-    FieldType& get_field(FieldType SubType::*field) {
+    FieldType& get_field(FieldType SubType::* field) {
         return const_cast<FieldType&>(const_cast<const UStruct*>(this)->get_field(field));
     }
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## Upcoming
+
+- Fixed that assigning an entire array, rather than getting the array and setting it's elements,
+  would likely cause memory corruption. This was most common when using an array of large structs,
+  and when assigning to one which was previously empty.
+
+  [275bbc8b](https://github.com/bl-sdk/unrealsdk/commit/275bbc8b)
+
 ## 1.8.0
 
 - Added support for sending property changed events, via `UObject::post_edit_change_property` and
