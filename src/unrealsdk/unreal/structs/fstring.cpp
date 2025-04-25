@@ -43,9 +43,11 @@ UnmanagedFString::UnmanagedFString(std::string_view str)
     : UnmanagedFString(unrealsdk::utils::widen(str)) {}
 UnmanagedFString::UnmanagedFString(std::wstring_view str)
     : TArray{.data = nullptr, .count = 0, .max = 0} {
-    auto size = valid_size(str);
-    this->resize(size);
-    memcpy(this->data, str.data(), size * sizeof(*this->data));
+    if (!str.empty()) {
+        auto size = valid_size(str);
+        this->resize(size);
+        memcpy(this->data, str.data(), size * sizeof(*this->data));
+    }
 }
 UnmanagedFString::UnmanagedFString(UnmanagedFString&& other) noexcept
     : TArray{.data = std::exchange(other.data, nullptr),
