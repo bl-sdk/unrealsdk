@@ -28,6 +28,7 @@ class UClass : public UStruct {
     UClass& operator=(UClass&&) = delete;
     ~UClass() = delete;
 
+    // These fields become member functions, returning a reference into the object.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREALSDK_UCLASS_FIELDS(X)  \
     X(UObject*, ClassDefaultObject) \

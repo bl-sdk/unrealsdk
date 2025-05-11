@@ -30,6 +30,7 @@ class UStruct : public UField {
     UStruct& operator=(UStruct&&) = delete;
     ~UStruct() = delete;
 
+    // These fields become member functions, returning a reference into the object.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREALSDK_USTRUCT_FIELDS(X) \
     X(UStruct*, SuperField)         \

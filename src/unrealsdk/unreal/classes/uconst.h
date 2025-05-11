@@ -27,6 +27,7 @@ class UConst : public UField {
     UConst& operator=(UConst&&) = delete;
     ~UConst() = delete;
 
+    // These fields become member functions, returning a reference into the object.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREALSDK_UCONST_FIELDS(X) X(UnmanagedFString, Value)
 

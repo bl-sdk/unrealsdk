@@ -35,6 +35,7 @@ class UField : public UObject {
     UField& operator=(UField&&) = delete;
     ~UField() = delete;
 
+    // These fields become member functions, returning a reference into the object.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREALSDK_UFIELD_FIELDS(X) X(UField*, Next)
 

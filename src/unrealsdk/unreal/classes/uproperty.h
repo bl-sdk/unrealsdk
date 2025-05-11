@@ -60,6 +60,7 @@ class UProperty : public UField {
     using property_flags_type = uint32_t;
 #endif
 
+    // These fields become member functions, returning a reference into the object.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREALSDK_UPROPERTY_FIELDS(X)     \
     X(int32_t, ArrayDim)                  \

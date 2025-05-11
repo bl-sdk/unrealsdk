@@ -27,6 +27,7 @@ class UFunction : public UStruct {
     UFunction& operator=(UFunction&&) = delete;
     ~UFunction() = delete;
 
+    // These fields become member functions, returning a reference into the object.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREALSDK_UFUNCTION_FIELDS(X) \
     X(uint32_t, FunctionFlags)        \

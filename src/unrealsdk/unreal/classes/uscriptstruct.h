@@ -34,6 +34,7 @@ class UScriptStruct : public UStruct {
     UScriptStruct& operator=(UScriptStruct&&) = delete;
     ~UScriptStruct() = delete;
 
+    // These fields become member functions, returning a reference into the object.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREALSDK_USCRIPTSTRUCT_FIELDS(X) X(uint32_t, StructFlags)
 

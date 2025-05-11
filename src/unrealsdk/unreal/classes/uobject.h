@@ -38,6 +38,7 @@ class UObject {
     using object_flags_type = uint64_t;
 #endif
 
+    // These fields become member functions, returning a reference into the object.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREALSDK_UOBJECT_FIELDS(X)   \
     X(object_flags_type, ObjectFlags) \
