@@ -8,7 +8,7 @@
 #include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/structs/fname.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
+#if defined(UE3) && defined(ARCH_X86)
 
 namespace unrealsdk::unreal {
 

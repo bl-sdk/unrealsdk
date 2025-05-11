@@ -21,10 +21,5 @@ constexpr auto OFFSETS = OFFSET_LIST_FROM_NAMESPACE();
     return bl1::OFFSETS;
 }
 
-unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> BL1Hook::uenum_get_names(
-    const unreal::UEnum* uenum) const {
-    return reinterpret_cast<const bl1::UEnum*>(uenum)->get_names();
-}
-
 }  // namespace unrealsdk::game
 #endif

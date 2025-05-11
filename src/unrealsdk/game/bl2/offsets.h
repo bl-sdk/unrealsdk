@@ -3,15 +3,14 @@
 
 #include "unrealsdk/pch.h"
 #include "unrealsdk/unreal/classes/uconst.h"
+#include "unrealsdk/unreal/classes/uenum.h"
 #include "unrealsdk/unreal/classes/ufield.h"
 #include "unrealsdk/unreal/classes/uscriptstruct.h"
 #include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/structs/fname.h"
 #include "unrealsdk/unreal/structs/tarray.h"
-#include "unrealsdk/unreal/structs/tarray_funcs.h"
-#include "unrealsdk/unreal/structs/tpair.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
+#if defined(UE3) && defined(ARCH_X86)
 
 namespace unrealsdk::unreal {
 
@@ -91,21 +90,10 @@ class UFunction : public T {
 
 template <typename T>
 class UEnum : public T {
+    friend class unreal::UEnum;
+
    private:
     unreal::TArray<unreal::FName> Names;
-
-   public:
-    [[nodiscard]] unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> get_names(void) const {
-        unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> output{};
-        output.resize(this->Names.size());
-
-        for (size_t i = 0; i < this->Names.size(); i++) {
-            output.data[i].key = this->Names.at(i);
-            output.data[i].value = i;
-        }
-
-        return output;
-    }
 };
 
 }  // namespace generic

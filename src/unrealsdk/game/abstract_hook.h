@@ -4,7 +4,6 @@
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/unreal/structs/fname.h"
-#include "unrealsdk/unreal/structs/tarray.h"
 
 #ifndef UNREALSDK_IMPORTING
 
@@ -13,7 +12,6 @@ namespace unrealsdk::unreal {
 class GNames;
 class GObjects;
 class UClass;
-class UEnum;
 class UFunction;
 class UObject;
 struct FFrame;
@@ -21,9 +19,6 @@ struct FLazyObjectPtr;
 struct FSoftObjectPtr;
 struct FText;
 struct TemporaryFString;
-
-template <typename KeyType, typename ValueType>
-struct TPair;
 
 }  // namespace unrealsdk::unreal
 
@@ -93,8 +88,6 @@ struct AbstractHook {
     virtual void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr,
                                        const unreal::UObject* obj) const = 0;
     [[nodiscard]] virtual const unreal::offsets::OffsetList& get_offsets(void) const = 0;
-    [[nodiscard]] virtual unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> uenum_get_names(
-        const unreal::UEnum* uenum) const = 0;
 };
 
 #pragma endregion

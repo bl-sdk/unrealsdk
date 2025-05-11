@@ -5,7 +5,7 @@
 #include "unrealsdk/game/bl2/offsets.h"
 #include "unrealsdk/unreal/offsets.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
+#if defined(UE3) && defined(ARCH_X86)
 
 namespace unrealsdk::game::tps {
 

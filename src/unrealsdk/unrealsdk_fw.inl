@@ -10,24 +10,18 @@ namespace. It is included directly in the other two files.
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/unreal/offset_list.h"
-#include "unrealsdk/unreal/structs/tarray.h"
 
 namespace unrealsdk::unreal {
 
 class GNames;
 class GObjects;
 class UClass;
-class UEnum;
 class UFunction;
 struct FFrame;
 struct FLazyObjectPtr;
-struct FName;
 struct FSoftObjectPtr;
 struct FText;
 struct TemporaryFString;
-
-template <typename KeyType, typename ValueType>
-struct TPair;
 
 }  // namespace unrealsdk::unreal
 
@@ -71,19 +65,6 @@ UNREALSDK_CAPI(void, ftext_as_culture_invariant, FText* text, TemporaryFString&&
 UNREALSDK_CAPI(void, fsoftobjectptr_assign, FSoftObjectPtr* ptr, const unreal::UObject* obj);
 UNREALSDK_CAPI(void, flazyobjectptr_assign, FLazyObjectPtr* ptr, const unreal::UObject* obj);
 UNREALSDK_CAPI([[nodiscard]] const offsets::OffsetList*, get_offsets);
-
-// Since we're not allowed to return a C++ type in an extern C, create a dummy C type to transfer
-// all our values into
-struct UEnumGetNamesCRet {
-    void* data;
-    int32_t count;
-    int32_t max;
-};
-static_assert(sizeof(UEnumGetNamesCRet)
-              == sizeof(unreal::TArray<unreal::TPair<unreal::FName, uint64_t>>));
-static_assert(alignof(UEnumGetNamesCRet)
-              == alignof(unreal::TArray<unreal::TPair<unreal::FName, uint64_t>>));
-UNREALSDK_CAPI([[nodiscard]] UEnumGetNamesCRet, uenum_get_names, const unreal::UEnum* uenum);
 
 }  // namespace internal
 

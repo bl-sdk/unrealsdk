@@ -11,7 +11,7 @@
 #include "unrealsdk/unreal/structs/tarray.h"
 #include "unrealsdk/unreal/structs/tpair.h"
 
-#if defined(UE4) && defined(ARCH_X64) && !defined(UNREALSDK_IMPORTING)
+#if defined(UE4) && defined(ARCH_X64)
 
 namespace unrealsdk::unreal {
 
@@ -125,6 +125,8 @@ class UFunction : public UStruct {
 using UConst = unreal::offsets::generic::UConst<UField>;
 
 class UEnum : public UField {
+    friend class unreal::UEnum;
+
    private:
     unreal::UnmanagedFString CppType;
     unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> Names;
