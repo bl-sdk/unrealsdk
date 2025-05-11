@@ -22,17 +22,9 @@ typedef NTSTATUS(WINAPI* NtQueryInformationProcess_func)(HANDLE ProcessHandle,
                                                          ULONG ProcessInformationLength,
                                                          PULONG ReturnLength);
 
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wenum-constexpr-conversion"
-#endif
-
-constexpr auto ThreadHideFromDebugger = static_cast<THREAD_INFORMATION_CLASS>(17);
-constexpr auto ProcessDebugObjectHandle = static_cast<PROCESSINFOCLASS>(30);
-
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#endif
+// These are undocumented values, not in the header, treat as size_t to avoid enum conversion errors
+constexpr size_t ThreadHideFromDebugger = 17;
+constexpr size_t ProcessDebugObjectHandle = 30;
 
 // NOLINTEND(readability-identifier-naming)
 
@@ -43,7 +35,7 @@ NTSTATUS NTAPI NtSetInformationThread_hook(HANDLE ThreadHandle,
                                            PVOID ThreadInformation,
                                            ULONG ThreadInformationLength) {
     // NOLINTEND(readability-identifier-naming)
-    if (ThreadInformationClass == ThreadHideFromDebugger) {
+    if (static_cast<size_t>(ThreadInformationClass) == ThreadHideFromDebugger) {
         return STATUS_SUCCESS;
     }
 
@@ -61,7 +53,7 @@ NTSTATUS WINAPI NtQueryInformationProcess_hook(HANDLE ProcessHandle,
                                                ULONG ProcessInformationLength,
                                                PULONG ReturnLength) {
     // NOLINTEND(readability-identifier-naming)
-    if (ProcessInformationClass == ProcessDebugObjectHandle) {
+    if (static_cast<size_t>(ProcessInformationClass) == ProcessDebugObjectHandle) {
         return STATUS_PORT_NOT_SET;
     }
 

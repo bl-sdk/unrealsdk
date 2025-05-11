@@ -49,9 +49,9 @@ void PropTraits<UArrayProperty>::set(const UArrayProperty* prop,
         return;
     }
 
-    cast(inner, [prop, &arr, &value]<typename T>(const T* inner) {
+    cast(inner, [&arr, &value]<typename T>(const T* inner) {
         auto new_size = value.size();
-        arr->resize(new_size, prop->ElementSize());
+        arr->resize(new_size, inner->ElementSize());
 
         for (size_t i = 0; i < new_size; i++) {
             set_property<T>(inner, 0,

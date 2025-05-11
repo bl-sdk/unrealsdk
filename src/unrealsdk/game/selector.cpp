@@ -40,7 +40,7 @@ using all_known_games = std::tuple<BL1Hook, BL2Hook, TPSHook>;
  * @tparam i Index of the game class being tested this iteration. Picked up automatically.
  * @param executable The executable name to match against.
  */
-template <int i = 0>
+template <size_t i = 0>
 std::unique_ptr<AbstractHook> find_correct_hook(std::string_view executable) {
     if constexpr (i >= std::tuple_size_v<all_known_games>) {
         throw std::runtime_error("Failed to find compatible game hook!");
@@ -58,7 +58,8 @@ std::unique_ptr<AbstractHook> find_correct_hook(std::string_view executable) {
 
 std::unique_ptr<AbstractHook> select_based_on_executable(void) {
     auto executable_filename = utils::get_executable().filename().string();
-    return find_correct_hook(config::get_str("exe_override").value_or(executable_filename));
+    return find_correct_hook(
+        config::get_str("unrealsdk.exe_override").value_or(executable_filename));
 }
 
 }  // namespace unrealsdk::game

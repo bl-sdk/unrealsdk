@@ -70,7 +70,7 @@ FName::operator std::wstring() const {
     return stream.str();
 }
 
-FName operator"" _fn(const wchar_t* str, size_t /*len*/) {
+FName operator""_fn(const wchar_t* str, size_t /*len*/) {
     return FName{str};
 }
 
