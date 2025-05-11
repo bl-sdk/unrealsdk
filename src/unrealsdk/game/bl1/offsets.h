@@ -6,6 +6,7 @@
 #include "unrealsdk/unreal/classes/uconst.h"
 #include "unrealsdk/unreal/classes/uscriptstruct.h"
 #include "unrealsdk/unreal/offsets.h"
+#include "unrealsdk/unreal/structs/fname.h"
 
 #if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
 
@@ -31,7 +32,28 @@ namespace unrealsdk::game::bl1 {
 class UStruct;
 class UClass;
 
-using UObject = bl2::generic::UObject<UClass>;
+class UObject {
+   private:
+    uintptr_t* vftable;
+
+   public:
+    int32_t InternalIndex;
+    uint64_t ObjectFlags;
+
+   private:
+    void* HashNext;
+    void* HashOuterNext;
+    void* StateFrame;
+    UObject* _Linker;
+    void* _LinkerIndex;
+    int32_t NetIndex;
+
+   public:
+    UObject* Outer;
+    unreal::FName Name;
+    UClass* Class;
+    UObject* ObjectArchetype;
+};
 
 class UField : public UObject {
    public:
