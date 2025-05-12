@@ -3,6 +3,8 @@
 
 #include "unrealsdk/pch.h"
 #include "unrealsdk/game/bl2/offsets.h"
+#include "unrealsdk/unreal/classes/properties/attribute_property.h"
+#include "unrealsdk/unreal/classes/properties/ubyteproperty.h"
 #include "unrealsdk/unreal/classes/uconst.h"
 #include "unrealsdk/unreal/classes/uscriptstruct.h"
 #include "unrealsdk/unreal/offsets.h"
@@ -122,6 +124,22 @@ using UScriptStruct = unreal::offsets::generic::UScriptStruct<UStruct>;
 using UFunction = bl2::generic::UFunction<UStruct>;
 using UConst = unreal::offsets::generic::UConst<UField>;
 using UEnum = bl2::generic::UEnum<UField>;
+
+using UInt8Property = UProperty;
+using UInt16Property = UProperty;
+using UIntProperty = UProperty;
+using UInt64Property = UProperty;
+using UByteProperty = unreal::offsets::generic::UByteProperty<UProperty>;
+using UUInt16Property = UProperty;
+using UUInt32Property = UProperty;
+using UUInt64Property = UProperty;
+using UFloatProperty = UProperty;
+using UDoubleProperty = UProperty;
+using UNameProperty = UProperty;
+
+using UByteAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UByteProperty>;
+using UFloatAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UFloatProperty>;
+using UIntAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UIntProperty>;
 
 // NOLINTEND(cppcoreguidelines-pro-type-member-init,
 //           readability-identifier-naming,

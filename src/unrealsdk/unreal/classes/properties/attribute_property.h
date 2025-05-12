@@ -10,56 +10,67 @@
 
 namespace unrealsdk::unreal {
 
-class UArrayProperty;
-class UProperty;
-
 #if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
-template <typename T, typename = std::enable_if_t<std::is_base_of_v<UProperty, T>>>
-class AttributeProperty : public T {
-   public:
-    AttributeProperty() = delete;
-    AttributeProperty(const AttributeProperty&) = delete;
-    AttributeProperty(AttributeProperty&&) = delete;
-    AttributeProperty& operator=(const AttributeProperty&) = delete;
-    AttributeProperty& operator=(AttributeProperty&&) = delete;
-    ~AttributeProperty() = delete;
+class UArrayProperty;
+class UProperty;
 
-    // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
-
-   private:
-    UArrayProperty* ModifierStackProperty;
-    AttributeProperty<T>* OtherAttributeProperty;
-
-    // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
-   public:
-    /**
-     * @brief Gets the property used for this attribute's modifier stack.
-     *
-     * @return The modifier stack property.
-     */
-    [[nodiscard]] UArrayProperty* get_modifier_stack_prop(void) const {
-        return this->read_field(&AttributeProperty<T>::ModifierStackProperty);
-    }
-
-    /**
-     * @brief Gets the other attribute property used for this attribute.
-     *
-     * @return The other attribute property.
-     */
-    [[nodiscard]] AttributeProperty<T>* get_other_attribute_property(void) const {
-        return this->read_field(&AttributeProperty<T>::OtherAttributeProperty);
-    }
-};
+namespace offsets::generic {
 
 template <typename T>
-struct PropTraits<AttributeProperty<T>> : public PropTraits<T> {};
+class GenericAttributeProperty : public T {
+   public:
+    // NOLINTBEGIN(readability-identifier-naming)
 
-using UByteAttributeProperty = AttributeProperty<UByteProperty>;
-using UFloatAttributeProperty = AttributeProperty<UFloatProperty>;
-using UIntAttributeProperty = AttributeProperty<UIntProperty>;
+    UArrayProperty* ModifierStackProperty;
+    GenericAttributeProperty<T>* OtherAttributeProperty;
+
+    // NOLINTEND(readability-identifier-naming)
+};
+
+}  // namespace offsets::generic
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFINE_ATTRIBUTE_PROPERTY(class_name, base_class, fields) \
+    class class_name : public base_class {                        \
+       public:                                                    \
+        class_name() = delete;                                    \
+        class_name(const class_name&) = delete;                   \
+        class_name(class_name&&) = delete;                        \
+        class_name& operator=(const class_name&) = delete;        \
+        class_name& operator=(class_name&&) = delete;             \
+        ~class_name() = delete;                                   \
+        /* NOLINTNEXTLINE(readability-identifier-naming) */       \
+        UNREALSDK_DEFINE_FIELDS_HEADER(class_name, fields);       \
+    };                                                            \
+    template <>                                                   \
+    struct PropTraits<class_name> : public PropTraits<base_class> {};
+
+// These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UBYTEATTRIBUTEPROPERTY_FIELDS(X) \
+    X(UArrayProperty*, ModifierStackProperty)      \
+    X(UByteAttributeProperty*, OtherAttributeProperty)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UFLOATATTRIBUTEPROPERTY_FIELDS(X) \
+    X(UArrayProperty*, ModifierStackProperty)       \
+    X(UFloatAttributeProperty*, OtherAttributeProperty)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UINTATTRIBUTEPROPERTY_FIELDS(X) \
+    X(UArrayProperty*, ModifierStackProperty)     \
+    X(UIntAttributeProperty*, OtherAttributeProperty)
+
+DEFINE_ATTRIBUTE_PROPERTY(UByteAttributeProperty,
+                          UByteProperty,
+                          UNREALSDK_UBYTEATTRIBUTEPROPERTY_FIELDS);
+DEFINE_ATTRIBUTE_PROPERTY(UFloatAttributeProperty,
+                          UFloatProperty,
+                          UNREALSDK_UFLOATATTRIBUTEPROPERTY_FIELDS);
+DEFINE_ATTRIBUTE_PROPERTY(UIntAttributeProperty,
+                          UIntProperty,
+                          UNREALSDK_UINTATTRIBUTEPROPERTY_FIELDS);
 
 template <>
 inline const wchar_t* const ClassTraits<UByteAttributeProperty>::NAME = L"ByteAttributeProperty";
@@ -67,6 +78,8 @@ template <>
 inline const wchar_t* const ClassTraits<UFloatAttributeProperty>::NAME = L"FloatAttributeProperty";
 template <>
 inline const wchar_t* const ClassTraits<UIntAttributeProperty>::NAME = L"IntAttributeProperty";
+
+#undef DEFINE_ATTRIBUTE_PROPERTY
 
 #if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)

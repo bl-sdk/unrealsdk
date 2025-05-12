@@ -2,6 +2,8 @@
 #define UNREALSDK_GAME_BL3_OFFSETS_H
 
 #include "unrealsdk/pch.h"
+#include "unrealsdk/unreal/classes/properties/attribute_property.h"
+#include "unrealsdk/unreal/classes/properties/ubyteproperty.h"
 #include "unrealsdk/unreal/classes/uconst.h"
 #include "unrealsdk/unreal/classes/uenum.h"
 #include "unrealsdk/unreal/classes/ufield.h"
@@ -132,10 +134,23 @@ class UEnum : public UField {
     unreal::UnmanagedFString CppType;
     unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> Names;
     int64_t CppForm;
-
-   public:
-    [[nodiscard]] unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> get_names(void) const;
 };
+
+using UInt8Property = UProperty;
+using UInt16Property = UProperty;
+using UIntProperty = UProperty;
+using UInt64Property = UProperty;
+using UByteProperty = unreal::offsets::generic::UByteProperty<UProperty>;
+using UUInt16Property = UProperty;
+using UUInt32Property = UProperty;
+using UUInt64Property = UProperty;
+using UFloatProperty = UProperty;
+using UDoubleProperty = UProperty;
+using UNameProperty = UProperty;
+
+using UByteAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UByteProperty>;
+using UFloatAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UFloatProperty>;
+using UIntAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UIntProperty>;
 
 // NOLINTEND(cppcoreguidelines-pro-type-member-init,
 //           readability-identifier-naming,

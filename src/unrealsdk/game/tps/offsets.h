@@ -82,6 +82,22 @@ using UFunction = bl2::generic::UFunction<UStruct>;
 using UConst = bl2::UConst;
 using UEnum = bl2::UEnum;
 
+using UInt8Property = UProperty;
+using UInt16Property = UProperty;
+using UIntProperty = UProperty;
+using UInt64Property = UProperty;
+using UByteProperty = unreal::offsets::generic::UByteProperty<UProperty>;
+using UUInt16Property = UProperty;
+using UUInt32Property = UProperty;
+using UUInt64Property = UProperty;
+using UFloatProperty = UProperty;
+using UDoubleProperty = UProperty;
+using UNameProperty = UProperty;
+
+using UByteAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UByteProperty>;
+using UFloatAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UFloatProperty>;
+using UIntAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UIntProperty>;
+
 // NOLINTEND(cppcoreguidelines-pro-type-member-init,
 //           readability-identifier-naming,
 //           readability-magic-numbers)

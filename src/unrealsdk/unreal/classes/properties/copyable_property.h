@@ -49,7 +49,7 @@ using UInt16Property = CopyableProperty<int16_t>;
 using UIntProperty = CopyableProperty<int32_t>;
 using UInt64Property = CopyableProperty<int64_t>;
 
-// UByteProperty has an extra field in UE3, handled in a different file
+// UByteProperty has an extra field we care about, it's handled in a different file
 using UUInt16Property = CopyableProperty<uint16_t>;
 using UUInt32Property = CopyableProperty<uint32_t>;
 using UUInt64Property = CopyableProperty<uint64_t>;

@@ -2,6 +2,8 @@
 #define UNREALSDK_UNREAL_OFFSET_LIST_H
 
 #include "unrealsdk/pch.h"
+#include "unrealsdk/unreal/classes/properties/attribute_property.h"
+#include "unrealsdk/unreal/classes/properties/ubyteproperty.h"
 #include "unrealsdk/unreal/classes/uclass.h"
 #include "unrealsdk/unreal/classes/uconst.h"
 #include "unrealsdk/unreal/classes/ufield.h"
@@ -28,7 +30,11 @@ namespace unrealsdk::unreal::offsets {
     X(UClass)                              \
     X(UScriptStruct)                       \
     X(UFunction)                           \
-    X(UConst)
+    X(UConst)                              \
+    X(UByteProperty)                       \
+    X(UByteAttributeProperty)              \
+    X(UFloatAttributeProperty)             \
+    X(UIntAttributeProperty)
 
 #define UNREALSDK_OFFSETS__DEFINE_OFFSET_LIST_MEMBERS(name) unrealsdk::unreal::name::Offsets name;
 #define UNREALSDK_OFFSETS__NESTED_FROM_TYPE(name) \
