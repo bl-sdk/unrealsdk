@@ -66,9 +66,9 @@ target_link_libraries(MyProject PRIVATE unrealsdk)
 ```
 
 You must define the build "flavour" before including the sdk. Each flavour corresponds to a set of
-games running on a similar (but not neccesarily the exact same) unreal engine versions. Essentially,
+games running on a similar (but not necessarily the exact same) unreal engine versions. Essentially,
 if two games are similar enough to use the same mod manager, and support mostly the same mods, they
-should work under the same build flavour. Some level of runtime adaptation is suppported (e.g. core
+should work under the same build flavour. Some level of runtime adaptation is supported (e.g. core
 types may slightly change size or layout), but accounting for large engine internal differences
 (e.g. the different GNames data structures) at runtime is a non-goal.
 

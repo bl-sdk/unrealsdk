@@ -17,7 +17,7 @@ namespace unrealsdk::game {
 
 namespace {
 
-using construct_obj_func = UObject* (*)(UClass* cls,
+using construct_obj_func = UObject* (*)(UClass * cls,
                                         UObject* obj,
                                         FName name,
                                         uint32_t flags,

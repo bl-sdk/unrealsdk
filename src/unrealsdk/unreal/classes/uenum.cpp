@@ -1,6 +1,7 @@
 #include "unrealsdk/pch.h"
 #include "unrealsdk/unreal/classes/uenum.h"
 #include "unrealsdk/game/bl2/offsets.h"
+#include "unrealsdk/game/bl3/offsets.h"
 #include "unrealsdk/unreal/structs/fname.h"
 
 namespace unrealsdk::unreal {

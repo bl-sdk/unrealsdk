@@ -117,8 +117,7 @@
         "strategy": "external"
       },
       "cacheVariables": {
-        "UNREALSDK_FLAVOUR": "WILLOW",
-        "UNREALSDK_ARCH": "x86"
+        "UNREALSDK_FLAVOUR": "WILLOW"
       }
     },
     {
@@ -129,8 +128,7 @@
         "strategy": "external"
       },
       "cacheVariables": {
-        "UNREALSDK_FLAVOUR": "OAK",
-        "UNREALSDK_ARCH": "x64"
+        "UNREALSDK_FLAVOUR": "OAK"
       }
     },
     {
