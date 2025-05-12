@@ -31,7 +31,6 @@ class UConst : public UField {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREALSDK_UCONST_FIELDS(X) X(UnmanagedFString, Value)
 
-    // NOLINTNEXTLINE(readability-identifier-naming)
     UNREALSDK_DEFINE_FIELDS_HEADER(UConst, UNREALSDK_UCONST_FIELDS);
 
    private:

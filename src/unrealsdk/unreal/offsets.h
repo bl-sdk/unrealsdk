@@ -50,8 +50,10 @@ using copy_cv = std::conditional_t<
 #define UNREALSDK_DEFINE_FIELDS_HEADER(ClassName, X_MACRO)             \
    public:                                                             \
     struct Offsets;                                                    \
+    /* NOLINTNEXTLINE(readability-identifier-naming) */                \
     X_MACRO(UNREALSDK_OFFSETS__DEFINE_GETTER)                          \
     struct Offsets {                                                   \
+        /* NOLINTNEXTLINE(readability-identifier-naming) */            \
         X_MACRO(UNREALSDK_OFFSETS__DEFINE_OFFSET_MEMBERS)              \
         template <typename T>                                          \
         static constexpr Offsets from() {                              \

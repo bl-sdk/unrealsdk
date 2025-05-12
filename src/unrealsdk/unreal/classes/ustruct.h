@@ -37,7 +37,6 @@ class UStruct : public UField {
     X(UField*, Children)            \
     X(UProperty*, PropertyLink)
 
-    // NOLINTNEXTLINE(readability-identifier-naming)
     UNREALSDK_DEFINE_FIELDS_HEADER(UStruct, UNREALSDK_USTRUCT_FIELDS);
 
    private:

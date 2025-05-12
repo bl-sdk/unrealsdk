@@ -34,7 +34,6 @@ class UClass : public UStruct {
     X(UObject*, ClassDefaultObject) \
     X(TArray<FImplementedInterface>, Interfaces)
 
-    // NOLINTNEXTLINE(readability-identifier-naming)
     UNREALSDK_DEFINE_FIELDS_HEADER(UClass, UNREALSDK_UCLASS_FIELDS);
 
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)

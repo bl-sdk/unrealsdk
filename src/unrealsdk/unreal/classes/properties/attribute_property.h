@@ -42,7 +42,6 @@ class GenericAttributeProperty : public T {
         class_name& operator=(const class_name&) = delete;        \
         class_name& operator=(class_name&&) = delete;             \
         ~class_name() = delete;                                   \
-        /* NOLINTNEXTLINE(readability-identifier-naming) */       \
         UNREALSDK_DEFINE_FIELDS_HEADER(class_name, fields);       \
     };                                                            \
     template <>                                                   \

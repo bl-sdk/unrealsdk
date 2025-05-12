@@ -40,7 +40,6 @@ class UByteProperty : public CopyableProperty<uint8_t> {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREALSDK_UBYTEPROPERTY_FIELDS(X) X(UEnum*, Enum)
 
-    // NOLINTNEXTLINE(readability-identifier-naming)
     UNREALSDK_DEFINE_FIELDS_HEADER(UByteProperty, UNREALSDK_UBYTEPROPERTY_FIELDS);
 
    private:

@@ -38,7 +38,6 @@ class UScriptStruct : public UStruct {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREALSDK_USCRIPTSTRUCT_FIELDS(X) X(uint32_t, StructFlags)
 
-    // NOLINTNEXTLINE(readability-identifier-naming)
     UNREALSDK_DEFINE_FIELDS_HEADER(UScriptStruct, UNREALSDK_USCRIPTSTRUCT_FIELDS);
 
    private:

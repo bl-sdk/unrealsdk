@@ -30,8 +30,6 @@ class UObject {
 
     uintptr_t* vftable;
 
-    // NOLINTBEGIN(readability-identifier-naming)
-
 #if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     using object_flags_type = uint32_t;
 #elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
@@ -51,6 +49,7 @@ class UObject {
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UObject, UNREALSDK_UOBJECT_FIELDS);
 
+    // NOLINTBEGIN(readability-identifier-naming)
 #if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
    private:
     int32_t ObjectFlags_member;

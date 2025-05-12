@@ -52,8 +52,6 @@ class UProperty : public UField {
     UProperty& operator=(UProperty&&) = delete;
     ~UProperty() = delete;
 
-    // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
-
 #if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     using property_flags_type = uint64_t;
 #elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
@@ -73,6 +71,7 @@ class UProperty : public UField {
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UProperty, UNREALSDK_UPROPERTY_FIELDS);
 
+    // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 #if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
    private:
     int32_t ArrayDim_member;
