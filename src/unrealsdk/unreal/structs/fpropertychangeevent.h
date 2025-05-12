@@ -7,7 +7,7 @@ namespace unrealsdk::unreal {
 
 class UProperty;
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -63,7 +63,7 @@ struct FPropertyChangedChainEvent : public FPropertyChangedEvent {
     FEditPropertyChain* PropertyChain{};
 };
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

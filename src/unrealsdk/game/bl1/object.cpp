@@ -5,7 +5,7 @@
 #include "unrealsdk/memory.h"
 #include "unrealsdk/unreal/structs/fstring.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::unreal;
 using namespace unrealsdk::memory;

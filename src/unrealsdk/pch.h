@@ -5,6 +5,13 @@
 // This file is purely macros, it doesn't rely on anything else
 #include "unrealsdk/exports.h"
 
+// The flavour macros are used in ifdefs everywhere.
+// `UNREALSDK_FLAVOUR` should be defined to be equal to one of them.
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#define UNREALSDK_FLAVOUR_WILLOW 1
+#define UNREALSDK_FLAVOUR_OAK 2
+// NOLINTEND(cppcoreguidelines-macro-usage)
+
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_NO_STATUS
 #define NOGDI
@@ -82,21 +89,16 @@ static_assert(std::numeric_limits<double>::is_iec559 && std::numeric_limits<doub
 using float32_t = float;
 using float64_t = double;
 
-#ifdef ARCH_X64
-static_assert(sizeof(uintptr_t) == sizeof(uint64_t),
-              "Architecture define doesn't align with pointer size");
-#else
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 static_assert(sizeof(uintptr_t) == sizeof(uint32_t),
-              "Architecture define doesn't align with pointer size");
+              "Expected 32 bit pointers for Willow SDK flavour");
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
+static_assert(sizeof(uintptr_t) == sizeof(uint64_t),
+              "Expected 64 bit pointers for Oak SDK flavour");
+#else
+#error Unknown sdk flavour
 #endif
 
-#endif
-
-#if defined(UE4) == defined(UE3)
-#error Exactly one UE version must be defined
-#endif
-#if defined(ARCH_X64) == defined(ARCH_X86)
-#error Exactly one architecture must be defined
 #endif
 
 #endif /* UNREALSDK_PCH_H */

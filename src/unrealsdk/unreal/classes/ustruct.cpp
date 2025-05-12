@@ -133,10 +133,12 @@ utils::IteratorProxy<UStruct::SuperFieldIterator> UStruct::superfields(void) con
 #pragma endregion
 
 size_t UStruct::get_struct_size(void) const {
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     return (this->PropertySize + this->MinAlignment - 1) & ~(this->MinAlignment - 1);
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
     return this->PropertySize;
+#else
+#error Unknown SDK flavour
 #endif
 }
 

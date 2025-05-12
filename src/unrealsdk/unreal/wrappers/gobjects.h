@@ -3,10 +3,12 @@
 
 #include "unrealsdk/pch.h"
 
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
 #include "unrealsdk/unreal/structs/gobjects.h"
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #include "unrealsdk/unreal/structs/tarray.h"
+#else
+#error Unknown SDK flavour
 #endif
 
 namespace unrealsdk::unreal {
@@ -16,11 +18,14 @@ class UObject;
 
 class GObjects {
    public:
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     using internal_type = FUObjectArray*;
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
     using internal_type = TArray<UObject*>*;
+#else
+#error Unknown SDK flavour
 #endif
+
    private:
     internal_type internal;
 

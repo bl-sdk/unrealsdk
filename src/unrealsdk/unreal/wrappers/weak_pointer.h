@@ -3,7 +3,7 @@
 
 #include "unrealsdk/pch.h"
 
-#ifdef UE3
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #define UNREALSDK_EMULATED_WEAK_POINTER
 #endif
 

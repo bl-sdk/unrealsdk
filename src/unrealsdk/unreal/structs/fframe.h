@@ -3,7 +3,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -29,11 +29,15 @@ struct FOutParamRec {
 struct FOutputDevice {
     void* VfTable;
 
-#ifdef UE3
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
    private:
     uint32_t bAllowSuppression;
 
    public:
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
+    // Intentionally empty
+#else
+#error Unknown SDK flavour
 #endif
 
     uint32_t bSuppressEventTag;
@@ -48,12 +52,16 @@ struct FFrame : public FOutputDevice {
     uint8_t* Code;
     void* Locals;
 
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
    private:
     UProperty* LastProperty;
     void* LastPropertyAddress;
 
    public:
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
+    // Intentionally empty
+#else
+#error Unknown SDK flavour
 #endif
 
     FFrame* PreviousFrame;
@@ -75,7 +83,7 @@ struct FFrame : public FOutputDevice {
 #pragma GCC diagnostic pop
 #endif
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

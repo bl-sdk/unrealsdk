@@ -13,7 +13,7 @@ namespace unrealsdk::unreal {
 class UArrayProperty;
 class UProperty;
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -68,7 +68,7 @@ inline const wchar_t* const ClassTraits<UFloatAttributeProperty>::NAME = L"Float
 template <>
 inline const wchar_t* const ClassTraits<UIntAttributeProperty>::NAME = L"IntAttributeProperty";
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

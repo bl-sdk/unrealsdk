@@ -59,20 +59,28 @@ The recommended way to link against the sdk is as a submodule.
 git clone --recursive https://github.com/bl-sdk/unrealsdk.git
 ```
 ```cmake
+set(UNREALSDK_FLAVOUR WILLOW)
+# set(UNREALSDK_SHARED True)
 add_submodule(path/to/unrealsdk)
 target_link_libraries(MyProject PRIVATE unrealsdk)
 ```
 
-You can configure the sdk by setting a few variables before including it:
-- `UNREALSDK_UE_VERSION` - The unreal engine version to build the SDK for, one of `UE3` or `UE4`.
-  These versions are different enough that supporting them from a single binary is difficult.
-- `UNREALSDK_ARCH` - The architecture to build the sdk for. One of `x86` or `x64`. Will be double
-  checked at compile time.
-- `UNREALSDK_SHARED` - If set, compiles as a shared library instead of as an object.
+You must define the build "flavour" before including the sdk. Each flavour corresponds to a set of
+games running on a similar (but not neccesarily the exact same) unreal engine versions. Essentially,
+if two games are similar enough to use the same mod manager, and support mostly the same mods, they
+should work under the same build flavour. Some level of runtime adaptation is suppported (e.g. core
+types may slightly change size or layout), but accounting for large engine internal differences
+(e.g. the different GNames data structures) at runtime is a non-goal.
 
-If you want to be able to run multiple projects using the sdk in the same game process, you *must*
-compile it as a shared library, there's a decent amount of internal state preventing initializing it
-twice.
+The currently supported flavours are:
+- `WILLOW`: Borderlands 1, 2, TPS, and AoDK standalone. Named for Gearbox's codename. 32-bit UE3.
+- `OAK`: Borderlands 3 and Wonderlands. Named for Gearbox's codename. 64-bit UE 4.21ish - there's
+         some backports making exact versioning awkward.
+
+Additionally, you can optionally define the `UNREALSDK_SHARED` variable, to compile as a shared
+library instead of as an object one. If you want to be able to run multiple projects using the sdk
+in the same game process, you *must* compile it as a shared library, there's a decent amount of
+internal state preventing initializing it twice.
 
 If you're linking against a static library, the easiest way to initialize it is:
 ```cpp

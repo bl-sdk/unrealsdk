@@ -3,7 +3,7 @@
 #include "unrealsdk/game/bl1/bl1.h"
 #include "unrealsdk/memory.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::memory;
 

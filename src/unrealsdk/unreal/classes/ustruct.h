@@ -9,7 +9,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -42,7 +42,7 @@ class UStruct : public UField {
 
    private:
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     /* Struct this inherits from, may be null */
     UStruct* SuperField_member;
     /* Pointer to start of linked list of child fields */
@@ -68,7 +68,7 @@ class UStruct : public UField {
     /* Array of object references embedded in script code. Mirrored for easy access by realtime
      * garbage collection code */
     TArray<UObject*> ScriptObjectReferences;
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
     uint8_t UnknownData00[0x8];
 
     UStruct* SuperField_member;
@@ -82,7 +82,8 @@ class UStruct : public UField {
     uint8_t UnknownData02[0x10];
 
     TArray<UObject*> ScriptObjectReferences;
-
+#else
+#error Unknown SDK flavour
 #endif
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 
@@ -230,7 +231,7 @@ struct ClassTraits<UStruct> {
 #pragma GCC diagnostic pop
 #endif
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

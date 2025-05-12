@@ -6,7 +6,7 @@
 #include "unrealsdk/game/abstract_hook.h"
 #include "unrealsdk/game/selector.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW && !defined(UNREALSDK_IMPORTING)
 
 namespace unrealsdk::game {
 

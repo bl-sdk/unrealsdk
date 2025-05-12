@@ -2,8 +2,12 @@
 
 project(unrealsdk VERSION 1.8.0)
 
-set(UNREALSDK_UE_VERSION "UE4" CACHE STRING "The unreal engine version to build the SDK for. One of 'UE3' or 'UE4'.")
-set(UNREALSDK_ARCH "x64" CACHE STRING "The architecture to build the sdk for. One of 'x86' or 'x64'.")
+set(UNREALSDK_FLAVOUR "" CACHE STRING "Which \"flavour\" of the SDK to build.")
+set_property(CACHE UNREALSDK_FLAVOUR PROPERTY STRINGS "WILLOW" "OAK")
+if (NOT UNREALSDK_FLAVOUR MATCHES "(WILLOW|OAK)")
+  message(FATAL_ERROR "Got invalid sdk flavour '${UNREALSDK_FLAVOUR}'")
+endif()
+
 set(UNREALSDK_SHARED False CACHE BOOL "If set, compiles as a shared library instead of as an object.")
 
 add_library(_unrealsdk_interface INTERFACE)
@@ -60,8 +64,7 @@ target_include_directories(_unrealsdk_interface INTERFACE "src" ${CONFIGURE_FILE
 target_link_libraries(_unrealsdk_interface INTERFACE minhook tomlplusplus::tomlplusplus)
 
 target_compile_definitions(_unrealsdk_interface INTERFACE
-    "${UNREALSDK_UE_VERSION}"
-    "ARCH_$<UPPER_CASE:${UNREALSDK_ARCH}>"
+    "UNREALSDK_FLAVOUR=UNREALSDK_FLAVOUR_${UNREALSDK_FLAVOUR}"
     "$<$<BOOL:${UNREALSDK_SHARED}>:UNREALSDK_SHARED>"
 )
 

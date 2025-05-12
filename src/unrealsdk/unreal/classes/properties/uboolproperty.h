@@ -10,7 +10,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -31,13 +31,15 @@ class UBoolProperty : public UProperty {
    private:
     // NOLINTBEGIN(readability-identifier-naming)
 
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     uint8_t FieldSize;
     uint8_t ByteOffset;
     uint8_t ByteMask;
     uint8_t FieldMask;
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
     uint32_t FieldMask;
+#else
+#error Unknown SDK flavour
 #endif
 
     // NOLINTEND(readability-identifier-naming)
@@ -67,7 +69,7 @@ struct ClassTraits<UBoolProperty> {
 #pragma GCC diagnostic pop
 #endif
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

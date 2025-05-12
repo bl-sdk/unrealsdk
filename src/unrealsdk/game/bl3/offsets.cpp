@@ -4,7 +4,7 @@
 #include "unrealsdk/unreal/classes/ufield.h"
 #include "unrealsdk/unreal/offset_list.h"
 
-#if defined(UE4) && defined(ARCH_X64) && !defined(UNREALSDK_IMPORTING)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::unreal::offsets;
 

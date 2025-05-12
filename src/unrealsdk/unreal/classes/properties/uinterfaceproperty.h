@@ -13,7 +13,7 @@ namespace unrealsdk::unreal {
 class UClass;
 class UObject;
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -53,7 +53,7 @@ struct ClassTraits<UInterfaceProperty> {
     static inline const wchar_t* const NAME = L"InterfaceProperty";
 };
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

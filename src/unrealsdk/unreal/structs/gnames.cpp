@@ -8,7 +8,7 @@ bool FNameEntry::is_wide(void) const {
     return (this->Index & NAME_WIDE_MASK) != 0;
 }
 
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
 
 FNameEntry* TStaticIndirectArrayThreadSafeRead_FNameEntry::at(size_t idx) const {
     if (std::cmp_greater_equal(idx, this->Count)) {

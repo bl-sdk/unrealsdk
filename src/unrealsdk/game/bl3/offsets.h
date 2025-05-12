@@ -11,7 +11,7 @@
 #include "unrealsdk/unreal/structs/tarray.h"
 #include "unrealsdk/unreal/structs/tpair.h"
 
-#if defined(UE4) && defined(ARCH_X64)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
 
 namespace unrealsdk::unreal {
 

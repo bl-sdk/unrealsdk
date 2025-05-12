@@ -8,7 +8,7 @@
 #include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/structs/fname.h"
 
-#if defined(UE3) && defined(ARCH_X86)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 
 namespace unrealsdk::unreal {
 
@@ -18,7 +18,7 @@ struct FImplementedInterface;
 
 namespace unrealsdk::game::bl1 {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 #if defined(__clang__)
@@ -129,7 +129,7 @@ using UEnum = bl2::generic::UEnum<UField>;
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #endif
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

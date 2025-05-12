@@ -13,7 +13,7 @@ namespace unrealsdk::unreal {
 
 UNREALSDK_DEFINE_FIELDS_SOURCE_FILE(UProperty, UNREALSDK_UPROPERTY_FIELDS);
 
-#ifdef UE3
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 
 size_t UProperty::class_size(void) {
     static size_t size = 0;

@@ -2,7 +2,7 @@
 #include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/version_error.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW && !defined(UNREALSDK_IMPORTING)
 
 namespace unrealsdk::game {
 

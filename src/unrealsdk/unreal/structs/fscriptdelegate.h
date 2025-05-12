@@ -8,7 +8,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -17,10 +17,12 @@ class UFunction;
 
 struct FScriptDelegate {
    private:
-#ifdef UE3
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
     UObject* object = nullptr;
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     FWeakObjectPtr object;
+#else
+#error Unknown SDK flavour
 #endif
 
    public:
@@ -66,7 +68,7 @@ struct FScriptDelegate {
                                    const UFunction* signature);
 };
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

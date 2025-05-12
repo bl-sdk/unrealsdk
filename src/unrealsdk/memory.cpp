@@ -126,11 +126,12 @@ uintptr_t read_offset(uintptr_t address) {
         LOG(ERROR, "Attempted to read a null offset!");
         return 0;
     }
-#ifdef ARCH_X64
-    return address + *reinterpret_cast<int32_t*>(address) + 4;
-#else
-    return *reinterpret_cast<uintptr_t*>(address);
-#endif
+
+    if constexpr (sizeof(uintptr_t) == sizeof(uint64_t)) {
+        return address + *reinterpret_cast<int32_t*>(address) + 4;
+    } else {
+        return *reinterpret_cast<uintptr_t*>(address);
+    }
 }
 
 void unlock_range(uintptr_t start, size_t size) {

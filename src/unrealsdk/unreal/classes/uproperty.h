@@ -9,7 +9,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -38,7 +38,7 @@ This means:
 
 class UProperty : public UField {
    public:
-#ifdef UE3
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
     static constexpr auto PROP_FLAG_OPTIONAL = 0x10;
 #endif
     static constexpr auto PROP_FLAG_PARAM = 0x80;
@@ -54,10 +54,12 @@ class UProperty : public UField {
 
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
-#if UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     using property_flags_type = uint64_t;
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
     using property_flags_type = uint32_t;
+#else
+#error Unknown SDK flavour
 #endif
 
     // These fields become member functions, returning a reference into the object.
@@ -71,7 +73,7 @@ class UProperty : public UField {
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UProperty, UNREALSDK_UPROPERTY_FIELDS);
 
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
    private:
     int32_t ArrayDim_member;
     int32_t ElementSize_member;
@@ -94,8 +96,7 @@ class UProperty : public UField {
     UProperty* DestructorLinkNext;
     /** In memory only: Linked list of properties requiring post constructor initialization.**/
     UProperty* PostConstructLinkNext;  // 0x0030(0x0040) MISSED OFFSET
-#else
-
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
    private:
     int32_t ArrayDim_member;
     int32_t ElementSize_member;
@@ -114,8 +115,10 @@ class UProperty : public UField {
      * @return The size of this class.
      */
     [[nodiscard]] static size_t class_size(void);
-
+#else
+#error Unknown SDK flavour
 #endif
+
    public:
     /**
      * @brief Reads a field on a UProperty subclass, taking into account it's variable length.
@@ -131,12 +134,14 @@ class UProperty : public UField {
               typename FieldType,
               typename = std::enable_if_t<std::is_base_of_v<UProperty, PropertyType>>>
     FieldType read_field(FieldType PropertyType::* field) const {
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
         return reinterpret_cast<const PropertyType*>(this)->*field;
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
         return *reinterpret_cast<FieldType*>(
             reinterpret_cast<uintptr_t>(&(reinterpret_cast<const PropertyType*>(this)->*field))
             - sizeof(UProperty) + UProperty::class_size());
+#else
+#error Unknown SDK flavour
 #endif
     }
 
@@ -152,7 +157,7 @@ struct ClassTraits<UProperty> {
 #pragma GCC diagnostic pop
 #endif
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

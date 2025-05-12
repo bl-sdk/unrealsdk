@@ -5,7 +5,8 @@
 
 namespace unrealsdk::unreal {
 
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
+
 std::unordered_map<FName, uint64_t> UEnum::get_names(void) const {
     auto bl3_enum = reinterpret_cast<const unrealsdk::game::bl3::UEnum*>(this);
     std::unordered_map<FName, uint64_t> output;
@@ -16,7 +17,7 @@ std::unordered_map<FName, uint64_t> UEnum::get_names(void) const {
     return output;
 }
 
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 
 std::unordered_map<FName, uint64_t> UEnum::get_names(void) const {
     auto bl2_enum = reinterpret_cast<const unrealsdk::game::bl2::UEnum*>(this);
@@ -28,6 +29,8 @@ std::unordered_map<FName, uint64_t> UEnum::get_names(void) const {
     return output;
 }
 
+#else
+#error Unknown SDK flavour
 #endif
 
 }  // namespace unrealsdk::unreal

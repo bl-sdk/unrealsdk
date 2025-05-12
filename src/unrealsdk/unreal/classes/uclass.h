@@ -10,7 +10,7 @@ namespace unrealsdk::unreal {
 
 struct FImplementedInterface;
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -40,12 +40,12 @@ class UClass : public UStruct {
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
    private:
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     uint8_t UnknownData00[0x70];
     UObject* ClassDefaultObject_internal;
     uint8_t UnknownData01[0xA0];
     TArray<FImplementedInterface> Interfaces_internal;
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
     // Misc Fields I found within this block in BL2, but which we don't care about enough for me to
     //  find in UE4, or to want to increase the compile times by including
 
@@ -59,6 +59,8 @@ class UClass : public UStruct {
     uint8_t UnknownData01[0x48];
     TArray<FImplementedInterface> Interfaces_internal;
 
+#else
+#error Unknown SDK flavour
 #endif
     // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
    public:
@@ -83,7 +85,7 @@ struct ClassTraits<UClass> {
 #pragma GCC diagnostic pop
 #endif
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

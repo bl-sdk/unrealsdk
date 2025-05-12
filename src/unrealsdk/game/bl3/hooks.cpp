@@ -12,7 +12,7 @@
 #include "unrealsdk/unreal/wrappers/unreal_pointer_funcs.h"
 #include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 
-#if defined(UE4) && defined(ARCH_X64) && !defined(UNREALSDK_IMPORTING)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::unreal;
 using namespace unrealsdk::memory;

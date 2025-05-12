@@ -10,7 +10,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -32,10 +32,12 @@ class UObject {
 
     // NOLINTBEGIN(readability-identifier-naming)
 
-#if UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     using object_flags_type = uint32_t;
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
     using object_flags_type = uint64_t;
+#else
+#error Unknown SDK flavour
 #endif
 
     // These fields become member functions, returning a reference into the object.
@@ -49,7 +51,7 @@ class UObject {
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UObject, UNREALSDK_UOBJECT_FIELDS);
 
-#if UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
    private:
     int32_t ObjectFlags_member;
     int32_t InternalIndex_member;
@@ -58,7 +60,7 @@ class UObject {
     UObject* Outer_member;
 
    public:
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 
    private:
     // TODO: remove
@@ -76,6 +78,8 @@ class UObject {
     UObject* ObjectArchetype;
 
    public:
+#else
+#error Unknown SDK flavour
 #endif
 
     // NOLINTEND(readability-identifier-naming)
@@ -192,7 +196,7 @@ struct ClassTraits<UObject> {
     static inline const wchar_t* const NAME = L"Object";
 };
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

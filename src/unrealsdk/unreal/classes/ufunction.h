@@ -7,7 +7,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -41,7 +41,7 @@ class UFunction : public UStruct {
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
    private:
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     uint32_t FunctionFlags_internal;
     uint8_t NumParams_internal;
     uint16_t ParamsSize_internal;
@@ -52,7 +52,7 @@ class UFunction : public UStruct {
     UFunction* EventGraphFunction;
     int32_t EventGraphCallOffset;
     void* Func;
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
     uint32_t FunctionFlags_internal;
     uint16_t iNative;
     uint16_t RepOffset;
@@ -63,7 +63,8 @@ class UFunction : public UStruct {
     uint16_t ReturnValueOffset_internal;
     uint8_t UnknownData00[0x6];
     void* Func;
-
+#else
+#error Unknown SDK flavour
 #endif
    public:
     /**
@@ -85,7 +86,7 @@ struct ClassTraits<UFunction> {
 #pragma GCC diagnostic pop
 #endif
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

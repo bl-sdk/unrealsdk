@@ -11,7 +11,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -32,12 +32,14 @@ class UEnum : public UField {
    private:
     // NOLINTBEGIN(readability-identifier-naming)
 
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     UnmanagedFString CppType;
     TArray<TPair<FName, uint64_t>> Names;
     int64_t CppForm;
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
     TArray<FName> Names;
+#else
+#error Unknown SDK flavour
 #endif
 
     // NOLINTEND(readability-identifier-naming)
@@ -60,7 +62,7 @@ struct ClassTraits<UEnum> {
 #pragma GCC diagnostic pop
 #endif
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 
