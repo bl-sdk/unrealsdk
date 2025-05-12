@@ -109,25 +109,4 @@ else()
     # Unconditionally add the exporting flag
     # Add it privately, so it doesn't appear in anything linking against this
     target_compile_definitions(unrealsdk PRIVATE "UNREALSDK_EXPORTING")
-
-    # Postbuild
-    if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-        set(POSTBUILD_SCRIPT "postbuild")
-        if(CMAKE_HOST_WIN32)
-            set(POSTBUILD_SCRIPT "${POSTBUILD_SCRIPT}.bat")
-        endif()
-        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${POSTBUILD_SCRIPT}")
-            add_custom_command(
-                TARGET unrealsdk
-                POST_BUILD
-                COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/${POSTBUILD_SCRIPT}"
-                ARGS
-                    "$<SHELL_PATH:$<TARGET_FILE:unrealsdk>>"
-                    "${UNREALSDK_UE_VERSION}"
-                    "${UNREALSDK_ARCH}"
-                    "$<IF:$<CONFIG:DEBUG>,DEBUG,RELEASE>"
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            )
-        endif()
-    endif()
 endif()

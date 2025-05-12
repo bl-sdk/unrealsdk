@@ -174,15 +174,13 @@ To build:
    git clone --recursive https://github.com/bl-sdk/unrealsdk.git
    ```
 
-2. (OPTIONAL) Copy `postbuild.template`, and edit it to copy files to your game install directories.
-
-3. Choose a preset, and run CMake. Most IDEs will be able to do this for you,
+2. Choose a preset, and run CMake. Most IDEs will be able to do this for you,
    ```
    cmake . --preset msvc-ue4-x64-debug
    cmake --build out/build/msvc-ue4-x64-debug
    ```
 
-4. (OPTIONAL) If you're debugging a game on Steam, add a `steam_appid.txt` in the same folder as the
+3. (OPTIONAL) If you're debugging a game on Steam, add a `steam_appid.txt` in the same folder as the
    executable, containing the game's Steam App Id.
 
    Normally, games compiled with Steamworks will call
