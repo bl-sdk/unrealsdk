@@ -22,7 +22,7 @@ void PropTraits<UWeakObjectProperty>::set(const UWeakObjectProperty* prop,
                                           const Value& value) {
     // Ensure the object is of a valid class
     if (value != nullptr) {
-        auto prop_cls = prop->get_property_class();
+        auto prop_cls = prop->PropertyClass();
         if (!value->is_instance(prop_cls)) {
             throw std::runtime_error("Object is not instance of " + (std::string)prop_cls->Name());
         }

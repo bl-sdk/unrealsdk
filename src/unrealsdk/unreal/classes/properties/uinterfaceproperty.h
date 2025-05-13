@@ -10,12 +10,23 @@
 
 namespace unrealsdk::unreal {
 
-class UClass;
-class UObject;
-
 #if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
+
+class UClass;
+class UObject;
+
+namespace offsets::generic {
+
+template <typename T>
+class UInterfaceProperty : public T {
+   public:
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    UClass* InterfaceClass;
+};
+
+}  // namespace offsets::generic
 
 class UInterfaceProperty : public UProperty {
    public:
@@ -26,16 +37,15 @@ class UInterfaceProperty : public UProperty {
     UInterfaceProperty& operator=(UInterfaceProperty&&) = delete;
     ~UInterfaceProperty() = delete;
 
-    /**
-     * @brief Get the interface class of this property, which values must be an implementation of.
-     *
-     * @return This property's interface class.
-     */
-    [[nodiscard]] UClass* get_interface_class(void) const;
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UINTERFACEPROPERTY_FIELDS(X) X(UClass*, InterfaceClass)
+
+    UNREALSDK_DEFINE_FIELDS_HEADER(UInterfaceProperty, UNREALSDK_UINTERFACEPROPERTY_FIELDS);
 
    private:
     // NOLINTNEXTLINE(readability-identifier-naming)
-    UClass* InterfaceClass;
+    UClass* InterfaceClass_member;
 };
 
 template <>

@@ -3,20 +3,21 @@
 #include "unrealsdk/unreal/classes/properties/uinterfaceproperty.h"
 #include "unrealsdk/unreal/classes/uclass.h"
 #include "unrealsdk/unreal/classes/uobject.h"
+#include "unrealsdk/unreal/offset_list.h"
+#include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/structs/fimplementedinterface.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
+#include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
+
+UNREALSDK_DEFINE_FIELDS_SOURCE_FILE(UInterfaceProperty, UNREALSDK_UINTERFACEPROPERTY_FIELDS);
 
 struct FScriptInterface {
     UObject* obj;     // A pointer to a UObject that implements a native interface.
     void* iface_ptr;  // Pointer to the location of the interface object within the UObject
                       // referenced by ObjectPointer.
 };
-
-UClass* UInterfaceProperty::get_interface_class(void) const {
-    return this->read_field(&UInterfaceProperty::InterfaceClass);
-}
 
 PropTraits<UInterfaceProperty>::Value PropTraits<UInterfaceProperty>::get(
     const UInterfaceProperty* /*prop*/,
@@ -28,7 +29,7 @@ PropTraits<UInterfaceProperty>::Value PropTraits<UInterfaceProperty>::get(
 void PropTraits<UInterfaceProperty>::set(const UInterfaceProperty* prop,
                                          uintptr_t addr,
                                          const Value& value) {
-    auto prop_iface = prop->get_interface_class();
+    auto prop_iface = prop->InterfaceClass();
 
     size_t pointer_offset = 0;
 

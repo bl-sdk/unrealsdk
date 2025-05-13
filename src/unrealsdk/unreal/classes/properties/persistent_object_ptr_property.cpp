@@ -2,6 +2,8 @@
 
 #include "unrealsdk/unreal/classes/properties/persistent_object_ptr_property.h"
 #include "unrealsdk/unreal/classes/uclass.h"
+#include "unrealsdk/unreal/offset_list.h"
+#include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/structs/fstring.h"
 #include "unrealsdk/unreal/structs/tarray.h"
 #include "unrealsdk/unreal/structs/tarray_funcs.h"
@@ -12,9 +14,7 @@
 
 namespace unrealsdk::unreal {
 
-UClass* USoftClassProperty::get_meta_class(void) const {
-    return this->read_field(&USoftClassProperty::MetaClass);
-}
+UNREALSDK_DEFINE_FIELDS_SOURCE_FILE(USoftClassProperty, UNREALSDK_USOFTCLASSPROPERTY_FIELDS);
 
 PropTraits<ULazyObjectProperty>::Value PropTraits<ULazyObjectProperty>::get(
     const ULazyObjectProperty* /*prop*/,
@@ -44,7 +44,7 @@ void PropTraits<ULazyObjectProperty>::set(const ULazyObjectProperty* prop,
                                           const Value& value) {
     // Ensure the object is of a valid class
     if (value != nullptr) {
-        auto prop_cls = prop->get_property_class();
+        auto prop_cls = prop->PropertyClass();
         if (!value->is_instance(prop_cls)) {
             throw std::runtime_error("Object is not instance of " + (std::string)prop_cls->Name());
         }
@@ -57,7 +57,7 @@ void PropTraits<USoftObjectProperty>::set(const USoftObjectProperty* prop,
                                           const Value& value) {
     // Ensure the object is of a valid class
     if (value != nullptr) {
-        auto prop_cls = prop->get_property_class();
+        auto prop_cls = prop->PropertyClass();
         if (!value->is_instance(prop_cls)) {
             throw std::runtime_error("Object is not instance of " + (std::string)prop_cls->Name());
         }
@@ -70,11 +70,11 @@ void PropTraits<USoftClassProperty>::set(const USoftClassProperty* prop,
                                          const Value& value) {
     // Ensure the object is of a valid class
     if (value != nullptr) {
-        auto prop_cls = prop->get_property_class();
+        auto prop_cls = prop->PropertyClass();
         if (!value->is_instance(prop_cls)) {
             throw std::runtime_error("Object is not instance of " + (std::string)prop_cls->Name());
         }
-        auto meta_cls = prop->get_meta_class();
+        auto meta_cls = prop->MetaClass();
         if (!value->inherits(meta_cls)) {
             throw std::runtime_error("Class does not inherit from "
                                      + (std::string)meta_cls->Name());

@@ -3,7 +3,11 @@
 
 #include "unrealsdk/pch.h"
 #include "unrealsdk/unreal/classes/properties/attribute_property.h"
+#include "unrealsdk/unreal/classes/properties/persistent_object_ptr_property.h"
 #include "unrealsdk/unreal/classes/properties/ubyteproperty.h"
+#include "unrealsdk/unreal/classes/properties/uclassproperty.h"
+#include "unrealsdk/unreal/classes/properties/uinterfaceproperty.h"
+#include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
 #include "unrealsdk/unreal/classes/uconst.h"
 #include "unrealsdk/unreal/classes/uenum.h"
 #include "unrealsdk/unreal/classes/ufield.h"
@@ -151,6 +155,11 @@ using UNameProperty = UProperty;
 using UByteAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UByteProperty>;
 using UFloatAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UFloatProperty>;
 using UIntAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UIntProperty>;
+
+using UObjectProperty = unreal::offsets::generic::UObjectProperty<UProperty>;
+using UClassProperty = unreal::offsets::generic::UClassProperty<UObjectProperty>;
+using UInterfaceProperty = unreal::offsets::generic::UInterfaceProperty<UObjectProperty>;
+using USoftClassProperty = unreal::offsets::generic::USoftClassProperty<UObjectProperty>;
 
 // NOLINTEND(cppcoreguidelines-pro-type-member-init,
 //           readability-identifier-naming,

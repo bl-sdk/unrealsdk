@@ -113,7 +113,7 @@ bool say_crash_fix_hook(hook_manager::Details& hook) {
     static const auto spark_interface_prop =
         engine->Class()->find_prop_and_validate<UInterfaceProperty>(L"SparkInterface"_fn);
     static const auto is_spark_enabled_func =
-        spark_interface_prop->get_interface_class()->find_func_and_validate(L"IsSparkEnabled"_fn);
+        spark_interface_prop->InterfaceClass()->find_func_and_validate(L"IsSparkEnabled"_fn);
 
     // Check if we're online, if so allow normal processing
     if (BoundFunction{.func = is_spark_enabled_func,
@@ -136,7 +136,7 @@ bool say_crash_fix_hook(hook_manager::Details& hook) {
     static const auto pri_prop =
         hook.args->type->find_prop_and_validate<UObjectProperty>(L"PRI"_fn);
     static const auto player_name_prop =
-        pri_prop->get_property_class()->find_prop_and_validate<UStrProperty>(L"PlayerName"_fn);
+        pri_prop->PropertyClass()->find_prop_and_validate<UStrProperty>(L"PlayerName"_fn);
 
     auto player_name =
         hook.args->get<UObjectProperty>(pri_prop)->get<UStrProperty>(player_name_prop);

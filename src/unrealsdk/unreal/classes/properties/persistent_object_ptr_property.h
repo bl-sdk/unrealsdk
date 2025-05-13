@@ -5,18 +5,30 @@
 
 #include "unrealsdk/unreal/class_traits.h"
 #include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
+#include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 
 namespace unrealsdk::unreal {
 
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
+#pragma pack(push, 0x4)
+#endif
+
 struct FLazyObjectPath;
 struct FSoftObjectPath;
 class UObject;
 
-#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
-#pragma pack(push, 0x4)
-#endif
+namespace offsets::generic {
+
+template <typename T>
+class USoftClassProperty : public T {
+   public:
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    UClass* MetaClass;
+};
+
+}  // namespace offsets::generic
 
 class ULazyObjectProperty : public UObjectProperty {
    public:
@@ -49,16 +61,15 @@ class USoftClassProperty : public USoftObjectProperty {
     USoftClassProperty& operator=(USoftClassProperty&&) = delete;
     ~USoftClassProperty() = delete;
 
-    /**
-     * @brief Get the meta class of this property, which values must be a subclass of.
-     *
-     * @return This property's meta class.
-     */
-    [[nodiscard]] UClass* get_meta_class(void) const;
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_USOFTCLASSPROPERTY_FIELDS(X) X(UClass*, MetaClass)
+
+    UNREALSDK_DEFINE_FIELDS_HEADER(USoftClassProperty, UNREALSDK_USOFTCLASSPROPERTY_FIELDS);
 
    private:
     // NOLINTNEXTLINE(readability-identifier-naming)
-    UClass* MetaClass;
+    UClass* MetaClass_member;
 };
 
 template <>

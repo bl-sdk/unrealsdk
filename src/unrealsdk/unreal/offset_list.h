@@ -3,7 +3,11 @@
 
 #include "unrealsdk/pch.h"
 #include "unrealsdk/unreal/classes/properties/attribute_property.h"
+#include "unrealsdk/unreal/classes/properties/persistent_object_ptr_property.h"
 #include "unrealsdk/unreal/classes/properties/ubyteproperty.h"
+#include "unrealsdk/unreal/classes/properties/uclassproperty.h"
+#include "unrealsdk/unreal/classes/properties/uinterfaceproperty.h"
+#include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
 #include "unrealsdk/unreal/classes/uclass.h"
 #include "unrealsdk/unreal/classes/uconst.h"
 #include "unrealsdk/unreal/classes/ufield.h"
@@ -34,7 +38,11 @@ namespace unrealsdk::unreal::offsets {
     X(UByteProperty)                       \
     X(UByteAttributeProperty)              \
     X(UFloatAttributeProperty)             \
-    X(UIntAttributeProperty)
+    X(UIntAttributeProperty)               \
+    X(UObjectProperty)                     \
+    X(UClassProperty)                      \
+    X(UInterfaceProperty)                  \
+    X(USoftClassProperty)
 
 #define UNREALSDK_OFFSETS__DEFINE_OFFSET_LIST_MEMBERS(name) unrealsdk::unreal::name::Offsets name;
 #define UNREALSDK_OFFSETS__NESTED_FROM_TYPE(name) \

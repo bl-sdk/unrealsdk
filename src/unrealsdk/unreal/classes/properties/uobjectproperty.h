@@ -10,12 +10,23 @@
 
 namespace unrealsdk::unreal {
 
-class UClass;
-class UObject;
-
 #if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
+
+class UClass;
+class UObject;
+
+namespace offsets::generic {
+
+template <typename T>
+class UObjectProperty : public T {
+   public:
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    UClass* PropertyClass;
+};
+
+}  // namespace offsets::generic
 
 class UObjectProperty : public UProperty {
    public:
@@ -26,16 +37,15 @@ class UObjectProperty : public UProperty {
     UObjectProperty& operator=(UObjectProperty&&) = delete;
     ~UObjectProperty() = delete;
 
-    /**
-     * @brief Get the class of this property, which values must be an instance of.
-     *
-     * @return This property's class.
-     */
-    [[nodiscard]] UClass* get_property_class(void) const;
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UOBJECTPROPERTY_FIELDS(X) X(UClass*, PropertyClass)
+
+    UNREALSDK_DEFINE_FIELDS_HEADER(UObject, UNREALSDK_UOBJECTPROPERTY_FIELDS);
 
    private:
     // NOLINTNEXTLINE(readability-identifier-naming)
-    UClass* PropertyClass;
+    UClass* PropertyClass_member;
 };
 
 template <>
