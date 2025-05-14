@@ -1,5 +1,5 @@
-#ifndef UNREALSDK_UNREAL_CLASSES_PROPERTIES_USTRUCTPROPERTY_H
-#define UNREALSDK_UNREAL_CLASSES_PROPERTIES_USTRUCTPROPERTY_H
+#ifndef PYUNREALSDK_LIBS_UNREALSDK_SRC_UNREALSDK_UNREAL_CLASSES_PROPERTIES_USTRUCTPROPERTY_H
+#define PYUNREALSDK_LIBS_UNREALSDK_SRC_UNREALSDK_UNREAL_CLASSES_PROPERTIES_USTRUCTPROPERTY_H
 
 #include "unrealsdk/pch.h"
 
@@ -11,11 +11,22 @@
 
 namespace unrealsdk::unreal {
 
-class UScriptStruct;
-
 #if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
+
+class UScriptStruct;
+
+namespace offsets::generic {
+
+template <typename T>
+class UStructProperty : public T {
+   public:
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    unreal::UScriptStruct* Struct;
+};
+
+}  // namespace offsets::generic
 
 class UStructProperty : public UProperty {
    public:
@@ -26,16 +37,15 @@ class UStructProperty : public UProperty {
     UStructProperty& operator=(UStructProperty&&) = delete;
     ~UStructProperty() = delete;
 
-    /**
-     * @brief Get the struct type of this property, which values must be an instance of.
-     *
-     * @return This property's struct type.
-     */
-    [[nodiscard]] UScriptStruct* get_inner_struct(void) const;
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_USTRUCTPROPERTY_FIELDS(X) X(UScriptStruct*, Struct)
+
+    UNREALSDK_DEFINE_FIELDS_HEADER(UStructProperty, UNREALSDK_USTRUCTPROPERTY_FIELDS);
 
    private:
     // NOLINTNEXTLINE(readability-identifier-naming)
-    UScriptStruct* Struct;
+    UScriptStruct* Struct_member;
 };
 
 template <>
@@ -60,4 +70,4 @@ struct ClassTraits<UStructProperty> {
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREALSDK_UNREAL_CLASSES_PROPERTIES_USTRUCTPROPERTY_H */
+#endif /* PYUNREALSDK_LIBS_UNREALSDK_SRC_UNREALSDK_UNREAL_CLASSES_PROPERTIES_USTRUCTPROPERTY_H */

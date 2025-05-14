@@ -18,6 +18,17 @@ namespace unrealsdk::unreal {
 
 class UFunction;
 
+namespace offsets::generic {
+
+template <typename T>
+class UMulticastDelegateProperty : public T {
+   public:
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    UFunction* Signature;
+};
+
+}  // namespace offsets::generic
+
 class UMulticastDelegateProperty : public UProperty {
    public:
     UMulticastDelegateProperty() = delete;
@@ -27,17 +38,16 @@ class UMulticastDelegateProperty : public UProperty {
     UMulticastDelegateProperty& operator=(UMulticastDelegateProperty&&) = delete;
     ~UMulticastDelegateProperty() = delete;
 
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UMULTICASTDELEGATEPROPERTY_FIELDS(X) X(UFunction*, Signature)
+
+    UNREALSDK_DEFINE_FIELDS_HEADER(UMulticastDelegateProperty,
+                                   UNREALSDK_UMULTICASTDELEGATEPROPERTY_FIELDS);
+
    private:
     // NOLINTNEXTLINE(readability-identifier-naming)
-    UFunction* Signature;
-
-   public:
-    /**
-     * @brief Get the function holding this delegate's signature.
-     *
-     * @return The signature function.
-     */
-    [[nodiscard]] UFunction* get_signature(void) const;
+    UFunction* Signature_member;
 };
 
 template <>

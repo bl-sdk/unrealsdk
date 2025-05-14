@@ -28,6 +28,20 @@ class UBoolProperty : public UProperty {
     UBoolProperty& operator=(UBoolProperty&&) = delete;
     ~UBoolProperty() = delete;
 
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
+    using field_mask_type = uint8_t;
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
+    using field_mask_type = uint32_t;
+#else
+#error Unknown SDK flavour
+#endif
+
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UBOOLPROPERTY_FIELDS(X) X(field_mask_type, FieldMask)
+
+    UNREALSDK_DEFINE_FIELDS_HEADER(UBoolProperty, UNREALSDK_UBOOLPROPERTY_FIELDS);
+
    private:
     // NOLINTBEGIN(readability-identifier-naming)
 
@@ -35,21 +49,14 @@ class UBoolProperty : public UProperty {
     uint8_t FieldSize;
     uint8_t ByteOffset;
     uint8_t ByteMask;
-    uint8_t FieldMask;
+    uint8_t FieldMask_member;
 #elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
-    uint32_t FieldMask;
+    uint32_t FieldMask_member;
 #else
 #error Unknown SDK flavour
 #endif
 
     // NOLINTEND(readability-identifier-naming)
-   public:
-    /**
-     * @brief Get the bool field mask of this property.
-     *
-     * @return The field mask.
-     */
-    [[nodiscard]] decltype(FieldMask) get_field_mask(void) const;
 };
 
 template <>

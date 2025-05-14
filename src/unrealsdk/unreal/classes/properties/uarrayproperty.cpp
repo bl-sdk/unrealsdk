@@ -2,24 +2,25 @@
 
 #include "unrealsdk/unreal/cast.h"
 #include "unrealsdk/unreal/classes/properties/uarrayproperty.h"
+#include "unrealsdk/unreal/offset_list.h"
+#include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/structs/tarray.h"
 #include "unrealsdk/unreal/structs/tarray_funcs.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer_funcs.h"
 #include "unrealsdk/unreal/wrappers/wrapped_array.h"
+#include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
 
-UProperty* UArrayProperty::get_inner(void) const {
-    return this->read_field(&UArrayProperty::Inner);
-}
+UNREALSDK_DEFINE_FIELDS_SOURCE_FILE(UArrayProperty, UNREALSDK_UARRAYPROPERTY_FIELDS);
 
 PropTraits<UArrayProperty>::Value PropTraits<UArrayProperty>::get(
     const UArrayProperty* prop,
     uintptr_t addr,
     const UnrealPointer<void>& parent) {
-    auto inner = prop->get_inner();
+    auto inner = prop->Inner();
     if (prop->ArrayDim() > 1) {
         throw std::runtime_error(
             "Array has static array inner property - unsure how to handle, aborting!");
@@ -31,7 +32,7 @@ PropTraits<UArrayProperty>::Value PropTraits<UArrayProperty>::get(
 void PropTraits<UArrayProperty>::set(const UArrayProperty* prop,
                                      uintptr_t addr,
                                      const Value& value) {
-    auto inner = prop->get_inner();
+    auto inner = prop->Inner();
     if (prop->ArrayDim() > 1) {
         throw std::runtime_error(
             "Array has static array inner property - unsure how to handle, aborting!");
@@ -62,7 +63,7 @@ void PropTraits<UArrayProperty>::set(const UArrayProperty* prop,
 }
 
 void PropTraits<UArrayProperty>::destroy(const UArrayProperty* prop, uintptr_t addr) {
-    auto inner = prop->get_inner();
+    auto inner = prop->Inner();
     if (prop->ArrayDim() > 1) {
         throw std::runtime_error(
             "Array has static array inner property - unsure how to handle, aborting!");

@@ -5,10 +5,15 @@
 #include "unrealsdk/game/bl2/offsets.h"
 #include "unrealsdk/unreal/classes/properties/attribute_property.h"
 #include "unrealsdk/unreal/classes/properties/persistent_object_ptr_property.h"
+#include "unrealsdk/unreal/classes/properties/uarrayproperty.h"
 #include "unrealsdk/unreal/classes/properties/ubyteproperty.h"
 #include "unrealsdk/unreal/classes/properties/uclassproperty.h"
+#include "unrealsdk/unreal/classes/properties/udelegateproperty.h"
+#include "unrealsdk/unreal/classes/properties/uenumproperty.h"
 #include "unrealsdk/unreal/classes/properties/uinterfaceproperty.h"
+#include "unrealsdk/unreal/classes/properties/umulticastdelegateproperty.h"
 #include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
+#include "unrealsdk/unreal/classes/properties/ustructproperty.h"
 #include "unrealsdk/unreal/classes/uconst.h"
 #include "unrealsdk/unreal/classes/uscriptstruct.h"
 #include "unrealsdk/unreal/offsets.h"
@@ -129,24 +134,21 @@ using UFunction = bl2::generic::UFunction<UStruct>;
 using UConst = unreal::offsets::generic::UConst<UField>;
 using UEnum = bl2::generic::UEnum<UField>;
 
-using UInt8Property = UProperty;
-using UInt16Property = UProperty;
-using UIntProperty = UProperty;
-using UInt64Property = UProperty;
+using UArrayProperty = unreal::offsets::generic::UArrayProperty<UProperty>;
+using UBoolProperty = bl2::generic::UBoolProperty<UProperty>;
 using UByteProperty = unreal::offsets::generic::UByteProperty<UProperty>;
-using UUInt16Property = UProperty;
-using UUInt32Property = UProperty;
-using UUInt64Property = UProperty;
+using UDelegateProperty = unreal::offsets::generic::UDelegateProperty<UProperty>;
+using UEnumProperty = unreal::offsets::generic::UEnumProperty<UProperty>;
 using UFloatProperty = UProperty;
-using UDoubleProperty = UProperty;
-using UNameProperty = UProperty;
+using UIntProperty = UProperty;
+using UMulticastDelegateProperty = unreal::offsets::generic::UMulticastDelegateProperty<UProperty>;
+using UObjectProperty = unreal::offsets::generic::UObjectProperty<UProperty>;
+using UStructProperty = unreal::offsets::generic::UStructProperty<UProperty>;
 
 using UByteAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UByteProperty>;
+using UClassProperty = unreal::offsets::generic::UClassProperty<UObjectProperty>;
 using UFloatAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UFloatProperty>;
 using UIntAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UIntProperty>;
-
-using UObjectProperty = unreal::offsets::generic::UObjectProperty<UProperty>;
-using UClassProperty = unreal::offsets::generic::UClassProperty<UObjectProperty>;
 using UInterfaceProperty = unreal::offsets::generic::UInterfaceProperty<UObjectProperty>;
 using USoftClassProperty = unreal::offsets::generic::USoftClassProperty<UObjectProperty>;
 

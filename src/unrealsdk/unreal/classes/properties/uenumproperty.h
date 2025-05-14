@@ -10,11 +10,26 @@
 
 namespace unrealsdk::unreal {
 
-class UEnum;
-
 #if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
+
+class UEnum;
+
+namespace offsets::generic {
+
+template <typename T>
+class UEnumProperty : public T {
+   public:
+    // NOLINTBEGIN(readability-identifier-naming)
+
+    UProperty* UnderlyingProp;
+    UEnum* Enum;
+
+    // NOLINTEND(readability-identifier-naming)
+};
+
+}  // namespace offsets::generic
 
 class UEnumProperty : public UProperty {
    public:
@@ -25,27 +40,21 @@ class UEnumProperty : public UProperty {
     UEnumProperty& operator=(UEnumProperty&&) = delete;
     ~UEnumProperty() = delete;
 
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UENUMPROPERTY_FIELDS(X) \
+    X(UProperty*, UnderlyingProp)         \
+    X(UEnum*, Enum)
+
+    UNREALSDK_DEFINE_FIELDS_HEADER(UEnumProperty, UNREALSDK_UENUMPROPERTY_FIELDS);
+
    private:
     // NOLINTBEGIN(readability-identifier-naming)
 
-    UProperty* UnderlyingProp;
-    UEnum* Enum;
+    UProperty* UnderlyingProp_member;
+    UEnum* Enum_member;
 
     // NOLINTEND(readability-identifier-naming)
-   public:
-    /**
-     * @brief Get the underlying numeric property of this enum property.
-     *
-     * @return The underlying property.
-     */
-    [[nodiscard]] UProperty* get_underlying_prop(void) const;
-
-    /**
-     * @brief Get the enum associated with this property.
-     *
-     * @return The enum.
-     */
-    [[nodiscard]] UEnum* get_enum(void) const;
 };
 
 template <>

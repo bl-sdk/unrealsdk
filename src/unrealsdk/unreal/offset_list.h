@@ -4,12 +4,19 @@
 #include "unrealsdk/pch.h"
 #include "unrealsdk/unreal/classes/properties/attribute_property.h"
 #include "unrealsdk/unreal/classes/properties/persistent_object_ptr_property.h"
+#include "unrealsdk/unreal/classes/properties/uarrayproperty.h"
+#include "unrealsdk/unreal/classes/properties/uboolproperty.h"
 #include "unrealsdk/unreal/classes/properties/ubyteproperty.h"
 #include "unrealsdk/unreal/classes/properties/uclassproperty.h"
+#include "unrealsdk/unreal/classes/properties/udelegateproperty.h"
+#include "unrealsdk/unreal/classes/properties/uenumproperty.h"
 #include "unrealsdk/unreal/classes/properties/uinterfaceproperty.h"
+#include "unrealsdk/unreal/classes/properties/umulticastdelegateproperty.h"
 #include "unrealsdk/unreal/classes/properties/uobjectproperty.h"
+#include "unrealsdk/unreal/classes/properties/ustructproperty.h"
 #include "unrealsdk/unreal/classes/uclass.h"
 #include "unrealsdk/unreal/classes/uconst.h"
+#include "unrealsdk/unreal/classes/uenum.h"
 #include "unrealsdk/unreal/classes/ufield.h"
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/classes/uobject.h"
@@ -35,14 +42,20 @@ namespace unrealsdk::unreal::offsets {
     X(UScriptStruct)                       \
     X(UFunction)                           \
     X(UConst)                              \
-    X(UByteProperty)                       \
+    X(UArrayProperty)                      \
+    X(UBoolProperty)                       \
     X(UByteAttributeProperty)              \
+    X(UByteProperty)                       \
+    X(UClassProperty)                      \
+    X(UDelegateProperty)                   \
+    X(UEnumProperty)                       \
     X(UFloatAttributeProperty)             \
     X(UIntAttributeProperty)               \
-    X(UObjectProperty)                     \
-    X(UClassProperty)                      \
     X(UInterfaceProperty)                  \
-    X(USoftClassProperty)
+    X(UMulticastDelegateProperty)          \
+    X(UObjectProperty)                     \
+    X(USoftClassProperty)                  \
+    X(UStructProperty)
 
 #define UNREALSDK_OFFSETS__DEFINE_OFFSET_LIST_MEMBERS(name) unrealsdk::unreal::name::Offsets name;
 #define UNREALSDK_OFFSETS__NESTED_FROM_TYPE(name) \
