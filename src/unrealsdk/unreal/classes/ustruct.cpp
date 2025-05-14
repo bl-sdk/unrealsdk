@@ -134,9 +134,11 @@ utils::IteratorProxy<UStruct::SuperFieldIterator> UStruct::superfields(void) con
 
 size_t UStruct::get_struct_size(void) const {
 #if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
-    return (this->PropertySize + this->MinAlignment - 1) & ~(this->MinAlignment - 1);
+    auto bl3_struct = reinterpret_cast<const unrealsdk::game::bl3::UStruct*>(this);
+    return (bl3_struct->PropertySize + bl3_struct->MinAlignment - 1)
+           & ~(bl3_struct->MinAlignment - 1);
 #elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
-    return this->PropertySize;
+    return this->PropertySize();
 #else
 #error Unknown SDK flavour
 #endif

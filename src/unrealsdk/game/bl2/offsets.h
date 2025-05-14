@@ -142,9 +142,9 @@ class UStruct : public UField {
    public:
     UStruct* SuperField;
     UField* Children;
+    uint16_t PropertySize;
 
    private:
-    uint16_t PropertySize;
     uint8_t UnknownData01[0x1A];
 
    public:

@@ -66,10 +66,6 @@ class USoftClassProperty : public USoftObjectProperty {
 #define UNREALSDK_USOFTCLASSPROPERTY_FIELDS(X) X(UClass*, MetaClass)
 
     UNREALSDK_DEFINE_FIELDS_HEADER(USoftClassProperty, UNREALSDK_USOFTCLASSPROPERTY_FIELDS);
-
-   private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    UClass* MetaClass_member;
 };
 
 template <>

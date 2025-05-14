@@ -49,40 +49,6 @@ class UObject {
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UObject, UNREALSDK_UOBJECT_FIELDS);
 
-    // NOLINTBEGIN(readability-identifier-naming)
-#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
-   private:
-    int32_t ObjectFlags_member;
-    int32_t InternalIndex_member;
-    UClass* Class_member;
-    FName Name_member;
-    UObject* Outer_member;
-
-   public:
-#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
-
-   private:
-    // TODO: remove
-    void* HashNext;
-    uint64_t ObjectFlags_member;
-    void* HashOuterNext;
-    void* StateFrame;
-    class UObject* _Linker;
-    void* _LinkerIndex;
-    int InternalIndex_member;
-    int NetIndex;
-    UObject* Outer_member;
-    FName Name_member;
-    UClass* Class_member;
-    UObject* ObjectArchetype;
-
-   public:
-#else
-#error Unknown SDK flavour
-#endif
-
-    // NOLINTEND(readability-identifier-naming)
-
     /**
      * @brief Calls a virtual function on this object.
      *

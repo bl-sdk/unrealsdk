@@ -44,10 +44,6 @@ class UMulticastDelegateProperty : public UProperty {
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UMulticastDelegateProperty,
                                    UNREALSDK_UMULTICASTDELEGATEPROPERTY_FIELDS);
-
-   private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    UFunction* Signature_member;
 };
 
 template <>

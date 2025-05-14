@@ -39,10 +39,6 @@ class UScriptStruct : public UStruct {
 #define UNREALSDK_USCRIPTSTRUCT_FIELDS(X) X(uint32_t, StructFlags)
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UScriptStruct, UNREALSDK_USCRIPTSTRUCT_FIELDS);
-
-   private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    uint32_t StructFlags_internal;
 };
 
 template <>

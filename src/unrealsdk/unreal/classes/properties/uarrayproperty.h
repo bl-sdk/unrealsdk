@@ -41,10 +41,6 @@ class UArrayProperty : public UProperty {
 #define UNREALSDK_UARRAYPROPERTY_FIELDS(X) X(UProperty*, Inner)
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UArrayProperty, UNREALSDK_UARRAYPROPERTY_FIELDS);
-
-   private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    UProperty* Inner_member;
 };
 
 template <>

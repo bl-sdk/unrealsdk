@@ -41,10 +41,6 @@ class UClassProperty : public UObjectProperty {
 #define UNREALSDK_UCLASSPROPERTY_FIELDS(X) X(UClass*, MetaClass)
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UClassProperty, UNREALSDK_UCLASSPROPERTY_FIELDS);
-
-   private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    UClass* MetaClass_member;
 };
 
 template <>

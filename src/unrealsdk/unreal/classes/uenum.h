@@ -29,22 +29,6 @@ class UEnum : public UField {
     UEnum& operator=(UEnum&&) = delete;
     ~UEnum() = delete;
 
-   private:
-    // NOLINTBEGIN(readability-identifier-naming)
-
-#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
-    UnmanagedFString CppType;
-    TArray<TPair<FName, uint64_t>> Names;
-    int64_t CppForm;
-#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
-    TArray<FName> Names;
-#else
-#error Unknown SDK flavour
-#endif
-
-    // NOLINTEND(readability-identifier-naming)
-
-   public:
     /**
      * @brief Get the values of an enum which have assigned names.
      *

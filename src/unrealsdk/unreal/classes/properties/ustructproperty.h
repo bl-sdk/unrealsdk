@@ -42,10 +42,6 @@ class UStructProperty : public UProperty {
 #define UNREALSDK_USTRUCTPROPERTY_FIELDS(X) X(UScriptStruct*, Struct)
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UStructProperty, UNREALSDK_USTRUCTPROPERTY_FIELDS);
-
-   private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    UScriptStruct* Struct_member;
 };
 
 template <>

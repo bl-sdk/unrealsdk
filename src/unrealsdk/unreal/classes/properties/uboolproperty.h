@@ -41,22 +41,6 @@ class UBoolProperty : public UProperty {
 #define UNREALSDK_UBOOLPROPERTY_FIELDS(X) X(field_mask_type, FieldMask)
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UBoolProperty, UNREALSDK_UBOOLPROPERTY_FIELDS);
-
-   private:
-    // NOLINTBEGIN(readability-identifier-naming)
-
-#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
-    uint8_t FieldSize;
-    uint8_t ByteOffset;
-    uint8_t ByteMask;
-    uint8_t FieldMask_member;
-#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
-    uint32_t FieldMask_member;
-#else
-#error Unknown SDK flavour
-#endif
-
-    // NOLINTEND(readability-identifier-naming)
 };
 
 template <>

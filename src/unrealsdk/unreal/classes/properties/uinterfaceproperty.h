@@ -42,10 +42,6 @@ class UInterfaceProperty : public UProperty {
 #define UNREALSDK_UINTERFACEPROPERTY_FIELDS(X) X(UClass*, InterfaceClass)
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UInterfaceProperty, UNREALSDK_UINTERFACEPROPERTY_FIELDS);
-
-   private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    UClass* InterfaceClass_member;
 };
 
 template <>

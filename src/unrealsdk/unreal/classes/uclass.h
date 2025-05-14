@@ -36,33 +36,6 @@ class UClass : public UStruct {
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UClass, UNREALSDK_UCLASS_FIELDS);
 
-    // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
-
-   private:
-#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
-    uint8_t UnknownData00[0x70];
-    UObject* ClassDefaultObject_internal;
-    uint8_t UnknownData01[0xA0];
-    TArray<FImplementedInterface> Interfaces_internal;
-#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
-    // Misc Fields I found within this block in BL2, but which we don't care about enough for me to
-    //  find in UE4, or to want to increase the compile times by including
-
-    // 0xE8: TArray<FRepRecord> ClassReps;
-    // 0xF4: TArray<UField*> NetFields;
-    // 0x100: TArray<FName> HideCategories;
-    // 0x10C: TArray<FName> AutoExpandCategories;
-
-    uint8_t UnknownData00[0xCC];
-    UObject* ClassDefaultObject_internal;
-    uint8_t UnknownData01[0x48];
-    TArray<FImplementedInterface> Interfaces_internal;
-
-#else
-#error Unknown SDK flavour
-#endif
-    // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
-   public:
     /**
      * @brief Checks if this class implements an interface.
      *

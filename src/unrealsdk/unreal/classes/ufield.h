@@ -40,10 +40,6 @@ class UField : public UObject {
 #define UNREALSDK_UFIELD_FIELDS(X) X(UField*, Next)
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UField, UNREALSDK_UFIELD_FIELDS);
-
-   private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    UField* Next_member;
 };
 
 template <>

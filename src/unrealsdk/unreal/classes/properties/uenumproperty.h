@@ -47,14 +47,6 @@ class UEnumProperty : public UProperty {
     X(UEnum*, Enum)
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UEnumProperty, UNREALSDK_UENUMPROPERTY_FIELDS);
-
-   private:
-    // NOLINTBEGIN(readability-identifier-naming)
-
-    UProperty* UnderlyingProp_member;
-    UEnum* Enum_member;
-
-    // NOLINTEND(readability-identifier-naming)
 };
 
 template <>

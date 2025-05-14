@@ -83,12 +83,14 @@ class UProperty : public UField {
 };
 
 class UStruct : public UField {
+    friend class unreal::UStruct;
+
    public:
     UStruct* SuperField;
     UField* Children;
+    int32_t PropertySize;
 
    private:
-    int32_t PropertySize;
     int32_t MinAlignment;
     unreal::TArray<uint8_t> Script;
 

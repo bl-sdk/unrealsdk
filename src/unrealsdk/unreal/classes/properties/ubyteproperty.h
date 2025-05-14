@@ -41,13 +41,6 @@ class UByteProperty : public CopyableProperty<uint8_t> {
 #define UNREALSDK_UBYTEPROPERTY_FIELDS(X) X(UEnum*, Enum)
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UByteProperty, UNREALSDK_UBYTEPROPERTY_FIELDS);
-
-   private:
-    // NOLINTBEGIN(readability-identifier-naming)
-
-    UEnum* Enum_member;
-
-    // NOLINTEND(readability-identifier-naming)
 };
 
 template <>

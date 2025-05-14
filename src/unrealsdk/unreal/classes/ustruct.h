@@ -30,63 +30,24 @@ class UStruct : public UField {
     UStruct& operator=(UStruct&&) = delete;
     ~UStruct() = delete;
 
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
+    using property_size_type = uint16_t;
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
+    using property_size_type = int32_t;
+#else
+#error Unknown SDK flavour
+#endif
+
     // These fields become member functions, returning a reference into the object.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define UNREALSDK_USTRUCT_FIELDS(X) \
-    X(UStruct*, SuperField)         \
-    X(UField*, Children)            \
+#define UNREALSDK_USTRUCT_FIELDS(X)     \
+    X(UStruct*, SuperField)             \
+    X(UField*, Children)                \
+    X(property_size_type, PropertySize) \
     X(UProperty*, PropertyLink)
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UStruct, UNREALSDK_USTRUCT_FIELDS);
 
-   private:
-    // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
-#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
-    /* Struct this inherits from, may be null */
-    UStruct* SuperField_member;
-    /* Pointer to start of linked list of child fields */
-    UField* Children_member;
-
-    /* Total size of all UProperties, the allocated structure may be larger due to alignment */
-    int32_t PropertySize;
-    /* Alignment of structure in memory, structure will be at least this large */
-    int32_t MinAlignment;
-    /* Script bytecode associated with this object */
-    TArray<uint8_t> Script;
-
-    /* In memory only: Linked list of properties from most-derived to base */
-    UProperty* PropertyLink_member;
-
-    /* In memory only: Linked list of object reference properties from most-derived to base */
-    UProperty* RefLink;
-    /* In memory only: Linked list of properties requiring destruction. Note this does not include
-     * things that will be destroyed by the native destructor */
-    UProperty* DestructorLink;
-    /** In memory only: Linked list of properties requiring post constructor initialization */
-    UProperty* PostConstructLink;
-    /* Array of object references embedded in script code. Mirrored for easy access by realtime
-     * garbage collection code */
-    TArray<UObject*> ScriptObjectReferences;
-#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
-    uint8_t UnknownData00[0x8];
-
-    UStruct* SuperField_member;
-    UField* Children_member;
-
-    uint16_t PropertySize;
-    uint8_t UnknownData01[0x1A];
-
-    UProperty* PropertyLink_member;
-
-    uint8_t UnknownData02[0x10];
-
-    TArray<UObject*> ScriptObjectReferences;
-#else
-#error Unknown SDK flavour
-#endif
-    // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
-
-   public:
 #pragma region Iterators
     struct FieldIterator {
         using iterator_category = std::forward_iterator_tag;

@@ -32,10 +32,6 @@ class UConst : public UField {
 #define UNREALSDK_UCONST_FIELDS(X) X(UnmanagedFString, Value)
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UConst, UNREALSDK_UCONST_FIELDS);
-
-   private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    UnmanagedFString Value_internal;
 };
 
 template <>

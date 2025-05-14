@@ -37,43 +37,12 @@ class UFunction : public UStruct {
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UFunction, UNREALSDK_UFUNCTION_FIELDS);
 
-    // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
-
-   private:
-#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
-    uint32_t FunctionFlags_internal;
-    uint8_t NumParams_internal;
-    uint16_t ParamsSize_internal;
-    uint16_t ReturnValueOffset_internal;
-    uint16_t RPCId;
-    uint16_t RPCResponseId;
-    UProperty* FirstPropertyToInit;
-    UFunction* EventGraphFunction;
-    int32_t EventGraphCallOffset;
-    void* Func;
-#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
-    uint32_t FunctionFlags_internal;
-    uint16_t iNative;
-    uint16_t RepOffset;
-    FName FriendlyName;
-    uint8_t OperPrecedence;
-    uint8_t NumParams_internal;
-    uint16_t ParamsSize_internal;
-    uint16_t ReturnValueOffset_internal;
-    uint8_t UnknownData00[0x6];
-    void* Func;
-#else
-#error Unknown SDK flavour
-#endif
-   public:
     /**
      * @brief Finds the return param for this function (if it exists).
      *
      * @return The return param, or `nullptr` if none exists.
      */
     [[nodiscard]] UProperty* find_return_param(void) const;
-
-    // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 };
 
 template <>

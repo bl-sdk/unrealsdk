@@ -42,10 +42,6 @@ class UDelegateProperty : public UProperty {
 #define UNREALSDK_UDELEGATEPROPERTY_FIELDS(X) X(UFunction*, Signature)
 
     UNREALSDK_DEFINE_FIELDS_HEADER(UDelegateProperty, UNREALSDK_UDELEGATEPROPERTY_FIELDS);
-
-   private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    UFunction* Signature_member;
 };
 
 template <>
