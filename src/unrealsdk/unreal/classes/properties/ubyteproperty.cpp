@@ -4,7 +4,6 @@
 #include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unrealsdk.h"
 
-
 namespace unrealsdk::unreal {
 
 UNREALSDK_DEFINE_FIELDS_SOURCE_FILE(UByteProperty, UNREALSDK_UBYTEPROPERTY_FIELDS);

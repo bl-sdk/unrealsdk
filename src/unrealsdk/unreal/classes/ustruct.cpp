@@ -1,6 +1,7 @@
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/config.h"
+#include "unrealsdk/game/bl3/offsets.h"
 #include "unrealsdk/unreal/class_name.h"
 #include "unrealsdk/unreal/classes/ufield.h"
 #include "unrealsdk/unreal/classes/ufunction.h"
