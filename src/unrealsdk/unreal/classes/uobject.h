@@ -60,21 +60,21 @@ class UObject {
      */
     template <typename R, typename... Args>
     R call_virtual_function(size_t index, Args... args) const {
-#ifdef ARCH_X86
+        if constexpr (sizeof(void*) == sizeof(uint32_t)) {
 #if defined(__MINGW32__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wattributes"  // thiscall on non-class
 #endif
-        // NOLINTNEXTLINE(modernize-use-using) - need a typedef for the __thiscall
-        typedef R(__thiscall * func_ptr)(const UObject*, Args...);
+            // NOLINTNEXTLINE(modernize-use-using) - need a typedef for the __thiscall
+            typedef R(__thiscall * func_ptr)(const UObject*, Args...);
 #if defined(__MINGW32__)
 #pragma GCC diagnostic pop
 #endif
-#else
-        using func_ptr = R (*)(const UObject*, Args...);
-#endif
-
-        return reinterpret_cast<func_ptr>(this->vftable[index])(this, args...);
+            return reinterpret_cast<func_ptr>(this->vftable[index])(this, args...);
+        } else {
+            using func_ptr = R (*)(const UObject*, Args...);
+            return reinterpret_cast<func_ptr>(this->vftable[index])(this, args...);
+        }
     }
 
     /**
