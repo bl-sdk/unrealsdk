@@ -241,6 +241,13 @@ struct Pattern {
     }
 };
 
+/**
+ * @brief Gets the address range covered by the exe's module.
+ *
+ * @return A tuple of the exe start address and it's length.
+ */
+std::pair<uintptr_t, size_t> get_exe_range(void);
+
 }  // namespace unrealsdk::memory
 
 #endif /* UNREALSDK_MEMORY_H */

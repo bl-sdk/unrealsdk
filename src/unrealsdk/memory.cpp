@@ -4,15 +4,8 @@
 
 namespace unrealsdk::memory {
 
-namespace {
-
-/**
- * @brief Gets the address range covered by the exe's module.
- *
- * @return A tuple of the exe start address and it's length.
- */
-std::tuple<uintptr_t, size_t> get_exe_range(void) {
-    static std::optional<std::tuple<uintptr_t, size_t>> range = std::nullopt;
+std::pair<uintptr_t, size_t> get_exe_range(void) {
+    static std::optional<std::pair<uintptr_t, size_t>> range = std::nullopt;
     if (range) {
         return *range;
     }
@@ -37,8 +30,6 @@ std::tuple<uintptr_t, size_t> get_exe_range(void) {
     range = {reinterpret_cast<uintptr_t>(allocation_base), module_length};
     return *range;
 }
-
-}  // namespace
 
 uintptr_t sigscan(const uint8_t* bytes, const uint8_t* mask, size_t pattern_size) {
     auto [start, size] = get_exe_range();
