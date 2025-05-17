@@ -7,12 +7,6 @@ namespace unrealsdk::unreal::offsets {
 
 using offset_type = uint16_t;
 
-template <typename From, typename To>
-using copy_cv = std::conditional_t<
-    std::is_const_v<From>,
-    std::add_const_t<std::conditional_t<std::is_volatile_v<From>, std::add_volatile_t<To>, To>>,
-    /* align      */ std::conditional_t<std::is_volatile_v<From>, std::add_volatile_t<To>, To>>;
-
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
 // Internal macros
@@ -23,11 +17,18 @@ using copy_cv = std::conditional_t<
                   < std::numeric_limits<unrealsdk::unreal::offsets::offset_type>::max());
 #define UNREALSDK_OFFSETS__OFFSETOF(type, name) \
     static_cast<unrealsdk::unreal::offsets::offset_type>(offsetof(T, name)),
-#define UNREALSDK_OFFSETS__DEFINE_GETTER(type, name)                                 \
-    template <typename T>                                                            \
-    [[nodiscard]] unrealsdk::unreal::offsets::copy_cv<T, type>& name(this T& self) { \
-        return *reinterpret_cast<unrealsdk::unreal::offsets::copy_cv<T, type>*>(     \
-            reinterpret_cast<uintptr_t>(&self) + Offsets::get(&Offsets::name));      \
+#define UNREALSDK_OFFSETS__DEFINE_GETTER(type, name)                                     \
+   private:                                                                              \
+    using _type__##name = type;                                                          \
+                                                                                         \
+   public:                                                                               \
+    [[nodiscard]] _type__##name& name(void) {                                            \
+        return *reinterpret_cast<_type__##name*>(reinterpret_cast<uintptr_t>(this)       \
+                                                 + Offsets::get(&Offsets::name));        \
+    }                                                                                    \
+    [[nodiscard]] const _type__##name& name(void) const {                                \
+        return *reinterpret_cast<const _type__##name*>(reinterpret_cast<uintptr_t>(this) \
+                                                       + Offsets::get(&Offsets::name));  \
     }
 
 #if defined(__MINGW32__) || defined(__clang__)
@@ -113,10 +114,15 @@ struct Offsets {
 auto bl2_offsets = Offsets::from<bl2::UObject>();
 
 // The macro also creates a bunch of getters like the following
-template <typename T>
-[[nodiscard]] copy_cv<T, UClass*>& Class(this T& self) {
-    return *reinterpret_cast<copy_cv<T, UClass*>*>(reinterpret_cast<uintptr_t>(&self)
-                                                   + Offsets::get(&Offsets::Class));
+using _type__Class = UClass*;
+
+[[nodiscard]] _type__Class& Class(void) {
+    return *reinterpret_cast<_type__Class*>(reinterpret_cast<uintptr_t>(&self)
+                                        + Offsets::get(&Offsets::Class));
+}
+[[nodiscard]] const _type__Class& Class(void) const {
+    return *reinterpret_cast<_type__Class*>(reinterpret_cast<uintptr_t>(&self)
+                                        + Offsets::get(&Offsets::Class));
 }
 
 // Since these return a reference, they can be used pretty much the exact same way as a member.
