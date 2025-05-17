@@ -40,9 +40,10 @@
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
       },
-      "environment": {
+      "cacheVariables": {
         "MSVC_WINE_ENV_SCRIPT": "/win-sdk/bin/x86/msvcenv.sh"
       },
+      "generator": "Ninja",
       "toolchainFile": "common_cmake/clang-cross-x86.cmake"
     },
     {
@@ -53,9 +54,10 @@
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
       },
-      "environment": {
+      "cacheVariables": {
         "MSVC_WINE_ENV_SCRIPT": "/win-sdk/bin/x64/msvcenv.sh"
       },
+      "generator": "Ninja",
       "toolchainFile": "common_cmake/clang-cross-x64.cmake"
     },
     {

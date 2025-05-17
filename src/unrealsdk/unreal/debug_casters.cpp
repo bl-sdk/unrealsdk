@@ -5,7 +5,6 @@
 #include "unrealsdk/game/tps/offsets.h"
 #include "unrealsdk/unreal/offset_list.h"
 
-
 #ifndef NDEBUG
 /*
 For debug builds, we define a bunch of helper functions you may call to transform the "generic"
@@ -13,7 +12,7 @@ unreal types into "concrete" ones. These are intended for use only in a debugger
 
 These creates a few series of global functions, named after each supported game, and "ue_generic()".
 These functions have overloads for every dynamic unreal type, they take a pointer to one and return
-it cast to their concret, game specific type (or to the generic one for "ue_generic()"). These
+it cast to their concrete, game specific type (or to the generic one for "ue_generic()"). These
 functions all also support being run as a no-op, so you don't need to double check if you have a
 generic or concrete type.
 */
