@@ -151,8 +151,9 @@ using UArrayProperty = unreal::offsets::generic::UArrayProperty<UProperty>;
 using UByteProperty = unreal::offsets::generic::UByteProperty<UProperty>;
 using UDelegateProperty = unreal::offsets::generic::UDelegateProperty<UProperty>;
 using UEnumProperty = unreal::offsets::generic::UEnumProperty<UProperty>;
-using UFloatProperty = UProperty;
-using UIntProperty = UProperty;
+class UFloatProperty : public UProperty {};
+using UInterfaceProperty = unreal::offsets::generic::UInterfaceProperty<UProperty>;
+class UIntProperty : public UProperty {};
 using UMulticastDelegateProperty = unreal::offsets::generic::UMulticastDelegateProperty<UProperty>;
 using UObjectProperty = unreal::offsets::generic::UObjectProperty<UProperty>;
 using UStructProperty = unreal::offsets::generic::UStructProperty<UProperty>;
@@ -161,7 +162,6 @@ using UByteAttributeProperty = unreal::offsets::generic::GenericAttributePropert
 using UClassProperty = unreal::offsets::generic::UClassProperty<UObjectProperty>;
 using UFloatAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UFloatProperty>;
 using UIntAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UIntProperty>;
-using UInterfaceProperty = unreal::offsets::generic::UInterfaceProperty<UObjectProperty>;
 using USoftClassProperty = unreal::offsets::generic::USoftClassProperty<UObjectProperty>;
 
 class UBoolProperty : public UProperty {

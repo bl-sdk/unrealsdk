@@ -2,6 +2,9 @@
 #define UNREALSDK_UNREAL_OFFSET_LIST_H
 
 #include "unrealsdk/pch.h"
+
+// Note: this header needs to pull in almost all unreal classes, and their offset definitions
+// Refrain from including it in other headers
 #include "unrealsdk/unreal/classes/properties/attribute_property.h"
 #include "unrealsdk/unreal/classes/properties/persistent_object_ptr_property.h"
 #include "unrealsdk/unreal/classes/properties/uarrayproperty.h"

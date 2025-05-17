@@ -23,7 +23,7 @@ namespace unrealsdk::game::tps {
 class UClass;
 
 using UObject = bl2::generic::UObject<UClass>;
-using UField = bl2::UField;
+class UField : public bl2::UField {};
 
 class UProperty : public UField {
    public:
@@ -79,16 +79,17 @@ class UClass : public UStruct {
 
 using UScriptStruct = unreal::offsets::generic::UScriptStruct<UStruct>;
 using UFunction = bl2::generic::UFunction<UStruct>;
-using UConst = bl2::UConst;
-using UEnum = bl2::UEnum;
+class UConst : public bl2::UConst {};
+class UEnum : public bl2::UEnum {};
 
 using UArrayProperty = unreal::offsets::generic::UArrayProperty<UProperty>;
 using UBoolProperty = bl2::generic::UBoolProperty<UProperty>;
 using UByteProperty = unreal::offsets::generic::UByteProperty<UProperty>;
 using UDelegateProperty = unreal::offsets::generic::UDelegateProperty<UProperty>;
 using UEnumProperty = unreal::offsets::generic::UEnumProperty<UProperty>;
-using UFloatProperty = UProperty;
-using UIntProperty = UProperty;
+class UFloatProperty : public UProperty {};
+using UInterfaceProperty = unreal::offsets::generic::UInterfaceProperty<UProperty>;
+class UIntProperty : public UProperty {};
 using UMulticastDelegateProperty = unreal::offsets::generic::UMulticastDelegateProperty<UProperty>;
 using UObjectProperty = unreal::offsets::generic::UObjectProperty<UProperty>;
 using UStructProperty = unreal::offsets::generic::UStructProperty<UProperty>;
@@ -97,9 +98,7 @@ using UByteAttributeProperty = unreal::offsets::generic::GenericAttributePropert
 using UClassProperty = unreal::offsets::generic::UClassProperty<UObjectProperty>;
 using UFloatAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UFloatProperty>;
 using UIntAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<UIntProperty>;
-using UInterfaceProperty = unreal::offsets::generic::UInterfaceProperty<UObjectProperty>;
 using USoftClassProperty = unreal::offsets::generic::USoftClassProperty<UObjectProperty>;
-;
 
 // NOLINTEND(cppcoreguidelines-pro-type-member-init,
 //           readability-identifier-naming,
