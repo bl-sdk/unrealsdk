@@ -50,16 +50,6 @@ include(common_cmake/git_watcher.cmake)
 add_subdirectory(libs/minhook)
 add_subdirectory(libs/tomlplusplus)
 
-# If using the clang windows cross compilation toolchain
-if((NOT CMAKE_HOST_WIN32)
-    AND (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    AND (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
-    # Disable some intrinsics - MSVC implicitly defines intrinsics, but Clang does not, so we get
-    # a linking error otherwise
-    target_compile_definitions(minhook PRIVATE MINHOOK_DISABLE_INTRINSICS)
-    target_compile_definitions(_unrealsdk_interface INTERFACE TOML_ENABLE_SIMD=0)
-endif()
-
 target_include_directories(_unrealsdk_interface INTERFACE "src" ${CONFIGURE_FILES_DIR})
 target_link_libraries(_unrealsdk_interface INTERFACE minhook tomlplusplus::tomlplusplus)
 
