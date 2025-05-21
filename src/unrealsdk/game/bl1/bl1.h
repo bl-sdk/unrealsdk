@@ -13,11 +13,6 @@ namespace unrealsdk::game {
 class BL1Hook : public AbstractHook {
    protected:
     /**
-     * @brief Hex edits out the `obj dump` array limit message.
-     */
-    virtual void hexedit_array_limit_message(void) const;
-
-    /**
      * @brief Finds `FName::Init`, and sets up such that `fname_init` may be called.
      */
     static void find_fname_init(void);

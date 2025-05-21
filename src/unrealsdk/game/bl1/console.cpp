@@ -20,16 +20,30 @@ namespace unrealsdk::game {
 
 namespace {
 
+// This is an extra hook, which we don't strictly need for the interface, but is really handy. By
+// default the game prepends 'say ' to every command as a primitive way to disable console. Bypass
+// it so you can actually use it.
+
+const std::wstring SAY_BYPASS_FUNC = L"Engine.Console:ShippingConsoleCommand";
+const constexpr auto SAY_BYPASS_TYPE = hook_manager::Type::PRE;
+const std::wstring SAY_BYPASS_ID = L"unrealsdk_bl1_say_bypass";
+
+// We could combine this with the say bypass, but by keeping them separate it'll let users disable
+// one if they really want to
+const std::wstring CONSOLE_COMMAND_FUNC = L"Engine.Console:ConsoleCommand";
+// This is the actual end point of all console commands, the above function normally calls through
+// into this one - but we needed to hook it to be able to manage the console history. If something
+/// directly calls `PC.ConsoleCommand("my_cmd")`, we need this hook to be able to catch it.
+const std::wstring PC_CONSOLE_COMMAND_FUNC = L"Engine.PlayerController:ConsoleCommand";
+
+const constexpr auto CONSOLE_COMMAND_TYPE = hook_manager::Type::PRE;
+const std::wstring CONSOLE_COMMAND_ID = L"unrealsdk_bl1_console_command";
+
+const std::wstring INJECT_CONSOLE_FUNC = L"WillowGame.WillowGameViewportClient:PostRender";
+const constexpr auto INJECT_CONSOLE_TYPE = hook_manager::Type::PRE;
+const std::wstring INJECT_CONSOLE_ID = L"unrealsdk_bl1_inject_console";
+
 BoundFunction console_output_text{};
-
-////////////////////////////////////////////////////////////////////////////////
-// | CONSOLE HOOKS |
-////////////////////////////////////////////////////////////////////////////////
-
-// - NOTE -
-// I don't know if the say_crash_fix_hook is needed; don't know if the implementation/fix
-// needs to change either. Just going assume it is not needed until someone complains about crashing
-// in multiplayer lol.
 
 bool say_bypass_hook(const hook_manager::Details& hook) {
     static const auto console_command_func =
@@ -150,13 +164,7 @@ bool pc_console_command_hook(const hook_manager::Details& hook) {
 }
 
 bool inject_console_hook(const hook_manager::Details& hook) {
-    // clang-format off
-    remove_hook(
-        L"WillowGame.WillowGameViewportClient:PostRender",
-        hook_manager::Type::PRE,
-        L"bl1_inject_console_hook"
-    );
-    // clang-format on
+    remove_hook(INJECT_CONSOLE_FUNC, INJECT_CONSOLE_TYPE, INJECT_CONSOLE_ID);
 
     auto console = hook.obj->get<UObjectProperty>(L"ViewportConsole"_fn);
 
@@ -179,37 +187,14 @@ bool inject_console_hook(const hook_manager::Details& hook) {
 
 }  // namespace
 
-////////////////////////////////////////////////////////////////////////////////
-// | BL1HOOK ENTRIES |
-////////////////////////////////////////////////////////////////////////////////
-
 void BL1Hook::inject_console(void) {
-    // clang-format off
-    add_hook(
-        L"Engine.Console:ShippingConsoleCommand",
-        hook_manager::Type::PRE,
-        L"bl1_say_bypass_hook",
-        &say_bypass_hook
-    );
-    add_hook(
-        L"Engine.Console:ConsoleCommand",
-        hook_manager::Type::PRE,
-        L"bl1_console_command_hook",
-        &console_command_hook
-    );
-    add_hook(
-        L"Engine.PlayerController:ConsoleCommand",
-        hook_manager::Type::PRE,
-        L"bl1_pc_console_command_hook",
-        &pc_console_command_hook
-    );
-    add_hook(
-        L"WillowGame.WillowGameViewportClient:PostRender",
-        hook_manager::Type::PRE,
-        L"bl1_inject_console_hook",
-        &inject_console_hook
-    );
-    // clang-format on
+    add_hook(SAY_BYPASS_FUNC, SAY_BYPASS_TYPE, SAY_BYPASS_ID, &say_bypass_hook);
+
+    add_hook(CONSOLE_COMMAND_FUNC, CONSOLE_COMMAND_TYPE, CONSOLE_COMMAND_ID, &console_command_hook);
+    add_hook(PC_CONSOLE_COMMAND_FUNC, CONSOLE_COMMAND_TYPE, CONSOLE_COMMAND_ID,
+             &pc_console_command_hook);
+
+    add_hook(INJECT_CONSOLE_FUNC, INJECT_CONSOLE_TYPE, INJECT_CONSOLE_ID, &inject_console_hook);
 }
 
 void BL1Hook::uconsole_output_text(const std::wstring& str) const {

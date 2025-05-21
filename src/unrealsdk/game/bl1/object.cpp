@@ -12,10 +12,6 @@ using namespace unrealsdk::memory;
 
 namespace unrealsdk::game {
 
-// ############################################################################//
-//  | CONSTRUCT OBJECT |
-// ############################################################################//
-
 #pragma region ConstructObject
 
 namespace {
@@ -31,24 +27,23 @@ typedef UObject*(__cdecl* construct_obj_func)(UClass* cls,
                                               uint32_t assume_template_is_archetype);
 construct_obj_func construct_obj_ptr;
 
-const constinit Pattern<49> CONSTRUCT_OBJECT_PATTERN{
-    "6A FF"           // push FFFFFFFF
-    "68 ????????"     // push borderlands.18ED693
-    "64A1 00000000"   // mov eax,dword ptr fs:[0]
+const constinit Pattern<47> CONSTRUCT_OBJECT_PATTERN{
+    "6A FF"           // push -01
+    "68 ????????"     // push 018E9573
+    "64 A1 ????????"  // mov eax, fs:[00000000]
     "50"              // push eax
-    "83EC 0C"         // sub esp,C
+    "83 EC 0C"        // sub esp, 0C
     "53"              // push ebx
     "55"              // push ebp
     "56"              // push esi
     "57"              // push edi
-    "A1 ????????"     // mov eax,dword ptr ds:[1F16980]
-    "33C4"            // xor eax,esp
+    "A1 ????????"     // mov eax, [01F131C0]
+    "33 C4"           // xor eax, esp
     "50"              // push eax
-    "8D4424 20"       // lea eax,dword ptr ss:[esp+20]
-    "64 A3 00000000"  // mov dword ptr fs:[0],eax
-    "8B6C24 54"       // mov ebp,dword ptr ss:[esp+54]
-    "896C24 14"       // mov dword ptr ss:[esp+14],ebp
-    "85ED"            // test ebp,ebp
+    "8D 44 24 ??"     // lea eax, [esp+20]
+    "64 A3 ????????"  // mov fs:[00000000], eax
+    "8B 6C 24 ??"     // mov ebp, [esp+54]
+    "89 6C 24 ??"     // mov [esp+14], ebp
 };
 
 }  // namespace
@@ -68,10 +63,6 @@ UObject* BL1Hook::construct_object(UClass* cls,
 }
 
 #pragma endregion
-
-// ############################################################################//
-//  | PATH NAME |
-// ############################################################################//
 
 #pragma region PathName
 
@@ -93,16 +84,13 @@ typedef void(__thiscall* get_path_name_func)(const UObject* self,
 
 get_path_name_func get_path_name_ptr;
 
-const constinit Pattern<19> GET_PATH_NAME_PATTERN{
-    "8B4424 04"  // mov eax,dword ptr ss:[esp+4]
-    "56"         // push esi
-    "8BF1"       // mov esi,ecx
-    "3BF0"       // cmp esi,eax
-    "74 76"      // je borderlands.5CF501
-    "85F6"       // test esi,esi
-    "74 72"      // je borderlands.5CF501
-    "8B4E 28"    // mov ecx,dword ptr ds:[esi+28]
-    "53"         // push ebx
+const constinit Pattern<13> GET_PATH_NAME_PATTERN{
+    "8B 44 24 ??"  // mov eax, [esp+04]
+    "56"           // push esi
+    "8B F1"        // mov esi, ecx
+    "3B F0"        // cmp esi, eax
+    "74 ??"        // je 005D09D1
+    "85 F6"        // test esi, esi
 };
 
 }  // namespace
@@ -120,10 +108,6 @@ std::wstring BL1Hook::uobject_path_name(const UObject* obj) const {
 
 #pragma endregion
 
-// ############################################################################//
-//  | FIND OBJECT |
-// ############################################################################//
-
 #pragma region FindObject
 
 namespace {
@@ -135,25 +119,23 @@ typedef UObject*(__cdecl* static_find_object_func)(const UClass* cls,
                                                    uint32_t exact_class);
 
 static_find_object_func static_find_object_ptr;
-const constinit Pattern<50> STATIC_FIND_OBJECT_PATTERN{
-    "6A FF"          // push FFFFFFFF
-    "68 ????????"    // push borderlands.18EC190
-    "64A1 00000000"  // mov eax,dword ptr fs:[0]
-    "50"             // push eax
-    "83EC 24"        // sub esp,24
-    "53"             // push ebx
-    "55"             // push ebp
-    "56"             // push esi
-    "57"             // push edi
-    "A1 ????????"    // mov eax,dword ptr ds:[1F16980]
-    "33 C4"          // xor eax,esp
-    "50"             // push eax
-    "8D4424 38"      // lea eax,dword ptr ss:[esp+38]
-    "64A3 00000000"  // mov dword ptr fs:[0],eax
-    "8B7424 4C"      // mov esi,dword ptr ss:[esp+4C]
-    "8B7C24 50"      // mov edi,dword ptr ss:[esp+50]
-    "8BC6"           // mov eax,esi
-    "40"             // inc eax
+const constinit Pattern<47> STATIC_FIND_OBJECT_PATTERN{
+    "6A FF"           // push -01
+    "68 ????????"     // push 018E7FF0
+    "64 A1 ????????"  // mov eax, fs:[00000000]
+    "50"              // push eax
+    "83 EC 24"        // sub esp, 24
+    "53"              // push ebx
+    "55"              // push ebp
+    "56"              // push esi
+    "57"              // push edi
+    "A1 ????????"     // mov eax, [01F131C0]
+    "33 C4"           // xor eax, esp
+    "50"              // push eax
+    "8D 44 24 ??"     // lea eax, [esp+38]
+    "64 A3 ????????"  // mov fs:[00000000], eax
+    "8B 74 24 ??"     // mov esi, [esp+4C]
+    "8B 7C 24 ??"     // mov edi, [esp+50]
 };
 
 }  // namespace
@@ -169,10 +151,6 @@ UObject* BL1Hook::find_object(UClass* cls, const std::wstring& name) const {
 
 #pragma endregion
 
-// ############################################################################//
-//  | LOAD PACKAGE |
-// ############################################################################//
-
 #pragma region LoadPackage
 
 namespace {
@@ -180,19 +158,15 @@ namespace {
 using load_package_func = UObject* (*)(const UObject* outer, const wchar_t* name, uint32_t flags);
 load_package_func load_package_ptr;
 
-const constinit Pattern<34> LOAD_PACKAGE_PATTERN{
+const constinit Pattern<21> LOAD_PACKAGE_PATTERN{
     "55"              // push ebp
-    "8B EC"           // mov ebp,esp
-    "6A FF"           // push FFFFFFFF
-    "68 ????????"     // push borderlands.18ECDB0
-    "64 A1 00000000"  // mov eax,dword ptr fs:[0]
+    "8B EC"           // mov ebp, esp
+    "6A FF"           // push -01
+    "68 ????????"     // push 018E8C90
+    "64 A1 ????????"  // mov eax, fs:[00000000]
     "50"              // push eax
-    "83EC 28"         // sub esp,28
-    "53 56 57"        // push ebx
-    "A1 ????????"     // push esi
-    "33C5"            // push edi
-    "50"              // mov eax,dword ptr ds:[1F16980]
-    "8D45 F4"         // xor eax,ebp
+    "83 EC 28"        // sub esp, 28
+    "53"              // push ebx
 };
 
 }  // namespace

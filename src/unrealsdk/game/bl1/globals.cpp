@@ -15,17 +15,14 @@ namespace unrealsdk::game {
 
 namespace {
 
-// ############################################################################//
-//  | GOBJECTS |
-// ############################################################################//
-
 GObjects gobjects_wrapper{};
 
-const constinit Pattern<15> GOBJECTS_SIG{
-    "8B0D {????????}"  // mov ecx,dword ptr ds:[1FB85A8]
-    "8B04B1"           // mov eax,dword ptr ds:[ecx+esi*4]
-    "8B50 0C"          // mov edx,dword ptr ds:[eax+C]
-    "2158 08"          // and dword ptr ds:[eax+8],ebx
+const constinit Pattern<18> GOBJECTS_SIG{
+    "8B 0D {????????}"  // mov ecx, [01FB4DD8]
+    "8B 04 ??"          // mov eax, [ecx+esi*4]
+    "8B 50 ??"          // mov edx, [eax+0C]
+    "21 58 ??"          // and [eax+08], ebx
+    "89 50 ??"          // mov [eax+0C], edx
 };
 
 }  // namespace
@@ -41,19 +38,17 @@ const GObjects& BL1Hook::gobjects(void) const {
     return gobjects_wrapper;
 };
 
-// ############################################################################//
-//  | GNAMES |
-// ############################################################################//
-
 namespace {
 
 GNames gnames_wrapper{};
 
-const constinit Pattern<15> GNAMES_SIG{
-    "A1 {????????}"  // mov eax,dword ptr ds:[1FB8578]
-    "8B0CB0"         // mov ecx,dword ptr ds:[eax+esi*4]
-    "68 00100000"    // push 1000
-    "6A 00"          // push 0
+const constinit Pattern<21> GNAMES_SIG{
+    "A1 {????????}"  // mov eax, [01FB4DA8]
+    "8B 0C ??"       // mov ecx, [eax+esi*4]
+    "68 ????????"    // push 00001000
+    "6A ??"          // push 00
+    "E8 ????????"    // call 005C21F0
+    "5E"             // pop esi
 };
 
 }  // namespace

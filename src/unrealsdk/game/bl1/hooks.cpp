@@ -16,10 +16,6 @@ using namespace unrealsdk::unreal;
 
 namespace unrealsdk::game {
 
-////////////////////////////////////////////////////////////////////////////////
-// | PROCESS EVENT HOOK |
-////////////////////////////////////////////////////////////////////////////////
-
 namespace {
 
 // NOLINTNEXTLINE(modernize-use-using)
@@ -30,23 +26,17 @@ typedef void(__fastcall* process_event_func)(UObject* obj,
                                              void* /*null*/);
 process_event_func process_event_ptr;
 
-const constinit Pattern<43> PROCESS_EVENT_SIG{
-    "55"             // push ebp
-    "8BEC"           // mov ebp,esp
-    "6A FF"          // push FFFFFFFF
-    "68 ????????"    // push <borderlands.sub_18E9668>
-    "64A1 00000000"  // mov eax,dword ptr fs:[0]
-    "50"             // push eax
-    "83EC 40"        // sub esp,40
-    "A1 ????????"    // mov eax,dword ptr ds:[1F16980]
-    "33C5"           // xor eax,ebp
-    "8945 F0"        // mov dword ptr ss:[ebp-10],eax
-    "53"             // push ebx
-    "56"             // push esi
-    "57"             // push edi
-    "50"             // push eax
-    "8D45 F4"        // lea eax,dword ptr ss:[ebp-C]
-    "64A3 00000000"  // mov dword ptr fs:[0],eax
+const constinit Pattern<30> PROCESS_EVENT_SIG{
+    "55"              // push ebp
+    "8B EC"           // mov ebp, esp
+    "6A FF"           // push -01
+    "68 ????????"     // push 018E55E8
+    "64 A1 ????????"  // mov eax, fs:[00000000]
+    "50"              // push eax
+    "83 EC 40"        // sub esp, 40
+    "A1 ????????"     // mov eax, [01F131C0]
+    "33 C5"           // xor eax, ebp
+    "89 45 ??"        // mov [ebp-10], eax
 };
 
 void __fastcall process_event_hook(UObject* obj,
@@ -131,10 +121,6 @@ void BL1Hook::process_event(UObject* object, UFunction* func, void* params) cons
     locking_process_event_hook(object, nullptr, func, params, nullptr);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// | CALL FUNCTION HOOK |
-////////////////////////////////////////////////////////////////////////////////
-
 namespace {
 
 // NOLINTNEXTLINE(modernize-use-using)
@@ -146,14 +132,14 @@ typedef void(__fastcall* call_function_func)(UObject* obj,
 call_function_func call_function_ptr;
 
 const constinit Pattern<31> CALL_FUNCTION_SIG{
-    "55"               // push ebp
-    "8DAC24 FCFBFFFF"  // lea ebp,dword ptr ss:[esp-404]
-    "81EC 04040000"    // sub esp,404
-    "6A FF"            // push FFFFFFFF
-    "68 ????????"      // push borderlands.18E9638
-    "64 A1 00000000"   // mov eax,dword ptr fs:[0]
-    "50"               // push eax
-    "83EC 40"          // sub esp,40
+    "55"                 // push ebp
+    "8D AC 24 ????????"  // lea ebp, [esp-00000404]
+    "81 EC ????????"     // sub esp, 00000404
+    "6A FF"              // push -01
+    "68 ????????"        // push 018E55B8
+    "64 A1 ????????"     // mov eax, fs:[00000000]
+    "50"                 // push eax
+    "83 EC 40"           // sub esp, 40
 };
 
 void __fastcall call_function_hook(UObject* obj,

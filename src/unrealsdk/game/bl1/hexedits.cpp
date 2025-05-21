@@ -7,53 +7,39 @@
 
 using namespace unrealsdk::memory;
 
-// - NOTE -
-// I genuinely have no idea what these do and if they were required or not lol. They don't seem to
-// have any negative impact at runtime so fundamentally they should/might be correct. I was just
-// using the BL2 implementation as a checklist and these were trivial to find & patch.
-//
-
 namespace unrealsdk::game {
-
-// ############################################################################//
-//  | SIGNATURES |
-// ############################################################################//
 
 namespace {
 
-const constinit Pattern<17> SET_COMMAND_SIG{
-    "75 16"        // jne borderlands.87E1A7
-    "8D4C24 18"    // lea ecx,dword ptr ss:[esp+18]
-    "68 ????????"  // push borderlands.1B18900
-    "51"           // push ecx
-    "E8 ????????"  // call <borderlands.sub_5C1E10>
+const constinit Pattern<32> SET_COMMAND_SIG{
+    "85 C0"           // test eax, eax
+    "{?? ??}"         // jne 0087EC57
+    "8D 4C 24 ??"     // lea ecx, [esp+18]
+    "68 ????????"     // push 01B167C0
+    "51"              // push ecx
+    "E8 ????????"     // call 005C2FD0
+    "83 C4 08"        // add esp, 08
+    "85 C0"           // test eax, eax
+    "74 ??"           // je 0087EC80
+    "39 9E ????????"  // cmp [esi+000003E0], ebx
 };
 
-const constinit Pattern<20> ARRAY_LIMIT_SIG{
-    "6A 64"          // push 64
-    "50"             // push eax
-    "46"             // inc esi
-    "E8 ????????"    // call <borderlands.sub_517770>
-    "83C4 08"        // add esp,8
-    "3BF0"           // cmp esi,eax
-    "0F8C 59FFFFFF"  // jl borderlands.5E7D33
+const constinit Pattern<32> ARRAY_LIMIT_SIG{
+    "6A 64"            // push 64
+    "50"               // push eax
+    "46"               // inc esi
+    "{?? ????????}"    // call MIN              <---
+    "83 C4 08"         // add esp, 08
+    "3B F0"            // cmp esi, eax
+    "0F8C ????????"    // jl 005E8F03
+    "8B 7F ??"         // mov edi, [edi+04]
+    "83 FF 64"         // cmp edi, 64
+    "{???? ????????}"  // jl DONT_PRINT_MSG     <---
 };
-
-const constinit Pattern<29> ARRAY_LIMIT_MESSAGE{
-    "0F8C 7E000000"  // jl borderlands.5E7E64
-    "8B4C24 38"      // mov ecx,dword ptr ss:[esp+38]
-    "83C7 9D"        // add edi,FFFFFF9D
-    "57"             // push edi
-    "68 ????????"    // push borderlands.1A7F42C
-    "E8 ????????"    // call borderlands.51BAA0
-    "E9 ????????"    // jmp borderlands.5E7E64
-};
+const constexpr auto ARRAY_LIMIT_MESSAGE_OFFSET_FROM_MIN = 5 + 3 + 2 + 6 + 3 + 3;
+const constexpr auto ARRAY_LIMIT_UNLOCK_SIZE = ARRAY_LIMIT_MESSAGE_OFFSET_FROM_MIN + 2;
 
 }  // namespace
-
-// ############################################################################//
-//  | HEX EDITS |
-// ############################################################################//
 
 void BL1Hook::hexedit_set_command(void) {
     auto* set_command_msg = SET_COMMAND_SIG.sigscan_nullable<uint8_t*>();
@@ -73,57 +59,33 @@ void BL1Hook::hexedit_set_command(void) {
 }
 
 void BL1Hook::hexedit_array_limit(void) {
-    // - NOTE -
-    // In BL2 this seems to be inlined however for BL1 its not so we will NOP the CALL and its
-    // 4 byte address. The caller cleans the stack so need to worry about that. Might also be a
-    // good idea to move the signature forward to the CALL so we don't need to index weirdly.
-    //
-
     auto array_limit = ARRAY_LIMIT_SIG.sigscan_nullable<uint8_t*>();
     if (array_limit == nullptr) {
         LOG(ERROR, "Couldn't find array limit signature");
-    } else {
-        LOG(MISC, "Array Limit: {:p}", reinterpret_cast<void*>(array_limit));
-
-        // NOLINTBEGIN(readability-magic-numbers)
-        auto* call_instruction = array_limit + 4;
-
-        // Should *never* be true
-        if (call_instruction[0] != 0xE8) {
-            LOG(ERROR, "[ARRAY_LIMIT] ~ Instruction at {:p} + 0x04 is {:02X}",
-                static_cast<void*>(array_limit), *call_instruction);
-            return;
-        }
-
-        // Patching out the CALL ???????? to 5 NOP instructions
-        unlock_range(call_instruction, 5);
-        call_instruction[0] = 0x90;
-        call_instruction[1] = 0x90;
-        call_instruction[2] = 0x90;
-        call_instruction[3] = 0x90;
-        call_instruction[4] = 0x90;
-        // NOLINTEND(readability-magic-numbers)
-    }
-}
-
-void BL1Hook::hexedit_array_limit_message(void) const {
-    auto* array_limit_msg = ARRAY_LIMIT_MESSAGE.sigscan_nullable<uint8_t*>();
-
-    if (array_limit_msg == nullptr) {
-        LOG(ERROR, "Failed to find array limit message signature.");
         return;
     }
 
-    LOG(MISC, "Array Limit Message: {:p}", reinterpret_cast<void*>(array_limit_msg));
+    LOG(MISC, "Array Limit: {:p}", reinterpret_cast<void*>(array_limit));
+    unlock_range(array_limit, ARRAY_LIMIT_UNLOCK_SIZE);
+
+    // To patch the array limit, we simply NOP out the call to min, so it always uses the full array
+    // size. Luckily, this means we don't need to do any stack work.
 
     // NOLINTBEGIN(readability-magic-numbers)
-    unlock_range(array_limit_msg, 6);
-    array_limit_msg[0] = 0xE9;
-    array_limit_msg[1] = 0x7F;
-    array_limit_msg[2] = 0x00;
-    array_limit_msg[3] = 0x00;
-    array_limit_msg[4] = 0x00;
-    array_limit_msg[5] = 0x90;
+    array_limit[0] = 0x90;
+    array_limit[1] = 0x90;
+    array_limit[2] = 0x90;
+    array_limit[3] = 0x90;
+    array_limit[4] = 0x90;
+    // NOLINTEND(readability-magic-numbers)
+
+    // Then for the message, we're patching the JL with a NOP then a JMP w/ 4 byte offset
+    // Doing it this way means we can reuse the offset from the original JL
+
+    auto array_limit_msg = array_limit + ARRAY_LIMIT_MESSAGE_OFFSET_FROM_MIN;
+    // NOLINTBEGIN(readability-magic-numbers)
+    array_limit_msg[0] = 0x90;
+    array_limit_msg[1] = 0xE9;
     // NOLINTEND(readability-magic-numbers)
 }
 
