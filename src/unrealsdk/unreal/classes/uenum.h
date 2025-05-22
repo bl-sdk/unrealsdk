@@ -29,8 +29,23 @@ class UEnum : public UField {
     UEnum& operator=(UEnum&&) = delete;
     ~UEnum() = delete;
 
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
+    using names_type = TArray<FName>;
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
+    using names_type = TArray<TPair<FName, uint64_t> >;
+#else
+#error Unknown sdk flavour
+#endif
+
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UENUM_FIELDS(X) X(names_type, Names)
+
+    UNREALSDK_DEFINE_FIELDS_HEADER(UEnum, UNREALSDK_UENUM_FIELDS);
+
     /**
-     * @brief Get the values of an enum which have assigned names.
+     * @brief Converts the enum names into a more usable name to value map.
+     * @note Keys are always the raw enum names, rather than `MyEnum::Entry` it's always `Entry`.
      *
      * @return A map of names to their associated integer values.
      */

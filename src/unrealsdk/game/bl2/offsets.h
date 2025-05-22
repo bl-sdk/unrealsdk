@@ -101,9 +101,7 @@ class UFunction : public T {
 
 template <typename T>
 class UEnum : public T {
-    friend class unreal::UEnum;
-
-   private:
+   public:
     unreal::TArray<unreal::FName> Names;
 };
 

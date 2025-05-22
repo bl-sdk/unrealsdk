@@ -37,27 +37,28 @@ namespace unrealsdk::unreal::offsets {
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #define UNREALSDK__DYNAMIC_OFFSET_TYPES(X) \
-    X(UObject)                             \
-    X(UField)                              \
-    X(UStruct)                             \
-    X(UProperty)                           \
-    X(UClass)                              \
-    X(UScriptStruct)                       \
-    X(UFunction)                           \
-    X(UConst)                              \
     X(UArrayProperty)                      \
     X(UBoolProperty)                       \
     X(UByteAttributeProperty)              \
     X(UByteProperty)                       \
+    X(UClass)                              \
     X(UClassProperty)                      \
+    X(UConst)                              \
     X(UDelegateProperty)                   \
+    X(UEnum)                               \
     X(UEnumProperty)                       \
+    X(UField)                              \
     X(UFloatAttributeProperty)             \
+    X(UFunction)                           \
     X(UIntAttributeProperty)               \
     X(UInterfaceProperty)                  \
     X(UMulticastDelegateProperty)          \
+    X(UObject)                             \
     X(UObjectProperty)                     \
+    X(UProperty)                           \
+    X(UScriptStruct)                       \
     X(USoftClassProperty)                  \
+    X(UStruct)                             \
     X(UStructProperty)
 
 #define UNREALSDK_OFFSETS__DEFINE_OFFSET_LIST_MEMBERS(name) unrealsdk::unreal::name::Offsets name;

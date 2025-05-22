@@ -139,11 +139,13 @@ class UFunction : public UStruct {
 using UConst = unreal::offsets::generic::UConst<UField>;
 
 class UEnum : public UField {
-    friend class unreal::UEnum;
-
    private:
     unreal::UnmanagedFString CppType;
+
+   public:
     unreal::TArray<unreal::TPair<unreal::FName, uint64_t>> Names;
+
+   private:
     int64_t CppForm;
 };
 
