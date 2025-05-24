@@ -61,8 +61,10 @@ void console_command_hook(UObject* console_obj, UnmanagedFString* raw_line) {
     try {
         std::wstring line = *raw_line;
 
-        auto [callback, cmd_len] = commands::impl::find_matching_command(line);
-        if (callback != nullptr) {
+        // Since this is a hook on UConsole, and since the game doesn't seem to be running it's own
+        // commands through it, just always consider it direct user input
+        // I don't really know what interface automated commands would come through, if any
+        if (commands::impl::is_command_valid(line, true)) {
             // Update the history buffer
             {
                 // History buffer is oldest at index 0, newest at count
@@ -142,7 +144,7 @@ void console_command_hook(UObject* console_obj, UnmanagedFString* raw_line) {
             LOG(MIN, L"{}", msg);
 
             try {
-                callback->operator()(line.c_str(), line.size(), cmd_len);
+                commands::impl::run_command(line);
             } catch (const std::exception& ex) {
                 LOG(ERROR, "An exception occurred while running a console command: {}", ex.what());
             }

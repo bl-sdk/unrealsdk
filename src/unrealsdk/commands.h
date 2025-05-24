@@ -12,16 +12,18 @@ You can use this module to register custom console commands, in a single unified
 To register a command, you simply provide it's name. Commands are matched by comparing the first
 block of non-whitespace characters in a line submitted to console against all registered names.
 
-As a special case, if you register the special `NEXT_LINE` command, it will always match the very
-next line, in place of anything else which might have been matched otherwise. It will then
-immediately be removed (though before the callback is run, so you can re-register it if needed), to
-allow normal command processing to continue afterwards.
+To create interactive menus, rather than registering separate commands for every input, use the
+special `NEXT_LINE` command, which always matches the very next line, with higher priority than
+anything else. These commands are only matched once, and are automatically removed before running
+the callback. They also try to only match direct user inputs in console, and try ignore commands
+sent via automated means - e.g. if the game actually sends an `open` command to load a map.
 */
 
 /**
  * @brief A special value used to register a command which will always match the very next line.
  * @note Only one next line command can be registered at a time.
  * @note The next line command is automatically removed after it gets matched.
+ * @note The next line command *should not* be matched by automated commands.
  */
 extern const std::wstring NEXT_LINE;
 
@@ -67,13 +69,21 @@ namespace impl {  // These functions are only relevant when implementing a game 
 #ifndef UNREALSDK_IMPORTING
 
 /**
- * @brief Finds the command which matches the given line.
+ * @brief Checks if a command line contains a valid command to be run.
  *
- * @param line The line which was submitted.
- * @return A pair of the callback to run and the offset to pass to it, or of nullptr and 0 if there
- *         was no match.
+ * @param line The line to check.
+ * @param direct_user_input True if this command was directly input to console by a user.
+ * @return True if this contains a command we should run.
  */
-std::pair<DLLSafeCallback*, size_t> find_matching_command(std::wstring_view line);
+bool is_command_valid(std::wstring_view line, bool direct_user_input);
+
+/**
+ * @brief Runs the command associated with the given line.
+ * @note Assumes is_command_valid previously returned true on the same line.
+ *
+ * @param line The line holding the command to be run.
+ */
+void run_command(std::wstring_view line);
 
 #endif
 }  // namespace impl

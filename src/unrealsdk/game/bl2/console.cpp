@@ -174,8 +174,8 @@ bool console_command_hook(hook_manager::Details& hook) {
 
     auto line = hook.args->get<UStrProperty>(command_property);
 
-    auto [callback, cmd_len] = commands::impl::find_matching_command(line);
-    if (callback == nullptr) {
+    // This hook only runs when input via console, it is direct user input
+    if (!commands::impl::is_command_valid(line, true)) {
         return false;
     }
 
@@ -232,7 +232,7 @@ bool console_command_hook(hook_manager::Details& hook) {
     LOG(MIN, L"{}", msg);
 
     try {
-        callback->operator()(line.c_str(), line.size(), cmd_len);
+        commands::impl::run_command(line);
     } catch (const std::exception& ex) {
         LOG(ERROR, "An exception occurred while running a console command: {}", ex.what());
     }
@@ -246,15 +246,15 @@ bool pc_console_command_hook(hook_manager::Details& hook) {
 
     auto line = hook.args->get<UStrProperty>(command_property);
 
-    auto [callback, cmd_len] = commands::impl::find_matching_command(line);
-    if (callback == nullptr) {
+    // Conversely, this hook is explicitly not from console
+    if (!commands::impl::is_command_valid(line, false)) {
         return false;
     }
 
     // This hook does not go to console, so there's no extra processing to be done, we can just run
     // the callback immediately
     try {
-        callback->operator()(line.c_str(), line.size(), cmd_len);
+        commands::impl::run_command(line);
     } catch (const std::exception& ex) {
         LOG(ERROR, "An exception occurred while running a console command: {}", ex.what());
     }
