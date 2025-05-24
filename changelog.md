@@ -1,12 +1,29 @@
 # Changelog
 
-## Upcoming
+## 2.0.0 (Upcoming)
+- Now supports Borderlands 1. Big thanks to Ry for doing basically all the reverse engineering.
+
+- Major refactor of the core unreal types, to cleanly allow them to change layouts at runtime. All
+  core fields have changed from members to zero-arg methods, which return a reference to the member.
+  A few classes (e.g. `UProperty` subclasses) previous had existing methods to deal with the same
+  problem, these have all been moved to the new system.
+  
+  Clang is able to detect this change, and gives a nice error recommending inserting brackets at the
+  right spot.
+  
+- Removed the `UNREALSDK_UE_VERSION` and `UNREALSDK_ARCH` CMake variables, in favour a new merged
+  `UNREALSDK_FLAVOUR` variable.
+
+- Removed the (optional) dependency on libfmt, `std::format` support is now required.
+
+- Console commands registered using `unrealsdk::commands::NEXT_LINE` now (try to) only fire on
+  direct user input, and ignore commands send via automated means.
 
 - Fixed that assigning an entire array, rather than getting the array and setting it's elements,
   would likely cause memory corruption. This was most common when using an array of large structs,
   and when assigning to one which was previously empty.
 
-  [275bbc8b](https://github.com/bl-sdk/unrealsdk/commit/275bbc8b)
+- Made `unrealsdk::memory::get_exe_range` public.
 
 ## 1.8.0
 
