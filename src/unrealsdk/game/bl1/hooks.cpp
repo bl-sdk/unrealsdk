@@ -62,7 +62,7 @@ void __fastcall process_event_hook(UObject* obj,
                                        .ret = {func->find_return_param()},
                                        .func = {.func = func, .object = obj}};
 
-            const bool block_execution = run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
+            const bool block_execution = run_hooks_of_type(data, hook_manager::Type::PRE, hook);
 
             if (!block_execution) {
                 process_event_ptr(obj, edx, func, params, null);
@@ -72,7 +72,7 @@ void __fastcall process_event_hook(UObject* obj,
                 hook.ret.copy_to(reinterpret_cast<uintptr_t>(params));
             }
 
-            if (!has_post_hooks(*data)) {
+            if (!has_post_hooks(data)) {
                 return;
             }
 
@@ -81,10 +81,10 @@ void __fastcall process_event_hook(UObject* obj,
             }
 
             if (!block_execution) {
-                run_hooks_of_type(*data, hook_manager::Type::POST, hook);
+                run_hooks_of_type(data, hook_manager::Type::POST, hook);
             }
 
-            run_hooks_of_type(*data, hook_manager::Type::POST_UNCONDITIONAL, hook);
+            run_hooks_of_type(data, hook_manager::Type::POST_UNCONDITIONAL, hook);
 
             return;
         }
@@ -158,7 +158,7 @@ void __fastcall call_function_hook(UObject* obj,
                                        .ret = {func->find_return_param()},
                                        .func = {.func = func, .object = obj}};
 
-            const bool block_execution = run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
+            const bool block_execution = run_hooks_of_type(data, hook_manager::Type::PRE, hook);
 
             if (block_execution) {
                 stack->Code++;
@@ -173,7 +173,7 @@ void __fastcall call_function_hook(UObject* obj,
                                  - hook.ret.prop->Offset_Internal());
             }
 
-            if (!has_post_hooks(*data)) {
+            if (!has_post_hooks(data)) {
                 return;
             }
 
@@ -183,10 +183,10 @@ void __fastcall call_function_hook(UObject* obj,
             }
 
             if (!block_execution) {
-                run_hooks_of_type(*data, hook_manager::Type::POST, hook);
+                run_hooks_of_type(data, hook_manager::Type::POST, hook);
             }
 
-            run_hooks_of_type(*data, hook_manager::Type::POST_UNCONDITIONAL, hook);
+            run_hooks_of_type(data, hook_manager::Type::POST_UNCONDITIONAL, hook);
 
             return;
         }

@@ -48,7 +48,7 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
                                        .func = {.func = func, .object = obj}};
 
             const bool block_execution =
-                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
+                hook_manager::impl::run_hooks_of_type(data, hook_manager::Type::PRE, hook);
 
             if (!block_execution) {
                 process_event_ptr(obj, func, params);
@@ -58,7 +58,7 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
                 hook.ret.copy_to(reinterpret_cast<uintptr_t>(params));
             }
 
-            if (!hook_manager::impl::has_post_hooks(*data)) {
+            if (!hook_manager::impl::has_post_hooks(data)) {
                 return;
             }
 
@@ -67,10 +67,10 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
             }
 
             if (!block_execution) {
-                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST, hook);
+                hook_manager::impl::run_hooks_of_type(data, hook_manager::Type::POST, hook);
             }
 
-            hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST_UNCONDITIONAL,
+            hook_manager::impl::run_hooks_of_type(data, hook_manager::Type::POST_UNCONDITIONAL,
                                                   hook);
 
             return;
@@ -161,7 +161,7 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
                                        .func = {.func = func, .object = obj}};
 
             const bool block_execution =
-                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
+                hook_manager::impl::run_hooks_of_type(data, hook_manager::Type::PRE, hook);
 
             if (block_execution) {
                 stack->Code++;
@@ -176,7 +176,7 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
                                  - hook.ret.prop->Offset_Internal());
             }
 
-            if (!hook_manager::impl::has_post_hooks(*data)) {
+            if (!hook_manager::impl::has_post_hooks(data)) {
                 return;
             }
 
@@ -186,10 +186,10 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
             }
 
             if (!block_execution) {
-                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST, hook);
+                hook_manager::impl::run_hooks_of_type(data, hook_manager::Type::POST, hook);
             }
 
-            hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST_UNCONDITIONAL,
+            hook_manager::impl::run_hooks_of_type(data, hook_manager::Type::POST_UNCONDITIONAL,
                                                   hook);
 
             return;
