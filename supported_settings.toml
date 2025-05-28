@@ -5,8 +5,8 @@
 # crashes if used.
 
 # You are not expected to provide all settings, you should only set those you need. Some settings
-# will change behaviour simply by being defined. For example, if `uproperty_size` is set, the sdk
-# will not attempt to auto detect it, and will instead assume the provided value is accurate.
+# will change behaviour simply by being defined. For example, if `alloc_alignment` is set, the sdk
+# will not attempt to dynamically adjust it, and will always use the provided value.
 
 # Not all settings are used under all build configurations - for example UE3 doesn't support FText,
 # so `ftext_get_display_string_vf_index` is of course unused.
@@ -24,10 +24,6 @@ console_log_level = "INFO"
 # If set, overrides the executable name used for game detection in the shared module.
 exe_override = ""
 
-# Changes the size the `UProperty` class is assumed to have.
-uproperty_size = -1
-# Changes the size the `UStruct` class is assumed to have.
-ustruct_size = -1
 # Changes the alignment used when calling the unreal memory allocation functions.
 alloc_alignment = -1
 
@@ -60,4 +56,4 @@ log_all_calls_file = "unrealsdk.calls.tsv"
 # Overrides the virtual function index used when calling `UObject::PostEditChangeProperty`.
 uobject_post_edit_change_property_vf_index = -1
 # Overrides the virtual function index used when calling `UObject::PostEditChangeChainProperty`.
-uobject_post_edit_change_chain property_vf_index = -1
+uobject_post_edit_change_chain_property_vf_index = -1

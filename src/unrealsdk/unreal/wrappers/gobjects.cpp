@@ -4,11 +4,13 @@
 #include "unrealsdk/unreal/structs/fweakobjectptr.h"
 #include "unrealsdk/unreal/wrappers/gobjects.h"
 
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
 #include "unrealsdk/unreal/structs/gobjects.h"
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #include "unrealsdk/unreal/structs/tarray.h"
 #include "unrealsdk/version_error.h"
+#else
+#error Unknown SDK flavour
 #endif
 
 namespace unrealsdk::unreal {
@@ -70,7 +72,7 @@ GObjects::Iterator GObjects::end(void) {
 GObjects::GObjects(void) : internal(nullptr) {}
 GObjects::GObjects(internal_type internal) : internal(internal) {}
 
-#if defined(UE4)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
 
 size_t GObjects::size(void) const {
     return this->internal->ObjObjects.Count;
@@ -103,7 +105,7 @@ void GObjects::set_weak_object(FWeakObjectPtr* ptr, const UObject* obj) const {
     if (obj == nullptr) {
         *ptr = {};
     } else {
-        ptr->object_index = obj->InternalIndex;
+        ptr->object_index = obj->InternalIndex();
 
         auto obj_item = this->internal->ObjObjects.at(ptr->object_index);
         auto serial_number = obj_item->SerialNumber.load();
@@ -125,7 +127,7 @@ void GObjects::set_weak_object(FWeakObjectPtr* ptr, const UObject* obj) const {
     }
 }
 
-#elif defined(UE3)
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 
 size_t GObjects::size(void) const {
     return this->internal->size();
@@ -147,7 +149,7 @@ void GObjects::set_weak_object(FWeakObjectPtr* /* ptr */, const UObject* /* obj 
 }
 
 #else
-#error Unknown UE version
+#error Unknown SDK flavour
 #endif
 
 }  // namespace unrealsdk::unreal

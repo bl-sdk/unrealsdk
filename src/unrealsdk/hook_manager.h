@@ -109,7 +109,7 @@ bool remove_hook(std::wstring_view func, Type type, std::wstring_view identifier
 #ifndef UNREALSDK_IMPORTING
 namespace impl {  // These functions are only relevant when implementing a game hook
 
-struct List;
+struct Node;
 
 /*
 Processing hooks needs to be very optimized, thousands if not tens of thousands of functions calls
@@ -140,29 +140,29 @@ to work out if to early exit again. If it does, it can spend a bit longer extrac
  * @param source The source of the call, used for logging.
  * @param func The function which was called.
  * @param obj The object which called the function.
- * @return A pointer to the relevant hook list, or nullptr if no hooks match.
+ * @return A node pointer to pass into the following functions, or nullptr if no hooks match.
  */
-const List* preprocess_hook(std::wstring_view source,
-                            const unreal::UFunction* func,
-                            const unreal::UObject* obj);
+std::shared_ptr<Node> preprocess_hook(std::wstring_view source,
+                                      const unreal::UFunction* func,
+                                      const unreal::UObject* obj);
 
 /**
  * @brief Checks if a hook list contains any post hooks.
  *
- * @param list The hook list, retrieved from `preprocess_hook`.
+ * @param node The node previously retrieved from `preprocess_hook`.
  * @return True if the list contains post hooks.
  */
-bool has_post_hooks(const List& list);
+bool has_post_hooks(std::shared_ptr<Node> node);
 
 /**
  * @brief Runs all the hooks in a list which match the given type.
  *
- * @param list The hook list, retrieved from `preprocess_hook`.
+ * @param node The node previously retrieved from `preprocess_hook`.
  * @param type The type of hooks to run.
  * @param hook The hook details.
  * @return The logical or of the hooks' return values.
  */
-bool run_hooks_of_type(const List& list, Type type, Details& hook);
+bool run_hooks_of_type(std::shared_ptr<Node> node, Type type, Details& hook);
 
 }  // namespace impl
 #endif

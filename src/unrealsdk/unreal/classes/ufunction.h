@@ -7,7 +7,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -27,41 +27,15 @@ class UFunction : public UStruct {
     UFunction& operator=(UFunction&&) = delete;
     ~UFunction() = delete;
 
-    // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UFUNCTION_FIELDS(X) \
+    X(uint32_t, FunctionFlags)        \
+    X(uint8_t, NumParams)             \
+    X(uint16_t, ParamsSize)           \
+    X(uint16_t, ReturnValueOffset)
 
-   private:
-#ifdef UE4
-    uint32_t FunctionFlags_internal;
-    uint8_t NumParams_internal;
-    uint16_t ParamsSize_internal;
-    uint16_t ReturnValueOffset_internal;
-    uint16_t RPCId;
-    uint16_t RPCResponseId;
-    UProperty* FirstPropertyToInit;
-    UFunction* EventGraphFunction;
-    int32_t EventGraphCallOffset;
-    void* Func;
-#else
-    uint32_t FunctionFlags_internal;
-    uint16_t iNative;
-    uint16_t RepOffset;
-    FName FriendlyName;
-    uint8_t OperPrecedence;
-    uint8_t NumParams_internal;
-    uint16_t ParamsSize_internal;
-    uint16_t ReturnValueOffset_internal;
-    uint8_t UnknownData00[0x6];
-    void* Func;
-#endif
-   public:
-    decltype(FunctionFlags_internal)& FunctionFlags(void);
-    [[nodiscard]] const decltype(FunctionFlags_internal)& FunctionFlags(void) const;
-    decltype(NumParams_internal)& NumParams(void);
-    [[nodiscard]] const decltype(NumParams_internal)& NumParams(void) const;
-    decltype(ParamsSize_internal)& ParamsSize(void);
-    [[nodiscard]] const decltype(ParamsSize_internal)& ParamsSize(void) const;
-    decltype(ReturnValueOffset_internal)& ReturnValueOffset(void);
-    [[nodiscard]] const decltype(ReturnValueOffset_internal)& ReturnValueOffset(void) const;
+    UNREALSDK_DEFINE_FIELDS_HEADER(UFunction, UNREALSDK_UFUNCTION_FIELDS);
 
     /**
      * @brief Finds the return param for this function (if it exists).
@@ -69,8 +43,6 @@ class UFunction : public UStruct {
      * @return The return param, or `nullptr` if none exists.
      */
     [[nodiscard]] UProperty* find_return_param(void) const;
-
-    // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
 };
 
 template <>
@@ -82,7 +54,7 @@ struct ClassTraits<UFunction> {
 #pragma GCC diagnostic pop
 #endif
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

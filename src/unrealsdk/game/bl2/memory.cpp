@@ -4,7 +4,7 @@
 #include "unrealsdk/memory.h"
 #include "unrealsdk/unreal/alignment.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::memory;
 using namespace unrealsdk::unreal;

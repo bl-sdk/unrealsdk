@@ -12,11 +12,22 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
 class UFunction;
+
+namespace offsets::generic {
+
+template <typename T>
+class UMulticastDelegateProperty : public T {
+   public:
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    UFunction* Signature;
+};
+
+}  // namespace offsets::generic
 
 class UMulticastDelegateProperty : public UProperty {
    public:
@@ -27,17 +38,12 @@ class UMulticastDelegateProperty : public UProperty {
     UMulticastDelegateProperty& operator=(UMulticastDelegateProperty&&) = delete;
     ~UMulticastDelegateProperty() = delete;
 
-   private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    UFunction* Signature;
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UMULTICASTDELEGATEPROPERTY_FIELDS(X) X(UFunction*, Signature)
 
-   public:
-    /**
-     * @brief Get the function holding this delegate's signature.
-     *
-     * @return The signature function.
-     */
-    [[nodiscard]] UFunction* get_signature(void) const;
+    UNREALSDK_DEFINE_FIELDS_HEADER(UMulticastDelegateProperty,
+                                   UNREALSDK_UMULTICASTDELEGATEPROPERTY_FIELDS);
 };
 
 template <>
@@ -57,7 +63,7 @@ struct ClassTraits<UMulticastDelegateProperty> {
     static inline const wchar_t* const NAME = L"MulticastDelegateProperty";
 };
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

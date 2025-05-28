@@ -6,7 +6,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -66,7 +66,7 @@ struct FText {
     FText& operator=(FText&&) = delete;
 };
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 
@@ -74,9 +74,8 @@ struct FText {
 
 // Custom FText formatter, which just casts to a string first
 template <>
-struct unrealsdk::fmt::formatter<unrealsdk::unreal::FText>
-    : unrealsdk::fmt::formatter<std::string> {
-    auto format(unrealsdk::unreal::FText text, unrealsdk::fmt::format_context& ctx) const {
+struct std::formatter<unrealsdk::unreal::FText> : std::formatter<std::string> {
+    auto format(unrealsdk::unreal::FText text, std::format_context& ctx) const {
         return formatter<std::string>::format((std::string)text, ctx);
     }
 };

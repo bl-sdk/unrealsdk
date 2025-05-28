@@ -5,7 +5,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -21,7 +21,7 @@ struct FWeakObjectPtr {
     int32_t object_serial_number = 0;
 };
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

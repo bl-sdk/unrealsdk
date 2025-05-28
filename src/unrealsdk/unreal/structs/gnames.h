@@ -3,7 +3,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -19,7 +19,7 @@ struct FNameEntry {
 
     // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
 
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     int32_t Index;
 
    private:
@@ -27,7 +27,7 @@ struct FNameEntry {
 
    public:
     FNameEntry* HashNext;
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
    private:
     uint8_t UnknownData00[0x08];
 
@@ -38,6 +38,8 @@ struct FNameEntry {
     uint8_t UnknownData01[0x04];
 
    public:
+#else
+#error Unknown SDK flavour
 #endif
 
     union {
@@ -55,7 +57,7 @@ struct FNameEntry {
     [[nodiscard]] bool is_wide(void) const;
 };
 
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 struct TStaticIndirectArrayThreadSafeRead_FNameEntry {
@@ -87,7 +89,7 @@ struct TStaticIndirectArrayThreadSafeRead_FNameEntry {
 #pragma GCC diagnostic pop
 #endif
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

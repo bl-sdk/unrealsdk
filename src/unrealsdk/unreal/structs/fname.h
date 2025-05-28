@@ -5,7 +5,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -53,7 +53,7 @@ struct FName {
     operator std::wstring() const;
 };
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 
@@ -69,9 +69,8 @@ FName operator""_fn(const wchar_t* str, size_t len);
 
 // Custom FName formatter, which just casts to a string first
 template <>
-struct unrealsdk::fmt::formatter<unrealsdk::unreal::FName>
-    : unrealsdk::fmt::formatter<std::string> {
-    auto format(unrealsdk::unreal::FName name, unrealsdk::fmt::format_context& ctx) const {
+struct std::formatter<unrealsdk::unreal::FName> : std::formatter<std::string> {
+    auto format(unrealsdk::unreal::FName name, std::format_context& ctx) const {
         return formatter<std::string>::format((std::string)name, ctx);
     }
 };

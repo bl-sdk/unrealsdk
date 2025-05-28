@@ -43,7 +43,7 @@ void u_free(void* data) {
 UObject* construct_object(UClass* cls,
                           UObject* outer,
                           const FName& name,
-                          decltype(UObject::ObjectFlags) flags,
+                          uint64_t flags,
                           UObject* template_obj) {
     return UNREALSDK_MANGLE(construct_object)(cls, outer, &name, flags, template_obj);
 }
@@ -102,6 +102,10 @@ void fsoftobjectptr_assign(unreal::FSoftObjectPtr* ptr, const unreal::UObject* o
 
 void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr, const unreal::UObject* obj) {
     UNREALSDK_MANGLE(flazyobjectptr_assign)(ptr, obj);
+}
+
+[[nodiscard]] const offsets::OffsetList& get_offsets() {
+    return *UNREALSDK_MANGLE(get_offsets)();
 }
 
 }  // namespace internal

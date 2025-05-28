@@ -4,15 +4,8 @@
 
 namespace unrealsdk::memory {
 
-namespace {
-
-/**
- * @brief Gets the address range covered by the exe's module.
- *
- * @return A tuple of the exe start address and it's length.
- */
-std::tuple<uintptr_t, size_t> get_exe_range(void) {
-    static std::optional<std::tuple<uintptr_t, size_t>> range = std::nullopt;
+std::pair<uintptr_t, size_t> get_exe_range(void) {
+    static std::optional<std::pair<uintptr_t, size_t>> range = std::nullopt;
     if (range) {
         return *range;
     }
@@ -37,8 +30,6 @@ std::tuple<uintptr_t, size_t> get_exe_range(void) {
     range = {reinterpret_cast<uintptr_t>(allocation_base), module_length};
     return *range;
 }
-
-}  // namespace
 
 uintptr_t sigscan(const uint8_t* bytes, const uint8_t* mask, size_t pattern_size) {
     auto [start, size] = get_exe_range();
@@ -93,13 +84,15 @@ bool detour(uintptr_t addr, void* detour_func, void** original_func, std::string
 
     status = MH_CreateHook(reinterpret_cast<LPVOID>(addr), detour_func, original_func);
     if (status != MH_OK) {
-        LOG(ERROR, "Failed to create detour for {}", name);
+        const char* error = MH_StatusToString(status);
+        LOG(ERROR, "Failed to create detour for '{}'; With error: '{}'", name, error);
         return false;
     }
 
     status = MH_EnableHook(reinterpret_cast<LPVOID>(addr));
     if (status != MH_OK) {
-        LOG(ERROR, "Failed to enable detour for {}", name);
+        const char* error = MH_StatusToString(status);
+        LOG(ERROR, "Failed to enable detour for '{}'; With error: '{}'", name, error);
         return false;
     }
 
@@ -124,11 +117,12 @@ uintptr_t read_offset(uintptr_t address) {
         LOG(ERROR, "Attempted to read a null offset!");
         return 0;
     }
-#ifdef ARCH_X64
-    return address + *reinterpret_cast<int32_t*>(address) + 4;
-#else
-    return *reinterpret_cast<uintptr_t*>(address);
-#endif
+
+    if constexpr (sizeof(uintptr_t) == sizeof(uint64_t)) {
+        return address + *reinterpret_cast<int32_t*>(address) + 4;
+    } else {
+        return *reinterpret_cast<uintptr_t*>(address);
+    }
 }
 
 void unlock_range(uintptr_t start, size_t size) {

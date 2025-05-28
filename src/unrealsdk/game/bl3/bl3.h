@@ -6,7 +6,7 @@
 #include "unrealsdk/game/abstract_hook.h"
 #include "unrealsdk/game/selector.h"
 
-#if defined(UE4) && defined(ARCH_X64) && !defined(UNREALSDK_IMPORTING)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK && !defined(UNREALSDK_IMPORTING)
 
 namespace unrealsdk::game {
 
@@ -98,7 +98,7 @@ class BL3Hook : public AbstractHook {
     [[nodiscard]] unreal::UObject* construct_object(unreal::UClass* cls,
                                                     unreal::UObject* outer,
                                                     const unreal::FName& name,
-                                                    decltype(unreal::UObject::ObjectFlags) flags,
+                                                    uint64_t flags,
                                                     unreal::UObject* template_obj) const override;
     [[nodiscard]] unreal::UObject* find_object(unreal::UClass* cls,
                                                const std::wstring& name) const override;
@@ -118,6 +118,7 @@ class BL3Hook : public AbstractHook {
                                const unreal::UObject* obj) const override;
     void flazyobjectptr_assign(unreal::FLazyObjectPtr* ptr,
                                const unreal::UObject* obj) const override;
+    [[nodiscard]] const unreal::offsets::OffsetList& get_offsets(void) const override;
 };
 
 template <>

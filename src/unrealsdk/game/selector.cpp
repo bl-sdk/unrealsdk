@@ -2,6 +2,7 @@
 
 #include "unrealsdk/config.h"
 #include "unrealsdk/game/abstract_hook.h"
+#include "unrealsdk/game/bl1/bl1.h"
 #include "unrealsdk/game/bl2/bl2.h"
 #include "unrealsdk/game/bl3/bl3.h"
 #include "unrealsdk/game/tps/tps.h"
@@ -17,18 +18,12 @@ namespace {
 
 // Tuple of all hook types to consider.
 // The first matching hook will be used, order matters.
-#ifdef ARCH_X64
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
+using all_known_games = std::tuple<BL1Hook, BL2Hook, TPSHook>;
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
 using all_known_games = std::tuple<BL3Hook>;
 #else
-#error No known games for UE3 x64
-#endif
-#else
-#ifdef UE4
-#error No known games for UE4 x86
-#else
-using all_known_games = std::tuple<BL2Hook, TPSHook>;
-#endif
+#error Unknown SDK flavour
 #endif
 
 /**

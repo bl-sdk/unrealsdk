@@ -37,7 +37,7 @@ WrappedMulticastDelegate::WrappedMulticastDelegate(const UFunction* signature,
 void WrappedMulticastDelegate::call(WrappedStruct& params) const {
     if (params.type != this->signature) {
         throw std::runtime_error("Tried to call delegate with parameters of incorrect type: "
-                                 + (std::string)params.type->Name);
+                                 + (std::string)params.type->Name());
     }
 
     if (this->base->size() == 0) {

@@ -10,7 +10,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -28,26 +28,19 @@ class UBoolProperty : public UProperty {
     UBoolProperty& operator=(UBoolProperty&&) = delete;
     ~UBoolProperty() = delete;
 
-   private:
-    // NOLINTBEGIN(readability-identifier-naming)
-
-#ifdef UE4
-    uint8_t FieldSize;
-    uint8_t ByteOffset;
-    uint8_t ByteMask;
-    uint8_t FieldMask;
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
+    using field_mask_type = uint8_t;
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
+    using field_mask_type = uint32_t;
 #else
-    uint32_t FieldMask;
+#error Unknown SDK flavour
 #endif
 
-    // NOLINTEND(readability-identifier-naming)
-   public:
-    /**
-     * @brief Get the bool field mask of this property.
-     *
-     * @return The field mask.
-     */
-    [[nodiscard]] decltype(FieldMask) get_field_mask(void) const;
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UBOOLPROPERTY_FIELDS(X) X(field_mask_type, FieldMask)
+
+    UNREALSDK_DEFINE_FIELDS_HEADER(UBoolProperty, UNREALSDK_UBOOLPROPERTY_FIELDS);
 };
 
 template <>
@@ -67,7 +60,7 @@ struct ClassTraits<UBoolProperty> {
 #pragma GCC diagnostic pop
 #endif
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

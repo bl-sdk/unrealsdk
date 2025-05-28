@@ -9,7 +9,7 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -30,99 +30,23 @@ class UStruct : public UField {
     UStruct& operator=(UStruct&&) = delete;
     ~UStruct() = delete;
 
-    // NOLINTBEGIN(readability-magic-numbers, readability-identifier-naming)
-
-#ifdef UE4
-    /* Struct this inherits from, may be null */
-    UStruct* SuperField;
-    /* Pointer to start of linked list of child fields */
-    UField* Children;
-
-   private:
-    /* Total size of all UProperties, the allocated structure may be larger due to alignment */
-    int32_t PropertySize;
-    /* Alignment of structure in memory, structure will be at least this large */
-    int32_t MinAlignment;
-    /* Script bytecode associated with this object */
-    TArray<uint8_t> Script;
-
-   public:
-    /* In memory only: Linked list of properties from most-derived to base */
-    UProperty* PropertyLink;
-
-   private:
-    /* In memory only: Linked list of object reference properties from most-derived to base */
-    UProperty* RefLink;
-    /* In memory only: Linked list of properties requiring destruction. Note this does not include
-     * things that will be destroyed by the native destructor */
-    UProperty* DestructorLink;
-    /** In memory only: Linked list of properties requiring post constructor initialization */
-    UProperty* PostConstructLink;
-    /* Array of object references embedded in script code. Mirrored for easy access by realtime
-     * garbage collection code */
-    TArray<UObject*> ScriptObjectReferences;
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
+    using property_size_type = int32_t;
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
+    using property_size_type = uint16_t;
 #else
-   private:
-    uint8_t UnknownData00[0x8];
-
-   public:
-    UStruct* SuperField;
-    UField* Children;
-
-   private:
-    uint16_t PropertySize;
-    uint8_t UnknownData01[0x1A];
-
-   public:
-    UProperty* PropertyLink;
-
-   private:
-    uint8_t UnknownData02[0x10];
-
-    TArray<UObject*> ScriptObjectReferences;
-
-    // See the description in 'uproperty.h', we have the same issue here. `UnknownData02` is 0x10 in
-    // BL2, but 0x4 in TPS. Since we need it this time, we also make provisions for setters.
-
-    /**
-     * @brief Gets the size of this class.
-     *
-     * @return The size of this class.
-     */
-    [[nodiscard]] static size_t class_size(void);
-
+#error Unknown SDK flavour
 #endif
-   protected:
-    /**
-     * @brief Reads a field on a UStruct subclass, taking into account it's variable length.
-     *
-     * @tparam SubType The subclass of UStruct to read the field off of (should be picked up
-     *                 automatically).
-     * @tparam FieldType The type of the field being read (should be picked up automatically).
-     * @param field Pointer to member of the field to read.
-     * @return A reference to the field.
-     */
-    template <typename SubType,
-              typename FieldType,
-              typename = std::enable_if_t<std::is_base_of_v<UStruct, SubType>>>
-    [[nodiscard]] const FieldType& get_field(FieldType SubType::* field) const {
-#ifdef UE4
-        return reinterpret_cast<const SubType*>(this)->*field;
-#else
-        return *reinterpret_cast<FieldType*>(
-            reinterpret_cast<uintptr_t>(&(reinterpret_cast<const SubType*>(this)->*field))
-            - sizeof(UStruct) + UStruct::class_size());
-#endif
-    }
-    template <typename SubType,
-              typename FieldType,
-              typename = std::enable_if_t<std::is_base_of_v<UStruct, SubType>>>
-    FieldType& get_field(FieldType SubType::* field) {
-        return const_cast<FieldType&>(const_cast<const UStruct*>(this)->get_field(field));
-    }
 
-   public:
-    // NOLINTEND(readability-magic-numbers, readability-identifier-naming)
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_USTRUCT_FIELDS(X)     \
+    X(UStruct*, SuperField)             \
+    X(UField*, Children)                \
+    X(property_size_type, PropertySize) \
+    X(UProperty*, PropertyLink)
+
+    UNREALSDK_DEFINE_FIELDS_HEADER(UStruct, UNREALSDK_USTRUCT_FIELDS);
 
 #pragma region Iterators
     struct FieldIterator {
@@ -267,7 +191,7 @@ struct ClassTraits<UStruct> {
 #pragma GCC diagnostic pop
 #endif
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

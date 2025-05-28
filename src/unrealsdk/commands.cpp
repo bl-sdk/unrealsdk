@@ -82,17 +82,39 @@ namespace impl {
 
 #ifndef UNREALSDK_IMPORTING
 
-std::pair<DLLSafeCallback*, size_t> find_matching_command(std::wstring_view line) {
+bool is_command_valid(std::wstring_view line, bool direct_user_input) {
+    if (direct_user_input && commands.find(NEXT_LINE) != commands.end()) {
+        return true;
+    }
+    auto non_space = std::ranges::find_if_not(line, &std::iswspace);
+    if (non_space == line.end()) {
+        return false;
+    }
+
+    auto cmd_end = std::find_if(non_space, line.end(), &std::iswspace);
+
+    std::wstring cmd(cmd_end - non_space, '\0');
+    std::transform(non_space, cmd_end, cmd.begin(), &std::towlower);
+    return commands.contains(cmd);
+}
+
+void run_command(std::wstring_view line) {
     auto iter = commands.find(NEXT_LINE);
     if (iter != commands.end()) {
         auto callback = iter->second;
         commands.erase(iter);
-        return {callback, 0};
+
+        callback->operator()(line.data(), line.size(), 0);
+
+        callback->destroy();
+        return;
     }
 
+    // I realize we're redoing a bunch of work from above here, but meh.
+    // Hopefully LTO gets it
     auto non_space = std::ranges::find_if_not(line, &std::iswspace);
     if (non_space == line.end()) {
-        return {nullptr, 0};
+        return;
     }
 
     auto cmd_end = std::find_if(non_space, line.end(), &std::iswspace);
@@ -100,8 +122,7 @@ std::pair<DLLSafeCallback*, size_t> find_matching_command(std::wstring_view line
     std::wstring cmd(cmd_end - non_space, '\0');
     std::transform(non_space, cmd_end, cmd.begin(), &std::towlower);
 
-    return commands.contains(cmd) ? std::pair{commands[cmd], cmd_end - line.begin()}
-                                  : std::pair{nullptr, 0};
+    commands.at(cmd)->operator()(line.data(), line.size(), cmd_end - line.begin());
 }
 
 #endif

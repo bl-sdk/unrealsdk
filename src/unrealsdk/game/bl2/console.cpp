@@ -21,7 +21,7 @@
 #include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 #include "unrealsdk/unrealsdk.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::unreal;
 
@@ -74,7 +74,7 @@ bool say_bypass_hook(hook_manager::Details& hook) {
     */
 
     static const auto console_command_func =
-        hook.obj->Class->find_func_and_validate(L"ConsoleCommand"_fn);
+        hook.obj->Class()->find_func_and_validate(L"ConsoleCommand"_fn);
     static const auto command_property =
         hook.args->type->find_prop_and_validate<UStrProperty>(L"Command"_fn);
 
@@ -111,9 +111,9 @@ bool say_crash_fix_hook(hook_manager::Details& hook) {
     static const auto engine =
         unrealsdk::find_object(L"WillowGameEngine", L"Transient.WillowGameEngine_0");
     static const auto spark_interface_prop =
-        engine->Class->find_prop_and_validate<UInterfaceProperty>(L"SparkInterface"_fn);
+        engine->Class()->find_prop_and_validate<UInterfaceProperty>(L"SparkInterface"_fn);
     static const auto is_spark_enabled_func =
-        spark_interface_prop->get_interface_class()->find_func_and_validate(L"IsSparkEnabled"_fn);
+        spark_interface_prop->InterfaceClass()->find_func_and_validate(L"IsSparkEnabled"_fn);
 
     // Check if we're online, if so allow normal processing
     if (BoundFunction{.func = is_spark_enabled_func,
@@ -123,11 +123,11 @@ bool say_crash_fix_hook(hook_manager::Details& hook) {
     }
 
     static const auto get_timestamp_string_func =
-        hook.obj->Class->find_func_and_validate(L"GetTimestampString"_fn);
+        hook.obj->Class()->find_func_and_validate(L"GetTimestampString"_fn);
     static const auto default_save_game_manager =
         find_class(L"WillowSaveGameManager"_fn)->ClassDefaultObject();
     static const auto time_format_prop =
-        default_save_game_manager->Class->find_prop_and_validate<UStrProperty>(L"TimeFormat"_fn);
+        default_save_game_manager->Class()->find_prop_and_validate<UStrProperty>(L"TimeFormat"_fn);
 
     auto timestamp = BoundFunction{.func = get_timestamp_string_func, .object = hook.obj}
                          .call<UStrProperty, UStrProperty>(
@@ -136,7 +136,7 @@ bool say_crash_fix_hook(hook_manager::Details& hook) {
     static const auto pri_prop =
         hook.args->type->find_prop_and_validate<UObjectProperty>(L"PRI"_fn);
     static const auto player_name_prop =
-        pri_prop->get_property_class()->find_prop_and_validate<UStrProperty>(L"PlayerName"_fn);
+        pri_prop->PropertyClass()->find_prop_and_validate<UStrProperty>(L"PlayerName"_fn);
 
     auto player_name =
         hook.args->get<UObjectProperty>(pri_prop)->get<UStrProperty>(player_name_prop);
@@ -145,7 +145,7 @@ bool say_crash_fix_hook(hook_manager::Details& hook) {
     player_name += timestamp;
 
     static const auto add_chat_message_internal_func =
-        hook.obj->Class->find_func_and_validate(L"AddChatMessageInternal"_fn);
+        hook.obj->Class()->find_func_and_validate(L"AddChatMessageInternal"_fn);
     static const auto msg_prop = hook.args->type->find_prop_and_validate<UStrProperty>(L"msg"_fn);
 
     BoundFunction{.func = add_chat_message_internal_func, .object = hook.obj}
@@ -159,23 +159,23 @@ bool console_command_hook(hook_manager::Details& hook) {
         hook.args->type->find_prop_and_validate<UStrProperty>(L"Command"_fn);
 
     static const auto history_prop =
-        hook.obj->Class->find_prop_and_validate<UStrProperty>(L"History"_fn);
+        hook.obj->Class()->find_prop_and_validate<UStrProperty>(L"History"_fn);
     static const auto history_top_prop =
-        hook.obj->Class->find_prop_and_validate<UIntProperty>(L"HistoryTop"_fn);
+        hook.obj->Class()->find_prop_and_validate<UIntProperty>(L"HistoryTop"_fn);
     static const auto history_bot_prop =
-        hook.obj->Class->find_prop_and_validate<UIntProperty>(L"HistoryBot"_fn);
+        hook.obj->Class()->find_prop_and_validate<UIntProperty>(L"HistoryBot"_fn);
     static const auto history_cur_prop =
-        hook.obj->Class->find_prop_and_validate<UIntProperty>(L"HistoryCur"_fn);
+        hook.obj->Class()->find_prop_and_validate<UIntProperty>(L"HistoryCur"_fn);
 
     static const UFunction* purge_command_func =
-        hook.obj->Class->find_func_and_validate(L"PurgeCommandFromHistory"_fn);
+        hook.obj->Class()->find_func_and_validate(L"PurgeCommandFromHistory"_fn);
     static const UFunction* save_config_func =
-        hook.obj->Class->find_func_and_validate(L"SaveConfig"_fn);
+        hook.obj->Class()->find_func_and_validate(L"SaveConfig"_fn);
 
     auto line = hook.args->get<UStrProperty>(command_property);
 
-    auto [callback, cmd_len] = commands::impl::find_matching_command(line);
-    if (callback == nullptr) {
+    // This hook only runs when input via console, it is direct user input
+    if (!commands::impl::is_command_valid(line, true)) {
         return false;
     }
 
@@ -196,7 +196,7 @@ bool console_command_hook(hook_manager::Details& hook) {
         hook.obj->set<UStrProperty>(history_prop, history_top, line);
 
         // Increment top
-        history_top = (history_top + 1) % history_prop->ArrayDim;
+        history_top = (history_top + 1) % history_prop->ArrayDim();
         hook.obj->set<UIntProperty>(history_top_prop, history_top);
         // And set current
         hook.obj->set<UIntProperty>(history_cur_prop, history_top);
@@ -205,7 +205,7 @@ bool console_command_hook(hook_manager::Details& hook) {
         auto history_bot = hook.obj->get<UIntProperty>(history_bot_prop);
         if ((history_bot == -1) || history_bot == history_top) {
             hook.obj->set<UIntProperty>(history_bot_prop,
-                                        (history_bot + 1) % history_prop->ArrayDim);
+                                        (history_bot + 1) % history_prop->ArrayDim());
         }
 
         hook.obj->get<UFunction, BoundFunction>(save_config_func).call<void>();
@@ -227,12 +227,12 @@ bool console_command_hook(hook_manager::Details& hook) {
     as a compromise just use the LOG macro on the lowest possible log level, and assume the lowest
     people practically set their console log level to is dev warning.
     */
-    auto msg = unrealsdk::fmt::format(L">>> {} <<<", line);
+    auto msg = std::format(L">>> {} <<<", line);
     console_output_text.call<void, UStrProperty>(msg);
     LOG(MIN, L"{}", msg);
 
     try {
-        callback->operator()(line.c_str(), line.size(), cmd_len);
+        commands::impl::run_command(line);
     } catch (const std::exception& ex) {
         LOG(ERROR, "An exception occurred while running a console command: {}", ex.what());
     }
@@ -246,15 +246,15 @@ bool pc_console_command_hook(hook_manager::Details& hook) {
 
     auto line = hook.args->get<UStrProperty>(command_property);
 
-    auto [callback, cmd_len] = commands::impl::find_matching_command(line);
-    if (callback == nullptr) {
+    // Conversely, this hook is explicitly not from console
+    if (!commands::impl::is_command_valid(line, false)) {
         return false;
     }
 
     // This hook does not go to console, so there's no extra processing to be done, we can just run
     // the callback immediately
     try {
-        callback->operator()(line.c_str(), line.size(), cmd_len);
+        commands::impl::run_command(line);
     } catch (const std::exception& ex) {
         LOG(ERROR, "An exception occurred while running a console command: {}", ex.what());
     }

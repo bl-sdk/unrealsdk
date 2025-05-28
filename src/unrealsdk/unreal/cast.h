@@ -96,7 +96,7 @@ namespace {
  * @param obj The object which failed to cast.
  */
 inline void default_cast_fallback(const UObject* obj) {
-    throw std::runtime_error("Unknown object type " + (std::string)obj->Class->Name);
+    throw std::runtime_error("Unknown object type " + (std::string)obj->Class()->Name());
 }
 
 #ifdef __clang__
@@ -133,11 +133,11 @@ void cast_impl(InputType* obj,
     if constexpr (i >= std::tuple_size_v<ClassTuple>) {
         // But we're supposed to check inherited types, and we have a super field
         if constexpr (check_inherited_types) {
-            if (working_class->SuperField != nullptr) {
+            if (working_class->SuperField() != nullptr) {
                 // Jump back to the start of the tuple, but use the super field
                 return cast_impl<InputType, Function, Fallback, include_input_type,
                                  check_inherited_types, ClassTuple, 0>(
-                    obj, working_class->SuperField, func, fallback);
+                    obj, working_class->SuperField(), func, fallback);
             }
         }
 
@@ -153,7 +153,7 @@ void cast_impl(InputType* obj,
                       && (include_input_type
                           || !std::is_same_v<std::remove_const_t<InputType>, cls>)) {
             // If the class name matches
-            if (working_class->Name == cls_fname<cls>()) {
+            if (working_class->Name() == cls_fname<cls>()) {
                 // Run the callback
                 if constexpr (std::is_const_v<InputType>) {
                     return func.template operator()<cls>(reinterpret_cast<const cls*>(obj));
@@ -249,7 +249,7 @@ void cast(InputType* obj, const Function& func, const Fallback& fallback = defau
 
     return cast_impl<InputType, Function, Fallback, Options::include_input_type_v,
                      Options::check_inherited_types_v, typename Options::class_tuple_t, 0>(
-        obj, obj->Class, func, fallback);
+        obj, obj->Class(), func, fallback);
 }
 
 }  // namespace unrealsdk::unreal

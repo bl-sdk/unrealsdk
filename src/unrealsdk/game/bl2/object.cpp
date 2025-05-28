@@ -11,7 +11,7 @@
 #include "unrealsdk/unreal/structs/fstring.h"
 #include "unrealsdk/unreal/wrappers/bound_function.h"
 
-#if defined(UE3) && defined(ARCH_X86) && !defined(UNREALSDK_IMPORTING)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::unreal;
 using namespace unrealsdk::memory;
@@ -63,7 +63,7 @@ void BL2Hook::find_construct_object(void) {
 UObject* BL2Hook::construct_object(UClass* cls,
                                    UObject* outer,
                                    const FName& name,
-                                   decltype(UObject::ObjectFlags) flags,
+                                   uint64_t flags,
                                    UObject* template_obj) const {
     return construct_obj_ptr(cls, outer, name, flags, template_obj, nullptr, nullptr,
                              0 /* false */);

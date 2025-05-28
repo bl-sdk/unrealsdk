@@ -11,11 +11,22 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
 class UFunction;
+
+namespace offsets::generic {
+
+template <typename T>
+class UDelegateProperty : public T {
+   public:
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    UFunction* Signature;
+};
+
+}  // namespace offsets::generic
 
 class UDelegateProperty : public UProperty {
    public:
@@ -26,17 +37,11 @@ class UDelegateProperty : public UProperty {
     UDelegateProperty& operator=(UDelegateProperty&&) = delete;
     ~UDelegateProperty() = delete;
 
-   private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    UFunction* Signature;
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UDELEGATEPROPERTY_FIELDS(X) X(UFunction*, Signature)
 
-   public:
-    /**
-     * @brief Get the function holding this delegate's signature.
-     *
-     * @return The signature function.
-     */
-    [[nodiscard]] UFunction* get_signature(void) const;
+    UNREALSDK_DEFINE_FIELDS_HEADER(UDelegateProperty, UNREALSDK_UDELEGATEPROPERTY_FIELDS);
 };
 
 template <>
@@ -54,7 +59,7 @@ struct ClassTraits<UDelegateProperty> {
     static inline const wchar_t* const NAME = L"DelegateProperty";
 };
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

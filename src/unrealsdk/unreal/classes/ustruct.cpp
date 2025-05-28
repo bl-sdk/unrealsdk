@@ -1,61 +1,21 @@
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/config.h"
+#include "unrealsdk/game/bl3/offsets.h"
 #include "unrealsdk/unreal/class_name.h"
 #include "unrealsdk/unreal/classes/ufield.h"
 #include "unrealsdk/unreal/classes/ufunction.h"
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/classes/ustruct.h"
+#include "unrealsdk/unreal/offset_list.h"
+#include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/wrappers/bound_function.h"
 #include "unrealsdk/unreal/wrappers/gobjects.h"
 #include "unrealsdk/utils.h"
 
 namespace unrealsdk::unreal {
 
-#ifdef UE3
-
-size_t UStruct::class_size(void) {
-    static size_t size = 0;
-    if (size != 0) {
-        return size;
-    }
-
-    auto config_size = config::get_int("unrealsdk.ustruct_size");
-    if (config_size.has_value()) {
-        size = (size_t)*config_size;
-        return size;
-    }
-
-    // Rather than bother with a find object/class, we can recover UStruct from any arbitrary object
-    // This just avoids extra dependencies, especially since theoretically find class might depend
-    // on this
-
-    // First, find UClass
-    auto obj = *unrealsdk::gobjects().begin();
-    const UClass* class_cls = obj->Class;
-    for (; class_cls->Class != class_cls; class_cls = class_cls->Class) {}
-
-    // Then look through it's superfields for UStruct
-    const UStruct* struct_cls = nullptr;
-    for (auto superfield : class_cls->superfields()) {
-        if (superfield->Name == L"Struct"_fn) {
-            struct_cls = superfield;
-            break;
-        }
-    }
-
-    // If we couldn't find the class, default to our actual size
-    if (struct_cls == nullptr) {
-        size = sizeof(UStruct);
-        LOG(WARNING, "Couldn't find UStruct class size, defaulting to: {:#x}", size);
-    } else {
-        size = struct_cls->get_struct_size();
-        LOG(MISC, "UStruct class size: {:#x}", size);
-    }
-    return size;
-}
-
-#endif
+UNREALSDK_DEFINE_FIELDS_SOURCE_FILE(UStruct, UNREALSDK_USTRUCT_FIELDS);
 
 #pragma region Field Iterator
 
@@ -69,13 +29,13 @@ UStruct::FieldIterator::reference UStruct::FieldIterator::operator*() const {
 
 UStruct::FieldIterator& UStruct::FieldIterator::operator++() {
     if (this->field != nullptr) {
-        this->field = this->field->Next;
+        this->field = this->field->Next();
     }
     while (this->field == nullptr && this->this_struct != nullptr) {
-        this->this_struct = this->this_struct->SuperField;
+        this->this_struct = this->this_struct->SuperField();
 
         if (this->this_struct != nullptr) {
-            this->field = this->this_struct->Children;
+            this->field = this->this_struct->Children();
         }
     }
 
@@ -95,7 +55,7 @@ bool UStruct::FieldIterator::operator!=(const UStruct::FieldIterator& rhs) const
 };
 
 utils::IteratorProxy<UStruct::FieldIterator> UStruct::fields(void) const {
-    FieldIterator begin{this, this->Children};
+    FieldIterator begin{this, this->Children()};
 
     // If we start out pointing at null (because this struct has no direct children), increment once
     //  to find the actual first field
@@ -118,7 +78,7 @@ UStruct::PropertyIterator::reference UStruct::PropertyIterator::operator*() cons
 }
 
 UStruct::PropertyIterator& UStruct::PropertyIterator::operator++() {
-    prop = prop->PropertyLinkNext;
+    prop = prop->PropertyLinkNext();
     return *this;
 }
 UStruct::PropertyIterator UStruct::PropertyIterator::operator++(int) {
@@ -135,7 +95,7 @@ bool UStruct::PropertyIterator::operator!=(const UStruct::PropertyIterator& rhs)
 };
 
 utils::IteratorProxy<UStruct::PropertyIterator> UStruct::properties(void) const {
-    return {{this->PropertyLink}, {}};
+    return {{this->PropertyLink()}, {}};
 }
 
 #pragma endregion
@@ -151,7 +111,7 @@ UStruct::SuperFieldIterator::reference UStruct::SuperFieldIterator::operator*() 
 }
 
 UStruct::SuperFieldIterator& UStruct::SuperFieldIterator::operator++() {
-    this->this_struct = this->this_struct->SuperField;
+    this->this_struct = this->this_struct->SuperField();
     return *this;
 }
 UStruct::SuperFieldIterator UStruct::SuperFieldIterator::operator++(int) {
@@ -174,16 +134,20 @@ utils::IteratorProxy<UStruct::SuperFieldIterator> UStruct::superfields(void) con
 #pragma endregion
 
 size_t UStruct::get_struct_size(void) const {
-#ifdef UE4
-    return (this->PropertySize + this->MinAlignment - 1) & ~(this->MinAlignment - 1);
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
+    auto bl3_struct = reinterpret_cast<const unrealsdk::game::bl3::UStruct*>(this);
+    return (bl3_struct->PropertySize + bl3_struct->MinAlignment - 1)
+           & ~(bl3_struct->MinAlignment - 1);
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
+    return this->PropertySize();
 #else
-    return this->PropertySize;
+#error Unknown SDK flavour
 #endif
 }
 
 UField* UStruct::find(const FName& name) const {
     for (auto field : this->fields()) {
-        if (field->Name == name) {
+        if (field->Name() == name) {
             return field;
         }
     }
@@ -193,7 +157,7 @@ UField* UStruct::find(const FName& name) const {
 
 UProperty* UStruct::find_prop(const FName& name) const {
     for (auto prop : this->properties()) {
-        if (prop->Name == name) {
+        if (prop->Name() == name) {
             return prop;
         }
     }

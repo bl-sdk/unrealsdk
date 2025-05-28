@@ -5,7 +5,7 @@ namespace unrealsdk::unreal {
 
 class UObject;
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -14,7 +14,7 @@ class UObject;
 #pragma clang diagnostic ignored "-Wunused-private-field"
 #endif
 
-#if defined(UE4)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
 
 // There are a few fields we need to modify to deal with weak pointers. To be thread safe we need
 // them to be atomic fields - as unreal itself does. The fields are all aligned as normal, we expect
@@ -95,7 +95,7 @@ struct FUObjectArray {
 #pragma GCC diagnostic pop
 #endif
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

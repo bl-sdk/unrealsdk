@@ -2,7 +2,6 @@
 #define UNREALSDK_UNREAL_NAMEDOBJECTCACHE_H
 
 #include "unrealsdk/pch.h"
-#include "unrealsdk/format.h"
 #include "unrealsdk/unreal/class_name.h"
 #include "unrealsdk/unreal/find_class.h"
 #include "unrealsdk/unreal/structs/fname.h"
@@ -46,7 +45,7 @@ class NamedObjectCache {
      * @return The cached value.
      */
     virtual CacheType add_to_cache(ObjectType* obj) {
-        cache[obj->Name] = obj;
+        cache[obj->Name()] = obj;
         return obj;
     }
 
@@ -103,9 +102,9 @@ class NamedObjectCache {
         }
         // This should never really happen, but double check
         if (!obj->is_instance(this->uclass)) {
-            throw std::invalid_argument(unrealsdk::utils::narrow(unrealsdk::fmt::format(
-                L"Found object of unexpected class when searching for '{}': {}", name,
-                obj->get_path_name())));
+            throw std::invalid_argument(unrealsdk::utils::narrow(
+                std::format(L"Found object of unexpected class when searching for '{}': {}", name,
+                            obj->get_path_name())));
         }
 
         return add_to_cache(reinterpret_cast<ObjectType*>(obj));

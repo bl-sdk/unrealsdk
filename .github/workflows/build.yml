@@ -14,10 +14,10 @@ jobs:
       fail-fast: false
       matrix:
         preset: [
-          "clang-ue3-x86-release",
-          "clang-ue4-x64-release",
-          "msvc-ue3-x86-release",
-          "msvc-ue4-x64-release",
+          "clang-willow-release",
+          "clang-oak-release",
+          "msvc-willow-release",
+          "msvc-oak-release",
         ]
 
     steps:
@@ -29,7 +29,7 @@ jobs:
       if: startswith(matrix.preset, 'msvc')
       uses: TheMrMilchmann/setup-msvc-dev@v3
       with:
-        arch: ${{ fromJSON('["x86", "x64"]')[contains(matrix.preset, 'x64')] }}
+        arch: ${{ fromJSON('["x86", "x64"]')[contains(matrix.preset, 'oak')] }}
 
     - name: Setup CMake and Ninja
       uses: lukka/get-cmake@latest
@@ -52,17 +52,17 @@ jobs:
       fail-fast: false
       matrix:
         toolchain:
-          - preset: clang-cross-ue3-x86-release
+          - preset: clang-cross-willow-release
             container: clang-cross
-          - preset: clang-cross-ue4-x64-release
+          - preset: clang-cross-oak-release
             container: clang-cross
-          - preset: llvm-mingw-ue3-x86-release
+          - preset: llvm-mingw-willow-release
             container: llvm-mingw
-          - preset: llvm-mingw-ue4-x64-release
+          - preset: llvm-mingw-oak-release
             container: llvm-mingw
-          - preset: mingw-ue3-x86-release
+          - preset: mingw-willow-release
             container: mingw
-          - preset: mingw-ue4-x64-release
+          - preset: mingw-oak-release
             container: mingw
 
     steps:
@@ -93,7 +93,6 @@ jobs:
             cmake . --preset ${{ matrix.toolchain.preset }} -G Ninja
             cmake --build out/build/${{ matrix.toolchain.preset }}
 
-
 # ==============================================================================
 
   clang-tidy:
@@ -103,8 +102,8 @@ jobs:
       fail-fast: false
       matrix:
         preset: [
-          "clang-ue3-x86-release",
-          "clang-ue4-x64-release",
+          "clang-willow-release",
+          "clang-oak-release",
         ]
 
     steps:

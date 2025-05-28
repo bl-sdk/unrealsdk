@@ -22,7 +22,7 @@ template <>
 
 template <typename T, typename V>
 [[nodiscard]] V UObject::get(const FName& name, size_t idx) const {
-    return this->get<T>(this->Class->find_prop_and_validate<T>(name), idx);
+    return this->get<T>(this->Class()->find_prop_and_validate<T>(name), idx);
 }
 template <typename T, typename V>
 [[nodiscard]] V UObject::get(const T* prop, size_t idx) const {
@@ -31,7 +31,7 @@ template <typename T, typename V>
 
 template <typename T>
 void UObject::set(const FName& name, size_t idx, const typename PropTraits<T>::Value& value) {
-    this->set<T>(this->Class->find_prop_and_validate<T>(name), idx, value);
+    this->set<T>(this->Class()->find_prop_and_validate<T>(name), idx, value);
 }
 template <typename T>
 void UObject::set(const T* prop, size_t idx, const typename PropTraits<T>::Value& value) {

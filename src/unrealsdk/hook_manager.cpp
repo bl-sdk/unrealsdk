@@ -16,83 +16,129 @@ using namespace unrealsdk::unreal;
 #ifndef UNREALSDK_IMPORTING
 namespace unrealsdk::hook_manager::impl {
 
-namespace {
-
 /*
-We store all hooks in a multi layered mapping.
+The fact that hooks run arbitrary user provided callbacks means our data structure can get modified
+in a number of awkward ways while we're in the middle of iterating over it. There's the obvious case
+of a hook can remove itself, but also tricker ones like a hook can invoke a nested hook on itself,
+and only remove itself there, or the upper layer hook could remove itself and the nested one could
+re-add it, etc. It gets even messier if we consider threading.
 
-The outermost level is the FName of the function, which lets us do a very quick compare to discard
-most calls. The second level is the full path name string, what was passed in, which we use to
-confirm we've got the right hook.
+So the number one concern behind this design is robustness - we need to support essentially
+arbitrary modification while we're in the middle of iterating through it. This means performance is
+a secondary concern - though I still tried keeping it mind - I haven't done any benchmarking.
 
-`preprocess_hook` looks through these first two levels to determine if the called function has any
-hooks, and returns the "List" of all hooks which apply to that function at any stage.
+The easiest way to keep our iterators valid is to use linked lists. However, using a bunch of
+`std::list`s isn't the best for performance, as we'll discuss in a bit, since need several layers
+of them, so instead we use a bunch of intrusive linked lists on our own type.
 
-The list then maps each hook type into "Group"s. Each group is a full set to hooks to run on a
-specific stage.
+
+The most basic form of the data structure we want is essentially a:
+    map<FName, map<full_name, map<Type, collection<pair<identifier, callback>>>>>
+
+Matching FNames first lets us discard function calls far quicker than needing to do a string
+comparison on the full name. After matching both of them, we then need to split by hook type, which
+finally gets us the collection of callbacks to run. The identifiers have no influence when matching
+hooks, they're only used when adding/removing them.
+
+The smallest unit we have to iterate over is the hooks of the same type on the same function - the
+one labeled just "collection" above. This is the `next_in_collection` linked list.
+
+Then we need to be able to jump between the collections on the same hook, but of different type. The
+heads of the collection linked lists form into a second `next_type` linked list. We use an intrusive
+linked list, so the exact same node from the above list also holds the pointers for this one.
+
+Above that, we need to jump between groups of hooks which share the same fname, but have different
+full function names. The heads of the type linked lists form the third `next_function` linked list.
+
+Finally, we need to iterate through FNames. We actually do this using a hash table - but we still
+need to deal with collisions. The heads of the function linked lists form our fourth and final
+`next_collision` linked list.
+
+Trying to roughly diagram an example, this is what might be in a single hash bucket:
+
+Collision  | [A] -----------------------------> [F]
+           |  :                                  :
+Function   | [A] ---------------> [D]           [F] -> [G]
+           |  :                    :             :      :
+Type       | [A] --------> [C]     :             :      :
+           |  :             :      :             :      :
+Collection | [A] -> [B]    [C]    [D] -> [E]    [F]    [G]
+
+[A] Class::Func, post-hook
+[B] Class::Func, post-hook
+[C] Class::Func, pre-hook
+[D] OtherClass::Func
+[E] OtherClass::Func
+[F] ThirdClass::SomeOtherFunc, where `SomeOtherFunc` and `Func` happen to get a hash collision
+[G] FourthClass::SomeOtherFunc
+
+Each column is a single node, a node may be in multiple linked lists.
 */
 
-using Group = utils::StringViewMap<std::wstring, DLLSafeCallback*>;
+struct Node {
+   public:
+    FName fname;
+    std::wstring full_name;
+    Type type;
+    std::wstring identifier;
+    DLLSafeCallback* callback;
 
-}  // namespace
+    // Using shared pointers because it's easy
+    // Since we use std::make_shared, we're not really wasting allocations, but as a future
+    // optimization we could use an intrusive reference count to avoid repeating all the control
+    // block pointers, and save a little memory.
+    std::shared_ptr<Node> next_collision = nullptr;
+    std::shared_ptr<Node> next_function = nullptr;
+    std::shared_ptr<Node> next_type = nullptr;
+    std::shared_ptr<Node> next_in_collection = nullptr;
 
-struct List {
-    Group pre;
-    Group post;
-    Group post_unconditional;
-
-    /**
-     * @brief Checks if all groups in the list are empty.
-     *
-     * @return True if all groups are empty
-     */
-    [[nodiscard]] bool empty(void) const {
-        return this->pre.empty() && this->post.empty() && this->post_unconditional.empty();
-    }
-
-    /**
-     * @brief Gets a hook group on this list from it's type.
-     *
-     * @param type The hook type to get.
-     * @return A reference to the selected hook group on this object, or nullptr if calling the safe
-     *         version and the type's invalid.
-     */
-    [[nodiscard]] Group& get_group_by_type(Type type) {
-        switch (type) {
-            case Type::PRE:
-                return this->pre;
-            case Type::POST:
-                return this->post;
-            case Type::POST_UNCONDITIONAL:
-                return this->post_unconditional;
-            default:
-                throw std::invalid_argument("Invalid hook type " + std::to_string((uint8_t)type));
-        }
-    }
-    // We only need the const version in practice
-    [[nodiscard]] const Group* get_safe_group_by_type(Type type) const noexcept {
-        switch (type) {
-            case Type::PRE:
-                return &this->pre;
-            case Type::POST:
-                return &this->post;
-            case Type::POST_UNCONDITIONAL:
-                return &this->post_unconditional;
-            default:
-                return nullptr;
+    Node(FName fname,
+         std::wstring_view full_name,
+         Type type,
+         std::wstring_view identifier,
+         DLLSafeCallback* callback)
+        : fname(fname),
+          full_name(full_name),
+          type(type),
+          identifier(identifier),
+          callback(callback) {}
+    Node(const Node&) = default;
+    Node(Node&&) noexcept = default;
+    Node& operator=(const Node&) = default;
+    Node& operator=(Node&&) noexcept = default;
+    ~Node() {
+        if (this->callback != nullptr) {
+            this->callback->destroy();
+            this->callback = nullptr;
         }
     }
 };
 
 namespace {
 
-thread_local bool should_inject_next_call = false;
+const constexpr auto HASH_TABLE_SIZE = 0x1000;
+std::array<std::shared_ptr<Node>, HASH_TABLE_SIZE> hooks_hash_table;
+
+/**
+ * @brief Hashes the given fname, and returns which index of the table it goes in.
+ *
+ * @param name The name to check.
+ * @return The hash table index.
+ */
+size_t get_table_index(FName fname) {
+    static_assert(sizeof(unrealsdk::unreal::FName) == sizeof(uint64_t),
+                  "FName is not same size as a uint64");
+    uint64_t val{};
+    memcpy(&val, &fname, sizeof(fname));
+
+    // Identity seems mostly good enough - FNames already are just a relatively small integer value.
+    // This throws away the number field, but that's very rarely used on functions to begin with.
+    return val % HASH_TABLE_SIZE;
+}
 
 bool should_log_all_calls = false;
 std::wofstream log_all_calls_stream{};
 std::mutex log_all_calls_stream_mutex{};
-
-std::unordered_map<FName, utils::StringViewMap<std::wstring, List>> hooks{};
 
 void log_all_calls(bool should_log) {
     // Only keep this file stream open while we need it
@@ -111,6 +157,8 @@ void log_all_calls(bool should_log) {
         log_all_calls_stream.close();
     }
 }
+
+thread_local bool should_inject_next_call = false;
 
 void inject_next_call(void) {
     should_inject_next_call = true;
@@ -136,80 +184,243 @@ bool add_hook(std::wstring_view func,
               DLLSafeCallback* callback) {
     auto fname = extract_func_obj_name(func);
 
-    auto& path_name_map = hooks[fname];
-
-    // Doing this a bit weirdly to try avoid allocating a new string - we can get via string view,
-    // but setting requires converting to a full string first
-    auto iter = path_name_map.find(func);
-    if (iter == path_name_map.end()) {
-        iter = path_name_map.emplace(func, List{}).first;
+    auto hash_idx = get_table_index(fname);
+    auto node = hooks_hash_table.at(hash_idx);
+    if (node == nullptr) {
+        // This function isn't in the hash table, can just add directly.
+        hooks_hash_table.at(hash_idx) =
+            std::make_shared<Node>(fname, func, type, identifier, callback);
+        return true;
     }
 
-    auto& group = iter->second.get_group_by_type(type);
-    if (group.contains(identifier)) {
-        return false;
+    // Look through hash collisions
+    while (node->fname != fname) {
+        if (node->next_collision == nullptr) {
+            // We found a collision, but nothing matched our name, so add it to the end
+            node->next_collision = std::make_shared<Node>(fname, func, type, identifier, callback);
+            return true;
+        }
+        node = node->next_collision;
     }
 
-    group.emplace(identifier, callback);
-    return true;
+    // Look though full function names
+    while (node->full_name != func) {
+        if (node->next_function == nullptr) {
+            // We found another function with the same fname, but nothing matches the full name
+            node->next_function = std::make_shared<Node>(fname, func, type, identifier, callback);
+            return true;
+        }
+        node = node->next_function;
+    }
+
+    // Look through hook types
+    while (node->type != type) {
+        if (node->next_type == nullptr) {
+            // We found the right function, but it doesn't have any hooks of this type yet
+            node->next_type = std::make_shared<Node>(fname, func, type, identifier, callback);
+            return true;
+        }
+        node = node->next_type;
+    }
+
+    // Look through all remaining hooks to see if we can match the identifier
+    while (node->identifier != identifier) {
+        if (node->next_in_collection == nullptr) {
+            // Didn't find a matching identifier, add our new hook at the end
+            node->next_in_collection =
+                std::make_shared<Node>(fname, func, type, identifier, callback);
+        }
+        node = node->next_in_collection;
+    }
+
+    // We already have this identifier, can't insert
+    return false;
 }
 
 bool has_hook(std::wstring_view func, Type type, std::wstring_view identifier) {
     auto fname = extract_func_obj_name(func);
 
-    auto fname_iter = hooks.find(fname);
-    if (fname_iter == hooks.end()) {
-        return false;
-    }
-    auto& path_name_map = fname_iter->second;
-
-    auto path_name_iter = path_name_map.find(func);
-    if (path_name_iter == path_name_map.end()) {
+    auto hash_idx = get_table_index(fname);
+    auto node = hooks_hash_table.at(hash_idx);
+    if (node == nullptr) {
+        // This function isn't even in the hash table
         return false;
     }
 
-    return path_name_iter->second.get_group_by_type(type).contains(identifier);
+    // Look through hash collisions
+    while (node->fname != fname) {
+        if (node->next_collision == nullptr) {
+            // We found a collision, but nothing matched our name
+            return false;
+        }
+        node = node->next_collision;
+    }
+
+    // Look though full function names
+    while (node->full_name != func) {
+        if (node->next_function == nullptr) {
+            // We found another function with the same fname, but nothing matches the full name
+            return false;
+        }
+        node = node->next_function;
+    }
+
+    // Look through hook types
+    while (node->type != type) {
+        if (node->next_type == nullptr) {
+            // We found the right function, but it doesn't have any hooks of this type
+            return false;
+        }
+        node = node->next_type;
+    }
+
+    // Look through all remaining hooks to see if we can match the identifier
+    while (node->identifier != identifier) {
+        if (node->next_in_collection == nullptr) {
+            // Didn't find a matching identifier
+            return false;
+        }
+        node = node->next_in_collection;
+    }
+
+    return true;
 }
 
 bool remove_hook(std::wstring_view func, Type type, std::wstring_view identifier) {
     auto fname = extract_func_obj_name(func);
 
-    auto fname_iter = hooks.find(fname);
-    if (fname_iter == hooks.end()) {
-        return false;
-    }
-    auto& path_name_map = fname_iter->second;
-
-    auto path_name_iter = path_name_map.find(func);
-    if (path_name_iter == path_name_map.end()) {
+    auto hash_idx = get_table_index(fname);
+    auto node = hooks_hash_table.at(hash_idx);
+    if (node == nullptr) {
+        // This function isn't even in the hash table
         return false;
     }
 
-    auto& group = path_name_iter->second.get_group_by_type(type);
-    auto group_iter = group.find(identifier);
-    if (group_iter == group.end()) {
-        return false;
+    // Look through hash collisions
+    decltype(node) prev_collision = nullptr;
+    while (node->fname != fname) {
+        if (node->next_collision == nullptr) {
+            // We found a collision, but nothing matched our name
+            return false;
+        }
+        prev_collision = node;
+        node = node->next_collision;
     }
 
-    group_iter->second->destroy();
-    group.erase(group_iter);
+    // Look though full function names
+    decltype(node) prev_function = nullptr;
+    while (node->full_name != func) {
+        if (node->next_function == nullptr) {
+            // We found another function with the same fname, but nothing matches the full name
+            return false;
+        }
+        prev_function = node;
+        node = node->next_function;
+    }
+
+    // Look through hook types
+    decltype(node) prev_type = nullptr;
+    while (node->type != type) {
+        if (node->next_type == nullptr) {
+            // We found the right function, but it doesn't have any hooks of this type
+            return false;
+        }
+        prev_type = node;
+        node = node->next_type;
+    }
+
+    // Look through all remaining hooks to see if we can match the identifier
+    decltype(node) prev_in_collection = nullptr;
+    while (node->identifier != identifier) {
+        if (node->next_in_collection == nullptr) {
+            // Didn't find a matching identifier
+            return false;
+        }
+        prev_in_collection = node;
+        node = node->next_in_collection;
+    }
 
     /*
-    Important Note: While it's tempting, we can't also erase the higher levels here if they're
-    empty, because we may be being called from inside a hook, since this may cause a use after free.
+    We found a matching hook - 'node' is pointing at it.
 
-    We make sure to take a copy of the group in `run_hooks_of_type`, so invalidating iterators
-    within it is not a concern.
+    Consider the following diagram the diagram from above:
 
-    Instead, we clean up during `preprocess_hook`
+    Collision  | [A] -----------------------------> [F]
+               |  :                                  :
+    Function   | [A] ---------------> [D]           [F]
+               |  :                    :             :
+    Type       | [A]                   :            [F] --------> [H]
+               |  :                    :             :             :
+    Collection | [A] -> [B] -> [C]    [D] -> [E]    [F] -> [G]    [H]
+
+    Lets say we want to remove B, D, and F. The new layout we need is:
+
+    Collision  | [A] ------------------------------------> [G]
+               |  :                                         :
+    Function   | [A] ----------------------> [E]            :
+               |  :                           :             :
+    Type       | [A]                          :            [G] -> [H]
+               |  :                           :             :      :
+    Collection | [A] --------> [C]           [E]           [G]    [H]
+
+    Removing B is easy, we simply set A->next_in_collection = C to bypass it.
+
+    For D, we need to work bottom up. If our node is the head of the list, we need to promote our
+    next node up a layer. If our node is also the head of the above layer, we need to recurse
+    another layer up. So since D is the head of both the collection and type linked lists, we move
+    up to the function linked list, and need to set A->next_function = E.
+
+    F exposes a further complication on top of D, since it was pointing at multiple other nodes. As
+    part of promoting a node up a layer, we need to insert it into that layer's linked list - that's
+    how we keep then link to H. In D's case, these were all null.
+
+    Since only the heads of the lower-layer lists are used in the higher layer ones, as soon as we
+    come across a layer where we're not the head, we must be done, the lower layer nodes cannot have
+    other references to upper ones.
     */
 
+    if (prev_in_collection != nullptr) {
+        prev_in_collection->next_in_collection = node->next_in_collection;
+        return true;
+    }
+    if (node->next_in_collection) {
+        node->next_in_collection->next_type = node->next_type;
+        node->next_type = node->next_in_collection;
+    }
+
+    if (prev_type != nullptr) {
+        prev_type->next_type = node->next_type;
+        return true;
+    }
+    if (node->next_type != nullptr) {
+        node->next_type->next_function = node->next_function;
+        node->next_function = node->next_type;
+    }
+
+    if (prev_function != nullptr) {
+        prev_function->next_function = node->next_function;
+        return true;
+    }
+    if (node->next_function != nullptr) {
+        node->next_function->next_collision = node->next_collision;
+        node->next_collision = node->next_function;
+    }
+
+    if (prev_collision != nullptr) {
+        prev_collision->next_collision = node->next_collision;
+        return true;
+    }
+    // There's no higher layer linked list left. If we have following collision entries, set the
+    // hash table to them. If we don't, we want to null it anyway.
+    hooks_hash_table.at(hash_idx) = node->next_collision;
     return true;
 }
 
 }  // namespace
 
-const List* preprocess_hook(std::wstring_view source, const UFunction* func, const UObject* obj) {
+std::shared_ptr<Node> preprocess_hook(std::wstring_view source,
+                                      const UFunction* func,
+                                      const UObject* obj) {
     if (should_inject_next_call) {
         should_inject_next_call = false;
         return nullptr;
@@ -229,53 +440,70 @@ const List* preprocess_hook(std::wstring_view source, const UFunction* func, con
         }
     }
 
-    // Check if anything matches the function FName
-    auto fname_iter = hooks.find(func->Name);
-    if (fname_iter == hooks.end()) {
-        return nullptr;
-    }
-    auto& path_name_map = fname_iter->second;
-    if (path_name_map.empty()) {
-        hooks.erase(func->Name);
+    auto fname = func->Name();
+
+    auto hash_idx = get_table_index(fname);
+    auto node = hooks_hash_table.at(hash_idx);
+    if (node == nullptr) {
+        // This function isn't even in the hash table
         return nullptr;
     }
 
-    // Now check the full path name
+    // Look through hash collisions
+    while (node->fname != fname) {
+        if (node->next_collision == nullptr) {
+            // We found a collision, but nothing matched our name
+            return nullptr;
+        }
+        node = node->next_collision;
+    }
+
+    // At this point we need the full path name
     if (!should_log_all_calls) {
         func_name = func->get_path_name();
     }
-    auto path_name_iter = path_name_map.find(func_name);
-    if (path_name_iter == path_name_map.end()) {
-        return nullptr;
-    }
-    auto& list = path_name_iter->second;
-    if (list.empty()) {
-        path_name_map.erase(func_name);
-        return nullptr;
+
+    // Look though full function names
+    while (node->full_name != func_name) {
+        if (node->next_function == nullptr) {
+            // We found another function with the same fname, but nothing matches the full name
+            return nullptr;
+        }
+        node = node->next_function;
     }
 
-    return &list;
+    // Break off at this point - we know we have hooks on this function, so the hook processing will
+    // need to start extracting args.
+    return node;
 }
 
-bool has_post_hooks(const List& list) {
-    return !list.post.empty() || !list.post_unconditional.empty();
+bool has_post_hooks(std::shared_ptr<Node> node) {
+    // We got the node from preprocess_hook, it's pointing to the start of the types linked list
+    for (; node != nullptr; node = node->next_type) {
+        if (node->type == Type::POST || node->type == Type::POST_UNCONDITIONAL) {
+            return true;
+        }
+    }
+    return false;
 }
 
-bool run_hooks_of_type(const List& list, Type type, Details& hook) {
-    const Group* group_ptr = list.get_safe_group_by_type(type);
-    if (group_ptr == nullptr) {
-        LOG(ERROR, "Tried to run hooks of invalid type {}", (uint8_t)type);
-        return false;
+bool run_hooks_of_type(std::shared_ptr<Node> node, Type type, Details& hook) {
+    // We got the node from preprocess_hook, it's pointing to the start of the types linked list
+
+    // Look through hook types
+    while (node->type != type) {
+        if (node->next_type == nullptr) {
+            // No hooks of this type - return false to not block
+            return false;
+        }
+        node = node->next_type;
     }
 
-    // Grab a copy of the revelevant hook group, in case the hook removes itself (which would
-    // invalidate the iterator)
-    const Group group = *group_ptr;
-
+    // We've got the final list of hooks, run them all
     bool ret = false;
-    for (const auto& [_, hook_function] : group) {
+    for (; node != nullptr; node = node->next_in_collection) {
         try {
-            ret |= hook_function->operator()(hook);
+            ret |= node->callback->operator()(hook);
         } catch (const std::exception& ex) {
             LOG(ERROR, "An exception occurred during hook processing");
             LOG(ERROR, L"Function: {}", hook.func.func->get_path_name());

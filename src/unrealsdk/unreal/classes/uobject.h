@@ -4,12 +4,13 @@
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/unreal/class_traits.h"
+#include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/structs/fname.h"
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -29,45 +30,24 @@ class UObject {
 
     uintptr_t* vftable;
 
-    // NOLINTBEGIN(readability-identifier-naming)
-
-#if UE4
-    int32_t ObjectFlags;
-    int32_t InternalIndex;
-    UClass* Class;
-    FName Name;
-    UObject* Outer;
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
+    using object_flags_type = uint32_t;
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
+    using object_flags_type = uint64_t;
 #else
-   private:
-    void* HashNext;
-
-   public:
-    uint64_t ObjectFlags;
-
-   private:
-    void* HashOuterNext;
-    void* StateFrame;
-    class UObject* _Linker;
-    void* _LinkerIndex;
-
-   public:
-    int InternalIndex;
-
-   private:
-    int NetIndex;
-
-   public:
-    UObject* Outer;
-    FName Name;
-    UClass* Class;
-
-   private:
-    UObject* ObjectArchetype;
-
-   public:
+#error Unknown SDK flavour
 #endif
 
-    // NOLINTEND(readability-identifier-naming)
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UOBJECT_FIELDS(X)   \
+    X(object_flags_type, ObjectFlags) \
+    X(int32_t, InternalIndex)         \
+    X(UClass*, Class)                 \
+    X(FName, Name)                    \
+    X(UObject*, Outer)
+
+    UNREALSDK_DEFINE_FIELDS_HEADER(UObject, UNREALSDK_UOBJECT_FIELDS);
 
     /**
      * @brief Calls a virtual function on this object.
@@ -80,21 +60,21 @@ class UObject {
      */
     template <typename R, typename... Args>
     R call_virtual_function(size_t index, Args... args) const {
-#ifdef ARCH_X86
+        if constexpr (sizeof(void*) == sizeof(uint32_t)) {
 #if defined(__MINGW32__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wattributes"  // thiscall on non-class
 #endif
-        // NOLINTNEXTLINE(modernize-use-using) - need a typedef for the __thiscall
-        typedef R(__thiscall * func_ptr)(const UObject*, Args...);
+            // NOLINTNEXTLINE(modernize-use-using) - need a typedef for the __thiscall
+            typedef R(__thiscall * func_ptr)(const UObject*, Args...);
 #if defined(__MINGW32__)
 #pragma GCC diagnostic pop
 #endif
-#else
-        using func_ptr = R (*)(const UObject*, Args...);
-#endif
-
-        return reinterpret_cast<func_ptr>(this->vftable[index])(this, args...);
+            return reinterpret_cast<func_ptr>(this->vftable[index])(this, args...);
+        } else {
+            using func_ptr = R (*)(const UObject*, Args...);
+            return reinterpret_cast<func_ptr>(this->vftable[index])(this, args...);
+        }
     }
 
     /**
@@ -181,7 +161,7 @@ struct ClassTraits<UObject> {
     static inline const wchar_t* const NAME = L"Object";
 };
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

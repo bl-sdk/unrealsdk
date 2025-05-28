@@ -6,9 +6,24 @@
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-private-field"
+#endif
+
+namespace offsets::generic {
+
+template <typename T>
+class UScriptStruct : public T {
+   public:
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    uint32_t StructFlags;
+};
+
+}  // namespace offsets::generic
 
 class UScriptStruct : public UStruct {
    public:
@@ -19,16 +34,11 @@ class UScriptStruct : public UStruct {
     UScriptStruct& operator=(UScriptStruct&&) = delete;
     ~UScriptStruct() = delete;
 
-    // NOLINTBEGIN(readability-identifier-naming)
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_USCRIPTSTRUCT_FIELDS(X) X(uint32_t, StructFlags)
 
-   private:
-    uint32_t StructFlags_internal;
-
-   public:
-    decltype(StructFlags_internal)& StructFlags(void);
-    [[nodiscard]] const decltype(StructFlags_internal)& StructFlags(void) const;
-
-    // NOLINTEND(readability-identifier-naming)
+    UNREALSDK_DEFINE_FIELDS_HEADER(UScriptStruct, UNREALSDK_USCRIPTSTRUCT_FIELDS);
 };
 
 template <>
@@ -36,7 +46,10 @@ struct ClassTraits<UScriptStruct> {
     static inline const wchar_t* const NAME = L"ScriptStruct";
 };
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

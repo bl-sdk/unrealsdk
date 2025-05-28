@@ -9,7 +9,7 @@
 
 namespace unrealsdk::unreal {
 
-#ifdef UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
 
 FText::FText(std::string_view str) : FText(utils::widen(str)) {}
 FText::FText(std::wstring_view str) : data(), flags() {
@@ -53,7 +53,7 @@ FText::~FText() {
     }
 }
 
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 
 FText::FText(std::string_view /* str */) : data(), flags() {
     (void)this;
@@ -95,6 +95,8 @@ FText::~FText() {
     (void)this;
 }
 
+#else
+#error Unknown SDK flavour
 #endif
 
 }  // namespace unrealsdk::unreal

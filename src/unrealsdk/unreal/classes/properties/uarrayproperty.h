@@ -5,15 +5,27 @@
 
 #include "unrealsdk/unreal/class_traits.h"
 #include "unrealsdk/unreal/classes/uproperty.h"
+#include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
 #include "unrealsdk/unreal/wrappers/wrapped_array.h"
 
 namespace unrealsdk::unreal {
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
+
+namespace offsets::generic {
+
+template <typename T>
+class UArrayProperty : public T {
+   public:
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    UProperty* Inner;
+};
+
+}  // namespace offsets::generic
 
 class UArrayProperty : public UProperty {
    public:
@@ -24,16 +36,11 @@ class UArrayProperty : public UProperty {
     UArrayProperty& operator=(UArrayProperty&&) = delete;
     ~UArrayProperty() = delete;
 
-    /**
-     * @brief Get the inner property, which the array entries are instances of.
-     *
-     * @return This property's inner property.
-     */
-    [[nodiscard]] UProperty* get_inner(void) const;
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UARRAYPROPERTY_FIELDS(X) X(UProperty*, Inner)
 
-   private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    UProperty* Inner;
+    UNREALSDK_DEFINE_FIELDS_HEADER(UArrayProperty, UNREALSDK_UARRAYPROPERTY_FIELDS);
 };
 
 template <>
@@ -50,7 +57,7 @@ struct ClassTraits<UArrayProperty> {
     static inline const wchar_t* const NAME = L"ArrayProperty";
 };
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

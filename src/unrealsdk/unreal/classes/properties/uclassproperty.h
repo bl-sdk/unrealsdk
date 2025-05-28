@@ -1,5 +1,5 @@
-#ifndef UNREALSDK_UNREAL_CLASSES_PROPERTIES_UCLASSPROPERTY_H
-#define UNREALSDK_UNREAL_CLASSES_PROPERTIES_UCLASSPROPERTY_H
+#ifndef PYUNREALSDK_LIBS_UNREALSDK_SRC_UNREALSDK_UNREAL_CLASSES_PROPERTIES_UCLASSPROPERTY_H
+#define PYUNREALSDK_LIBS_UNREALSDK_SRC_UNREALSDK_UNREAL_CLASSES_PROPERTIES_UCLASSPROPERTY_H
 
 #include "unrealsdk/pch.h"
 
@@ -10,11 +10,22 @@
 
 namespace unrealsdk::unreal {
 
-class UClass;
-
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
+
+class UClass;
+
+namespace offsets::generic {
+
+template <typename T>
+class UClassProperty : public T {
+   public:
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    UClass* MetaClass;
+};
+
+}  // namespace offsets::generic
 
 class UClassProperty : public UObjectProperty {
    public:
@@ -25,16 +36,11 @@ class UClassProperty : public UObjectProperty {
     UClassProperty& operator=(UClassProperty&&) = delete;
     ~UClassProperty() = delete;
 
-    /**
-     * @brief Get the meta class of this property, which values must be a subclass of.
-     *
-     * @return This property's meta class.
-     */
-    [[nodiscard]] UClass* get_meta_class(void) const;
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UCLASSPROPERTY_FIELDS(X) X(UClass*, MetaClass)
 
-   private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    UClass* MetaClass;
+    UNREALSDK_DEFINE_FIELDS_HEADER(UClassProperty, UNREALSDK_UCLASSPROPERTY_FIELDS);
 };
 
 template <>
@@ -50,10 +56,10 @@ struct ClassTraits<UClassProperty> {
     static inline const wchar_t* const NAME = L"ClassProperty";
 };
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 
 }  // namespace unrealsdk::unreal
 
-#endif /* UNREALSDK_UNREAL_CLASSES_PROPERTIES_UCLASSPROPERTY_H */
+#endif /* PYUNREALSDK_LIBS_UNREALSDK_SRC_UNREALSDK_UNREAL_CLASSES_PROPERTIES_UCLASSPROPERTY_H */

@@ -123,7 +123,7 @@ UNREALSDK_CAPI([[nodiscard]] UObject*,
                UClass* cls,
                UObject* outer,
                const FName* name,
-               decltype(UObject::ObjectFlags) flags,
+               uint64_t flags,
                UObject* template_obj) {
     FName local_name{0, 0};
     if (name != nullptr) {
@@ -194,6 +194,10 @@ UNREALSDK_CAPI(void, fsoftobjectptr_assign, FSoftObjectPtr* ptr, const unreal::U
 
 UNREALSDK_CAPI(void, flazyobjectptr_assign, FLazyObjectPtr* ptr, const unreal::UObject* obj) {
     hook_instance->flazyobjectptr_assign(ptr, obj);
+}
+
+UNREALSDK_CAPI([[nodiscard]] const offsets::OffsetList*, get_offsets) {
+    return &hook_instance->get_offsets();
 }
 
 }  // namespace internal

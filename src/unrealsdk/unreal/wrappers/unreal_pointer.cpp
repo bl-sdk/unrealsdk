@@ -40,10 +40,10 @@ void UnrealPointerControl::destroy_object(void) {
             if (prop != nullptr) {
                 // Need to reconstruct the base address, since our pointer may be elsewhere
                 auto prop_base = reinterpret_cast<uintptr_t>(this)
-                                 + sizeof(impl::UnrealPointerControl) - prop->Offset_Internal;
+                                 + sizeof(impl::UnrealPointerControl) - prop->Offset_Internal();
 
                 cast(prop, [prop_base]<typename T>(const T* prop) {
-                    for (size_t i = 0; i < (size_t)prop->ArrayDim; i++) {
+                    for (size_t i = 0; i < (size_t)prop->ArrayDim(); i++) {
                         destroy_property<T>(prop, i, prop_base);
                     }
                 });

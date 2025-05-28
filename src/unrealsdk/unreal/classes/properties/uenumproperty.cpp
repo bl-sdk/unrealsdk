@@ -3,8 +3,11 @@
 #include "unrealsdk/unreal/cast.h"
 #include "unrealsdk/unreal/classes/properties/copyable_property.h"
 #include "unrealsdk/unreal/classes/properties/ubyteproperty.h"
+#include "unrealsdk/unreal/offset_list.h"
+#include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
+#include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
 
@@ -23,13 +26,7 @@ using valid_underlying_types = std::tuple<UInt8Property,
 
 }  // namespace
 
-UProperty* UEnumProperty::get_underlying_prop(void) const {
-    return this->read_field(&UEnumProperty::UnderlyingProp);
-}
-
-UEnum* UEnumProperty::get_enum(void) const {
-    return this->read_field(&UEnumProperty::Enum);
-}
+UNREALSDK_DEFINE_FIELDS_SOURCE_FILE(UEnumProperty, UNREALSDK_UENUMPROPERTY_FIELDS);
 
 PropTraits<UEnumProperty>::Value PropTraits<UEnumProperty>::get(const UEnumProperty* prop,
                                                                 uintptr_t addr,
@@ -37,7 +34,7 @@ PropTraits<UEnumProperty>::Value PropTraits<UEnumProperty>::get(const UEnumPrope
     PropTraits<UEnumProperty>::Value value{};
 
     cast<cast_options<>::with_classes<valid_underlying_types>>(
-        prop->get_underlying_prop(), [addr, parent, &value]<typename T>(const T* underlying) {
+        prop->UnderlyingProp(), [addr, parent, &value]<typename T>(const T* underlying) {
             static_assert(std::is_integral_v<typename PropTraits<T>::Value>);
 
             using underlying_limits = std::numeric_limits<typename PropTraits<T>::Value>;
@@ -53,7 +50,7 @@ PropTraits<UEnumProperty>::Value PropTraits<UEnumProperty>::get(const UEnumPrope
 
 void PropTraits<UEnumProperty>::set(const UEnumProperty* prop, uintptr_t addr, const Value& value) {
     cast<cast_options<>::with_classes<valid_underlying_types>>(
-        prop->get_underlying_prop(), [addr, value]<typename T>(const T* underlying) {
+        prop->UnderlyingProp(), [addr, value]<typename T>(const T* underlying) {
             static_assert(std::is_integral_v<typename PropTraits<T>::Value>);
 
             using underlying_limits = std::numeric_limits<typename PropTraits<T>::Value>;

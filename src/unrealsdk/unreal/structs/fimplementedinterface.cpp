@@ -6,10 +6,12 @@
 namespace unrealsdk::unreal {
 
 size_t FImplementedInterface::get_pointer_offset() const {
-#if UE4
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     return this->isNative ? 0 : this->PointerOffset;
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
+    return this->VFTableProperty == nullptr ? 0 : this->VFTableProperty->Offset_Internal();
 #else
-    return this->VFTableProperty == nullptr ? 0 : this->VFTableProperty->Offset_Internal;
+#error Unknown SDK flavour
 #endif
 }
 

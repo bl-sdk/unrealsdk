@@ -6,6 +6,8 @@
 #include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/classes/uproperty.h"
 #include "unrealsdk/unreal/classes/ustruct_funcs.h"
+#include "unrealsdk/unreal/offset_list.h"
+#include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/structs/fname.h"
 #include "unrealsdk/unreal/structs/fpropertychangeevent.h"
@@ -13,6 +15,8 @@
 #include "unrealsdk/unrealsdk.h"
 
 namespace unrealsdk::unreal {
+
+UNREALSDK_DEFINE_FIELDS_SOURCE_FILE(UObject, UNREALSDK_UOBJECT_FIELDS);
 
 #ifdef UNREALSDK_INTERNAL_PATH_NAME
 
@@ -53,11 +57,11 @@ std::wstring UObject::get_path_name(void) const {
 #endif
 
 bool UObject::is_instance(const UClass* cls) const {
-    return this->Class->inherits(cls);
+    return this->Class()->inherits(cls);
 }
 
 bool UObject::is_implementation(const UClass* iface, FImplementedInterface* impl_out) const {
-    return this->Class->implements(iface, impl_out);
+    return this->Class()->implements(iface, impl_out);
 }
 
 template <>
@@ -80,20 +84,23 @@ BoundFunction UObject::get<UFunction, BoundFunction>(const UFunction* prop, size
 }
 template <>
 BoundFunction UObject::get<UFunction, BoundFunction>(const FName& name, size_t idx) const {
-    return this->get<UFunction, BoundFunction>(this->Class->find_func_and_validate(name), idx);
+    return this->get<UFunction, BoundFunction>(this->Class()->find_func_and_validate(name), idx);
 }
 
 void UObject::post_edit_change_property(const FName& name) const {
-    this->post_edit_change_property(this->Class->find_prop(name));
+    this->post_edit_change_property(this->Class()->find_prop(name));
 }
 void UObject::post_edit_change_property(UProperty* prop) const {
     FPropertyChangedEvent event{prop};
 
-#ifdef UE3
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
     constexpr auto default_idx = 19;
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     constexpr auto default_idx = 78;
+#else
+#error Unknown SDK flavour
 #endif
+
     static auto idx =
         config::get_int<size_t>("unrealsdk.uobject_post_edit_change_property_vf_index")
             .value_or(default_idx);
@@ -106,11 +113,14 @@ void UObject::post_edit_change_chain_property(UProperty* prop,
     FEditPropertyChain edit_chain{chain};
     FPropertyChangedChainEvent event{prop, &edit_chain};
 
-#ifdef UE3
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
     constexpr auto default_idx = 18;
-#else
+#elif UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK
     constexpr auto default_idx = 77;
+#else
+#error Unknown SDK flavour
 #endif
+
     static auto idx =
         config::get_int<size_t>("unrealsdk.uobject_post_edit_change_chain_property_vf_index")
             .value_or(default_idx);  // NOLINT(readability-magic-numbers)

@@ -67,11 +67,11 @@ template <typename T>
                                                          uintptr_t base_addr,
                                                          const UnrealPointer<void>& parent = {
                                                              nullptr}) {
-    if (idx >= (size_t)prop->ArrayDim) {
+    if (idx >= (size_t)prop->ArrayDim()) {
         throw std::out_of_range("Property index out of range");
     }
-    return PropTraits<T>::get(prop, base_addr + prop->Offset_Internal + (idx * prop->ElementSize),
-                              parent);
+    return PropTraits<T>::get(
+        prop, base_addr + prop->Offset_Internal() + (idx * prop->ElementSize()), parent);
 }
 
 /**
@@ -88,11 +88,11 @@ void set_property(const T* prop,
                   size_t idx,
                   uintptr_t base_addr,
                   const typename PropTraits<T>::Value& value) {
-    if (idx >= (size_t)prop->ArrayDim) {
+    if (idx >= (size_t)prop->ArrayDim()) {
         throw std::out_of_range("Property index out of range");
     }
-    return PropTraits<T>::set(prop, base_addr + prop->Offset_Internal + (idx * prop->ElementSize),
-                              value);
+    return PropTraits<T>::set(
+        prop, base_addr + prop->Offset_Internal() + (idx * prop->ElementSize()), value);
 }
 
 /**
@@ -105,11 +105,11 @@ void set_property(const T* prop,
  */
 template <typename T>
 void destroy_property(const T* prop, size_t idx, uintptr_t base_addr) {
-    if (idx >= (size_t)prop->ArrayDim) {
+    if (idx >= (size_t)prop->ArrayDim()) {
         throw std::out_of_range("Property index out of range");
     }
-    return PropTraits<T>::destroy(prop,
-                                  base_addr + prop->Offset_Internal + (idx * prop->ElementSize));
+    return PropTraits<T>::destroy(
+        prop, base_addr + prop->Offset_Internal() + (idx * prop->ElementSize()));
 }
 
 }  // namespace unrealsdk::unreal

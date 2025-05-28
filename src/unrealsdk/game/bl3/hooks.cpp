@@ -12,7 +12,7 @@
 #include "unrealsdk/unreal/wrappers/unreal_pointer_funcs.h"
 #include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 
-#if defined(UE4) && defined(ARCH_X64) && !defined(UNREALSDK_IMPORTING)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::unreal;
 using namespace unrealsdk::memory;
@@ -48,7 +48,7 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
                                        .func = {.func = func, .object = obj}};
 
             const bool block_execution =
-                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
+                hook_manager::impl::run_hooks_of_type(data, hook_manager::Type::PRE, hook);
 
             if (!block_execution) {
                 process_event_ptr(obj, func, params);
@@ -58,7 +58,7 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
                 hook.ret.copy_to(reinterpret_cast<uintptr_t>(params));
             }
 
-            if (!hook_manager::impl::has_post_hooks(*data)) {
+            if (!hook_manager::impl::has_post_hooks(data)) {
                 return;
             }
 
@@ -67,10 +67,10 @@ void process_event_hook(UObject* obj, UFunction* func, void* params) {
             }
 
             if (!block_execution) {
-                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST, hook);
+                hook_manager::impl::run_hooks_of_type(data, hook_manager::Type::POST, hook);
             }
 
-            hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST_UNCONDITIONAL,
+            hook_manager::impl::run_hooks_of_type(data, hook_manager::Type::POST_UNCONDITIONAL,
                                                   hook);
 
             return;
@@ -161,7 +161,7 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
                                        .func = {.func = func, .object = obj}};
 
             const bool block_execution =
-                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::PRE, hook);
+                hook_manager::impl::run_hooks_of_type(data, hook_manager::Type::PRE, hook);
 
             if (block_execution) {
                 stack->Code++;
@@ -173,23 +173,23 @@ void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* fu
             if (hook.ret.has_value()) {
                 // Result is a pointer directly to where the property should go, remove the offset
                 hook.ret.copy_to(reinterpret_cast<uintptr_t>(result)
-                                 - hook.ret.prop->Offset_Internal);
+                                 - hook.ret.prop->Offset_Internal());
             }
 
-            if (!hook_manager::impl::has_post_hooks(*data)) {
+            if (!hook_manager::impl::has_post_hooks(data)) {
                 return;
             }
 
             if (hook.ret.prop != nullptr && !hook.ret.has_value() && !block_execution) {
                 hook.ret.copy_from(reinterpret_cast<uintptr_t>(result)
-                                   - hook.ret.prop->Offset_Internal);
+                                   - hook.ret.prop->Offset_Internal());
             }
 
             if (!block_execution) {
-                hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST, hook);
+                hook_manager::impl::run_hooks_of_type(data, hook_manager::Type::POST, hook);
             }
 
-            hook_manager::impl::run_hooks_of_type(*data, hook_manager::Type::POST_UNCONDITIONAL,
+            hook_manager::impl::run_hooks_of_type(data, hook_manager::Type::POST_UNCONDITIONAL,
                                                   hook);
 
             return;

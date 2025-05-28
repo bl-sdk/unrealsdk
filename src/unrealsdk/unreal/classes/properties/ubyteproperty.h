@@ -10,11 +10,22 @@
 
 namespace unrealsdk::unreal {
 
-class UEnum;
-
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
+
+class UEnum;
+
+namespace offsets::generic {
+
+template <typename T>
+class UByteProperty : public T {
+   public:
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    UEnum* Enum;
+};
+
+}  // namespace offsets::generic
 
 class UByteProperty : public CopyableProperty<uint8_t> {
    public:
@@ -25,20 +36,11 @@ class UByteProperty : public CopyableProperty<uint8_t> {
     UByteProperty& operator=(UByteProperty&&) = delete;
     ~UByteProperty() = delete;
 
-   private:
-    // NOLINTBEGIN(readability-identifier-naming)
+    // These fields become member functions, returning a reference into the object.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNREALSDK_UBYTEPROPERTY_FIELDS(X) X(UEnum*, Enum)
 
-    UEnum* Enum;
-
-    // NOLINTEND(readability-identifier-naming)
-
-   public:
-    /**
-     * @brief Get the enum associated with this property, if any.
-     *
-     * @return The enum.
-     */
-    [[nodiscard]] UEnum* get_enum(void) const;
+    UNREALSDK_DEFINE_FIELDS_HEADER(UByteProperty, UNREALSDK_UBYTEPROPERTY_FIELDS);
 };
 
 template <>
@@ -49,7 +51,7 @@ struct ClassTraits<UByteProperty> {
     static inline const wchar_t* const NAME = L"ByteProperty";
 };
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

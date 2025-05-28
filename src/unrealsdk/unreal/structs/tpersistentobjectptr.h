@@ -14,7 +14,7 @@ class USoftObjectProperty;
 class WrappedStruct;
 class WrappedArray;
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(push, 0x4)
 #endif
 
@@ -100,7 +100,7 @@ struct FLazyObjectPath {
 struct FSoftObjectPtr : public TPersistentObjectPtr<FSoftObjectPath> {};
 struct FLazyObjectPtr : public TPersistentObjectPtr<FLazyObjectPath> {};
 
-#if defined(_MSC_VER) && defined(ARCH_X86)
+#if defined(_MSC_VER) && UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
 #pragma pack(pop)
 #endif
 

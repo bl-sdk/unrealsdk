@@ -13,26 +13,27 @@ namespace unrealsdk::unreal {
 namespace func_params::impl {
 
 UProperty* get_next_param(UProperty* prop) {
-    prop = prop->PropertyLinkNext;
-    while (prop != nullptr && (prop->PropertyFlags & UProperty::PROP_FLAG_PARAM) == 0) {
-        prop = prop->PropertyLinkNext;
+    prop = prop->PropertyLinkNext();
+    while (prop != nullptr && (prop->PropertyFlags() & UProperty::PROP_FLAG_PARAM) == 0) {
+        prop = prop->PropertyLinkNext();
     }
     return prop;
 }
 
 void validate_no_more_params(UProperty* prop) {
-    for (; prop != nullptr; prop = prop->PropertyLinkNext) {
-        if ((prop->PropertyFlags & UProperty::PROP_FLAG_PARAM) == 0) {
+    for (; prop != nullptr; prop = prop->PropertyLinkNext()) {
+        if ((prop->PropertyFlags() & UProperty::PROP_FLAG_PARAM) == 0) {
             continue;
         }
-        if ((prop->PropertyFlags & UProperty::PROP_FLAG_RETURN) != 0) {
+        if ((prop->PropertyFlags() & UProperty::PROP_FLAG_RETURN) != 0) {
             continue;
         }
-#ifdef UE3
-        if ((prop->PropertyFlags & UProperty::PROP_FLAG_OPTIONAL) != 0) {
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_WILLOW
+        if ((prop->PropertyFlags() & UProperty::PROP_FLAG_OPTIONAL) != 0) {
             continue;
         }
 #endif
+
         throw std::runtime_error("Too few parameters to function call!");
     }
 }

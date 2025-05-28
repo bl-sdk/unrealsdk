@@ -74,7 +74,7 @@ UnrealPointer<T>::UnrealPointer(const UProperty* prop)
     requires std::is_void_v<T>
     : control(nullptr), ptr(nullptr) {
     // If malloc throws, it should have handled freeing memory if required
-    auto buf = unrealsdk::u_malloc((prop->ElementSize * prop->ArrayDim)
+    auto buf = unrealsdk::u_malloc((prop->ElementSize() * prop->ArrayDim())
                                    + sizeof(impl::UnrealPointerControl));
 
     // Otherwise, if we throw during initialization we need to free manually
@@ -83,7 +83,7 @@ UnrealPointer<T>::UnrealPointer(const UProperty* prop)
         this->control = new (buf) impl::UnrealPointerControl(prop);
 
         this->ptr = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(this->control + 1)
-                                            - prop->Offset_Internal);
+                                            - prop->Offset_Internal());
     } catch (const std::exception& ex) {
         unrealsdk::u_free(buf);
         LOG(ERROR, "Exception in unreal pointer constructor: {}", ex.what());

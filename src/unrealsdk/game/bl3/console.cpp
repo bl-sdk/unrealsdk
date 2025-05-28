@@ -22,7 +22,7 @@
 #include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 #include "unrealsdk/unrealsdk.h"
 
-#if defined(UE4) && defined(ARCH_X64) && !defined(UNREALSDK_IMPORTING)
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK && !defined(UNREALSDK_IMPORTING)
 
 using namespace unrealsdk::unreal;
 
@@ -61,8 +61,10 @@ void console_command_hook(UObject* console_obj, UnmanagedFString* raw_line) {
     try {
         std::wstring line = *raw_line;
 
-        auto [callback, cmd_len] = commands::impl::find_matching_command(line);
-        if (callback != nullptr) {
+        // Since this is a hook on UConsole, and since the game doesn't seem to be running it's own
+        // commands through it, just always consider it direct user input
+        // I don't really know what interface automated commands would come through, if any
+        if (commands::impl::is_command_valid(line, true)) {
             // Update the history buffer
             {
                 // History buffer is oldest at index 0, newest at count
@@ -103,7 +105,7 @@ void console_command_hook(UObject* console_obj, UnmanagedFString* raw_line) {
                     // anything, just lower the count
                     if (dropped_idx != (history_size - 1)) {
                         auto data = reinterpret_cast<uintptr_t>(history_buffer.base->data);
-                        auto element_size = history_buffer.type->ElementSize;
+                        auto element_size = history_buffer.type->ElementSize();
 
                         auto dest = data + (dropped_idx * element_size);
                         auto remaining_size = (history_size - dropped_idx) * element_size;
@@ -137,12 +139,12 @@ void console_command_hook(UObject* console_obj, UnmanagedFString* raw_line) {
             useful, so as a compromise just use the LOG macro on the lowest possible log level, and
             assume the lowest people practically set their console log level to is dev warning.
             */
-            auto msg = unrealsdk::fmt::format(L">>> {} <<<", line);
+            auto msg = std::format(L">>> {} <<<", line);
             static_uconsole_output_text(msg);
             LOG(MIN, L"{}", msg);
 
             try {
-                callback->operator()(line.c_str(), line.size(), cmd_len);
+                commands::impl::run_command(line);
             } catch (const std::exception& ex) {
                 LOG(ERROR, "An exception occurred while running a console command: {}", ex.what());
             }
@@ -163,12 +165,12 @@ bool inject_console_hook(hook_manager::Details& hook) {
     auto local_player = hook.obj->get<UObjectProperty>(L"Player"_fn);
     auto viewport = local_player->get<UObjectProperty>(L"ViewportClient"_fn);
     auto console_property =
-        viewport->Class->find_prop_and_validate<UObjectProperty>(L"ViewportConsole"_fn);
+        viewport->Class()->find_prop_and_validate<UObjectProperty>(L"ViewportConsole"_fn);
     console = viewport->get(console_property);
 
     if (console == nullptr) {
-        auto default_console = console_property->get_property_class()->ClassDefaultObject();
-        console = unrealsdk::construct_object(default_console->Class, default_console->Outer);
+        auto default_console = console_property->PropertyClass()->ClassDefaultObject();
+        console = unrealsdk::construct_object(default_console->Class(), default_console->Outer());
         viewport->set<UObjectProperty>(L"ViewportConsole"_fn, console);
     }
 
@@ -187,7 +189,7 @@ bool inject_console_hook(hook_manager::Details& hook) {
     // just search through gobjects for the default object ¯\_(ツ)_/¯
     auto input_settings_fn = L"InputSettings"_fn;
     for (const auto& inner_obj : gobjects()) {
-        if (inner_obj->Class->Name != input_settings_fn) {
+        if (inner_obj->Class()->Name() != input_settings_fn) {
             continue;
         }
 

@@ -17,45 +17,45 @@ template <typename T>
 const TPersistentObjectPtr<T>* get_addr_from(const UObject* obj,
                                              const UObjectProperty* prop,
                                              size_t idx) {
-    if (std::cmp_greater_equal(idx, prop->ArrayDim)) {
+    if (std::cmp_greater_equal(idx, prop->ArrayDim())) {
         throw std::out_of_range("Property index out of range");
     }
 
     auto addr =
-        reinterpret_cast<uintptr_t>(obj) + prop->Offset_Internal + (idx * prop->ElementSize);
+        reinterpret_cast<uintptr_t>(obj) + prop->Offset_Internal() + (idx * prop->ElementSize());
     return reinterpret_cast<TPersistentObjectPtr<T>*>(addr);
 }
 template <typename T>
 const TPersistentObjectPtr<T>* get_addr_from(const WrappedStruct& wrapped_struct,
                                              const UObjectProperty* prop,
                                              size_t idx) {
-    if (std::cmp_greater_equal(idx, prop->ArrayDim)) {
+    if (std::cmp_greater_equal(idx, prop->ArrayDim())) {
         throw std::out_of_range("Property index out of range");
     }
 
-    auto addr = reinterpret_cast<uintptr_t>(wrapped_struct.base.get()) + prop->Offset_Internal
-                + (idx * prop->ElementSize);
+    auto addr = reinterpret_cast<uintptr_t>(wrapped_struct.base.get()) + prop->Offset_Internal()
+                + (idx * prop->ElementSize());
     return reinterpret_cast<TPersistentObjectPtr<T>*>(addr);
 }
 
 template <typename T>
 const TPersistentObjectPtr<T>* get_addr_from_array(const WrappedArray& array, size_t idx) {
-    if (!array.type->Class->inherits(find_class<USoftObjectProperty>())) {
+    if (!array.type->Class()->inherits(find_class<USoftObjectProperty>())) {
         throw std::invalid_argument("WrappedArray property was of invalid type "
-                                    + (std::string)array.type->Class->Name);
+                                    + (std::string)array.type->Class()->Name());
     }
     if (std::cmp_greater_equal(idx, array.base->count)) {
         throw std::out_of_range("WrappedArray index out of range");
     }
 
-    auto addr = reinterpret_cast<uintptr_t>(array.base->data) + (array.type->ElementSize * idx);
+    auto addr = reinterpret_cast<uintptr_t>(array.base->data) + (array.type->ElementSize() * idx);
     return reinterpret_cast<TPersistentObjectPtr<T>*>(addr);
 }
 
 }  // namespace
 
 const FSoftObjectPath* FSoftObjectPath::get_from(const UObject* obj, FName name, size_t idx) {
-    return get_from(obj, obj->Class->find_prop_and_validate<USoftObjectProperty>(name), idx);
+    return get_from(obj, obj->Class()->find_prop_and_validate<USoftObjectProperty>(name), idx);
 }
 const FSoftObjectPath* FSoftObjectPath::get_from(const WrappedStruct& wrapped_struct,
                                                  FName name,
@@ -79,7 +79,7 @@ const FSoftObjectPath* FSoftObjectPath::get_from_array(const WrappedArray& array
 }
 
 const FLazyObjectPath* FLazyObjectPath::get_from(const UObject* obj, FName name, size_t idx) {
-    return get_from(obj, obj->Class->find_prop_and_validate<ULazyObjectProperty>(name), idx);
+    return get_from(obj, obj->Class()->find_prop_and_validate<ULazyObjectProperty>(name), idx);
 }
 const FLazyObjectPath* FLazyObjectPath::get_from(const WrappedStruct& wrapped_struct,
                                                  FName name,

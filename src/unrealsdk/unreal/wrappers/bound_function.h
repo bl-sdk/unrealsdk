@@ -52,7 +52,7 @@ void set_param(WrappedStruct& params,
     if (prop == nullptr) {
         throw std::runtime_error("Too many parameters to function call!");
     }
-    if (prop->ArrayDim > 1) {
+    if (prop->ArrayDim() > 1) {
         throw std::runtime_error(
             "Function has static array argument - unsure how to handle, aborting!");
     }
@@ -78,8 +78,8 @@ void set_param(WrappedStruct& params,
  */
 template <typename... Ts>
 void write_params(WrappedStruct& params, const typename PropTraits<Ts>::Value&... args) {
-    UProperty* prop = params.type->PropertyLink;
-    if (prop != nullptr && (prop->PropertyFlags & UProperty::PROP_FLAG_PARAM) == 0) {
+    UProperty* prop = params.type->PropertyLink();
+    if (prop != nullptr && (prop->PropertyFlags() & UProperty::PROP_FLAG_PARAM) == 0) {
         prop = impl::get_next_param(prop);
     }
 
@@ -112,7 +112,7 @@ return_type<R> get_return_value(const UFunction* func, const WrappedStruct& para
         if (ret == nullptr) {
             throw std::runtime_error("Couldn't find return param!");
         }
-        if (ret->ArrayDim > 1) {
+        if (ret->ArrayDim() > 1) {
             throw std::runtime_error(
                 "Function has static array return param - unsure how to handle, aborting!");
         }
@@ -162,7 +162,7 @@ class BoundFunction {
         if (params.type != this->func) {
             throw std::runtime_error(
                 "Tried to call function with pre-filled parameters of incorrect type: "
-                + (std::string)params.type->Name);
+                + (std::string)params.type->Name());
         }
 
         this->call_with_params(params.base.get());
