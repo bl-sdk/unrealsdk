@@ -49,7 +49,7 @@ const constinit Pattern<11> GNATIVES_SIG{
 };
 
 // NOLINTNEXTLINE(modernize-use-using)
-typedef void(__stdcall* fframe_step_func)(FFrame*, void*);
+typedef void(__thiscall* fframe_step_func)(UObject*, FFrame*, void*);
 fframe_step_func** fframe_step_gnatives;
 
 }  // namespace
@@ -59,8 +59,8 @@ void BL1Hook::find_fframe_step(void) {
     LOG(MISC, "GNatives: {:p}", reinterpret_cast<void*>(fframe_step_gnatives));
 }
 
-void BL1Hook::fframe_step(unreal::FFrame* frame, unreal::UObject* /*obj*/, void* param) const {
-    ((*fframe_step_gnatives)[*frame->Code++])(frame, param);
+void BL1Hook::fframe_step(FFrame* frame, UObject* obj, void* param) const {
+    ((*fframe_step_gnatives)[*frame->Code++])(obj, frame, param);
 }
 
 #pragma region FName::Init
