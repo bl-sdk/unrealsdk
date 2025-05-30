@@ -41,6 +41,11 @@ void BL1Hook::post_init(void) {
 
 namespace {
 
+#if defined(__MINGW32__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"  // thiscall on non-class
+#endif
+
 // FFrame::Step is inlined, so instead we manually re-implement it using GNatives.
 const constinit Pattern<11> GNATIVES_SIG{
     "8B 14 95 {????????}"  // mov edx, [edx*4+01F942C0]
@@ -51,6 +56,10 @@ const constinit Pattern<11> GNATIVES_SIG{
 // NOLINTNEXTLINE(modernize-use-using)
 typedef void(__thiscall* fframe_step_func)(UObject*, FFrame*, void*);
 fframe_step_func** fframe_step_gnatives;
+
+#if defined(__MINGW32__)
+#pragma GCC diagnostic pop
+#endif
 
 }  // namespace
 
