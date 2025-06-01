@@ -28,6 +28,15 @@ std::pair<uintptr_t, size_t> get_exe_range(void) {
     auto module_length = nt_header->OptionalHeader.SizeOfImage;
 
     range = {reinterpret_cast<uintptr_t>(allocation_base), module_length};
+
+    if constexpr (sizeof(uintptr_t) == 4) {
+        LOG(MISC, "Executable memory range: {:08x}-{:08x}", range->first,
+            range->first + range->second);
+    } else {
+        LOG(MISC, "Executable memory range: {:012x}-{:012x}", range->first,
+            range->first + range->second);
+    }
+
     return *range;
 }
 

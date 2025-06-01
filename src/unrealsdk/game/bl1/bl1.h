@@ -13,6 +13,11 @@ namespace unrealsdk::game {
 class BL1Hook : public AbstractHook {
    protected:
     /**
+     * @brief Blocking waits for the steam drm to finish unpacking the executable.
+     */
+    static void wait_for_steam_drm(void);
+
+    /**
      * @brief Finds `FName::Init`, and sets up such that `fname_init` may be called.
      */
     static void find_fname_init(void);
@@ -126,10 +131,11 @@ class BL1Hook : public AbstractHook {
 
 template <>
 struct GameTraits<BL1Hook> {
-    static constexpr auto NAME = "Borderlands";
+    static constexpr auto NAME = "Borderlands 1";
 
     static bool matches_executable(std::string_view executable) {
-        return executable == "Borderlands.exe" || executable == "borderlands.exe";
+        return executable.starts_with("Borderlands.exe")
+               || executable.starts_with("borderlands.exe");
     }
 };
 

@@ -29,6 +29,8 @@
 #define SetThreadDescription(x, y)
 #endif
 
+#include <tlhelp32.h>
+
 #include <MinHook.h>
 
 #ifdef __cplusplus

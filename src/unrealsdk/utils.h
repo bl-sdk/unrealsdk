@@ -131,6 +131,20 @@ struct DLLSafeCallback {
     R operator()(As... args) { return this->vftable->call(this, args...); }
 };
 
+/**
+ * @brief RAII class which suspends all other threads for it's lifespan.
+ */
+class ThreadSuspender {
+   public:
+    ThreadSuspender(void);
+    ~ThreadSuspender();
+
+    ThreadSuspender(const ThreadSuspender&) = delete;
+    ThreadSuspender(ThreadSuspender&&) = delete;
+    ThreadSuspender& operator=(const ThreadSuspender&) = delete;
+    ThreadSuspender& operator=(ThreadSuspender&&) = delete;
+};
+
 namespace {
 
 template <typename T>

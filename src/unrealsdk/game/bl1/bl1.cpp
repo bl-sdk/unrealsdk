@@ -14,6 +14,8 @@ using namespace unrealsdk::unreal;
 namespace unrealsdk::game {
 
 void BL1Hook::hook(void) {
+    wait_for_steam_drm();
+
     hook_antidebug();
 
     hook_process_event();
