@@ -25,11 +25,11 @@ const constexpr std::chrono::seconds FALLBACK_DELAY{5};
 // NOLINTBEGIN(readability-identifier-naming)
 
 // NOLINTNEXTLINE(modernize-use-using)  - need a typedef for calling conventions in msvc
-typedef void(WINAPI* GetStatupInfoA_func)(LPSTARTUPINFOA);
-GetStatupInfoA_func GetStatupInfoA_ptr;
+typedef void(WINAPI* GetStartupInfoA_func)(LPSTARTUPINFOA);
+GetStartupInfoA_func GetStartupInfoA_ptr;
 
 void GetStartupInfoA_hook(LPSTARTUPINFOA lpStartupInfo) {
-    GetStatupInfoA_ptr(lpStartupInfo);
+    GetStartupInfoA_ptr(lpStartupInfo);
 
     static_assert(decltype(ready)::is_always_lock_free, "need to lock on checking ready flag too");
     if (ready.load()) {
@@ -63,7 +63,7 @@ void BL1Hook::wait_for_steam_drm(void) {
 
         status = MH_CreateHook(reinterpret_cast<LPVOID>(&GetStartupInfoA),
                                reinterpret_cast<LPVOID>(&GetStartupInfoA_hook),
-                               reinterpret_cast<LPVOID*>(&GetStatupInfoA_ptr));
+                               reinterpret_cast<LPVOID*>(&GetStartupInfoA_ptr));
         if (status != MH_OK) {
             LOG(ERROR, "Failed to create GetStartupInfoA hook: {:x}",
                 static_cast<uint32_t>(status));
