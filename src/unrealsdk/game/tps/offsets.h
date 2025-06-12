@@ -71,7 +71,7 @@ class UClass : public UStruct {
     UObject* ClassDefaultObject;
 
    private:
-    uint8_t UnknownData01[0x14];
+    uint8_t UnknownData01[0x10];
 
    public:
     unreal::TArray<unreal::FImplementedInterface> Interfaces;

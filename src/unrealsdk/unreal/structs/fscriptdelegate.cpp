@@ -94,8 +94,12 @@ void FScriptDelegate::validate_signature(const std::optional<BoundFunction>& fun
     reasonably simple to implement.
     */
     {
-        auto func_props = func->func->properties();
-        auto sig_props = signature->properties();
+        auto func_props = std::ranges::filter_view(func->func->properties(), [](UProperty* prop) {
+            return (prop->PropertyFlags() & UProperty::PROP_FLAG_PARAM) != 0;
+        });
+        auto sig_props = std::ranges::filter_view(signature->properties(), [](UProperty* prop) {
+            return (prop->PropertyFlags() & UProperty::PROP_FLAG_PARAM) != 0;
+        });
 
         auto [func_diff, sig_diff] = std::ranges::mismatch(
             func_props, sig_props,

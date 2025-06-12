@@ -1,8 +1,3 @@
-
-// - NOTE -
-// Copied from bl2/antidebug.cpp
-//
-
 #include "unrealsdk/pch.h"
 
 #include "unrealsdk/game/bl1/bl1.h"
