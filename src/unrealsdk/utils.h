@@ -68,59 +68,103 @@ struct IteratorProxy {
 /**
  * @brief A class used to safely pass callbacks, which may be lambdas or other complex callables,
  *        across dll boundaries safely.
+ * @note This is used to address the fact that std::function may differ between STL implementations.
  * @note You should never have to use this directly, the wrappers should convert everything for you.
  *
- * @warning When using this type to implement a wrapper, it must be handled with great care. It
- *          relies on two dangerous rules to work properly:
- *          - It must never be stored or passed by value, only ever by pointer.
- *          - Before destroying the pointer, you must manually call the `destroy` method.
- *
+ * @tparam F The std::function type this callback is based on.
  * @tparam R The return type. May be void.
  * @tparam As The argument types.
  */
+template <typename F>
+struct DLLSafeCallback;
 template <typename R, typename... As>
-// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
-struct DLLSafeCallback {
-    /// The inner type of the function this callback runs.
-    using InnerFunc = std::function<R(As...) noexcept(false)>;
-
+struct DLLSafeCallback<std::function<R(As...)>> {
    private:
-    // We can't trust an actual virtual function table to have a consistent layout -  e.g. clang
-    // uses two destructors (freeing and non-freeing), MSVC only uses one (with a bool arg)
-    // Instead, create our own manually.
+    /*
+    This Inner type is what does most of the work. It has some very non-standard semantics, so the
+    outer DLLSafeCallback just safely wraps a pointer around it.
 
-    // Note MSVC relies on `noexcept(false)` to allow exceptions to cross dll boundaries.
-    struct PseudoVFTable {
-        void (*destroy)(DLLSafeCallback* self) noexcept(false);
-        R (*call)(DLLSafeCallback* self, As... args) noexcept(false);
+    On constructing a new callback, we'll construct a new Inner struct in the current DLL - using
+    the current std::function layout and current allocator. We then rely on "virtual" functions
+    whenever we interact with it, to make sure it's always code from the original DLL. This is
+    critical because the inner struct's layout can be completely different between implementations,
+    we can't even rely on it being a consistent size.
+
+    One complication is we can't trust an actual virtual function table to have a consistent layout.
+    For example, clang uses two destructors (freeing and non-freeing), while MSVC only uses one
+    (with a bool arg). We also need to make sure we avoid devirtualization, especially with LTO. To
+    handle these, we have to create our own vftable manually.
+    */
+    struct Inner {
+       public:
+        struct PseudoVFTable {
+            // MSVC relies on `noexcept(false)` to allow exceptions to cross dll boundaries.
+            void (*destroy)(Inner* self) noexcept(false);
+            R (*call)(Inner* self, As... args) noexcept(false);
+        };
+
+       private:
+        // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
+        static void destroy(Inner* self) noexcept(false) { delete self; }
+        static R call(Inner* self, As... args) noexcept(false) {
+            return self->func(std::forward<As>(args)...);
+        }
+
+        static const constexpr PseudoVFTable DEFAULT_VFTABLE = {
+            &Inner::destroy,
+            &Inner::call,
+        };
+
+       public:
+        // Volatile means assume can be changed externally - e.g. because it was assigned by a
+        // different dll. Otherwise optimization might try devirtualize it.
+        volatile const PseudoVFTable* vftable = &DEFAULT_VFTABLE;
+
+       private:
+        // Must be after the vftable, since we can't rely on it's size.
+        std::function<R(As...)> func;
+
+       public:
+        Inner(std::function<R(As...)> func) : func(func) {}
     };
 
-    // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
-    static void destroy(DLLSafeCallback* self) noexcept(false) { delete self; }
-    static R call(DLLSafeCallback* self, As... args) noexcept(false) { return self->func(args...); }
-
-    static const constexpr PseudoVFTable DEFAULT_VFTABLE = {
-        &DLLSafeCallback::destroy,
-        &DLLSafeCallback::call,
-    };
-    // Use volatile to prevent optimization from calling our copies of the function, it has to go
-    // through the vftable
-    volatile const PseudoVFTable* vftable = &DEFAULT_VFTABLE;
-
-    InnerFunc func;
+    Inner* inner;
 
    public:
     /**
-     * @brief Constructs a new safe callback from a function.
+     * @brief Constructs a new dll safe callback.
      *
      * @param func The function to wrap.
      */
-    DLLSafeCallback(InnerFunc func) : func(func) {}
+    DLLSafeCallback(std::function<R(As...)> func) : inner(new Inner(std::move(func))) {}
+    DLLSafeCallback(DLLSafeCallback&& other) noexcept
+        : inner(std::exchange(other.inner, nullptr)) {}
 
     /**
-     * @brief Destroys the callback.
+     * @brief Assigns to the dll safe callback.
+     *
+     * @param other The other callback to assign from.
+     * @return A reference to this callback.
      */
-    void destroy(void) { this->vftable->destroy(this); }
+    DLLSafeCallback& operator=(DLLSafeCallback&& other) noexcept {
+        std::swap(this->inner, other.inner);
+    }
+
+    /**
+     * @brief Destroys the dll safe callback.
+     */
+    ~DLLSafeCallback() {
+        if (this->inner != nullptr) {
+            this->inner->vftable->destroy(this->inner);
+            // The original dll has safely destroyed the inner struct, so we're free to "leak" it
+            this->inner = nullptr;
+        }
+    }
+
+    // No copy construction/assignment. Haven't really needed it yet, and would require implementing
+    // some form of reference counting.
+    DLLSafeCallback(const DLLSafeCallback&) = delete;
+    DLLSafeCallback& operator=(const DLLSafeCallback& other) = delete;
 
     /**
      * @brief Runs the callback.
@@ -128,7 +172,12 @@ struct DLLSafeCallback {
      * @param args The callback args.
      * @return The return value of the callback
      */
-    R operator()(As... args) { return this->vftable->call(this, args...); }
+    R operator()(As... args) {
+        if (this->inner == nullptr) {
+            throw std::runtime_error("tried to run a null callback!");
+        }
+        return this->inner->vftable->call(this->inner, std::forward<As>(args)...);
+    }
 };
 
 /**

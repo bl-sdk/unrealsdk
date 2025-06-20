@@ -6,10 +6,10 @@ namespace unrealsdk::commands {
 
 namespace {
 
+using DLLSafeCallback = utils::DLLSafeCallback<Callback>;
+
 #ifndef UNREALSDK_IMPORTING
-
-utils::StringViewMap<std::wstring, DLLSafeCallback*> commands{};
-
+utils::StringViewMap<std::wstring, DLLSafeCallback> commands{};
 #endif
 
 }  // namespace
@@ -18,10 +18,10 @@ utils::StringViewMap<std::wstring, DLLSafeCallback*> commands{};
 const std::wstring NEXT_LINE{};
 
 #ifdef UNREALSDK_SHARED
-UNREALSDK_CAPI(bool, add_command, const wchar_t* cmd, size_t size, DLLSafeCallback* callback);
+UNREALSDK_CAPI(bool, add_command, const wchar_t* cmd, size_t size, DLLSafeCallback&& callback);
 #endif
 #ifndef UNREALSDK_IMPORTING
-UNREALSDK_CAPI(bool, add_command, const wchar_t* cmd, size_t size, DLLSafeCallback* callback) {
+UNREALSDK_CAPI(bool, add_command, const wchar_t* cmd, size_t size, DLLSafeCallback&& callback) {
     std::wstring lower_cmd(size, '\0');
     std::transform(cmd, cmd + size, lower_cmd.begin(), &std::towlower);
 
@@ -29,14 +29,14 @@ UNREALSDK_CAPI(bool, add_command, const wchar_t* cmd, size_t size, DLLSafeCallba
         return false;
     }
 
-    commands.emplace(std::move(lower_cmd), callback);
+    commands.emplace(std::move(lower_cmd), std::move(callback));
     return true;
 }
 #endif
 
 bool add_command(std::wstring_view cmd, const Callback& callback) {
     // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
-    return UNREALSDK_MANGLE(add_command)(cmd.data(), cmd.size(), new DLLSafeCallback(callback));
+    return UNREALSDK_MANGLE(add_command)(cmd.data(), cmd.size(), {callback});
 }
 
 #ifdef UNREALSDK_SHARED
@@ -67,9 +67,7 @@ UNREALSDK_CAPI(bool, remove_command, const wchar_t* cmd, size_t size) {
         return false;
     }
 
-    iter->second->destroy();
     commands.erase(iter);
-
     return true;
 }
 #endif
@@ -101,12 +99,10 @@ bool is_command_valid(std::wstring_view line, bool direct_user_input) {
 void run_command(std::wstring_view line) {
     auto iter = commands.find(NEXT_LINE);
     if (iter != commands.end()) {
-        auto callback = iter->second;
+        auto callback = std::move(iter->second);
         commands.erase(iter);
 
-        callback->operator()(line.data(), line.size(), 0);
-
-        callback->destroy();
+        callback(line.data(), line.size(), 0);
         return;
     }
 
@@ -122,7 +118,7 @@ void run_command(std::wstring_view line) {
     std::wstring cmd(cmd_end - non_space, '\0');
     std::transform(non_space, cmd_end, cmd.begin(), &std::towlower);
 
-    commands.at(cmd)->operator()(line.data(), line.size(), cmd_end - line.begin());
+    commands.at(cmd)(line.data(), line.size(), cmd_end - line.begin());
 }
 
 #endif
