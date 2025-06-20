@@ -12,9 +12,13 @@
 
 using namespace unrealsdk::unreal;
 
+namespace unrealsdk::hook_manager {
+
+using DLLSafeCallback = utils::DLLSafeCallback<Callback>;
+
 #pragma region Implementation
 #ifndef UNREALSDK_IMPORTING
-namespace unrealsdk::hook_manager::impl {
+namespace impl {
 
 /*
 The fact that hooks run arbitrary user provided callbacks means our data structure can get modified
@@ -81,7 +85,7 @@ struct Node {
     std::wstring full_name;
     Type type;
     std::wstring identifier;
-    DLLSafeCallback* callback;
+    DLLSafeCallback callback;
 
     // Using shared pointers because it's easy
     // Since we use std::make_shared, we're not really wasting allocations, but as a future
@@ -96,22 +100,12 @@ struct Node {
          std::wstring_view full_name,
          Type type,
          std::wstring_view identifier,
-         DLLSafeCallback* callback)
+         DLLSafeCallback&& callback)
         : fname(fname),
           full_name(full_name),
           type(type),
           identifier(identifier),
-          callback(callback) {}
-    Node(const Node&) = default;
-    Node(Node&&) noexcept = default;
-    Node& operator=(const Node&) = default;
-    Node& operator=(Node&&) noexcept = default;
-    ~Node() {
-        if (this->callback != nullptr) {
-            this->callback->destroy();
-            this->callback = nullptr;
-        }
-    }
+          callback(std::move(callback)) {}
 };
 
 namespace {
@@ -181,7 +175,7 @@ FName extract_func_obj_name(std::wstring_view func) {
 bool add_hook(std::wstring_view func,
               Type type,
               std::wstring_view identifier,
-              DLLSafeCallback* callback) {
+              DLLSafeCallback&& callback) {
     auto fname = extract_func_obj_name(func);
 
     auto hash_idx = get_table_index(fname);
@@ -189,7 +183,7 @@ bool add_hook(std::wstring_view func,
     if (node == nullptr) {
         // This function isn't in the hash table, can just add directly.
         hooks_hash_table.at(hash_idx) =
-            std::make_shared<Node>(fname, func, type, identifier, callback);
+            std::make_shared<Node>(fname, func, type, identifier, std::move(callback));
         return true;
     }
 
@@ -197,7 +191,8 @@ bool add_hook(std::wstring_view func,
     while (node->fname != fname) {
         if (node->next_collision == nullptr) {
             // We found a collision, but nothing matched our name, so add it to the end
-            node->next_collision = std::make_shared<Node>(fname, func, type, identifier, callback);
+            node->next_collision =
+                std::make_shared<Node>(fname, func, type, identifier, std::move(callback));
             return true;
         }
         node = node->next_collision;
@@ -207,7 +202,8 @@ bool add_hook(std::wstring_view func,
     while (node->full_name != func) {
         if (node->next_function == nullptr) {
             // We found another function with the same fname, but nothing matches the full name
-            node->next_function = std::make_shared<Node>(fname, func, type, identifier, callback);
+            node->next_function =
+                std::make_shared<Node>(fname, func, type, identifier, std::move(callback));
             return true;
         }
         node = node->next_function;
@@ -217,7 +213,8 @@ bool add_hook(std::wstring_view func,
     while (node->type != type) {
         if (node->next_type == nullptr) {
             // We found the right function, but it doesn't have any hooks of this type yet
-            node->next_type = std::make_shared<Node>(fname, func, type, identifier, callback);
+            node->next_type =
+                std::make_shared<Node>(fname, func, type, identifier, std::move(callback));
             return true;
         }
         node = node->next_type;
@@ -228,7 +225,7 @@ bool add_hook(std::wstring_view func,
         if (node->next_in_collection == nullptr) {
             // Didn't find a matching identifier, add our new hook at the end
             node->next_in_collection =
-                std::make_shared<Node>(fname, func, type, identifier, callback);
+                std::make_shared<Node>(fname, func, type, identifier, std::move(callback));
         }
         node = node->next_in_collection;
     }
@@ -503,7 +500,7 @@ bool run_hooks_of_type(std::shared_ptr<Node> node, Type type, Details& hook) {
     bool ret = false;
     for (; node != nullptr; node = node->next_in_collection) {
         try {
-            ret |= node->callback->operator()(hook);
+            ret |= node->callback(hook);
         } catch (const std::exception& ex) {
             LOG(ERROR, "An exception occurred during hook processing");
             LOG(ERROR, L"Function: {}", hook.func.func->get_path_name());
@@ -514,14 +511,13 @@ bool run_hooks_of_type(std::shared_ptr<Node> node, Type type, Details& hook) {
     return ret;
 }
 
-}  // namespace unrealsdk::hook_manager::impl
+}  // namespace impl
 #endif
 #pragma endregion
 
 // =================================================================================================
 
 #pragma region Public Interface
-namespace unrealsdk::hook_manager {
 
 #ifdef UNREALSDK_SHARED
 UNREALSDK_CAPI(void, log_all_calls, bool should_log);
@@ -555,7 +551,7 @@ UNREALSDK_CAPI(bool,
                Type type,
                const wchar_t* identifier,
                size_t identifier_size,
-               DLLSafeCallback* callback);
+               DLLSafeCallback&& callback);
 #endif
 #ifndef UNREALSDK_IMPORTING
 UNREALSDK_CAPI(bool,
@@ -565,8 +561,9 @@ UNREALSDK_CAPI(bool,
                Type type,
                const wchar_t* identifier,
                size_t identifier_size,
-               DLLSafeCallback* callback) {
-    return impl::add_hook({func, func_size}, type, {identifier, identifier_size}, callback);
+               DLLSafeCallback&& callback) {
+    return impl::add_hook({func, func_size}, type, {identifier, identifier_size},
+                          std::move(callback));
 }
 #endif
 
@@ -576,7 +573,7 @@ bool add_hook(std::wstring_view func,
               const Callback& callback) {
     // NOLINTBEGIN(cppcoreguidelines-owning-memory)
     return UNREALSDK_MANGLE(add_hook)(func.data(), func.size(), type, identifier.data(),
-                                      identifier.size(), new DLLSafeCallback(callback));
+                                      identifier.size(), {callback});
     // NOLINTEND(cppcoreguidelines-owning-memory)
 }
 

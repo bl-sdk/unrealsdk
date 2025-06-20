@@ -36,8 +36,7 @@ extern const std::wstring NEXT_LINE;
  *                points to the first whitespace char after the command (or off the end of the
  *                string if there was none). 0 in the case of a `NEXT_LINE` match.
  */
-using DLLSafeCallback = utils::DLLSafeCallback<void, const wchar_t*, size_t, size_t>;
-using Callback = DLLSafeCallback::InnerFunc;
+using Callback = std::function<void(const wchar_t*, size_t, size_t)>;
 
 /**
  * @brief Adds a custom console command.
