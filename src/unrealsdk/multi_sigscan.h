@@ -15,8 +15,8 @@ struct MultiPattern {
     const uint8_t* mask;
     size_t pattern_size;
     ptrdiff_t offset;
-    size_t start_offset = 0;
 
+    size_t start_offset = 0;
     std::atomic<uintptr_t> result = 0;
 
     /**
@@ -31,6 +31,13 @@ struct MultiPattern {
           mask(pattern.mask.data()),
           pattern_size(n),
           offset(pattern.offset) {}
+
+    /**
+     * @brief Gets the resolved address.
+     *
+     * @return The address.
+     */
+    uintptr_t addr(void) const { return this->result.load(); }
 };
 
 namespace {
@@ -65,6 +72,7 @@ std::pair<uint8_t, size_t> multi_sigscan_preprocess(const std::array<MultiPatter
                 continue;
             }
             uint8_t byte = pattern->bytes[i];
+            // saturating add
             byte_counts.at(byte) = (uint8_t)std::min(255, byte_counts.at(byte) + 1);
             seen_bytes.at(byte / 64) |= ((uint64_t)1 << (byte % 64));
         }
@@ -77,16 +85,16 @@ std::pair<uint8_t, size_t> multi_sigscan_preprocess(const std::array<MultiPatter
     }
     // NOLINTEND(readability-magic-numbers)
 
-#undef UNREALSDK_PRINT_MULTI_SIGSCAN_STATS
-#ifdef UNREALSDK_PRINT_MULTI_SIGSCAN_STATS
+#undef UNREALSDK_MULTI_SIGSCAN_LOGGING
+#ifdef UNREALSDK_MULTI_SIGSCAN_LOGGING
     LOG(MISC, "Multi-sigscan stats across {} patterns:", n);
     LOG(MISC, "Total uses of byte", n);
-    LOG(MISC, "   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
+    LOG(MISC, "    00  01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F");
     // NOLINTNEXTLINE(readability-magic-numbers)
     for (size_t i = 0; i < 256; i += 16) {
         LOG(MISC,
-            "{:02X} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} "
-            "{:2}",
+            "{:02X} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} "
+            "{:3}",
             i, byte_counts.at(i + 0), byte_counts.at(i + 1), byte_counts.at(i + 2),
             byte_counts.at(i + 3), byte_counts.at(i + 4), byte_counts.at(i + 5),
             byte_counts.at(i + 6), byte_counts.at(i + 7), byte_counts.at(i + 8),
@@ -95,12 +103,12 @@ std::pair<uint8_t, size_t> multi_sigscan_preprocess(const std::array<MultiPatter
             byte_counts.at(i + 15));
     }
     LOG(MISC, "Num patterns with byte:", n);
-    LOG(MISC, "   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
+    LOG(MISC, "    00  01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F");
     // NOLINTNEXTLINE(readability-magic-numbers)
     for (size_t i = 0; i < 256; i += 16) {
         LOG(MISC,
-            "{:02X} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} {:2} "
-            "{:2}",
+            "{:02X} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} {:3} "
+            "{:3}",
             i, patterns_with_byte.at(i + 0), patterns_with_byte.at(i + 1),
             patterns_with_byte.at(i + 2), patterns_with_byte.at(i + 3),
             patterns_with_byte.at(i + 4), patterns_with_byte.at(i + 5),
@@ -172,11 +180,14 @@ void multi_sigscan_thread(const uint8_t* pos,
                           const std::array<MultiPattern*, n>& patterns,
                           uint8_t byte) {
     do {
-        const auto* match = std::find(pos, end, byte);
+        const auto* const match = std::find(pos, end, byte);
         if (match == end) {
             return;
         }
 
+#ifdef UNREALSDK_MULTI_SIGSCAN_LOGGING
+        size_t pos_idx = 0;
+#endif
         for (MultiPattern* pattern : patterns) {
             const uint8_t* sig_start = match - pattern->start_offset;
 
@@ -196,7 +207,18 @@ void multi_sigscan_thread(const uint8_t* pos,
                     std::memory_order::memory_order_relaxed)) {
                     new_result = old_result != 0 && old_result < result ? old_result : result;
                 }
+
+#ifdef UNREALSDK_MULTI_SIGSCAN_LOGGING
+                LOG(MISC, "Multi-sigscan match in pattern {} at {:p}, sig at {:p}, result now {:p}",
+                    pos_idx, reinterpret_cast<const void*>(match),
+                    reinterpret_cast<const void*>(sig_start),
+                    reinterpret_cast<const void*>(pattern->result.load()));
+#endif
             }
+
+#ifdef UNREALSDK_MULTI_SIGSCAN_LOGGING
+            pos_idx++;
+#endif
         }
 
         pos = match + 1;

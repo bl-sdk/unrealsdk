@@ -13,7 +13,7 @@ namespace unrealsdk::game {
 
 namespace {
 
-const constexpr Pattern<84> GMALLOC_SIG{
+const constexpr Pattern<84> GMALLOC_PGO_SIG{
     // This is the inlined initialization code, it gets thousands of matches
     "48 8B 0D {????????}"      // mov rcx, [Borderlands4.exe+114F8EA0]
     "48 85 C9"                 // test rcx, rcx
@@ -38,6 +38,24 @@ const constexpr Pattern<84> GMALLOC_SIG{
     "C3"                 // retn
     "48 8D 0D ????????"  // lea rcx, cs:1514D2468h
     "48 89 D6"           // mov rsi, rdx
+};
+const constexpr Pattern<52> GMALLOC_NON_PGO_SIG{
+    "48 8B 0D {????????}"  // mov rcx, [Borderlands4.exe+C4DBF30]
+    "48 85 C9"             // test rcx, rcx
+    "74 ??"                // je Borderlands4.exe+1D843
+    "48 8B 01"             // mov rax, [rcx]
+    "48 8B 40 ??"          // mov rax, [rax+28]
+    "48 89 FA"             // mov rdx, rdi
+    "41 89 F0"             // mov r8d, esi
+    "48 83 C4 ??"          // add rsp, 28
+    "5F"                   // pop rdi
+    "5E"                   // pop rsi
+    "48 FF E0"             // jmp rax
+    "E8 ????????"          // call Borderlands4.exe+5B4E598
+    "48 8B 0D ????????"    // mov rcx, [Borderlands4.exe+C4DBF30]
+    "EB ??"                // jmp Borderlands4.exe+1D82D
+    "CC"                   // int 3
+    "48 89 C8"             // mov rax, rcx
 };
 
 struct FMalloc;
@@ -64,12 +82,13 @@ FMalloc* gmalloc;
 
 }  // namespace
 namespace bl4 {
-constinit MultiPattern gmalloc_multi{GMALLOC_SIG};
-}
+constinit MultiPattern gmalloc_pgo_multi{GMALLOC_PGO_SIG};
+constinit MultiPattern gmalloc_non_pgo_multi{GMALLOC_NON_PGO_SIG};
+}  // namespace bl4
 
 void BL4Hook::find_gmalloc(void) {
-    auto gmalloc_sig = GMALLOC_SIG.sigscan("GMalloc");
-    LOG(MISC, "GMalloc sig: {:p}", reinterpret_cast<void*>(gmalloc_sig));
+    auto gmalloc_sig =
+        BL4Hook::choose_pattern(bl4::gmalloc_pgo_multi, bl4::gmalloc_non_pgo_multi, "GMalloc sig");
     volatile auto gmalloc_ptr = read_offset<FMalloc**>(gmalloc_sig);
     while (*gmalloc_ptr == nullptr) {
         // NOLINTNEXTLINE(readability-magic-numbers)

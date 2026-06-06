@@ -19,46 +19,54 @@ void BL4Hook::hook(void) {
     hook_antidebug();
     hook_process_event_and_wait_for_unpack();
 
-    multi_sigscan(                         //
-        &bl4::gnatives_multi,              //
-        &bl4::ftexthistory_vftable_multi,  //
-        &bl4::fnamepool_multi,             //
-        &bl4::fname_find_or_store_multi,   //
-        &bl4::gobjects_multi,              //
-        &bl4::call_function_multi,         //
-        &bl4::process_event_multi,         //
-        &bl4::gmalloc_multi,               //
-        &bl4::get_obj_path_name_multi,     //
-        &bl4::get_field_path_name_multi,   //
-        &bl4::construct_obj_multi,         //
-        &bl4::find_obj_multi,              //
-        &bl4::load_package_multi           //
+    multi_sigscan(                                       //
+        &bl4::gnatives_multi,                            //
+        &bl4::ftexthistory_vftable_pgo_multi,            //
+        &bl4::ftext_as_culture_invariant_non_pgo_multi,  //
+        &bl4::fnamepool_pgo_multi,                       //
+        &bl4::fnamepool_non_pgo_multi,                   //
+        &bl4::fname_find_or_store_pgo_multi,             //
+        &bl4::fname_find_or_store_non_pgo_multi,         //
+        &bl4::gobjects_multi,                            //
+        &bl4::call_function_multi,                       //
+        &bl4::process_event_multi,                       //
+        &bl4::gmalloc_pgo_multi,                         //
+        &bl4::gmalloc_non_pgo_multi,                     //
+        &bl4::get_obj_path_name_pgo_multi,               //
+        &bl4::get_obj_path_name_non_pgo_multi,           //
+        &bl4::get_field_path_name_pgo_multi,             //
+        &bl4::get_field_path_name_non_pgo_multi,         //
+        &bl4::construct_obj_pgo_multi,                   //
+        &bl4::construct_obj_non_pgo_multi,               //
+        &bl4::find_obj_pgo_multi,                        //
+        &bl4::find_obj_non_pgo_multi,                    //
+        &bl4::load_package_multi                         //
     );
 
-    // The exe is quite big, a couple of these funcs use delay loops, and we seem to have run into
-    // timing issues before, so multithread the sigscans
-    std::vector<std::thread> threads;
-    for (auto func : {
-             hook_call_function,
-             find_fname_funcs,
-             find_gmalloc,
-             find_get_path_name,
-             find_construct_object,
-             find_static_find_object,
-             find_load_package,
-             find_fframe_step,
-             find_ftext_as_culture_invariant,
-             find_gobjects,
-         }) {
-        threads.emplace_back(func);
-    }
-    for (auto& thread : threads) {
-        thread.join();
-    }
+    hook_call_function();
+    find_fname_funcs();
+    find_gmalloc();
+    find_get_path_name();
+    find_construct_object();
+    find_static_find_object();
+    find_load_package();
+    find_fframe_step();
+    find_ftext_as_culture_invariant();
+    find_gobjects();
 }
 
 void BL4Hook::post_init(void) {
     inject_console();
+}
+
+uintptr_t BL4Hook::choose_pattern(const memory::MultiPattern& pgo,
+                                  const memory::MultiPattern& non_pgo,
+                                  std::string_view name) {
+    auto pgo_addr = pgo.addr();
+    auto non_pgo_addr = non_pgo.addr();
+    LOG(INFO, "{}: {:p}/{:p}", name, reinterpret_cast<void*>(pgo_addr),
+        reinterpret_cast<void*>(non_pgo_addr));
+    return pgo_addr == 0 ? non_pgo_addr : pgo_addr;
 }
 
 #pragma region FFrame::Step
@@ -69,8 +77,9 @@ using gnatives_func = void (*)(UObject* obj, FFrame* stack, void* param);
 
 gnatives_func* gnatives_table_ptr;
 
-const constexpr Pattern<22> GNATIVES_PTR{
-    "48 89 FA"             // mov rdx, rdi
+const constexpr Pattern<26> GNATIVES_PTR{
+    "48 89 F?"             // mov rdx, rdi              | mov rdx, rsi
+    "4C 8D 45 ??"          // lea r8, [rbp-08]
     "4C 8D 0D {????????}"  // lea r9, [Borderlands4.exe+C5CBDB0]
     "41 FF 14 C1"          // call qword ptr [r9+rax*8]
     "48 83 C4 ??"          // add rsp, 20
@@ -93,94 +102,6 @@ void BL4Hook::fframe_step(FFrame* frame, UObject* obj, void* param) const {
     auto curr_native = *frame->Code();
     frame->Code()++;
     gnatives_table_ptr[curr_native](obj, frame, param);
-}
-
-#pragma endregion
-
-#pragma region FText::AsCultureInvariant
-
-namespace {
-
-// FTextHistory::AsCultureInvariant seems to get entirely inlined, replicate it
-
-// binfold finds a couple of FTextHistory_Base funcs, xrefs to find table, xrefs and pick any
-// This is the entire initializer, this sig gets hundreds of matches
-const constexpr Pattern<46> FTEXTHISTORY_BASE_VFTABLE_PATTERN{
-    "B9 30000000"           // mov ecx, 00000030
-    "E8 ????????"           // call Borderlands4.exe+B17F7A0        <--- malloc wrapper
-    "0F 57 C0"              // xorps xmm0, xmm0
-    "0F 29 00"              // movaps [rax], xmm0
-    "48 8D 0D ????????"     // lea rcx, [Borderlands4.exe+EC372D0]  <--- FTextHistory_Base vftable
-    "48 89 08"              // mov [rax], rcx
-    "48 C7 40 10 FFFFFFFF"  // mov qword ptr [rax+10], FFFFFFFFFFFFFFFF
-    "0F 11 40 18"           // movups [rax+18], xmm0
-    "48 C7 40 28 00000000"  // mov qword ptr [rax+28], 00000000
-    ,
-    19};
-
-// NOLINTNEXTLINE(readability-identifier-naming)
-struct FTextHistory_Base {
-    uintptr_t* vftable;  // = vftable
-    std::atomic<uint32_t> ref_count = 0;
-    uint16_t unknown0 = 0;
-    uint16_t unknown1 = 0;
-    uint32_t unknown2_minus_one = (uint32_t)-1;
-    uint32_t unknown3_minus_one = (uint32_t)-1;
-    UnmanagedFString str;  // = 0
-    // This one's weird. Initialiser suggests u32+4 padding, usage suggests pointer.
-    uintptr_t unknown4_alt_str_ptr = 0;
-};
-// NOLINTBEGIN(readability-magic-numbers)
-static_assert(sizeof(FTextHistory_Base) == 0x30);
-static_assert(sizeof(FText) == 0x10);
-// NOLINTEND(readability-magic-numbers)
-
-uintptr_t* ftexthistory_base_vftable = nullptr;
-
-}  // namespace
-namespace bl4 {
-constinit MultiPattern ftexthistory_vftable_multi{FTEXTHISTORY_BASE_VFTABLE_PATTERN};
-}
-
-void BL4Hook::find_ftext_as_culture_invariant(void) {
-    auto sig = FTEXTHISTORY_BASE_VFTABLE_PATTERN.sigscan_nullable();
-    LOG(MISC, "FTextHistory_Base vftable sig: {:p}", reinterpret_cast<void*>(sig));
-
-    ftexthistory_base_vftable = read_offset<uintptr_t*>(sig);
-    LOG(MISC, "FTextHistory_Base vftable: {:p}",
-        reinterpret_cast<void*>(ftexthistory_base_vftable));
-}
-
-void BL4Hook::ftext_as_culture_invariant(unreal::FText* text, std::wstring_view str) const {
-    auto* base = unrealsdk::u_malloc<FTextHistory_Base>(sizeof(FTextHistory_Base));
-    base->vftable = ftexthistory_base_vftable;
-    base->ref_count = 1;  // pre-increment the ref count
-    base->unknown0 = 0;
-    base->unknown1 = 0;
-    base->unknown2_minus_one = (uint32_t)-1;
-    base->unknown3_minus_one = (uint32_t)-1;
-    base->str = str;
-    base->unknown4_alt_str_ptr = 0;
-
-    // Being slightly paranoid about the padding in ftext, zero it too
-#if defined(__MINGW32__) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wnontrivial-memcall"
-#endif
-    memset(text, 0, sizeof(*text));
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-#if defined(__MINGW32__) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
-
-    text->data = reinterpret_cast<FTextData*>(base);
-    text->flags = FText::FLAG_FROM_NAME_OR_STRING | FText::FLAG_INVARIANT_CULTURE;
 }
 
 #pragma endregion
