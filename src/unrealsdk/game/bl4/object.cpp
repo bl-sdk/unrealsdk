@@ -1,6 +1,7 @@
 #include "unrealsdk/pch.h"
 #include "unrealsdk/game/bl4/bl4.h"
 #include "unrealsdk/memory.h"
+#include "unrealsdk/multi_sigscan.h"
 #include "unrealsdk/unreal/classes/uclass.h"
 #include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/structs/ffield.h"
@@ -40,7 +41,7 @@ get_obj_path_name_func get_obj_path_name_ptr;
 // This error message contains two object path names, so it calls get path twice before
 // The get path you get from there is just the raw fstring version (?), and first function called
 // by it is the inner string builder we hook here
-const constinit Pattern<39> GET_OBJ_PATH_NAME_PATTERN{
+const constexpr Pattern<39> GET_OBJ_PATH_NAME_PATTERN{
     "41 56"                 // push r14
     "56"                    // push rsi
     "57"                    // push rdi
@@ -61,7 +62,7 @@ get_field_path_name_func get_field_path_name_ptr;
 
 // Search for the string "CoreUObject/Private/UObject/PropertyBaseObject.cpp", xrefs
 // It calls UObjectBaseUtility::GetPathName, then FField::GetPathName, then the log function
-const constinit Pattern<43> GET_FIELD_PATH_NAME_PATTERN{
+const constexpr Pattern<43> GET_FIELD_PATH_NAME_PATTERN{
     "41 57"                 // push r15
     "41 56"                 // push r14
     "56"                    // push rsi
@@ -77,6 +78,10 @@ const constinit Pattern<43> GET_FIELD_PATH_NAME_PATTERN{
 };
 
 }  // namespace
+namespace bl4 {
+constinit MultiPattern get_obj_path_name_multi{GET_OBJ_PATH_NAME_PATTERN};
+constinit MultiPattern get_field_path_name_multi{GET_FIELD_PATH_NAME_PATTERN};
+}  // namespace bl4
 
 void BL4Hook::find_get_path_name(void) {
     get_obj_path_name_ptr = GET_OBJ_PATH_NAME_PATTERN.sigscan_nullable<get_obj_path_name_func>();
@@ -148,7 +153,7 @@ UNREALSDK_UNREAL_STRUCT_PADDING_POP()
 using construct_obj_func = UObject* (*)(FStaticConstructObjectParameters * params);
 construct_obj_func construct_obj_ptr;
 
-const constinit Pattern<41> CONSTRUCT_OBJECT_PATTERN{
+const constexpr Pattern<41> CONSTRUCT_OBJECT_PATTERN{
     "41 56"                 // push r14
     "56"                    // push rsi
     "57"                    // push rdi
@@ -164,6 +169,9 @@ const constinit Pattern<41> CONSTRUCT_OBJECT_PATTERN{
 };
 
 }  // namespace
+namespace bl4 {
+constinit MultiPattern construct_obj_multi{CONSTRUCT_OBJECT_PATTERN};
+}
 
 void BL4Hook::find_construct_object(void) {
     construct_obj_ptr = CONSTRUCT_OBJECT_PATTERN.sigscan_nullable<construct_obj_func>();
@@ -204,7 +212,7 @@ static_find_object_safe_func static_find_object_ptr;
 
 // Search for the string L"FindImportedObject", xrefs. This function makes several calls to it,
 // easiest to find is near the top of the function, first call inside the loop.
-const constinit Pattern<31> STATIC_FIND_OBJECT_PATTERN{
+const constexpr Pattern<35> STATIC_FIND_OBJECT_PATTERN{
     "41 56"              // push r14
     "56"                 // push rsi
     "57"                 // push rdi
@@ -214,12 +222,16 @@ const constinit Pattern<31> STATIC_FIND_OBJECT_PATTERN{
     "48 31 E0"           // xor rax, rsp
     "48 89 44 24 ??"     // mov [rsp+30], rax
     "F6 05 ???????? 01"  // test byte ptr [Borderlands4.exe+115D7A00], 01
-
+    "74 ??"              // jz short loc_14153EB78
+    "31 C0"              // xor eax, eax
 };
 
 const constexpr intptr_t ANY_PACKAGE = -1;
 
 }  // namespace
+namespace bl4 {
+constinit MultiPattern find_obj_multi{STATIC_FIND_OBJECT_PATTERN};
+}
 
 void BL4Hook::find_static_find_object(void) {
     static_find_object_ptr =
@@ -245,7 +257,7 @@ using load_package_func = UObject* (*)(const UObject* outer,
                                        void* diff_package_path);
 load_package_func load_package_ptr;
 
-const constinit Pattern<50> LOAD_PACKAGE_PATTERN{
+const constexpr Pattern<67> LOAD_PACKAGE_PATTERN{
     "41 57"                 // push r15
     "41 56"                 // push r14
     "41 55"                 // push r13
@@ -261,9 +273,16 @@ const constinit Pattern<50> LOAD_PACKAGE_PATTERN{
     "48 83 3A 00"           // cmp qword ptr [rdx], 00
     "0F84 ????????"         // je Borderlands4.exe+2546480
     "4D 89 CF"              // mov r15, r9
+    "44 89 C7"              // mov edi, r8d
+    "49 89 D4"              // mov r12, rdx
+    "48 89 CE"              // mov rsi, rcx
+    "48 8B AC 24 ????????"  // mov rbp, [rsp+1F8]
 };
 
 }  // namespace
+namespace bl4 {
+constinit MultiPattern load_package_multi{LOAD_PACKAGE_PATTERN};
+}
 
 void BL4Hook::find_load_package(void) {
     load_package_ptr = LOAD_PACKAGE_PATTERN.sigscan_nullable<load_package_func>();

@@ -2,6 +2,7 @@
 #include "unrealsdk/game/bl4/bl4.h"
 #include "unrealsdk/game/bl4/offsets.h"
 #include "unrealsdk/memory.h"
+#include "unrealsdk/multi_sigscan.h"
 #include "unrealsdk/unreal/structs/gnames.h"
 #include "unrealsdk/utils.h"
 
@@ -61,6 +62,10 @@ using fname_find_or_store_wstring_func = void (*)(FName* self,
 fname_find_or_store_wstring_func fname_find_or_store_wstring_ptr;
 
 }  // namespace
+namespace bl4 {
+constinit MultiPattern fnamepool_multi{FNAMEPOOL_SIG};
+constinit MultiPattern fname_find_or_store_multi{FNAME_FIND_OR_STORE_WSTRING};
+}  // namespace bl4
 
 void BL4Hook::find_fname_funcs(void) {
     fname_find_or_store_wstring_ptr =

@@ -49,61 +49,6 @@ uintptr_t sigscan(const uint8_t* bytes,
                   size_t pattern_size,
                   uintptr_t start,
                   size_t size) {
-#ifdef UNREALSDK_NEW_SIGSCAN_IMPLEMENTATION
-    // As an optimization, we use std::find to efficiently find a starting byte (avoiding common
-    // ones), then only do our slower masked comparison after. Find that byte.
-    uint8_t starting_byte{};
-    ptrdiff_t starting_offset{};
-    do {
-        auto bytes_pos = bytes;
-        const auto bytes_end = bytes + pattern_size;
-
-        // Avoid some common bytes
-        auto match = std::find_if_not(bytes_pos, bytes_end, [](uint8_t byte) {
-            // NOLINTNEXTLINE(readability-magic-numbers)
-            return byte == 0x00 || byte == 0x24 || byte == 0x48 || byte == 0xff;
-        });
-        if (match == bytes_end) {
-            // Let's not bother handling this, make a better pattern
-            throw std::invalid_argument(
-                "sigscan pattern is too vague, couldn't find a starting byte");
-        }
-
-        // Must not be masked
-        auto offset = match - bytes;
-        if (mask[offset] == 0xFF) {  // NOLINT(readability-magic-numbers)
-            starting_byte = *match;
-            starting_offset = offset;
-            break;
-        }
-        bytes_pos = match + 1;
-
-    } while (true);
-
-    auto mem_pos = reinterpret_cast<uint8_t*>(start);
-    const auto mem_end = mem_pos + size;
-
-    do {
-        // Find the first instance
-        auto match = std::find(mem_pos, mem_end, starting_byte);
-        if (match == mem_end) {
-            return 0;
-        }
-
-        // Go back to the actual start of the pattern
-        match -= starting_offset;
-
-        const uint8_t* mask_pos = mask;
-        if (std::ranges::equal(match, match + pattern_size, bytes, bytes + pattern_size,
-                               std::ranges::equal_to{},
-                               [&mask_pos](uint8_t byte) { return byte & (*mask_pos++); })) {
-            return reinterpret_cast<uintptr_t>(match);
-        }
-
-        mem_pos = match + starting_offset + 1;
-    } while (true);
-
-#else
     auto start_ptr = reinterpret_cast<uint8_t*>(start);
     // The naive O(nm) search works well enough, even repeating it for each different pattern
     for (size_t i = 0; i < (size - pattern_size); i++) {
@@ -121,7 +66,6 @@ uintptr_t sigscan(const uint8_t* bytes,
     }
 
     return 0;
-#endif
 }
 
 #ifdef UNREALSDK_SHARED

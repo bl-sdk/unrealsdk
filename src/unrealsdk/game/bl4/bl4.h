@@ -9,6 +9,7 @@
 
 #include "unrealsdk/game/abstract_hook.h"
 #include "unrealsdk/game/selector.h"
+#include "unrealsdk/multi_sigscan.h"
 
 namespace unrealsdk::game {
 
@@ -83,6 +84,21 @@ struct GameTraits<BL4Hook> {
 #endif
 
 namespace bl4 {
+
+extern constinit memory::MultiPattern gnatives_multi;
+extern constinit memory::MultiPattern ftexthistory_vftable_multi;
+extern constinit memory::MultiPattern fnamepool_multi;
+extern constinit memory::MultiPattern fname_find_or_store_multi;
+extern constinit memory::MultiPattern gobjects_multi;
+extern constinit memory::MultiPattern call_function_multi;
+extern constinit memory::MultiPattern process_event_multi;
+extern constinit memory::MultiPattern gmalloc_multi;
+extern constinit memory::MultiPattern get_obj_path_name_multi;
+extern constinit memory::MultiPattern get_field_path_name_multi;
+extern constinit memory::MultiPattern construct_obj_multi;
+extern constinit memory::MultiPattern find_obj_multi;
+extern constinit memory::MultiPattern load_package_multi;
+
 namespace {
 
 constexpr auto DEFAULT_POLL_INTERVAL = std::chrono::milliseconds{100};

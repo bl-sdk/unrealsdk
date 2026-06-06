@@ -1,6 +1,7 @@
 #include "unrealsdk/pch.h"
 #include "unrealsdk/memory.h"
 #include "unrealsdk/game/bl4/bl4.h"
+#include "unrealsdk/multi_sigscan.h"
 #include "unrealsdk/unreal/alignment.h"
 
 #if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK2 && !defined(UNREALSDK_IMPORTING)
@@ -12,7 +13,7 @@ namespace unrealsdk::game {
 
 namespace {
 
-const constexpr Pattern<67> GMALLOC_SIG{
+const constexpr Pattern<84> GMALLOC_SIG{
     // This is the inlined initialization code, it gets thousands of matches
     "48 8B 0D {????????}"      // mov rcx, [Borderlands4.exe+114F8EA0]
     "48 85 C9"                 // test rcx, rcx
@@ -29,6 +30,14 @@ const constexpr Pattern<67> GMALLOC_SIG{
     "48 83 C4 20"              // add rsp, 20
     "5E"                       // pop rsi
     "48 FF E0"                 // jmp rax
+    // Not entirely sure this is still part of initalization, adding just to try get an 89 for the
+    // multi sigscan
+    "90"                 // nop
+    "48 83 C4 ??"        // add rsp, 20h
+    "5E"                 // pop rsi
+    "C3"                 // retn
+    "48 8D 0D ????????"  // lea rcx, cs:1514D2468h
+    "48 89 D6"           // mov rsi, rdx
 };
 
 struct FMalloc;
@@ -54,6 +63,9 @@ struct FMalloc {
 FMalloc* gmalloc;
 
 }  // namespace
+namespace bl4 {
+constinit MultiPattern gmalloc_multi{GMALLOC_SIG};
+}
 
 void BL4Hook::find_gmalloc(void) {
     auto gmalloc_sig = GMALLOC_SIG.sigscan("GMalloc");

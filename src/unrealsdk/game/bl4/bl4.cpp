@@ -1,6 +1,7 @@
 #include "unrealsdk/pch.h"
 #include "unrealsdk/game/bl4/bl4.h"
 #include "unrealsdk/memory.h"
+#include "unrealsdk/multi_sigscan.h"
 #include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/structs/fframe.h"
 #include "unrealsdk/unreal/structs/fname.h"
@@ -17,6 +18,22 @@ namespace unrealsdk::game {
 void BL4Hook::hook(void) {
     hook_antidebug();
     hook_process_event_and_wait_for_unpack();
+
+    multi_sigscan(                         //
+        &bl4::gnatives_multi,              //
+        &bl4::ftexthistory_vftable_multi,  //
+        &bl4::fnamepool_multi,             //
+        &bl4::fname_find_or_store_multi,   //
+        &bl4::gobjects_multi,              //
+        &bl4::call_function_multi,         //
+        &bl4::process_event_multi,         //
+        &bl4::gmalloc_multi,               //
+        &bl4::get_obj_path_name_multi,     //
+        &bl4::get_field_path_name_multi,   //
+        &bl4::construct_obj_multi,         //
+        &bl4::find_obj_multi,              //
+        &bl4::load_package_multi           //
+    );
 
     // The exe is quite big, a couple of these funcs use delay loops, and we seem to have run into
     // timing issues before, so multithread the sigscans
@@ -52,7 +69,8 @@ using gnatives_func = void (*)(UObject* obj, FFrame* stack, void* param);
 
 gnatives_func* gnatives_table_ptr;
 
-const constinit Pattern<19> GNATIVES_PTR{
+const constexpr Pattern<22> GNATIVES_PTR{
+    "48 89 FA"             // mov rdx, rdi
     "4C 8D 0D {????????}"  // lea r9, [Borderlands4.exe+C5CBDB0]
     "41 FF 14 C1"          // call qword ptr [r9+rax*8]
     "48 83 C4 ??"          // add rsp, 20
@@ -60,6 +78,9 @@ const constinit Pattern<19> GNATIVES_PTR{
 };
 
 }  // namespace
+namespace bl4 {
+constinit MultiPattern gnatives_multi{GNATIVES_PTR};
+}
 
 void BL4Hook::find_fframe_step(void) {
     auto gnative_inst = GNATIVES_PTR.sigscan("gnative");
@@ -84,7 +105,7 @@ namespace {
 
 // binfold finds a couple of FTextHistory_Base funcs, xrefs to find table, xrefs and pick any
 // This is the entire initializer, this sig gets hundreds of matches
-const constinit Pattern<46> FTEXTHISTORY_BASE_VFTABLE_PATTERN{
+const constexpr Pattern<46> FTEXTHISTORY_BASE_VFTABLE_PATTERN{
     "B9 30000000"           // mov ecx, 00000030
     "E8 ????????"           // call Borderlands4.exe+B17F7A0        <--- malloc wrapper
     "0F 57 C0"              // xorps xmm0, xmm0
@@ -103,8 +124,8 @@ struct FTextHistory_Base {
     std::atomic<uint32_t> ref_count = 0;
     uint16_t unknown0 = 0;
     uint16_t unknown1 = 0;
-    uint32_t unknown2_minus_one = -1;
-    uint32_t unknown3_minus_one = -1;
+    uint32_t unknown2_minus_one = (uint32_t)-1;
+    uint32_t unknown3_minus_one = (uint32_t)-1;
     UnmanagedFString str;  // = 0
     // This one's weird. Initialiser suggests u32+4 padding, usage suggests pointer.
     uintptr_t unknown4_alt_str_ptr = 0;
@@ -117,6 +138,9 @@ static_assert(sizeof(FText) == 0x10);
 uintptr_t* ftexthistory_base_vftable = nullptr;
 
 }  // namespace
+namespace bl4 {
+constinit MultiPattern ftexthistory_vftable_multi{FTEXTHISTORY_BASE_VFTABLE_PATTERN};
+}
 
 void BL4Hook::find_ftext_as_culture_invariant(void) {
     auto sig = FTEXTHISTORY_BASE_VFTABLE_PATTERN.sigscan_nullable();
@@ -133,8 +157,8 @@ void BL4Hook::ftext_as_culture_invariant(unreal::FText* text, std::wstring_view 
     base->ref_count = 1;  // pre-increment the ref count
     base->unknown0 = 0;
     base->unknown1 = 0;
-    base->unknown2_minus_one = -1;
-    base->unknown3_minus_one = -1;
+    base->unknown2_minus_one = (uint32_t)-1;
+    base->unknown3_minus_one = (uint32_t)-1;
     base->str = str;
     base->unknown4_alt_str_ptr = 0;
 
