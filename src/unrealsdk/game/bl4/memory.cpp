@@ -30,7 +30,7 @@ const constexpr Pattern<84> GMALLOC_PGO_SIG{
     "48 83 C4 20"              // add rsp, 20
     "5E"                       // pop rsi
     "48 FF E0"                 // jmp rax
-    // Not entirely sure this is still part of initalization, adding just to try get an 89 for the
+    // Not entirely sure this is still part of initialization, adding just to try get an 89 for the
     // multi sigscan
     "90"                 // nop
     "48 83 C4 ??"        // add rsp, 20h

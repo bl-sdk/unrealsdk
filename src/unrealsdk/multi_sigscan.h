@@ -199,12 +199,11 @@ void multi_sigscan_thread(const uint8_t* pos,
 
                 // We have a match. Try swap into the result, if we don't already have one, and it's
                 // smaller than the old result.
-                auto old_result = pattern->result.load(std::memory_order::memory_order_relaxed);
+                auto old_result = pattern->result.load(std::memory_order_relaxed);
                 auto new_result = old_result != 0 && old_result < result ? old_result : result;
 
                 while (!pattern->result.compare_exchange_weak(
-                    old_result, new_result, std::memory_order::memory_order_seq_cst,
-                    std::memory_order::memory_order_relaxed)) {
+                    old_result, new_result, std::memory_order_seq_cst, std::memory_order_relaxed)) {
                     new_result = old_result != 0 && old_result < result ? old_result : result;
                 }
 
@@ -241,12 +240,12 @@ void multi_sigscan(T*... patterns_arg) {
     size_t num_threads = std::thread::hardware_concurrency();
     if (num_threads == 0) {
         // May return 0 if not supported.
-        // Curently steam hardware survey says 6 and 8 cores are ~25% each, so lets go with the
+        // Currently steam hardware survey says 6 and 8 cores are ~25% each, so lets go with the
         // better of the two.
         // NOLINTNEXTLINE(readability-magic-numbers)
         num_threads = 8;
     }
-    // Assuming we hit memory throughput on all our threads, leave one for the game's initalization
+    // Assuming we hit memory throughput on all our threads, leave one for the game's initialization
     // This is entirely theoretical, I have not measured
     num_threads--;
 

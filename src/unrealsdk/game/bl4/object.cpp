@@ -319,7 +319,7 @@ using load_package_func = UObject* (*)(const UObject* outer,
                                        void* diff_package_path);
 load_package_func load_package_ptr;
 
-const constexpr Pattern<67> LOAD_PACKAGE_PATTERN{
+const constexpr Pattern<50> LOAD_PACKAGE_PATTERN{
     "41 57"                 // push r15
     "41 56"                 // push r14
     "41 55"                 // push r13
@@ -335,10 +335,6 @@ const constexpr Pattern<67> LOAD_PACKAGE_PATTERN{
     "48 83 3A 00"           // cmp qword ptr [rdx], 00
     "0F84 ????????"         // je Borderlands4.exe+2546480
     "4D 89 CF"              // mov r15, r9
-    "44 89 C7"              // mov edi, r8d
-    "49 89 D4"              // mov r12, rdx
-    "48 89 CE"              // mov rsi, rcx
-    "48 8B AC 24 ????????"  // mov rbp, [rsp+1F8]
 };
 
 }  // namespace

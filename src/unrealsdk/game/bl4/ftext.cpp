@@ -40,8 +40,8 @@ struct FTextHistory_Base {
     std::atomic<uint32_t> ref_count = 0;
     uint16_t unknown0 = 0;
     uint16_t unknown1 = 0;
-    uint32_t unknown2_minus_one = (uint32_t)-1;
-    uint32_t unknown3_minus_one = (uint32_t)-1;
+    uint32_t unknown2_minus_one = static_cast<uint32_t>(-1);
+    uint32_t unknown3_minus_one = static_cast<uint32_t>(-1);
     UnmanagedFString str;  // = 0
     // This one's weird. Initialiser suggests u32+4 padding, usage suggests pointer.
     uintptr_t unknown4_alt_str_ptr = 0;
@@ -64,8 +64,8 @@ void BL4Hook::ftext_as_culture_invariant_pgo(unreal::FText* text, std::wstring_v
     base->ref_count = 1;  // pre-increment the ref count
     base->unknown0 = 0;
     base->unknown1 = 0;
-    base->unknown2_minus_one = (uint32_t)-1;
-    base->unknown3_minus_one = (uint32_t)-1;
+    base->unknown2_minus_one = static_cast<uint32_t>(-1);
+    base->unknown3_minus_one = static_cast<uint32_t>(-1);
     base->str = str;
     base->unknown4_alt_str_ptr = 0;
 

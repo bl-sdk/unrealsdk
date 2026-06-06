@@ -104,7 +104,7 @@ void BL4Hook::find_fname_funcs(void) {
 
     auto name_pool_base = pgo_addr == 0 ? non_pgo_addr : pgo_addr;
     auto ptr_offset = pgo_addr == 0 ? FNAMEPOOL_NON_PGO_PTR_OFFSET : FNAMEPOOL_PGO_PTR_OFFSET;
-    auto initalized_offset =
+    auto initialized_offset =
         pgo_addr == 0 ? FNAMEPOOL_NON_PGO_INITIALIZED_OFFSET : FNAMEPOOL_PGO_INITIALIZED_OFFSET;
 
     name_pool_ptr = read_offset<decltype(name_pool_ptr)>(name_pool_base + ptr_offset);
@@ -112,7 +112,8 @@ void BL4Hook::find_fname_funcs(void) {
 
     // I tried manually initaliaing the pool, but it didn't seem to like it
     // Just wait for it to happen on the main thread instead
-    auto name_pool_initialized = read_offset<volatile uint8_t*>(name_pool_base + initalized_offset);
+    auto name_pool_initialized =
+        read_offset<volatile uint8_t*>(name_pool_base + initialized_offset);
     while (*name_pool_initialized != 0) {
         const constexpr auto sleep_time = std::chrono::milliseconds{50};
         std::this_thread::sleep_for(sleep_time);
