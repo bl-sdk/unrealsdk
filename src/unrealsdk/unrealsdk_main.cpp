@@ -121,7 +121,7 @@ UNREALSDK_CAPI([[nodiscard]] UObject*,
                const FName* name,
                uint64_t flags,
                UObject* template_obj) {
-    FName local_name{0, 0};
+    FName local_name{};
     if (name != nullptr) {
         local_name = *name;
     }
@@ -146,7 +146,7 @@ UNREALSDK_CAPI([[nodiscard]] UObject*,
 
 namespace internal {
 
-UNREALSDK_CAPI(void, fname_init, FName* name, const wchar_t* str, int32_t number) {
+UNREALSDK_CAPI(void, fname_init, FName* name, const wchar_t* str, uint32_t number) {
     hook_instance->fname_init(name, str, number);
 }
 

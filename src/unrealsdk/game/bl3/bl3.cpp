@@ -41,7 +41,7 @@ namespace {
 
 using fname_init_func = void (*)(FName* self,
                                  const wchar_t* str,
-                                 int32_t number,
+                                 uint32_t number,
                                  int32_t find_type,
                                  int32_t split_name,
                                  int32_t hardcode_idx);
@@ -62,7 +62,7 @@ void BL3Hook::find_fname_init(void) {
     LOG(MISC, "FName::Init: {:p}", reinterpret_cast<void*>(fname_init_ptr));
 }
 
-void BL3Hook::fname_init(FName* name, const wchar_t* str, int32_t number) const {
+void BL3Hook::fname_init(FName* name, const wchar_t* str, uint32_t number) const {
     fname_init_ptr(name, str, number, 1, 1 /* true */, -1);
 }
 

@@ -20,7 +20,7 @@ FNameEntry* TStaticIndirectArrayThreadSafeRead_FNameEntry::at(size_t idx) const 
     //           cppcoreguidelines-pro-bounds-constant-array-index)
 };
 
-FNameEntry* FNamePool::at(int32_t idx) const {
+FNameEntry* FNamePool::at(uint32_t idx) const {
     uint32_t as_unsigned{};
     memcpy(&as_unsigned, &idx, sizeof(idx));
 

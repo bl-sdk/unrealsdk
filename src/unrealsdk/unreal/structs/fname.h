@@ -25,8 +25,8 @@ struct FName {
     friend class game::BL3Hook;
     friend class game::BL4Hook;
 
-    int32_t index{0};
-    int32_t number{0};
+    uint32_t index{0};
+    uint32_t number{0};
 
    public:
     /**
@@ -38,10 +38,10 @@ struct FName {
      * @param number The name number to use.
      */
     FName(void) = default;
-    FName(int32_t index, int32_t number);
-    explicit FName(const wchar_t* name, int32_t number = 0);
-    explicit FName(const std::string& name, int32_t number = 0);
-    explicit FName(const std::wstring& name, int32_t number = 0);
+    FName(uint32_t index, uint32_t number);
+    explicit FName(const wchar_t* name, uint32_t number = 0);
+    explicit FName(const std::string& name, uint32_t number = 0);
+    explicit FName(const std::wstring& name, uint32_t number = 0);
 
     bool operator==(const FName& other) const;
     bool operator!=(const FName& other) const;

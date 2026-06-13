@@ -104,7 +104,7 @@ class BL3Hook : public AbstractHook {
     [[nodiscard]] unreal::UObject* load_package(const std::wstring& name,
                                                 uint32_t flags) const override;
 
-    void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const override;
+    void fname_init(unreal::FName* name, const wchar_t* str, uint32_t number) const override;
     [[nodiscard]] std::variant<const std::string_view, const std::wstring_view> fname_get_str(
         const unreal::FName& name) const override;
     void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const override;

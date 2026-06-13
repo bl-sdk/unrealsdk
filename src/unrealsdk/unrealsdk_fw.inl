@@ -55,7 +55,7 @@ UNREALSDK_CAPI([[nodiscard]] UObject*,
 
 namespace internal {
 
-UNREALSDK_CAPI(void, fname_init, FName* name, const wchar_t* str, int32_t number);
+UNREALSDK_CAPI(void, fname_init, FName* name, const wchar_t* str, uint32_t number);
 UNREALSDK_CAPI(void, fname_get_str, FName name, const void** str, size_t* size, bool* is_wide);
 UNREALSDK_CAPI(void, fframe_step, FFrame* frame, UObject* obj, void* param);
 UNREALSDK_CAPI(void, process_event, UObject* object, UFunction* function, void* params);

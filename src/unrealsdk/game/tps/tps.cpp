@@ -14,9 +14,9 @@ namespace unrealsdk::game {
 #pragma GCC diagnostic ignored "-Wattributes"  // thiscall on non-class
 #endif
 
-void TPSHook::fname_init(FName* name, const wchar_t* str, int32_t number) const {
+void TPSHook::fname_init(FName* name, const wchar_t* str, uint32_t number) const {
     // NOLINTNEXTLINE(modernize-use-using)
-    typedef void*(__thiscall * fname_init_func)(FName * name, const wchar_t* str, int32_t number,
+    typedef void*(__thiscall * fname_init_func)(FName * name, const wchar_t* str, uint32_t number,
                                                 int32_t find_type, int32_t split_name,
                                                 int32_t /*unknown*/);
 

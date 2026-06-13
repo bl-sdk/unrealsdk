@@ -85,7 +85,7 @@ namespace {
 
 using fname_init_func = void (*)(FName* name,
                                  const wchar_t* str,
-                                 int32_t number,
+                                 uint32_t number,
                                  int32_t find_type,
                                  int32_t split_name);
 
@@ -98,7 +98,7 @@ void BL1EHook::find_fname_init(void) {
     LOG(MISC, "FName::Init: {:p}", reinterpret_cast<void*>(fname_init_ptr));
 }
 
-void BL1EHook::fname_init(FName* name, const wchar_t* str, int32_t number) const {
+void BL1EHook::fname_init(FName* name, const wchar_t* str, uint32_t number) const {
     fname_init_ptr(name, str, number, 1, 1);
 }
 

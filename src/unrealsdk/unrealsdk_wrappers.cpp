@@ -60,10 +60,10 @@ UObject* load_package(std::wstring_view name, uint32_t flags) {
 
 namespace internal {
 
-void fname_init(FName* name, const wchar_t* str, int32_t number) {
+void fname_init(FName* name, const wchar_t* str, uint32_t number) {
     UNREALSDK_MANGLE(fname_init)(name, str, number);
 }
-void fname_init(FName* name, const std::wstring& str, int32_t number) {
+void fname_init(FName* name, const std::wstring& str, uint32_t number) {
     UNREALSDK_MANGLE(fname_init)(name, str.data(), number);
 }
 std::variant<const std::string_view, const std::wstring_view> fname_get_str(

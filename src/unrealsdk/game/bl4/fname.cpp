@@ -131,7 +131,7 @@ std::variant<const std::string_view, const std::wstring_view> BL4Hook::fname_get
     return std::string_view{&entry->Name.Ansi[0], size};
 }
 
-void BL4Hook::fname_init(FName* name, const wchar_t* str, int32_t number) const {
+void BL4Hook::fname_init(FName* name, const wchar_t* str, uint32_t number) const {
     const constexpr auto max_ascii_char = L'\x7F';
     const constexpr auto fname_add = 1;
 

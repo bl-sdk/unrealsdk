@@ -73,7 +73,7 @@ struct AbstractHook {
     [[nodiscard]] virtual unreal::UObject* load_package(const std::wstring& name,
                                                         uint32_t flags) const;
 
-    virtual void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const;
+    virtual void fname_init(unreal::FName* name, const wchar_t* str, uint32_t number) const;
     [[nodiscard]] virtual std::variant<const std::string_view, const std::wstring_view>
     fname_get_str(const unreal::FName& name) const;
 
