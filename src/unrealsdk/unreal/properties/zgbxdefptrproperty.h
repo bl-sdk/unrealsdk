@@ -10,14 +10,6 @@
 
 namespace unrealsdk::unreal {
 
-/*
-========================================
-THIS PROPERTY TYPE IS STILL EXPERIMENTAL
-========================================
-
-It may currently leak memory and/or cause crashes, and it's semantics are all liable to change
-*/
-
 class ZGbxDefPtrProperty : public ZProperty {
    public:
     ZGbxDefPtrProperty() = delete;
@@ -36,7 +28,6 @@ class ZGbxDefPtrProperty : public ZProperty {
 
 template <>
 struct PropTraits<ZGbxDefPtrProperty> : public AbstractPropTraits<ZGbxDefPtrProperty> {
-    // TODO: we may need to switch to a wrapper type if ownership matters
     using Value = FGbxDefPtr;
 
     static Value get(const ZGbxDefPtrProperty* prop,

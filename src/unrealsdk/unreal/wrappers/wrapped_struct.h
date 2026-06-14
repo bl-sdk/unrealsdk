@@ -27,7 +27,7 @@ class WrappedStruct {
      * @param type The type of the struct.
      * @param base The base address of the struct.
      * @param parent The parent pointer this struct was retrieved from, used to copy ownership.
-     * @param other The other wrapped struct to copy/move from. Only allowed if of the same type.
+     * @param other The other wrapped struct to copy/move from.
      */
     WrappedStruct(const UStruct* type);
     WrappedStruct(const UStruct* type, void* base, const UnrealPointer<void>& parent = {nullptr});
@@ -38,7 +38,7 @@ class WrappedStruct {
      * @brief Assigns to the struct.
      * @note Only allowed if of the same type.
      *
-     * @param other The other wrapped struct to copy/move from
+     * @param other The other wrapped struct to copy/move from.
      * @return A reference to this wrapped struct.
      */
     WrappedStruct& operator=(const WrappedStruct& other);
