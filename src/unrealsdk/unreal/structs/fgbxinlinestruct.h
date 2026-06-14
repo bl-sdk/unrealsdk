@@ -13,13 +13,13 @@ class UScriptStruct;
 UNREALSDK_UNREAL_STRUCT_PADDING_PUSH()
 
 /*
-So this type is just a plain lie from gearbox - structs are inline normally, this type is explictly
+So this type is just a plain lie from gearbox - structs are inline normally, this type is explicitly
 out-of-line. It mostly seems like they're just trying to avoid using UObjects, but still want
 something that behaves the exact same. They seem strictly worse, I suspect they're LLM slop.
 
-The main thing to note with this type is that it explictly allows for subclasses of the MetaStruct
+The main thing to note with this type is that it explicitly allows for subclasses of the MetaStruct
 on the property. We have to use a virtual function to get the real type back out. All of the structs
-that may be assigned must have a vftable (it's referenced by TReferenceController::DestoryObject()),
+that may be assigned must have a vftable (it's referenced by TReferenceController::DestroyObject()),
 though it's accounted for in the property offsets so can mostly be ignored.
 */
 
@@ -43,16 +43,18 @@ struct FGbxInlineStructAllocation {
     static constexpr auto EXTRA_ALLOC_SIZE = 0x18;
 
     TReferenceController controller{.vftable = nullptr, .ref_count = 1, .weak_ref_count = 1};
-    // This layout is important, this field is explictly used in the vftables we're copying
+    // This layout is important, this field is explicitly used in the vftables we're copying
     uint32_t offset_to_data = EXTRA_ALLOC_SIZE;
     uint32_t unknown = 0;
     uintptr_t* data_vftable = nullptr;
     // remaining struct data goes here
 };
 
+#if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK2
 static_assert(offsetof(FGbxInlineStructAllocation, data_vftable)
                   == FGbxInlineStructAllocation::EXTRA_ALLOC_SIZE,
               "inline struct allocation layout was unexpectedly large");
+#endif
 
 }  // namespace internal
 

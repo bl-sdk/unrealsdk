@@ -38,7 +38,7 @@ PropTraits<ZEnumProperty>::Value PropTraits<ZEnumProperty>::get(const ZEnumPrope
             static_assert(std::is_integral_v<typename PropTraits<T>::Value>);
 
             using underlying_limits = std::numeric_limits<typename PropTraits<T>::Value>;
-            using value_limits = std::numeric_limits<typename PropTraits<ZEnumProperty>::Value>;
+            using value_limits = std::numeric_limits<PropTraits<ZEnumProperty>::Value>;
             static_assert(underlying_limits::min() >= value_limits::min()
                           && underlying_limits::max() <= value_limits::max());
 
@@ -54,7 +54,7 @@ void PropTraits<ZEnumProperty>::set(const ZEnumProperty* prop, uintptr_t addr, c
             static_assert(std::is_integral_v<typename PropTraits<T>::Value>);
 
             using underlying_limits = std::numeric_limits<typename PropTraits<T>::Value>;
-            using value_limits = std::numeric_limits<typename PropTraits<ZEnumProperty>::Value>;
+            using value_limits = std::numeric_limits<PropTraits<ZEnumProperty>::Value>;
             static_assert(underlying_limits::min() >= value_limits::min()
                           && underlying_limits::max() <= value_limits::max());
 

@@ -195,7 +195,7 @@ bool inject_console_hook(hook_manager::Details& hook) {
 
         auto existing_console_key =
             inner_obj->get<ZStructProperty>(L"ConsoleKey"_fn).get<ZNameProperty>(L"KeyName"_fn);
-        FName console_key{0, 0};
+        FName console_key{};
 
         if (existing_console_key != L"None"_fn && existing_console_key != L"Undefine"_fn) {
             LOG(MISC, "Console key is already set to {}", existing_console_key);

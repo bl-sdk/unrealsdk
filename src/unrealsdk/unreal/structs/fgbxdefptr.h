@@ -34,7 +34,7 @@ Features we're going to ignore for now:
 - Changing the name/type of an already resolved property - you can reassign a new property on top of
   it. This means we can reuse this type as its own "wrapped def ptr" type.
 
-ZGbxDefPtrPropertys have a Struct field. In lieu of other evidence, we're going to assume that's a
+`ZGbxDefPtrProperty`s have a Struct field. In lieu of other evidence, we're going to assume that's a
 class restriction, same as an object property.
 */
 
