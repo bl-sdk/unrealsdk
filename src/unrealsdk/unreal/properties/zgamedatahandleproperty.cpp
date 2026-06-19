@@ -34,8 +34,8 @@ void PropTraits<ZGameDataHandleProperty>::set(const ZGameDataHandleProperty* pro
 }
 
 void PropTraits<ZGameDataHandleProperty>::destroy(const ZGameDataHandleProperty* /*prop*/,
-                                             uintptr_t /*addr*/) {
-    // Current assumption is the pointers are non-owning references, so we don't need to free
+                                                  uintptr_t /*addr*/) {
+    // Current assumption is the handles are non-owning references, so we don't need to free
     // anything here
 }
 

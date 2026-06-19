@@ -5,8 +5,8 @@
 #include "unrealsdk/unreal/classes/uscriptstruct.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/structs/fname.h"
-#include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 #include "unrealsdk/unreal/wrappers/unreal_pointer.h"
+#include "unrealsdk/unreal/wrappers/wrapped_struct.h"
 
 namespace unrealsdk::unreal {
 
@@ -38,8 +38,8 @@ name, which appear to uniquely identify a def. When the game accesses one of the
 an actual pointer to the struct. At this point we do not try to resolve them ourselves, like we do
 with real soft object pointers, you'll have to find a resolved instance to edit it.
 
-FGbxInlineStruct is a pointer to an explictly out-of-line FGbxDef. This uses a shared pointer, so in
-this instance they *are* owning references. Because of this we do let you create your own. Not
+FGbxInlineStruct is a pointer to an explicitly out-of-line FGbxDef. This uses a shared pointer, so
+in this instance they *are* owning references. Because of this we do let you create your own. Not
 entirely sure how they relate to the NCS datatables.
 
 ZGbxDefPtrProperty and ZGbxInlineStructProperty both appear totally ok with inheritance - you can

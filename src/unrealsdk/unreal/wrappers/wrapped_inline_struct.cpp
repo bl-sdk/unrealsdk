@@ -30,7 +30,7 @@ WrappedInlineStruct::WrappedInlineStruct(const WrappedInlineStruct& other)
     controller->unknown = 0;
     controller->def.vftable = other.inline_ref.ptr.obj->vftable;
     static_assert(sizeof(controller->def) == sizeof(controller->def.vftable),
-                  "unexpected extra data to initalize in a FGbxDef");
+                  "unexpected extra data to initialize in a FGbxDef");
 
     this->inline_ref.ptr.controller = &controller->controller;
     this->inline_ref.ptr.obj = &controller->def;
