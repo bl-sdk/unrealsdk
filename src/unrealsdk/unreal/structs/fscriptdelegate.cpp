@@ -45,7 +45,7 @@ void FScriptDelegate::set_object(UObject* obj) {
 void FScriptDelegate::bind(const std::optional<BoundFunction>& func) {
     if (!func.has_value()) {
         this->set_object(nullptr);
-        this->func_name = FName{0, 0};
+        this->func_name = FName{};
         return;
     }
 

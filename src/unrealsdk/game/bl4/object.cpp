@@ -1,6 +1,7 @@
 #include "unrealsdk/pch.h"
 #include "unrealsdk/game/bl4/bl4.h"
 #include "unrealsdk/memory.h"
+#include "unrealsdk/multi_sigscan.h"
 #include "unrealsdk/unreal/classes/uclass.h"
 #include "unrealsdk/unreal/classes/uobject.h"
 #include "unrealsdk/unreal/structs/ffield.h"
@@ -40,7 +41,7 @@ get_obj_path_name_func get_obj_path_name_ptr;
 // This error message contains two object path names, so it calls get path twice before
 // The get path you get from there is just the raw fstring version (?), and first function called
 // by it is the inner string builder we hook here
-const constinit Pattern<39> GET_OBJ_PATH_NAME_PATTERN{
+const constexpr Pattern<39> GET_OBJ_PATH_NAME_PGO_PATTERN{
     "41 56"                 // push r14
     "56"                    // push rsi
     "57"                    // push rdi
@@ -53,6 +54,19 @@ const constinit Pattern<39> GET_OBJ_PATH_NAME_PATTERN{
     "48 89 84 24 ????????"  // mov [rsp+00000080], rax
     "48 39 D1"              // cmp rcx, rdx
 };
+const constexpr Pattern<42> GET_OBJ_PATH_NAME_NON_PGO_PATTERN{
+    "41 56"                 // push r14
+    "56"                    // push rsi
+    "57"                    // push rdi
+    "53"                    // push rbx
+    "48 81 EC ????????"     // sub rsp, 00000088
+    "4C 89 C6"              // mov rsi, r8
+    "48 8B 05 ????????"     // mov rax, [Borderlands4.exe+C372940]
+    "48 31 E0"              // xor rax, rsp
+    "48 89 84 24 ????????"  // mov [rsp+00000080], rax
+    "48 85 C9"              // test rcx, rcx
+    "0F84 ????????"         // je Borderlands4.exe+4261FF6
+};
 
 using get_field_path_name_func = ManagedFString* (*)(const FField* self,
                                                      ManagedFString* ret,
@@ -61,7 +75,7 @@ get_field_path_name_func get_field_path_name_ptr;
 
 // Search for the string "CoreUObject/Private/UObject/PropertyBaseObject.cpp", xrefs
 // It calls UObjectBaseUtility::GetPathName, then FField::GetPathName, then the log function
-const constinit Pattern<43> GET_FIELD_PATH_NAME_PATTERN{
+const constexpr Pattern<43> GET_FIELD_PATH_NAME_PGO_PATTERN{
     "41 57"                 // push r15
     "41 56"                 // push r14
     "56"                    // push rsi
@@ -75,16 +89,40 @@ const constinit Pattern<43> GET_FIELD_PATH_NAME_PATTERN{
     "48 89 94 24 ????????"  // mov [rsp+00000248], rdx
     "48 8D 54 24 ??"        // lea rdx,[rsp+58]
 };
+const constexpr Pattern<67> GET_FIELD_PATH_NAME_NON_PGO_PATTERN{
+    "56"                    // push rsi
+    "57"                    // push rdi
+    "48 81 EC ????????"     // sub rsp, 00000258
+    "48 89 D6"              // mov rsi, rdx
+    "48 8B 05 ????????"     // mov rax, [Borderlands4.exe+C372940]
+    "48 31 E0"              // xor rax, rsp
+    "48 89 84 24 ????????"  // mov [rsp+00000250], rax
+    "48 8D 44 24 ??"        // lea rax, [rsp+50]
+    "C6 40 F8 00"           // mov byte ptr [rax-08], 00
+    "48 89 40 E0"           // mov [rax-20], rax
+    "48 89 40 E8"           // mov [rax-18], rax
+    "48 8D 94 24 ????????"  // lea rdx, [rsp+00000250]
+    "48 89 50 F0"           // mov [rax-10], rdx
+    "48 8D 7C 24 ??"        // lea rdi, [rsp+30]
+    "4C 89 C2"              // mov rdx, r8
+};
 
 }  // namespace
+namespace bl4 {
+constinit MultiPattern get_obj_path_name_pgo_multi{GET_OBJ_PATH_NAME_PGO_PATTERN};
+constinit MultiPattern get_obj_path_name_non_pgo_multi{GET_OBJ_PATH_NAME_NON_PGO_PATTERN};
+constinit MultiPattern get_field_path_name_pgo_multi{GET_FIELD_PATH_NAME_PGO_PATTERN};
+constinit MultiPattern get_field_path_name_non_pgo_multi{GET_FIELD_PATH_NAME_NON_PGO_PATTERN};
+}  // namespace bl4
 
 void BL4Hook::find_get_path_name(void) {
-    get_obj_path_name_ptr = GET_OBJ_PATH_NAME_PATTERN.sigscan_nullable<get_obj_path_name_func>();
-    LOG(MISC, "UObject::GetPathName: {:p}", reinterpret_cast<void*>(get_obj_path_name_ptr));
+    get_obj_path_name_ptr = BL4Hook::choose_pattern<get_obj_path_name_func>(
+        bl4::get_obj_path_name_pgo_multi, bl4::get_obj_path_name_non_pgo_multi,
+        "UObject::GetPathName");
 
-    get_field_path_name_ptr =
-        GET_FIELD_PATH_NAME_PATTERN.sigscan_nullable<get_field_path_name_func>();
-    LOG(MISC, "FField::GetPathName: {:p}", reinterpret_cast<void*>(get_field_path_name_ptr));
+    get_field_path_name_ptr = BL4Hook::choose_pattern<get_field_path_name_func>(
+        bl4::get_field_path_name_pgo_multi, bl4::get_field_path_name_non_pgo_multi,
+        "FField::GetPathName");
 }
 
 std::wstring BL4Hook::uobject_path_name(const UObject* obj) const {
@@ -148,7 +186,7 @@ UNREALSDK_UNREAL_STRUCT_PADDING_POP()
 using construct_obj_func = UObject* (*)(FStaticConstructObjectParameters * params);
 construct_obj_func construct_obj_ptr;
 
-const constinit Pattern<41> CONSTRUCT_OBJECT_PATTERN{
+const constexpr Pattern<41> CONSTRUCT_OBJECT_PGO_PATTERN{
     "41 56"                 // push r14
     "56"                    // push rsi
     "57"                    // push rdi
@@ -162,12 +200,30 @@ const constinit Pattern<41> CONSTRUCT_OBJECT_PATTERN{
     "48 8B 39"              // mov rdi, [rcx]
     "48 8B 51 08"           // mov rdx, [rcx+08]
 };
+const constexpr Pattern<39> CONSTRUCT_OBJECT_NON_PGO_PATTERN{
+    "41 57"                 // push r15
+    "41 56"                 // push r14
+    "56"                    // push rsi
+    "57"                    // push rdi
+    "55"                    // push rbp
+    "53"                    // push rbx
+    "48 81 EC ????????"     // sub rsp, 00000278
+    "48 89 CE"              // mov rsi, rcx
+    "48 8B 05 ????????"     // mov rax, [Borderlands4.exe+C372940]
+    "48 31 E0"              // xor rax, rsp
+    "48 89 84 24 ????????"  // mov [rsp+00000270], rax
+    "48 8B 39"              // mov rdi, [rcx]
+};
 
 }  // namespace
+namespace bl4 {
+constinit MultiPattern construct_obj_pgo_multi{CONSTRUCT_OBJECT_PGO_PATTERN};
+constinit MultiPattern construct_obj_non_pgo_multi{CONSTRUCT_OBJECT_NON_PGO_PATTERN};
+}  // namespace bl4
 
 void BL4Hook::find_construct_object(void) {
-    construct_obj_ptr = CONSTRUCT_OBJECT_PATTERN.sigscan_nullable<construct_obj_func>();
-    LOG(MISC, "StaticConstructObject: {:p}", reinterpret_cast<void*>(construct_obj_ptr));
+    construct_obj_ptr = BL4Hook::choose_pattern<construct_obj_func>(
+        bl4::construct_obj_pgo_multi, bl4::construct_obj_non_pgo_multi, "StaticConstructObject");
 }
 
 UObject* BL4Hook::construct_object(UClass* cls,
@@ -204,7 +260,7 @@ static_find_object_safe_func static_find_object_ptr;
 
 // Search for the string L"FindImportedObject", xrefs. This function makes several calls to it,
 // easiest to find is near the top of the function, first call inside the loop.
-const constinit Pattern<31> STATIC_FIND_OBJECT_PATTERN{
+const constexpr Pattern<35> STATIC_FIND_OBJECT_PGO_PATTERN{
     "41 56"              // push r14
     "56"                 // push rsi
     "57"                 // push rdi
@@ -214,17 +270,35 @@ const constinit Pattern<31> STATIC_FIND_OBJECT_PATTERN{
     "48 31 E0"           // xor rax, rsp
     "48 89 44 24 ??"     // mov [rsp+30], rax
     "F6 05 ???????? 01"  // test byte ptr [Borderlands4.exe+115D7A00], 01
-
+    "74 ??"              // jz short loc_14153EB78
+    "31 C0"              // xor eax, eax
+};
+const constexpr Pattern<32> STATIC_FIND_OBJECT_NON_PGO_PATTERN{
+    "41 57"              // push r15
+    "41 56"              // push r14
+    "41 55"              // push r13
+    "41 54"              // push r12
+    "56"                 // push rsi
+    "57"                 // push rdi
+    "55"                 // push rbp
+    "53"                 // push rbx
+    "48 83 EC 28"        // sub rsp, 28
+    "F6 05 ???????? 01"  // test byte ptr [Borderlands4.exe+C5B2940], 01
+    "0F 85 ????????"     // jnz loc_14005F0E1
+    "44 89 CB"           // mov ebx, r9d
 };
 
 const constexpr intptr_t ANY_PACKAGE = -1;
 
 }  // namespace
+namespace bl4 {
+constinit MultiPattern find_obj_pgo_multi{STATIC_FIND_OBJECT_PGO_PATTERN};
+constinit MultiPattern find_obj_non_pgo_multi{STATIC_FIND_OBJECT_NON_PGO_PATTERN};
+}  // namespace bl4
 
 void BL4Hook::find_static_find_object(void) {
-    static_find_object_ptr =
-        STATIC_FIND_OBJECT_PATTERN.sigscan_nullable<static_find_object_safe_func>();
-    LOG(MISC, "StaticFindObjectSafe: {:p}", reinterpret_cast<void*>(static_find_object_ptr));
+    static_find_object_ptr = BL4Hook::choose_pattern<static_find_object_safe_func>(
+        bl4::find_obj_pgo_multi, bl4::find_obj_non_pgo_multi, "StaticFindObjectSafe");
 }
 
 UObject* BL4Hook::find_object(UClass* cls, const std::wstring& name) const {
@@ -245,7 +319,7 @@ using load_package_func = UObject* (*)(const UObject* outer,
                                        void* diff_package_path);
 load_package_func load_package_ptr;
 
-const constinit Pattern<50> LOAD_PACKAGE_PATTERN{
+const constexpr Pattern<50> LOAD_PACKAGE_PATTERN{
     "41 57"                 // push r15
     "41 56"                 // push r14
     "41 55"                 // push r13
@@ -264,6 +338,9 @@ const constinit Pattern<50> LOAD_PACKAGE_PATTERN{
 };
 
 }  // namespace
+namespace bl4 {
+constinit MultiPattern load_package_multi{LOAD_PACKAGE_PATTERN};
+}
 
 void BL4Hook::find_load_package(void) {
     load_package_ptr = LOAD_PACKAGE_PATTERN.sigscan_nullable<load_package_func>();

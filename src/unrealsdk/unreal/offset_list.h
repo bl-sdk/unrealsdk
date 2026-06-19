@@ -21,6 +21,7 @@
 #include "unrealsdk/unreal/properties/zclassproperty.h"
 #include "unrealsdk/unreal/properties/zdelegateproperty.h"
 #include "unrealsdk/unreal/properties/zenumproperty.h"
+#include "unrealsdk/unreal/properties/zgamedatahandleproperty.h"
 #include "unrealsdk/unreal/properties/zgbxdefptrproperty.h"
 #include "unrealsdk/unreal/properties/zgbxinlinestructproperty.h"
 #include "unrealsdk/unreal/properties/zinterfaceproperty.h"
@@ -58,6 +59,7 @@ namespace unrealsdk::unreal::offsets {
     X(ZDelegateProperty)                   \
     X(ZEnumProperty)                       \
     X(ZFloatAttributeProperty)             \
+    X(ZGameDataHandleProperty)             \
     X(ZGbxDefPtrProperty)                  \
     X(ZGbxInlineStructProperty)            \
     X(ZIntAttributeProperty)               \

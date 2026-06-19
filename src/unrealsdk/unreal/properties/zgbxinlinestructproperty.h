@@ -6,19 +6,11 @@
 #include "unrealsdk/unreal/offsets.h"
 #include "unrealsdk/unreal/prop_traits.h"
 #include "unrealsdk/unreal/properties/zstructproperty.h"
-#include "unrealsdk/unreal/structs/fgbxinlinestruct.h"
+#include "unrealsdk/unreal/wrappers/wrapped_inline_struct.h"
 
 namespace unrealsdk::unreal {
 
 class UScriptStruct;
-
-/*
-========================================
-THIS PROPERTY TYPE IS STILL EXPERIMENTAL
-========================================
-
-It may currently leak memory and/or cause crashes, and it's semantics are all liable to change
-*/
 
 class ZGbxInlineStructProperty : public ZStructProperty {
    public:
@@ -39,8 +31,7 @@ class ZGbxInlineStructProperty : public ZStructProperty {
 
 template <>
 struct PropTraits<ZGbxInlineStructProperty> : public AbstractPropTraits<ZGbxInlineStructProperty> {
-    // TODO: we may need to switch to a wrapper type if ownership matters
-    using Value = FGbxInlineStruct;
+    using Value = std::optional<WrappedInlineStruct>;
 
     static Value get(const ZGbxInlineStructProperty* prop,
                      uintptr_t addr,

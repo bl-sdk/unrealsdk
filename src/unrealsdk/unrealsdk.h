@@ -122,7 +122,7 @@ void u_free(void* data);
  */
 [[nodiscard]] unreal::UObject* construct_object(unreal::UClass* cls,
                                                 unreal::UObject* outer,
-                                                const unreal::FName& name = {0, 0},
+                                                const unreal::FName& name = {},
                                                 uint64_t flags = 0,
                                                 unreal::UObject* template_obj = nullptr);
 
@@ -160,8 +160,8 @@ namespace internal {
  * @param str The string to initialize the name to. Must be null terminated.
  * @param number The number to initialize the name to.
  */
-void fname_init(unreal::FName* name, const wchar_t* str, int32_t number);
-void fname_init(unreal::FName* name, const std::wstring& str, int32_t number);
+void fname_init(unreal::FName* name, const wchar_t* str, uint32_t number);
+void fname_init(unreal::FName* name, const std::wstring& str, uint32_t number);
 
 /**
  * @brief Gets the string portion of an FName.

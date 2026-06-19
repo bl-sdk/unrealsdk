@@ -70,7 +70,7 @@ struct FNamePool {
      * @param idx The fname index to get.
      * @return The item at that index.
      */
-    [[nodiscard]] FNameEntry* at(int32_t idx) const;
+    [[nodiscard]] FNameEntry* at(uint32_t idx) const;
 };
 
 UNREALSDK_UNREAL_STRUCT_PADDING_POP()

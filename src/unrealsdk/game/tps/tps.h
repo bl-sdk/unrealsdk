@@ -15,7 +15,7 @@ class TPSHook : public BL2Hook {
     void hexedit_array_limit_message(void) const override;
 
    public:
-    void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const override;
+    void fname_init(unreal::FName* name, const wchar_t* str, uint32_t number) const override;
     [[nodiscard]] const unreal::offsets::OffsetList& get_offsets(void) const override;
 };
 

@@ -9,6 +9,7 @@
 
 #include "unrealsdk/game/abstract_hook.h"
 #include "unrealsdk/game/selector.h"
+#include "unrealsdk/multi_sigscan.h"
 
 namespace unrealsdk::game {
 
@@ -32,6 +33,28 @@ class BL4Hook : public AbstractHook {
 
     static void inject_console(void);
 
+    static void ftext_as_culture_invariant_pgo(unreal::FText* text, std::wstring_view str);
+    static void ftext_as_culture_invariant_non_pgo(unreal::FText* text, std::wstring_view str);
+
+    /**
+     * @brief Choose between the pgo/non-pgo sigscan patterns.
+     *
+     * @tparam T The type to cast the address to.
+     * @param pgo The pgo pattern.
+     * @param non_pgo The non-pgo pattern.
+     * @param name The name to use in the log message.
+     * @return The address - possibly null if both patterns failed.
+     */
+    static uintptr_t choose_pattern(const memory::MultiPattern& pgo,
+                                    const memory::MultiPattern& non_pgo,
+                                    std::string_view name);
+    template <typename T>
+    static T choose_pattern(const memory::MultiPattern& pgo,
+                            const memory::MultiPattern& non_pgo,
+                            std::string_view name) {
+        return reinterpret_cast<T>(choose_pattern(pgo, non_pgo, name));
+    }
+
    public:
     void hook(void) override;
     void post_init(void) override;
@@ -51,7 +74,7 @@ class BL4Hook : public AbstractHook {
                                                const std::wstring& name) const override;
     [[nodiscard]] unreal::UObject* load_package(const std::wstring& name,
                                                 uint32_t flags) const override;
-    void fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const override;
+    void fname_init(unreal::FName* name, const wchar_t* str, uint32_t number) const override;
     [[nodiscard]] std::variant<const std::string_view, const std::wstring_view> fname_get_str(
         const unreal::FName& name) const override;
     void fframe_step(unreal::FFrame* frame, unreal::UObject* obj, void* param) const override;
@@ -83,6 +106,29 @@ struct GameTraits<BL4Hook> {
 #endif
 
 namespace bl4 {
+
+extern constinit memory::MultiPattern gnatives_multi;
+extern constinit memory::MultiPattern ftexthistory_vftable_pgo_multi;
+extern constinit memory::MultiPattern ftext_as_culture_invariant_non_pgo_multi;
+extern constinit memory::MultiPattern fnamepool_pgo_multi;
+extern constinit memory::MultiPattern fnamepool_non_pgo_multi;
+extern constinit memory::MultiPattern fname_find_or_store_pgo_multi;
+extern constinit memory::MultiPattern fname_find_or_store_non_pgo_multi;
+extern constinit memory::MultiPattern gobjects_multi;
+extern constinit memory::MultiPattern call_function_multi;
+extern constinit memory::MultiPattern process_event_multi;
+extern constinit memory::MultiPattern gmalloc_pgo_multi;
+extern constinit memory::MultiPattern gmalloc_non_pgo_multi;
+extern constinit memory::MultiPattern get_obj_path_name_pgo_multi;
+extern constinit memory::MultiPattern get_obj_path_name_non_pgo_multi;
+extern constinit memory::MultiPattern get_field_path_name_pgo_multi;
+extern constinit memory::MultiPattern get_field_path_name_non_pgo_multi;
+extern constinit memory::MultiPattern construct_obj_pgo_multi;
+extern constinit memory::MultiPattern construct_obj_non_pgo_multi;
+extern constinit memory::MultiPattern find_obj_pgo_multi;
+extern constinit memory::MultiPattern find_obj_non_pgo_multi;
+extern constinit memory::MultiPattern load_package_multi;
+
 namespace {
 
 constexpr auto DEFAULT_POLL_INTERVAL = std::chrono::milliseconds{100};

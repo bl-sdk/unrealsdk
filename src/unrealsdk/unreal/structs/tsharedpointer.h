@@ -36,6 +36,9 @@ template <typename T>
 struct TSharedPointer {
     T* obj;
     TReferenceController* controller;
+
+    // NOTE: Deliberately no destructor, you have to add/remove refs manually. This is so we can
+    // skip doing so, e.g. if we just borrowed the reference.
 };
 
 UNREALSDK_UNREAL_STRUCT_PADDING_POP()

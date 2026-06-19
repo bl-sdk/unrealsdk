@@ -25,6 +25,7 @@
 #include "unrealsdk/unreal/properties/zcomponentproperty.h"
 #include "unrealsdk/unreal/properties/zdelegateproperty.h"
 #include "unrealsdk/unreal/properties/zenumproperty.h"
+#include "unrealsdk/unreal/properties/zgamedatahandleproperty.h"
 #include "unrealsdk/unreal/properties/zgbxdefptrproperty.h"
 #include "unrealsdk/unreal/properties/zgbxinlinestructproperty.h"
 #include "unrealsdk/unreal/properties/zinterfaceproperty.h"
@@ -65,6 +66,7 @@ using all_unreal_classes = std::tuple<  // formatting
     ZEnumProperty,
     ZFloatAttributeProperty,
     ZFloatProperty,
+    ZGameDataHandleProperty,
     ZGbxDefPtrProperty,
     ZGbxInlineStructProperty,
     ZInt16Property,

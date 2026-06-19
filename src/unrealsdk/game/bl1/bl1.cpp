@@ -111,7 +111,7 @@ const constinit Pattern<72> FNAME_INIT_SIG{
 // NOLINTNEXTLINE(modernize-use-using)
 typedef void(__thiscall* fname_init_func)(FName* name,
                                           const wchar_t* str,
-                                          int32_t number,
+                                          uint32_t number,
                                           int32_t find_type,
                                           int32_t split_name);
 
@@ -128,7 +128,7 @@ void BL1Hook::find_fname_init(void) {
     LOG(MISC, "FName::Init: {:p}", (void*)fname_init_ptr);
 }
 
-void BL1Hook::fname_init(unreal::FName* name, const wchar_t* str, int32_t number) const {
+void BL1Hook::fname_init(unreal::FName* name, const wchar_t* str, uint32_t number) const {
     fname_init_ptr(name, str, number, 1, 1);
 }
 

@@ -2,6 +2,7 @@
 #include "unrealsdk/unreal/wrappers/gobjects.h"
 #include "unrealsdk/game/bl4/bl4.h"
 #include "unrealsdk/memory.h"
+#include "unrealsdk/multi_sigscan.h"
 
 #if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK2 && !defined(UNREALSDK_IMPORTING)
 
@@ -21,6 +22,9 @@ const constexpr Pattern<15> GOBJECTS_SIG{
 GObjects gobjects_wrapper{};
 
 }  // namespace
+namespace bl4 {
+constinit MultiPattern gobjects_multi{GOBJECTS_SIG};
+}  // namespace bl4
 
 void BL4Hook::find_gobjects(void) {
     auto gobjects_sig = GOBJECTS_SIG.sigscan_nullable();

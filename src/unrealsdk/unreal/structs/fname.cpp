@@ -6,13 +6,13 @@
 
 namespace unrealsdk::unreal {
 
-FName::FName(int32_t index, int32_t number) : index(index), number(number) {}
+FName::FName(uint32_t index, uint32_t number) : index(index), number(number) {}
 
-FName::FName(const wchar_t* name, int32_t number) {
+FName::FName(const wchar_t* name, uint32_t number) {
     unrealsdk::internal::fname_init(this, name, number);
 }
-FName::FName(const std::string& name, int32_t number) : FName(utils::widen(name), number) {};
-FName::FName(const std::wstring& name, int32_t number) {
+FName::FName(const std::string& name, uint32_t number) : FName(utils::widen(name), number) {};
+FName::FName(const std::wstring& name, uint32_t number) {
     unrealsdk::internal::fname_init(this, name, number);
 }
 

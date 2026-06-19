@@ -163,6 +163,8 @@ using ZClassProperty = unreal::offsets::generic::ZClassProperty<ZObjectProperty>
 using ZFloatAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<ZFloatProperty>;
 using ZIntAttributeProperty = unreal::offsets::generic::GenericAttributeProperty<ZIntProperty>;
 using ZSoftClassProperty = unreal::offsets::generic::ZSoftClassProperty<ZObjectProperty>;
+using ZGameDataHandleProperty =
+    unreal::offsets::generic::ZGameDataHandleProperty<ZProperty>;                    // Validated
 using ZGbxDefPtrProperty = unreal::offsets::generic::ZGbxDefPtrProperty<ZProperty>;  // Validated
 using ZGbxInlineStructProperty =
     unreal::offsets::generic::ZGbxInlineStructProperty<ZStructProperty>;  // Validated

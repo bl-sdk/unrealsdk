@@ -50,7 +50,7 @@ unreal::UObject* AbstractHook::load_package(const std::wstring& /*name*/,
 }
 void AbstractHook::fname_init(unreal::FName* /*name*/,
                               const wchar_t* /*str*/,
-                              int32_t /*number*/) const {
+                              uint32_t /*number*/) const {
     throw_version_error("fname_init not implemented");
     unreachable();
 }

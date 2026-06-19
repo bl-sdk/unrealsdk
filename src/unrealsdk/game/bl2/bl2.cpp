@@ -68,9 +68,9 @@ void BL2Hook::find_fname_init(void) {
     LOG(MISC, "FName::Init: {:p}", this->fname_init_ptr);
 }
 
-void BL2Hook::fname_init(FName* name, const wchar_t* str, int32_t number) const {
+void BL2Hook::fname_init(FName* name, const wchar_t* str, uint32_t number) const {
     // NOLINTNEXTLINE(modernize-use-using)  - need a typedef for the __thiscall
-    typedef void*(__thiscall * fname_init_func)(FName * name, const wchar_t* str, int32_t number,
+    typedef void*(__thiscall * fname_init_func)(FName * name, const wchar_t* str, uint32_t number,
                                                 int32_t find_type, int32_t split_name);
 
     reinterpret_cast<fname_init_func>(this->fname_init_ptr)(name, str, number, 1, 1);

@@ -5,7 +5,7 @@
 namespace unrealsdk::unreal {
 
 bool TReferenceController::remove_weak_ref(void) {
-    if (--this->weak_ref_count > 1) {
+    if (--this->weak_ref_count > 0) {
         return false;
     }
 
@@ -18,7 +18,7 @@ bool TReferenceController::remove_weak_ref(void) {
 }
 
 bool TReferenceController::remove_strong_ref(void) {
-    if (--this->ref_count > 1) {
+    if (--this->ref_count > 0) {
         return false;
     }
     static auto idx =

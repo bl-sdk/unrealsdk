@@ -3,6 +3,7 @@
 #include "unrealsdk/hook_manager.h"
 #include "unrealsdk/locks.h"
 #include "unrealsdk/memory.h"
+#include "unrealsdk/multi_sigscan.h"
 #include "unrealsdk/unreal/structs/fframe.h"
 
 #if UNREALSDK_FLAVOUR == UNREALSDK_FLAVOUR_OAK2 && !defined(UNREALSDK_IMPORTING)
@@ -21,7 +22,7 @@ call_function_func* call_function_ptr;
 
 // binfold seems good at picking up UObject::execVirtualFunction, it calls two functions, first is
 // UObject::FindFunctionChecked, second is this
-const constinit Pattern<27> CALL_FUNCTION_SIG{
+const constexpr Pattern<27> CALL_FUNCTION_SIG{
     "55"              // push rbp
     "41 57"           // push r15
     "41 56"           // push r14
@@ -33,8 +34,15 @@ const constinit Pattern<27> CALL_FUNCTION_SIG{
     "48 83 EC ??"     // sub rsp, 38
     "48 8D 6C 24 ??"  // lea rbp, [rsp+30]
     "4C 89 C?"        // mov rbx, r9        | mov rsi, r9
-    "4D 89 C6"        // mov r14,r8
+    "4D 89 C6"        // mov r14, r8
 };
+
+}  // namespace
+namespace bl4 {
+constinit MultiPattern call_function_multi{CALL_FUNCTION_SIG};
+}  // namespace bl4
+
+namespace {
 
 void call_function_hook(UObject* obj, FFrame* stack, void* result, UFunction* func) {
     try {
@@ -116,7 +124,7 @@ namespace {
 using process_event_func = void(UObject* obj, UFunction* func, void* params);
 process_event_func* process_event_ptr;
 
-const constinit Pattern<41> PROCESS_EVENT_SIG{
+const constexpr Pattern<41> PROCESS_EVENT_SIG{
     "55"                    // push rbp
     "41 57"                 // push r15
     "41 56"                 // push r14
@@ -131,6 +139,13 @@ const constinit Pattern<41> PROCESS_EVENT_SIG{
     "48 31 E8"              // xor rax, rbp
     "48 89 45 40"           // mov [rbp+40h], rax
 };
+
+}  // namespace
+namespace bl4 {
+constinit MultiPattern process_event_multi{PROCESS_EVENT_SIG};
+}  // namespace bl4
+
+namespace {
 
 void process_event_hook(UObject* obj, UFunction* func, void* params) {
     try {
