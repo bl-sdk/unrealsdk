@@ -81,6 +81,12 @@ class UField : public T {
 };
 
 template <typename T>
+class ZGameDataHandleProperty : public T {
+   public:
+    uint32_t TypeHandle;
+};
+
+template <typename T>
 class ZInterfaceProperty : public T {
    public:
     unreal::UClass* InterfaceClass;

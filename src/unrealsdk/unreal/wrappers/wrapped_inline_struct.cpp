@@ -10,7 +10,8 @@ namespace unrealsdk::unreal {
 
 WrappedInlineStruct::WrappedInlineStruct(const FGbxInlineStruct* inline_ref,
                                          const UnrealPointer<void>& parent)
-    : WrappedStruct(inline_ref->get_type(), inline_ref->ptr.obj, parent), inline_ref(*inline_ref) {
+    : WrappedStruct(inline_ref->ptr.obj->get_type(), inline_ref->ptr.obj, parent),
+      inline_ref(*inline_ref) {
     // Add a ref for ourselves
     if (inline_ref->ptr.controller != nullptr) {
         inline_ref->ptr.controller->ref_count++;
@@ -27,10 +28,12 @@ WrappedInlineStruct::WrappedInlineStruct(const WrappedInlineStruct& other)
     controller->controller.weak_ref_count = 1;
     controller->offset_to_data = internal::FGbxInlineStructAllocation::EXTRA_ALLOC_SIZE;
     controller->unknown = 0;
-    controller->data_vftable = *reinterpret_cast<uintptr_t**>(other.inline_ref.ptr.obj);
+    controller->def.vftable = other.inline_ref.ptr.obj->vftable;
+    static_assert(sizeof(controller->def) == sizeof(controller->def.vftable),
+                  "unexpected extra data to initalize in a FGbxDef");
 
     this->inline_ref.ptr.controller = &controller->controller;
-    this->inline_ref.ptr.obj = &controller->data_vftable;
+    this->inline_ref.ptr.obj = &controller->def;
     this->inline_ref.flags = other.inline_ref.flags;
 
     copy_struct(reinterpret_cast<uintptr_t>(this->inline_ref.ptr.obj), other);

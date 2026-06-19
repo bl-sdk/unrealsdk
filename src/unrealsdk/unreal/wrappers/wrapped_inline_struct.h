@@ -11,6 +11,7 @@ struct FGbxInlineStruct;
 
 class WrappedInlineStruct : public WrappedStruct {
    public:
+    // Since inline structs contain a shared pointer, copy our own reference to it to keep it alive
     FGbxInlineStruct inline_ref;
 
     /**

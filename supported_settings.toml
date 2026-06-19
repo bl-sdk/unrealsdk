@@ -47,8 +47,8 @@ ftext_get_display_string_vf_index = -1
 # Overrides the virtual function index used when calling the `FTextData` destructor
 ftext_destroy_data_vf_index = -1
 
-# Overrides the virtual function index used when calling `FGbxInlineStruct::GetType`.
-fgbxinlinestruct_gettype_vf_index = -1
+# Overrides the virtual function index used when calling `FGbxDef::GetType`.
+fgbxdef_gettype_vf_index = -1
 
 # If true, locks simultaneous unreal function calls from different threads. This lock is held both
 # during hooks and when you manually call unreal functions.
