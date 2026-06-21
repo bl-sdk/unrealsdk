@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required(VERSION 3.25)
 
-project(unrealsdk VERSION 3.1.0)
+project(unrealsdk VERSION 3.2.0)
 
 set(UNREALSDK_FLAVOUR "" CACHE STRING "Which \"flavour\" of the SDK to build.")
 set_property(CACHE UNREALSDK_FLAVOUR PROPERTY STRINGS "WILLOW" "OAK" "OAK2")
