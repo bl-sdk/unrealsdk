@@ -11,6 +11,14 @@ These are not hard rules, we just strive to follow them on a best-effort basis. 
 compatibility it's recommended to always compile against the exact same commit as you expect to be
 linking against.
 
+## 3.2.0
+- Updated to support both sets of BL4 signatures, optimized sigscanning.
+
+- Improved support for the custom BL4 types - `FGameDataHandle`, `FGbxDefPtr`, `FGbxInlineStruct`,
+  and their associated properties.
+
+- Validated this release against the other games, hence removing the beta tag.
+
 ## 3.1.0 Beta
 This release is marked as a beta, since it was only (partially) tested against BL4. Other games are
 mostly untested.
